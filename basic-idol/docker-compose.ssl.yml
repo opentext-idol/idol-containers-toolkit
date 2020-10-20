@@ -1,0 +1,69 @@
+###
+# Copyright (c) 2019-2020 Micro Focus or one of its affiliates.
+#
+# Licensed under the MIT License (the "License"); you may not use this file
+# except in compliance with the License.
+#
+# The only warranties for products and services of Micro Focus and its affiliates
+# and licensors ("Micro Focus") are as may be set forth in the express warranty
+# statements accompanying such products and services. Nothing herein should be
+# construed as constituting an additional warranty. Micro Focus shall not be
+# liable for technical or editorial errors or omissions contained herein. The
+# information contained herein is subject to change without notice.
+###
+
+# This is designed to be used atop of docker-compose.yml
+# Therefore the incantation to use this is something like
+# docker-compose -f docker-compose.yml -f docker-compose.ssl.yml up 
+
+version: "3.7"
+
+# bind mount holding certificates
+x-ssl-volume: &ssl-volume
+  type: bind
+  source: ../ssl/intermediate
+  target: /ssl
+
+services:
+  idol-nifi:
+    environment:
+      - USE_SSL=true
+    volumes:
+      - ./nifi/flow/basic.ssl.xml:/opt/nifi/flow/this_flow.xml:ro # this controls which NiFi flow is used
+      - *ssl-volume
+  idol-content:
+    env_file:
+      - idol_ssl.env
+    volumes:
+      - *ssl-volume
+  idol-agentstore:
+    env_file:
+      - idol_ssl.env
+    volumes:
+      - *ssl-volume
+  idol-categorisation-agentstore:
+    env_file:
+      - idol_ssl.env
+    volumes:
+      - *ssl-volume
+  idol-community:
+    env_file:
+      - idol_ssl.env
+    volumes:
+      - *ssl-volume
+  idol-view:
+    env_file:
+      - idol_ssl.env
+    volumes:
+      - *ssl-volume
+  idol-find:
+    env_file:
+      - idol_ssl.env
+    environment:
+      - IDOL_UI_CFG=config_ssl.json
+      - IDOL_UI_STARTUP_SCRIPT=ui_start_ssl.sh
+    depends_on:
+      - idol-community
+      - idol-view
+    volumes:
+      - *ssl-volume

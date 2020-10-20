@@ -1,0 +1,82 @@
+###
+# Copyright (c) 2019-2020 Micro Focus or one of its affiliates.
+#
+# Licensed under the MIT License (the "License"); you may not use this file
+# except in compliance with the License.
+#
+# The only warranties for products and services of Micro Focus and its affiliates
+# and licensors ("Micro Focus") are as may be set forth in the express warranty
+# statements accompanying such products and services. Nothing herein should be
+# construed as constituting an additional warranty. Micro Focus shall not be
+# liable for technical or editorial errors or omissions contained herein. The
+# information contained herein is subject to change without notice.
+###
+
+# The incantation to use this is
+# docker-compose -f docker-compose.yml -f docker-compose.add-mmap.yml up
+version: "3.7"
+
+# The version of IDOL components to use
+x-args-shared: 
+  - &mmap-postgres-password ieBPwmujrKEY9sh6oaybA8wyf
+
+# Change the IP to the address of an external IDOL LicenseServer instance
+x-external-licenseserver-host: &external-licenseserver-host
+  - idol-licenseserver:${LICENSESERVER_IP}
+
+volumes:
+  items:
+  static_video:
+  mediaserver-processed-video:
+  mmap-postgres-events: # Persistent storage for db
+
+services:
+  idol-mediaserver:
+    image: ${IDOL_REGISTRY}/mediaserver-enus:${IDOL_SERVER_VERSION}
+    extra_hosts: *external-licenseserver-host
+    ports:
+      - 14000-14001:14000-14001
+    volumes:
+     - mediaserver-processed-video:/processed-video
+  idol-nifi:
+    depends_on: [idol-mmap-app]
+    volumes:
+      - ./nifi/flow/with.mmap.xml:/opt/nifi/flow/this_flow.xml:ro # this controls which NiFi flow is used
+      - mediaserver-processed-video:/processed-video
+  idol-mmap-postgres:
+    image: postgres:11-alpine
+    environment: 
+      POSTGRES_DB: mmap-events
+      POSTGRES_USER: mmap
+      POSTGRES_PASSWORD: *mmap-postgres-password
+    volumes:
+      - mmap-postgres-events:/var/lib/postgresql/data
+      - ../common-files/mmap-postgres/schema:/docker-entrypoint-initdb.d
+  idol-mmap-playlistserver:
+    image: ${IDOL_REGISTRY}/mediaserver-playlistserver:${IDOL_SERVER_VERSION}
+    extra_hosts: *external-licenseserver-host
+    ports:
+      - 24000-24001:24000-24001
+    volumes:
+      - static_video:/mmap/data/static-video/final
+  idol-mmap-app:
+    depends_on: [idol-mmap-postgres, idol-mmap-playlistserver]
+    image: ${IDOL_REGISTRY}/mmap_app:${IDOL_SERVER_VERSION}
+    environment:
+      MMAP_POSTGRES_PASSWORD: *mmap-postgres-password
+    extra_hosts: *external-licenseserver-host
+    ports:
+      - 8002:8080
+      - 8443:8443
+    volumes:
+      # expose the MMAP config for editing
+      #- "${MMAP_CONFIG_DIR?MMAP_CONFIG_DIR}/application:${MMAP_DIR?MMAP_DIR}/config"
+      # access recorder video data, eg. rolling buffer
+      #- "${MMAP_DATA_DIR?MMAP_DATA_DIR}/streaming-video:${MMAP_DIR?MMAP_DIR}/input-data/streaming-video"
+      # provide somewhere to put video files so MMAP can read them when creating a video
+      #- "${MMAP_DATA_DIR?MMAP_DATA_DIR}/static-video:${MMAP_DIR?MMAP_DIR}/input-data/static-video"
+      - mediaserver-processed-video:/mmap/input-data/static-video
+      # persist repository data
+      - "items:${MMAP_DIR?MMAP_DIR}/data/items"
+      - static_video:/mmap/data/static-video/final
+  

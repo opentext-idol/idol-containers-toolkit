@@ -1,0 +1,91 @@
+###
+# Copyright (c) 2019-2020 Micro Focus or one of its affiliates.
+#
+# Licensed under the MIT License (the "License"); you may not use this file
+# except in compliance with the License.
+#
+# The only warranties for products and services of Micro Focus and its affiliates
+# and licensors ("Micro Focus") are as may be set forth in the express warranty
+# statements accompanying such products and services. Nothing herein should be
+# construed as constituting an additional warranty. Micro Focus shall not be
+# liable for technical or editorial errors or omissions contained herein. The
+# information contained herein is subject to change without notice.
+###
+
+# Answerserver container setup
+# Creates an answerbank, factbank and passageextractor
+
+version: "3.7"
+
+# Change the IP to the address of an external IDOL LicenseServer instance
+x-external-licenseserver-host: &external-licenseserver-host
+  - idol-licenseserver:${LICENSESERVER_IP}
+
+# Change to your http proxy, or remove altogether if you don't have a http proxy
+x-http-proxy: &http-proxy-settings
+  - HTTP_PROXY_HOST=${HTTP_PROXY}
+  - HTTP_PROXY_PORT=8080
+
+services:
+  idol-answerbank-agentstore:
+    image: ${IDOL_REGISTRY}/answerbank-agentstore:${IDOL_SERVER_VERSION}
+    extra_hosts: *external-licenseserver-host
+  idol-factbank-postgres:
+    image: postgres:11-alpine
+    environment:
+      - POSTGRES_DB=factbank-data
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - ../common-files/factbank-postgres/factbank_unified.schema:/docker-entrypoint-initdb.d/00-schema.sql:ro
+      - ${INITIAL_FACTBANK_DATA}/codings.sql:/docker-entrypoint-initdb.d/codings.sql:ro
+      - ${INITIAL_FACTBANK_DATA}/facts.sql:/docker-entrypoint-initdb.d/facts.sql:ro
+  idol-passageextractor-content:
+    image: ${IDOL_REGISTRY}/content:${IDOL_SERVER_VERSION}
+    extra_hosts: *external-licenseserver-host
+    volumes:
+      - ./passageextractor_content/content.cfg:/content/cfg/content.cfg
+  idol-passageextractor-agentstore:
+    image: ${IDOL_REGISTRY}/passageextractor-agentstore:${IDOL_SERVER_VERSION}
+    extra_hosts: *external-licenseserver-host
+  idol-answerserver:
+    image: ${IDOL_REGISTRY}/answerserver:${IDOL_SERVER_VERSION}
+    extra_hosts: *external-licenseserver-host
+    volumes:
+      - ./answerserver/answerserver.cfg:/answerserver/cfg/answerserver.cfg
+      - ./answerserver/startup_tasks.sh:/answerserver/startup_tasks.sh
+  idol-qms-agentstore:
+    image: ${IDOL_REGISTRY}/qms-agentstore:${IDOL_SERVER_VERSION}
+    extra_hosts: *external-licenseserver-host
+  idol-qms:
+    image: ${IDOL_REGISTRY}/qms:${IDOL_SERVER_VERSION}
+    extra_hosts: *external-licenseserver-host
+    volumes:
+      - ./qms/qms.cfg:/qms/cfg/qms.cfg
+  idol-dataadmin-statsserver:
+    image: ${IDOL_REGISTRY}/statsserver:${IDOL_SERVER_VERSION}
+    extra_hosts: *external-licenseserver-host
+    volumes:
+      - ./statsserver/statsserver.cfg:/statsserver/cfg/statsserver.cfg
+  idol-dataadmin-viewserver:
+    image: ${IDOL_REGISTRY}/view:${IDOL_SERVER_VERSION}
+    extra_hosts: *external-licenseserver-host
+    environment: *http-proxy-settings
+    volumes:
+      - ./viewserver/view.cfg:/view/cfg/view.cfg
+      - ./viewserver/startup_tasks.sh:/view/startup_tasks.sh
+  idol-dataadmin-community:
+    image: ${IDOL_REGISTRY}/community:${IDOL_SERVER_VERSION}
+    extra_hosts: *external-licenseserver-host
+    environment:
+      - IDOL_CONTENT_HOST=idol-passageextractor-content
+      - IDOL_CONTENT_PORT=9100
+      - IDOL_AGENTSTORE_HOST=idol-qms-agentstore
+      - IDOL_AGENTSTORE_PORT=20050
+    volumes:
+      - ./community/community.cfg:/community/cfg/community.cfg
+      - ./community/startup_tasks.sh:/community/startup_tasks.sh
+  idol-dataadmin:
+    image: ${IDOL_REGISTRY}/dataadmin:${IDOL_SERVER_VERSION}
+    ports:
+      - 8080:8000

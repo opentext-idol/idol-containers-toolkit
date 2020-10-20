@@ -1,0 +1,6 @@
+# Keep LF eol when checked out on Windows
+*.conf text eol=lf
+*.schema text eol=lf
+*.sh text eol=lf
+*.sql text eol=lf
+*.xsl text eol=lf

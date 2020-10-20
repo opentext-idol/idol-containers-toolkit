@@ -1,0 +1,112 @@
+###
+# Copyright (c) 2019-2020 Micro Focus or one of its affiliates.
+#
+# Licensed under the MIT License (the "License"); you may not use this file
+# except in compliance with the License.
+#
+# The only warranties for products and services of Micro Focus and its affiliates
+# and licensors ("Micro Focus") are as may be set forth in the express warranty
+# statements accompanying such products and services. Nothing herein should be
+# construed as constituting an additional warranty. Micro Focus shall not be
+# liable for technical or editorial errors or omissions contained herein. The
+# information contained herein is subject to change without notice.
+###
+
+# This is designed to be used atop of docker-compose.yml
+# Therefore the incantation to use this is something like
+# docker-compose -f docker-compose.yml -f docker-compose.add-docsec.yml up 
+version: "3.7"
+
+x-args-security:
+  # Put configuration details for the ldap server here
+  - &ldap-server "LDAP_SERVER=insert_your_ldap_server_hostname_here"
+  - &ldap-port "LDAP_PORT=389"
+  - &ldap-base "LDAP_BASE=OU=people,DC=ldap-server,DC=example,DC=com"
+  - &ldap-username "LDAP_USERNAME=uid=admin,ou=people,dc=ldap-server,dc=example,dc=com"
+  - &ldap-base-dn "LDAP_BASE_DN=uid=admin,ou=people,dc=ldap-server,dc=example,dc=com"
+  - &ldap-group "LDAP_GROUP=OU=people,DC=ldap-server,DC=example,DC=com"
+  - &ldap-rdn-attribute "LDAP_RDN_ATTRIBUTE=CN"
+  - &key-username "KEY_USERNAME=uid"
+  - &key-groupname "KEY_GROUPNAME=cn"
+  - &ldap-mode "LDAP_MODE=Group"
+  - &ldap-group-base "LDAP_GROUP_BASE=OU=groups,DC=ldap-server,DC=example,DC=com"
+  - &user-filter "USER_FILTER=(objectClass=person)"
+  - &group-filter "GROUP_FILTER=(objectClass=groupOfNames)"
+  # Don't put the LDAP password here in plain text:
+  # encrypt your password via autpassword with omnigroupserver/aes.key
+  - &ldap-password "LDAP_PASSWORD=insert_your_encrypted_ldap_password_here"
+
+  # Uncomment and set these if necessary
+  #- &document-security-type "DOCUMENT_SECURITY_TYPE=NT_V4"
+  #- &document-security-type-mode "DOCUMENT_SECURITY_TYPE_MODE=AUTONOMY_SECURITY_V4_NT_MAPPED"
+  #- &document-security-type-propmatch "DOCUMENT_SECURITY_TYPE_PROPMATCH=nt_v4"
+
+x-args-shared:
+  - &registry REGISTRY=${IDOL_REGISTRY} # registry to use
+  - &idol-version IDOL_VERSION=${IDOL_SERVER_VERSION}
+  - &security-keys "SECURITYINFOKEYS=123,654,798,059"
+
+# Change the IP to the address of an external IDOL LicenseServer instance
+x-external-licenseserver-host: &external-licenseserver-host
+  - idol-licenseserver:${LICENSESERVER_IP}
+
+services:
+  idol-content:
+    image: idol-compose/docsec-content
+    build:
+      context: ./content
+      args:
+        - CONTENT_CFG=content_docsec.cfg
+        - *registry
+        - *idol-version
+        - *security-keys
+       #- *document-security-type
+       #- *document-security-type-mode
+       #- *document-security-type-propmatch
+    ports:
+      - 9100:9100
+      - 9101:9101
+  idol-community:
+    image: idol-compose/docsec-community
+    build:
+      context: ./community
+      args:
+        - COMMUNITY_CFG=community_ogs_ldap_docsec.cfg
+        - *registry
+        - *idol-version
+        - *security-keys
+        - *ldap-server
+        - *ldap-port
+        - *ldap-base-dn
+        - *ldap-password
+        - *ldap-group
+        - *ldap-rdn-attribute
+       #- *document-security-type
+    depends_on:
+      - idol-content
+      - idol-agentstore
+      - idol-omnigroupserver
+  idol-omnigroupserver:
+    image: idol-compose/docsec-omnigroupserver
+    build:
+      context: ./omnigroupserver
+      args:
+        - *registry
+        - *ldap-server
+        - *ldap-port
+        - *ldap-base
+        - *ldap-username
+        - *ldap-password
+        - *key-username
+        - *key-groupname
+        - *ldap-mode
+        - *ldap-group-base
+        - *user-filter
+        - *group-filter
+    extra_hosts: *external-licenseserver-host
+    ports:
+      - 3057:3057
+      - 3058:3058
+  idol-find:
+    environment:
+      - IDOL_UI_CFG=config_docsec.json
