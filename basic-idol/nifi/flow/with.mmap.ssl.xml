@@ -134,10 +134,6 @@
         <value>idol-mediaserver:14000</value>
       </property>
       <property>
-        <name>ConnectionRetries</name>
-        <value>3</value>
-      </property>
-      <property>
         <name>ConnectionTimeout</name>
         <value>1 min</value>
       </property>
@@ -620,10 +616,6 @@ Type=response
       <property>
         <name>MediaServerHosts</name>
         <value>idol-mediaserver:14000</value>
-      </property>
-      <property>
-        <name>ConnectionRetries</name>
-        <value>3</value>
       </property>
       <property>
         <name>ConnectionTimeout</name>
