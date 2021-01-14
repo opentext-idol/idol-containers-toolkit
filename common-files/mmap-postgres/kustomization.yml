@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+configMapGenerator:
+  - name: mmap-postgres-initdb
+    files:
+      - 00-schema.sql=schema/00-schema.sql
+      - partition-word-table.sql=schema/partition-word-table.sql
+      - searchable-text.sql=schema/searchable-text.sql
+      - stored-procedures.sql=schema/stored-procedures.sql

@@ -1,0 +1,617 @@
+{{- /*
+ Copyright (c) 2019-2020 Micro Focus or one of its affiliates.
+
+ Licensed under the MIT License (the "License"); you may not use this file
+ except in compliance with the License.
+
+ The only warranties for products and services of Micro Focus and its affiliates
+ and licensors ("Micro Focus") are as may be set forth in the express warranty
+ statements accompanying such products and services. Nothing herein should be
+ construed as constituting an additional warranty. Micro Focus shall not be
+ liable for technical or editorial errors or omissions contained herein. The
+ information contained herein is subject to change without notice.
+
+*/}}
+apiVersion: {{ .Values.deploymentApiVersion }}
+kind: Deployment
+metadata:
+  name: {{ .Values.content.deployment }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.content.deployment }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.content.deployment }}
+    spec:
+      hostAliases:
+      - ip: {{ .Values.licenseServer.ip | quote }}
+        hostnames:
+        - {{ .Values.licenseServer.hostname | quote }}
+{{- if .Values.isIncluded.documentSecurity }}
+      initContainers:
+      - name: edit-config
+        # This initContainer edits the config file to add the security info, including keys and type
+        image: yauritux/busybox-curl
+        imagePullPolicy: IfNotPresent
+        command:
+        - sh
+        - "-c"
+        - |
+          sed "s/XX_SECURITYINFOKEYS_XX/{{ .Values.documentSecurity.securityKeys | quote }}/g" /mnt/config-map/{{ .Values.content.volumes.cfg.subPath }} > /mnt/config/idol/content.cfg
+          sed -i "s/XX_DOCUMENT_SECURITY_TYPE_XX/{{ .Values.documentSecurity.securityType }}/g" /mnt/config/idol/content.cfg
+          sed -i "s/XX_DOCUMENT_SECURITY_TYPE_MODE_XX/{{ .Values.documentSecurity.securityTypeMode }}/g" /mnt/config/idol/content.cfg
+          sed -i "s/XX_DOCUMENT_SECURITY_TYPE_PROPMATCH_XX/{{ .Values.documentSecurity.securityTypePropMatch }}/g" /mnt/config/idol/content.cfg
+        volumeMounts:
+        - name: {{ .Values.content.volumes.cfg.name }}
+          mountPath: /mnt/config-map
+        - name: config-volume
+          mountPath: /mnt/config/idol
+{{- end }}
+      containers:
+      - image: {{ .Values.maintainer }}/{{ .Values.content.image }}:{{ .Values.idolVersion }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        name: {{ .Values.content.name }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.livenessProbePath }}
+            port: {{ (index .Values.content.ports 0).container | int }}
+{{- template "basicidol.deployment.standardLivenessProbe" }}
+        ports:
+        - containerPort: {{ (index .Values.content.ports 0).container | int }}
+          hostPort: {{ (index .Values.content.ports 0).host | int }}
+          protocol: {{ .Values.portProtocol }}
+        - containerPort: {{ (index .Values.content.ports 1).container | int }}
+          hostPort: {{ (index .Values.content.ports 1).host | int }}
+          protocol: {{ .Values.portProtocol }}
+{{- if .Values.isIncluded.documentSecurity }}
+        command: ["/bin/sh"]
+        args: ["-c", "cd /content && command cp -f /etc/config/idol/content.cfg content.cfg && ./run_idol.sh"]
+        env:
+        - name: IDOL_COMPONENT_CFG
+          value: "/content/content.cfg"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/config/idol
+      volumes:
+      - name: config-volume
+        emptyDir: {}
+      - name: {{ .Values.content.volumes.cfg.name }}
+        configMap:
+          name: {{ .Values.content.volumes.cfg.configMap }}
+{{- end }}
+      imagePullSecrets:
+      - name: {{ .Values.secret.name }}
+---
+apiVersion: {{ .Values.deploymentApiVersion }}
+kind: Deployment
+metadata:
+  name: {{ .Values.agentstore.deployment }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.agentstore.deployment }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.agentstore.deployment }}
+    spec:
+      hostAliases:
+      - ip: {{ .Values.licenseServer.ip | quote }}
+        hostnames:
+        - {{ .Values.licenseServer.hostname | quote }}
+      containers:
+      - image: {{ .Values.maintainer }}/{{ .Values.agentstore.image }}:{{ .Values.idolVersion }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        name: {{ .Values.agentstore.name }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.livenessProbePath }}
+            port: {{ (index .Values.agentstore.ports 0).container | int }}
+{{- template "basicidol.deployment.standardLivenessProbe" }}
+        ports:
+        - containerPort: {{ (index .Values.agentstore.ports 0).container | int }}
+          hostPort: {{ (index .Values.agentstore.ports 0).host | int }}
+          protocol: {{ .Values.portProtocol }}
+        - containerPort: {{ (index .Values.agentstore.ports 1).container | int }}
+          hostPort: {{ (index .Values.agentstore.ports 1).host | int }}
+          protocol: {{ .Values.portProtocol }}
+      imagePullSecrets:
+      - name: {{ .Values.secret.name }}
+---
+apiVersion: {{ .Values.deploymentApiVersion }}
+kind: Deployment
+metadata:
+  name: {{ .Values.categorisationAgentstore.deployment }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.categorisationAgentstore.deployment }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.categorisationAgentstore.deployment }}
+    spec:
+      hostAliases:
+      - ip: {{ .Values.licenseServer.ip | quote }}
+        hostnames:
+        - {{ .Values.licenseServer.hostname | quote }}
+      containers:
+      - image: {{ .Values.maintainer }}/{{ .Values.categorisationAgentstore.image }}:{{ .Values.idolVersion }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        name: {{ .Values.categorisationAgentstore.name }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.livenessProbePath }}
+            port: {{ (index .Values.categorisationAgentstore.ports 0).container | int }}
+{{- template "basicidol.deployment.standardLivenessProbe" }}
+        ports:
+        - containerPort: {{ (index .Values.categorisationAgentstore.ports 0).container | int }}
+          hostPort: {{ (index .Values.categorisationAgentstore.ports 0).host | int }}
+          protocol: {{ .Values.portProtocol }}
+        - containerPort: {{ (index .Values.categorisationAgentstore.ports 1).container | int }}
+          hostPort: {{ (index .Values.categorisationAgentstore.ports 1).host | int }}
+          protocol: {{ .Values.portProtocol }}
+        - containerPort: {{ (index .Values.categorisationAgentstore.ports 2).container | int }}
+          hostPort: {{ (index .Values.categorisationAgentstore.ports 2).host | int }}
+          protocol: {{ .Values.portProtocol }}
+      imagePullSecrets:
+      - name: {{ .Values.secret.name }}
+---
+apiVersion: {{ .Values.deploymentApiVersion }}
+kind: Deployment
+metadata:
+  name: {{ .Values.community.deployment }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.community.deployment }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.community.deployment }}
+    spec:
+      hostAliases:
+      - ip: {{ .Values.licenseServer.ip | quote }}
+        hostnames:
+        - {{ .Values.licenseServer.hostname | quote }}
+{{- if .Values.isIncluded.documentSecurity }}
+      initContainers:
+      - name: check-omnigroupserver-availability
+        image: yauritux/busybox-curl
+        args:
+        - sh
+        - -c
+        - curl "http://idol-omnigroupserver:{{ (index .Values.omnigroupserver.ports 0).container }}/a=getpid"
+      - name: edit-config
+        # This initContainer edits the config file to add the security info, including keys and LDAP settings
+        image: yauritux/busybox-curl
+        imagePullPolicy: IfNotPresent
+        command:
+        - sh
+        - "-c"
+        - |
+          sed "s/XX_SECURITYINFOKEYS_XX/{{ .Values.documentSecurity.securityKeys | quote }}/g" /mnt/config-map/{{ .Values.community.volumes.cfg.subPath }} > /mnt/config/idol/community.cfg
+          sed -i "s/XX_DOCUMENT_SECURITY_TYPE_XX/{{ .Values.documentSecurity.securityType }}/g" /mnt/config/idol/community.cfg
+          sed -i "s/XX_LDAP_SERVER_XX/{{ .Values.documentSecurity.ldap.ldapServer }}/g" /mnt/config/idol/community.cfg
+          sed -i "s/XX_LDAP_PORT_XX/{{ .Values.documentSecurity.ldap.ldapPort }}/g" /mnt/config/idol/community.cfg
+          sed -i "s/XX_LDAP_GROUP_XX/{{ .Values.documentSecurity.ldap.ldapGroup | quote}}/g" /mnt/config/idol/community.cfg
+          sed -i "s/XX_LDAP_BASE_DN_XX/{{ .Values.documentSecurity.ldap.ldapBaseDn | quote }}/g" /mnt/config/idol/community.cfg
+          sed -i "s/XX_LDAP_BASE_DN_PASSWORD_XX/{{ .Values.documentSecurity.ldap.ldapPassword | quote }}/g" /mnt/config/idol/community.cfg
+          sed -i "s/XX_LDAP_RDN_ATTRIBUTE_XX/{{ .Values.documentSecurity.ldap.ldapRdnAttribute }}/g" /mnt/config/idol/community.cfg
+        volumeMounts:
+        - name: {{ .Values.community.volumes.cfg.name }}
+          mountPath: /mnt/config-map
+        - name: config-volume
+          mountPath: /mnt/config/idol
+{{- end }}
+      containers:
+      - image: {{ .Values.maintainer }}/{{ .Values.community.image }}:{{ .Values.idolVersion }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        name: {{ .Values.community.name }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.livenessProbePath }}
+            port: {{ (index .Values.community.ports 0).container | int }}
+{{- template "basicidol.deployment.communityLivenessProbe" }}
+        ports:
+        - containerPort: {{ (index .Values.community.ports 0).container | int }}
+          hostPort: {{ (index .Values.community.ports 0).host | int }}
+          protocol: {{ .Values.portProtocol }}
+        - containerPort: {{ (index .Values.community.ports 1).container | int }}
+          hostPort: {{ (index .Values.community.ports 1).host | int }}
+          protocol: {{ .Values.portProtocol }}
+{{- if .Values.isIncluded.documentSecurity }}
+        command: ["/bin/sh"]
+        args: ["-c", "cd /community && command cp -f /etc/config/idol/community.cfg community.cfg && ./run_idol.sh"]
+        env:
+        - name: IDOL_COMPONENT_CFG
+          value: "/community/community.cfg"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/config/idol
+      volumes:
+      - name: config-volume
+        emptyDir: {}
+      - name: {{ .Values.community.volumes.cfg.name }}
+        configMap:
+          name: {{ .Values.community.volumes.cfg.configMap }}
+{{- end }}
+      imagePullSecrets:
+      - name: {{ .Values.secret.name }}
+---
+apiVersion: {{ .Values.deploymentApiVersion }}
+kind: Deployment
+metadata:
+  name: {{ .Values.view.deployment }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.view.deployment }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.view.deployment }}
+    spec:
+      hostAliases:
+      - ip: {{ .Values.licenseServer.ip | quote }}
+        hostnames:
+        - {{ .Values.licenseServer.hostname | quote }}
+      containers:
+      - image: {{ .Values.maintainer }}/{{ .Values.view.image }}:{{ .Values.idolVersion }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        name: {{ .Values.view.name }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.livenessProbePath }}
+            port: {{ (index .Values.view.ports 0).container | int }}
+{{- template "basicidol.deployment.standardLivenessProbe" }}
+        ports:
+        - containerPort: {{ (index .Values.view.ports 0).container | int }}
+          hostPort: {{ (index .Values.view.ports 0).host | int }}
+          protocol: {{ .Values.portProtocol }}
+      imagePullSecrets:
+      - name: {{ .Values.secret.name }}
+---
+apiVersion: {{ .Values.deploymentApiVersion }}
+kind: Deployment
+metadata:
+  name: {{ .Values.find.deployment }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.find.deployment }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.find.deployment }}
+    spec:
+      hostAliases:
+      - ip: {{ .Values.licenseServer.ip | quote }}
+        hostnames:
+        - {{ .Values.licenseServer.hostname | quote }}
+{{- template "basicidol.deployment.findInitContainers" }}
+      containers:
+      - image: {{ .Values.maintainer }}/{{ .Values.find.image }}:{{ .Values.idolVersion }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        name: {{ .Values.find.name }}
+        env:
+        - name: {{ (index .Values.find.env 0).name }}
+          value: {{ (index .Values.find.env 0).value | quote }}
+        livenessProbe:
+          httpGet:
+            path: {{ (index .Values.find.ports 0).livenessProbePath }}
+            port: {{ (index .Values.find.ports 0).container | int }}
+{{- template "basicidol.deployment.findNifiLivenessProbe" }}
+        ports:
+        - containerPort: {{ (index .Values.find.ports 0).container | int }}
+          hostPort: {{ (index .Values.find.ports 0).host | int }}
+          protocol: {{ .Values.portProtocol }}
+      imagePullSecrets:
+      - name: {{ .Values.secret.name }}
+---
+apiVersion: {{ .Values.deploymentApiVersion }}
+kind: Deployment
+metadata:
+  name: {{ .Values.nifi.deployment }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.nifi.deployment }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.nifi.deployment }}
+    spec:
+      hostAliases:
+      - ip: {{ .Values.licenseServer.ip | quote }}
+        hostnames:
+        - {{ .Values.licenseServer.hostname | quote }}
+      containers:
+      - image: {{ .Values.maintainer }}/{{ .Values.nifi.image }}:{{ .Values.idolVersion }} #choose nifi-minimal or nifi-full
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        name: {{ .Values.nifi.name }}
+        env:
+        - name: {{ .Values.nifi.env.webProxyContextPath.name }}
+          value: {{ .Values.nifi.env.webProxyContextPath.value | quote }}
+        - name: {{ .Values.nifi.env.webHttpPort.name }}
+          value: {{ .Values.nifi.env.webHttpPort.value | quote }}
+        volumeMounts:
+        - name: {{ .Values.nifi.volumes.ingest.name }}
+          mountPath: {{ .Values.nifi.volumes.ingest.mountPath }}
+        - name: {{ .Values.nifi.volumes.flow.name }}
+          mountPath: {{ .Values.nifi.volumes.flow.mountPath }}
+          subPath: {{ .Values.nifi.volumes.flow.subPath }}
+{{- if .Values.isIncluded.mmap }}
+        - name: {{ .Values.nifi.volumes.processedVideo.name }}
+          mountPath: {{ .Values.nifi.volumes.processedVideo.mountPath }}
+{{- end }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.nifi.ports.ui.livenessProbePath }}
+            port: {{ .Values.nifi.ports.ui.container | int }}
+{{- template "basicidol.deployment.findNifiLivenessProbe" }}
+        ports:
+        - containerPort: {{ .Values.nifi.ports.ui.container | int }}
+          hostPort: {{ .Values.nifi.ports.ui.host | int }}
+          protocol: {{ .Values.portProtocol }}
+{{- if .Values.isIncluded.mmap }}
+      - image: {{ .Values.maintainer }}/{{ .Values.mmapMediaserver.image }}:{{ .Values.idolVersion }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        name: {{ .Values.mmapMediaserver.name }}
+        volumeMounts:
+        - name: {{ .Values.mmapMediaserver.volumes.processedVideo.name }}
+          mountPath: {{ .Values.mmapMediaserver.volumes.processedVideo.mountPath }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.livenessProbePath }}
+            port: {{ .Values.mmapMediaserver.ports.aci.container | int }}
+{{- template "basicidol.deployment.mmapMediaPlaylistserverLivenessProbe" }}
+        ports:
+        - containerPort: {{ .Values.mmapMediaserver.ports.aci.container | int }}
+          hostPort: {{ .Values.mmapMediaserver.ports.aci.host | int }}
+          protocol: {{ .Values.portProtocol }}
+        - containerPort: {{ .Values.mmapMediaserver.ports.index.container | int }}
+          hostPort: {{ .Values.mmapMediaserver.ports.index.host | int }}
+          protocol: {{ .Values.portProtocol }}
+      - image: {{ .Values.maintainer }}/{{ .Values.mmapPlaylistserver.image }}:{{ .Values.idolVersion }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        name: {{ .Values.mmapPlaylistserver.name }}
+        volumeMounts:
+        - name: {{ .Values.mmapPlaylistserver.volumes.staticVideo.name }}
+          mountPath: {{ .Values.mmapPlaylistserver.volumes.staticVideo.mountPath }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.livenessProbePath }}
+            port: {{ .Values.mmapPlaylistserver.ports.aci.container | int }}
+{{- template "basicidol.deployment.mmapMediaPlaylistserverLivenessProbe" }}
+        ports:
+        - containerPort: {{ .Values.mmapPlaylistserver.ports.aci.container | int }}
+          hostPort: {{ .Values.mmapPlaylistserver.ports.aci.host | int }}
+          protocol: {{ .Values.portProtocol }}
+      - image: {{ .Values.maintainer }}/{{ .Values.mmapApp.image }}:{{ .Values.idolVersion }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        name: {{ .Values.mmapApp.name }}
+        env:
+        - name: {{ .Values.mmapApp.env.postgres.name }}
+          value: {{ .Values.mmapApp.env.postgres.value }}
+        volumeMounts:
+        - name: {{ .Values.mmapApp.volumes.staticVideo.name }}
+          mountPath: {{ .Values.mmapApp.volumes.staticVideo.mountPath }}
+        - name: {{ .Values.mmapApp.volumes.processedVideo.name }}
+          mountPath: {{ .Values.mmapApp.volumes.processedVideo.mountPath }}
+        - name: {{ .Values.mmapApp.volumes.items.name }}
+          mountPath: {{ .Values.mmapApp.volumes.items.mountPath }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.mmapApp.ports.ui.livenessProbePath }}
+            port: {{ .Values.mmapApp.ports.ui.container | int }}
+{{- template "basicidol.deployment.mmapAppLivenessProbe" }}
+        ports:
+        - containerPort: {{ .Values.mmapApp.ports.ui.container | int }}
+          hostPort: {{ .Values.mmapApp.ports.ui.host | int }}
+          protocol: {{ .Values.portProtocol }}
+        - containerPort: {{ .Values.mmapApp.ports.ajp.container | int }}
+          hostPort: {{ .Values.mmapApp.ports.ajp.host | int }}
+          protocol: {{ .Values.portProtocol }}
+        - containerPort: {{ .Values.mmapApp.ports.ssl.container | int }}
+          hostPort: {{ .Values.mmapApp.ports.ssl.host | int }}
+          protocol: {{ .Values.portProtocol }}
+{{- end }}
+      imagePullSecrets:
+      - name: {{ .Values.secret.name }}
+      volumes:
+      - name: {{ .Values.nifi.volumes.ingest.name }}
+        emptyDir: {}
+      - name: {{ .Values.nifi.volumes.flow.name }}
+        configMap:
+          name: {{ .Values.nifi.volumes.flow.configMap }}
+{{- if .Values.isIncluded.mmap }}
+      - name: {{ .Values.mmapApp.volumes.staticVideo.name }}
+        emptyDir: {}
+      - name: {{ .Values.mmapApp.volumes.processedVideo.name }}
+        emptyDir: {}
+      - name: {{ .Values.mmapApp.volumes.items.name }}
+        emptyDir: {}
+---
+apiVersion: {{ .Values.deploymentApiVersion }}
+kind: Deployment
+metadata:
+  name: {{ .Values.mmapDb.deployment }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.mmapDb.deployment }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.mmapDb.deployment }}
+    spec:
+      containers:
+      - image: {{ .Values.mmapDb.image }}
+        imagePullPolicy: IfNotPresent
+        name: {{ .Values.mmapDb.name }}
+        env:
+          - name: {{ .Values.mmapDb.env.postgresDb.name }}
+            value: {{ .Values.mmapDb.env.postgresDb.value }}
+          - name: {{ .Values.mmapDb.env.postgresUser.name }}
+            value: {{ .Values.mmapDb.env.postgresUser.value }}
+          - name: {{ .Values.mmapDb.env.postgresPw.name }}
+            value: {{ .Values.mmapDb.env.postgresPw.value }}
+        livenessProbe:
+{{- template "basicidol.deployment.mmapDbLivenessProbe" }}
+        volumeMounts:
+        - name: {{ .Values.mmapDb.volumes.events.name }}
+          mountPath: {{ .Values.mmapDb.volumes.events.mountPath }}
+        - name: {{ .Values.mmapDb.volumes.initdb.name }}
+          mountPath: {{ .Values.mmapDb.volumes.initdb.mountPath }}
+        ports:
+        - containerPort: {{ .Values.mmapDb.ports.postgres.container }}
+          name: {{ .Values.mmapDb.ports.postgres.name }}
+      volumes:
+      - name: {{ .Values.mmapDb.volumes.events.name }}
+        emptyDir: {}
+      - name: {{ .Values.mmapDb.volumes.initdb.name }}
+        configMap:
+          name: {{ .Values.mmapDb.volumes.initdb.configMap }}
+      imagePullSecrets:
+      - name: {{ .Values.secret.name }}
+{{- end }}
+{{- if .Values.isIncluded.reverseProxy }}
+---
+apiVersion: {{ .Values.deploymentApiVersion }}
+kind: Deployment
+metadata:
+  name: {{ .Values.reverseProxy.deployment }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.reverseProxy.deployment }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.reverseProxy.deployment }}
+    spec:
+      hostAliases:
+      - ip: {{ .Values.licenseServer.ip | quote }}
+        hostnames:
+        - {{ .Values.licenseServer.hostname | quote }}
+      containers:
+      - image: {{ .Values.reverseProxy.image }}
+        imagePullPolicy: IfNotPresent
+        name: {{ .Values.reverseProxy.name }}
+        volumeMounts:
+        - name: {{ (index .Values.reverseProxy.volumes 0).name }}
+          mountPath: {{ (index .Values.reverseProxy.volumes 0).mountPath }}
+          subPath: {{ (index .Values.reverseProxy.volumes 0).subPath }}
+        livenessProbe:
+          httpGet:
+            path: {{ (index .Values.reverseProxy.ports 0).livenessProbePath }}
+            port: {{ (index .Values.reverseProxy.ports 0).container | int }}
+{{- template "basicidol.deployment.reverseProxyLivenessProbe" }}
+        ports:
+        - containerPort: {{ (index .Values.reverseProxy.ports 0).container | int }}
+          hostPort: {{ (index .Values.reverseProxy.ports 0).host | int }}
+          protocol: {{ .Values.portProtocol }}
+      imagePullSecrets:
+      - name: {{ .Values.secret.name }}
+      volumes:
+      - name: {{ (index .Values.reverseProxy.volumes 0).name }}
+        configMap:
+          name: {{ (index .Values.reverseProxy.volumes 0).configMap }}
+{{- end }}
+{{- if .Values.isIncluded.documentSecurity }}
+---
+apiVersion: {{ .Values.deploymentApiVersion }}
+kind: Deployment
+metadata:
+  name: {{ .Values.omnigroupserver.deployment }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.omnigroupserver.deployment }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.omnigroupserver.deployment }}
+    spec:
+      hostAliases:
+      - ip: {{ .Values.licenseServer.ip | quote }}
+        hostnames:
+        - {{ .Values.licenseServer.hostname | quote }}
+      initContainers:
+      - name: edit-config
+        # This initContainer edits the config file to add the LDAP information
+        image: yauritux/busybox-curl
+        imagePullPolicy: IfNotPresent
+        command:
+        - sh
+        - "-c"
+        - |
+          sed "s/XX_LDAP_SERVER_XX/{{ .Values.documentSecurity.ldap.ldapServer }}/g" /mnt/config-map/{{ .Values.omnigroupserver.volumes.cfg.subPath }} > /mnt/config/idol/omnigroupserver.cfg
+          sed -i "s/XX_LDAP_PORT_XX/{{ .Values.documentSecurity.ldap.ldapPort }}/g" /mnt/config/idol/omnigroupserver.cfg
+          sed -i "s/XX_LDAP_BASE_XX/{{ .Values.documentSecurity.ldap.ldapBase | quote }}/g" /mnt/config/idol/omnigroupserver.cfg
+          sed -i "s/XX_LDAP_USERNAME_XX/{{ .Values.documentSecurity.ldap.ldapUsername | quote }}/g" /mnt/config/idol/omnigroupserver.cfg
+          sed -i "s/XX_LDAP_PASSWORD_XX/{{ .Values.documentSecurity.ldap.ldapPassword | quote }}/g" /mnt/config/idol/omnigroupserver.cfg
+          sed -i "s/XX_KEY_USERNAME_XX/{{ .Values.documentSecurity.ldap.keyUsername }}/g" /mnt/config/idol/omnigroupserver.cfg
+          sed -i "s/XX_KEY_GROUPNAME_XX/{{ .Values.documentSecurity.ldap.keyGroupName }}/g" /mnt/config/idol/omnigroupserver.cfg
+          sed -i "s/XX_LDAP_MODE_XX/{{ .Values.documentSecurity.ldap.ldapMode }}/g" /mnt/config/idol/omnigroupserver.cfg
+          sed -i "s/XX_LDAP_GROUP_BASE_XX/{{ .Values.documentSecurity.ldap.ldapGroupBase | quote }}/g" /mnt/config/idol/omnigroupserver.cfg
+          sed -i "s/XX_USER_FILTER_XX/{{ .Values.documentSecurity.ldap.userFilter }}/g" /mnt/config/idol/omnigroupserver.cfg
+          sed -i "s/XX_GROUP_FILTER_XX/{{ .Values.documentSecurity.ldap.groupFilter }}/g" /mnt/config/idol/omnigroupserver.cfg
+          cat /mnt/config/idol/omnigroupserver.cfg
+        volumeMounts:
+        - name: {{ .Values.omnigroupserver.volumes.cfg.name }}
+          mountPath: /mnt/config-map
+        - name: config-volume
+          mountPath: /mnt/config/idol
+      containers:
+      - image: {{ .Values.maintainer }}/{{ .Values.omnigroupserver.image }}:{{ .Values.omnigroupserver.idolVersion }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        name: {{ .Values.omnigroupserver.name }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.livenessProbePath }}
+            port: {{ (index .Values.omnigroupserver.ports 0).container | int }}
+{{- template "basicidol.deployment.standardLivenessProbe" }}
+        ports:
+        - containerPort: {{ (index .Values.omnigroupserver.ports 0).container | int }}
+          hostPort: {{ (index .Values.omnigroupserver.ports 0).host | int }}
+          protocol: {{ .Values.portProtocol }}
+        - containerPort: {{ (index .Values.omnigroupserver.ports 1).container | int }}
+          hostPort: {{ (index .Values.omnigroupserver.ports 1).host | int }}
+          protocol: {{ .Values.portProtocol }}
+        command: ["/bin/sh"]
+        args: ["-c", "cd /omnigroupserver && command cp -f /etc/config/idol/omnigroupserver.cfg omnigroupserver.cfg && ./run_idol.sh"]
+        env:
+        - name: IDOL_COMPONENT_CFG
+          value: "/omnigroupserver/omnigroupserver.cfg"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/config/idol
+        - name: {{ .Values.omnigroupserver.volumes.aes.name }}
+          mountPath: {{ .Values.omnigroupserver.volumes.aes.mountPath }}
+          subPath: {{ .Values.omnigroupserver.volumes.aes.subPath }}
+      imagePullSecrets:
+      - name: {{ .Values.secret.name }}
+      volumes:
+      - name: config-volume
+        emptyDir: {}
+      - name: {{ .Values.omnigroupserver.volumes.cfg.name }}
+        configMap:
+          name: {{ .Values.omnigroupserver.volumes.cfg.configMap }}
+      - name: {{ .Values.omnigroupserver.volumes.aes.name }}
+        configMap:
+          name: {{ .Values.omnigroupserver.volumes.aes.configMap }}
+{{- end }}
