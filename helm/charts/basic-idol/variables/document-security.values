@@ -1,0 +1,59 @@
+###
+# Copyright (c) 2019-2020 Micro Focus or one of its affiliates.
+#
+# Licensed under the MIT License (the "License"); you may not use this file
+# except in compliance with the License.
+#
+# The only warranties for products and services of Micro Focus and its affiliates
+# and licensors ("Micro Focus") are as may be set forth in the express warranty
+# statements accompanying such products and services. Nothing herein should be
+# construed as constituting an additional warranty. Micro Focus shall not be
+# liable for technical or editorial errors or omissions contained herein. The
+# information contained herein is subject to change without notice.
+###
+
+isIncluded:
+  documentSecurity: true
+
+# Customize security settings here
+documentSecurity:
+  securityKeys: "123,654,798,059"
+  securityType: NT_V4
+  securityTypeMode: AUTONOMY_SECURITY_V4_NT_MAPPED
+  securityTypePropMatch: nt_v4
+  ldap:
+    ldapServer: insert_your_ldap_server_hostname_here
+    ldapPort: 389
+    ldapBase: "OU=people,DC=ldap-server,DC=example,DC=com"
+    ldapUsername: "uid=admin,ou=people,dc=ldap-server,dc=example,dc=com"
+    ldapBaseDn: "uid=admin,ou=people,dc=ldap-server,dc=example,dc=com"
+    ldapGroup: "OU=people,DC=ldap-server,DC=example,DC=com"
+    ldapRdnAttribute: CN
+    keyUsername: uid
+    keyGroupName: cn
+    ldapMode: Group
+    ldapGroupBase: "OU=groups,DC=ldap-server,DC=example,DC=com"
+    userFilter: "(objectClass=person)"
+    groupFilter: "(objectClass=groupOfNames)"
+    # Don't put the LDAP password here in plain text:
+    # encrypt your password via autpassword with omnigroupserver/aes.key
+    ldapPassword: insert_your_encrypted_ldap_password_here
+    
+content:
+  volumes:
+    cfg:
+      name: content-cfg-mount
+      mountPath: /content
+      subPath: content_docsec.cfg
+      configMap: content-document-security
+community:
+  volumes:
+    cfg:
+      name: community-cfg-mount
+      mountPath: /community
+      subPath: community_ogs_ldap_docsec.cfg
+      configMap: community-document-security
+find:
+  env:
+    - name: IDOL_UI_CFG
+      value: config_docsec.json

@@ -1,0 +1,185 @@
+apiVersion: {{ .Values.serviceApiVersion }}
+kind: Service
+metadata:
+  name: {{ .Values.content.name }} #These services allow pods to send internal requests to the correct component
+spec:
+  ports:
+  - port: {{ (index .Values.content.ports 0).service | int }}
+    targetPort: {{ (index .Values.content.ports 0).container | int }}
+    name: {{ (index .Values.content.ports 0).name }}
+  - port: {{ (index .Values.content.ports 1).service | int }}
+    targetPort: {{ (index .Values.content.ports 1).container | int }}
+    name: {{ (index .Values.content.ports 1).name }}
+  selector:
+    app: {{ .Values.content.deployment }}
+---
+apiVersion: {{ .Values.serviceApiVersion }}
+kind: Service
+metadata:
+  name: {{ .Values.agentstore.name }}
+spec:
+  ports:
+  - port: {{ (index .Values.agentstore.ports 0).service | int }}
+    targetPort: {{ (index .Values.agentstore.ports 0).container | int }}
+  selector:
+    app: {{ .Values.agentstore.deployment }}
+---
+apiVersion: {{ .Values.serviceApiVersion }}
+kind: Service
+metadata:
+  name: {{ .Values.categorisationAgentstore.name }}
+spec:
+  ports:
+  - port: {{ (index .Values.categorisationAgentstore.ports 0).service | int }}
+    targetPort: {{ (index .Values.categorisationAgentstore.ports 0).container | int }}
+  selector:
+    app: {{ .Values.categorisationAgentstore.deployment }}
+---
+apiVersion: {{ .Values.serviceApiVersion }}
+kind: Service
+metadata:
+  name: {{ .Values.community.name }}
+spec:
+  ports:
+  - port: {{ (index .Values.community.ports 0).service | int }}
+    targetPort: {{ (index .Values.community.ports 0).container | int }}
+    name: {{ (index .Values.community.ports 0).name }}
+  - port: {{ (index .Values.community.ports 1).service | int }}
+    targetPort: {{ (index .Values.community.ports 1).container | int }}
+    name: {{ (index .Values.community.ports 1).name }}
+  selector:
+    app: {{ .Values.community.deployment }}
+---
+apiVersion: {{ .Values.serviceApiVersion }}
+kind: Service
+metadata:
+  name: {{ .Values.view.name }}
+spec:
+  ports:
+  - port: {{ (index .Values.view.ports 0).service | int }}
+    targetPort: {{ (index .Values.view.ports 0).container | int }}
+  selector:
+    app: {{ .Values.view.deployment }}
+---
+apiVersion: {{ .Values.serviceApiVersion }}
+kind: Service
+metadata:
+  name: {{ .Values.find.name }}
+spec:
+  ports:
+  - port: {{ (index .Values.find.ports 0).service | int }}
+    targetPort: {{ (index .Values.find.ports 0).container | int }}
+  selector:
+    app: {{ .Values.find.deployment }}
+---
+apiVersion: {{ .Values.serviceApiVersion }}
+kind: Service
+metadata:
+  name: {{ .Values.nifi.name }}
+spec:
+  ports:
+  - port: {{ .Values.nifi.ports.connectorAci.service | int }}
+    targetPort: {{ .Values.nifi.ports.connectorAci.container | int }}
+    name: {{ .Values.nifi.ports.connectorAci.name }}
+{{- if .Values.isIncluded.reverseProxy }}
+  - port: {{ .Values.nifi.ports.ui.service | int }}
+    targetPort: {{ .Values.nifi.ports.ui.container | int }}
+    name: {{ .Values.nifi.ports.ui.name }}
+{{- end }}
+  selector:
+    app: {{ .Values.nifi.deployment }}
+{{- if .Values.isIncluded.reverseProxy }}
+---
+apiVersion: {{ .Values.serviceApiVersion }}
+kind: Service
+metadata:
+  name: {{ .Values.reverseProxy.name }}
+spec:
+  ports:
+  - port: {{ (index .Values.reverseProxy.ports 0).service | int }}
+    targetPort: {{ (index .Values.reverseProxy.ports 0).container | int }}
+  selector:
+    app: {{ .Values.reverseProxy.deployment }}
+{{- end }}
+{{- if .Values.isIncluded.mmap }}
+---
+apiVersion: {{ .Values.serviceApiVersion }}
+kind: Service
+metadata:
+  name: {{ .Values.mmapApp.name }}
+spec:
+  ports:
+  - port: {{ .Values.mmapApp.ports.ui.service | int }}
+    targetPort: {{ .Values.mmapApp.ports.ui.container | int }}
+    name: {{ .Values.mmapApp.ports.ui.name }}
+  - port: {{ .Values.mmapApp.ports.ajp.service | int }}
+    targetPort: {{ .Values.mmapApp.ports.ajp.container | int }}
+    name: {{ .Values.mmapApp.ports.ajp.name }}
+  selector:
+    app: {{ .Values.nifi.deployment }}
+---
+apiVersion: {{ .Values.serviceApiVersion }}
+kind: Service
+metadata:
+  name: {{ .Values.mmapPlaylistserver.name }}
+spec:
+  ports:
+  - port: {{ .Values.mmapPlaylistserver.ports.aci.service | int }}
+    targetPort: {{ .Values.mmapPlaylistserver.ports.aci.container | int }}
+  selector:
+    app: {{ .Values.nifi.deployment }}
+---
+apiVersion: {{ .Values.serviceApiVersion }}
+kind: Service
+metadata:
+  name: {{ .Values.mmapDb.name }}
+spec:
+  ports:
+  - port: {{ .Values.mmapDb.ports.postgres.service | int }}
+    targetPort: {{ .Values.mmapDb.ports.postgres.container | int }}
+  selector:
+    app: {{ .Values.mmapDb.deployment }}
+---
+apiVersion: {{ .Values.serviceApiVersion }}
+kind: Service
+metadata:
+  name: {{ .Values.mmapMediaserver.name }}
+spec:
+  ports:
+  - port: {{ .Values.mmapMediaserver.ports.aci.service | int }}
+    targetPort: {{ .Values.mmapMediaserver.ports.aci.container | int }}
+    name: {{ .Values.mmapMediaserver.ports.aci.name }}
+  - port: {{ .Values.mmapMediaserver.ports.index.service | int }}
+    targetPort: {{ .Values.mmapMediaserver.ports.index.container | int }}
+    name: {{ .Values.mmapMediaserver.ports.index.name }}
+  selector:
+    app: {{ .Values.nifi.deployment }}
+{{- end }}
+{{- /*
+ Copyright (c) 2019-2020 Micro Focus or one of its affiliates.
+
+ Licensed under the MIT License (the "License"); you may not use this file
+ except in compliance with the License.
+
+ The only warranties for products and services of Micro Focus and its affiliates
+ and licensors ("Micro Focus") are as may be set forth in the express warranty
+ statements accompanying such products and services. Nothing herein should be
+ construed as constituting an additional warranty. Micro Focus shall not be
+ liable for technical or editorial errors or omissions contained herein. The
+ information contained herein is subject to change without notice.
+
+*/}}
+{{- if .Values.isIncluded.documentSecurity }}
+---
+apiVersion: {{ .Values.serviceApiVersion }}
+kind: Service
+metadata:
+  name: {{ .Values.omnigroupserver.name }}
+spec:
+  ports:
+  - port: {{ (index .Values.omnigroupserver.ports 0).service | int }}
+    targetPort: {{ (index .Values.omnigroupserver.ports 0).container | int }}
+    name: {{ (index .Values.omnigroupserver.ports 0).name }}
+  selector:
+    app: {{ .Values.omnigroupserver.deployment }}
+{{- end }}
