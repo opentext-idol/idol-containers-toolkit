@@ -1,0 +1,45 @@
+###
+# Copyright (c) 2021 Micro Focus or one of its affiliates.
+#
+# Licensed under the MIT License (the "License"); you may not use this file
+# except in compliance with the License.
+#
+# The only warranties for products and services of Micro Focus and its affiliates
+# and licensors ("Micro Focus") are as may be set forth in the express warranty
+# statements accompanying such products and services. Nothing herein should be
+# construed as constituting an additional warranty. Micro Focus shall not be
+# liable for technical or editorial errors or omissions contained herein. The
+# information contained herein is subject to change without notice.
+###
+
+# Dockerfile to generate a controller + content bundle
+ARG IDOL_REGISTRY
+ARG IDOL_VERSION
+FROM ${IDOL_REGISTRY}/content:${IDOL_VERSION} as content
+
+ARG IDOL_REGISTRY
+ARG IDOL_VERSION
+FROM ${IDOL_REGISTRY}/controller:${IDOL_VERSION} as controller
+
+# Curl is required to add and start services via HTTP requests during controller bundle startup
+RUN apt-get update && apt-get install -y curl
+
+# Copy executables and configs to controller image
+COPY --from=content /content/ /content/
+
+# Add control script template which can accept start and stop as arguments,
+COPY control_scripts/control-template.sh /controller/control-template.sh
+# Add post startup tasks for controller to send requests adding the services bundled within its container
+COPY control_scripts/add_services.sh /controller/
+
+# Setup control script, update logs for each component
+# Finalize controller startup
+RUN for C in content ; do \
+    cp /controller/control-template.sh /${C}/control-${C}.sh ; \
+    chmod +x /${C}/control-${C}.sh ; \
+    sed -i "s#<COMPONENT>#${C}#g" /${C}/control-${C}.sh ; \
+    sed -i "s#^\(LogDirectory *= *\).*#\1/idol-logs-${C}/#" /${C}/cfg/${C}.cfg ; \
+    sed -i "s#^\(LogArchiveDirectory *= *\).*#\1/idol-logs-${C}/archive#" /${C}/cfg/${C}.cfg ; \
+    done && \
+    sed -i "s#^source ./startup_utils.sh#source ./startup_utils.sh\nsource ./add_services.sh#" /controller/startup_tasks.sh && \
+    sed -i "s#^function post_startup_tasks {#function post_startup_tasks {\n    add_content_service idol-controller-content-bundle\n    start_content idol-controller-content-bundle\n    add_to_coordinator idol-controller-content-bundle#" /controller/startup_tasks.sh

@@ -288,7 +288,7 @@ omnigroupserver:
   name: idol-omnigroupserver
   deployment: idol-omnigroupserver-deployment
   image: omnigroupserver
-  idolVersion: 12.0.0 #this tends to be behind the general idol version
+  idolVersion: 12.6 #this tends to be behind the general idol version
   ports:
     - name: aci-port
       service: *omnigroupserver-port0

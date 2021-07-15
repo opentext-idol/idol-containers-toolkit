@@ -1,0 +1,29 @@
+###
+# Copyright (c) 2021 Micro Focus or one of its affiliates.
+#
+# Licensed under the MIT License (the "License"); you may not use this file
+# except in compliance with the License.
+#
+# The only warranties for products and services of Micro Focus and its affiliates
+# and licensors ("Micro Focus") are as may be set forth in the express warranty
+# statements accompanying such products and services. Nothing herein should be
+# construed as constituting an additional warranty. Micro Focus shall not be
+# liable for technical or editorial errors or omissions contained herein. The
+# information contained herein is subject to change without notice.
+###
+
+# Modifies the siteadmin image to use the right default hostnames
+
+# Use published image for siteadmin
+ARG IDOL_REGISTRY
+ARG IDOL_VERSION
+FROM ${IDOL_REGISTRY}/siteadmin:${IDOL_VERSION} as siteadmin
+
+# jq used to edit the siteadmin config json
+RUN apt-get update && apt-get install -y jq
+
+# Bootstrapping a useradmin user, and setting default hosts using a preset config
+COPY control_scripts/add_useradmin.sh /opt/siteadmin/
+COPY siteadmin_bootstrap_config/config.json /opt/siteadmin/home/
+RUN sed -i 's#source ./startup_utils.sh#source ./startup_utils.sh\nsource ./add_useradmin.sh#' /opt/siteadmin/ui_start_basic.sh && \
+    sed -i 's#function do_pre_start_tasks {#function do_pre_start_tasks {\n    waitForAci idol-controller-siteadmin-backend-bundle:9030\n    add_useradmin idol-controller-siteadmin-backend-bundle:9030#' /opt/siteadmin/ui_start_basic.sh

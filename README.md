@@ -114,6 +114,29 @@ By default, only port 8080 is exposed and provides access to the Data Admin UI.
 If you want direct access to all of the container ports, then you can use the 
 `docker-compose.expose-ports.yml` file.
 
+## site-admin
+
+This creates a similar setup to the basic IDOL system, but allows the use of 
+Site Admin to control services. 
+
+To use this system, run the following commands in the _site-admin_ directory:
+
+    docker-compose up
+
+By default, the exposed ports are 8000 for find, port 8080 for Site Admin and port 8081 for NiFi.
+This allows access to each interface by:
+ -  `http://<dockerhost>:8081/nifi/` - the NiFi admin interface
+ -  `http://<dockerhost>:8000/find/` - the Find user interface, with an admin/admin logon provided
+ -  `http://<dockerhost>:8080` - the Site Admin user interface, with a useradmin/useradmin logon provided
+
+Any documents that you copy into a particular directory within the system will
+be detected and ingested by the NiFi setup. For example:
+
+    docker cp example.pdf site-admin_idol-nifi_1:/idol-ingest/
+
+If you want direct access to all of the container ports, then you can use the 
+`docker-compose.expose-ports.yml` file.
+
 ## Use SSL/TLS Communications
 
 Each docker compose set up directory contains a `idol-ssl.env` environment file and a 

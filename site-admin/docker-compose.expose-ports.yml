@@ -1,0 +1,36 @@
+###
+# Copyright (c) 2021 Micro Focus or one of its affiliates.
+#
+# Licensed under the MIT License (the "License"); you may not use this file
+# except in compliance with the License.
+#
+# The only warranties for products and services of Micro Focus and its affiliates
+# and licensors ("Micro Focus") are as may be set forth in the express warranty
+# statements accompanying such products and services. Nothing herein should be
+# construed as constituting an additional warranty. Micro Focus shall not be
+# liable for technical or editorial errors or omissions contained herein. The
+# information contained herein is subject to change without notice.
+###
+
+# expose internal service ports that don't necessarily
+# need to be exposed to the outside world
+version: "3.7"
+
+services:
+  idol-controller-content-bundle:
+    ports:
+      - 9100-9102:9100-9102
+  idol-controller-find-backend-bundle:
+    ports:
+      - 9050-9052:9050-9052
+      - 9180-9182:9180-9182
+      - 9030-9032:9030-9032
+      - 9080-9082:9080-9082
+  idol-nifi:
+    ports:
+      - 8001:8081
+      - 11000:11000
+  idol-coordinator:
+    ports:
+      - 40200:40200
+      - 40202:40202

@@ -1,0 +1,97 @@
+{
+  "alerts" : {
+    "historySecs" : 1209600.0
+  },
+  "documentTracking" : {
+    "enabled" : false,
+    "datasource" : {
+      "platform" : "postgres",
+      "hibernateDialect" : "org.hibernate.dialect.PostgreSQL82Dialect",
+      "driverClassName" : "org.postgresql.Driver",
+      "url" : "jdbc:postgresql://:/",
+      "username" : "",
+      "password" : "",
+      "passwordRedacted" : false
+    }
+  },
+  "hostDiscovery" : {
+    "port" : 41200
+  },
+  "locale" : "en_US",
+  "login" : {
+    "name" : "CommunityAuthentication",
+    "defaultLogin" : {
+      "username" : null,
+      "password" : null
+    },
+    "community" : {
+      "protocol" : "HTTP",
+      "host" : "idol-controller-siteadmin-backend-bundle",
+      "port" : 9030,
+      "indexProtocol" : "HTTP",
+      "indexPort" : null,
+      "serviceProtocol" : "HTTP",
+      "servicePort" : 9032,
+      "productType" : [ "UASERVER" ],
+      "indexErrorMessage" : null,
+      "productTypeRegex" : null
+    },
+    "method" : "autonomy"
+  },
+  "logging" : {
+    "syslog" : {
+      "enabled" : false,
+      "host" : "",
+      "port" : 514
+    },
+    "logFile" : {
+      "enabled" : true,
+      "compression" : "NONE",
+      "maxHistory" : 30,
+      "rolloverFrequency" : "DAILY",
+      "maxSize" : 104857600
+    }
+  },
+  "mail" : {
+    "enabled" : false,
+    "host" : "",
+    "port" : 25,
+    "username" : "",
+    "password" : "",
+    "passwordRedacted" : false,
+    "properties" : { },
+    "from" : "",
+    "to" : [ ],
+    "connectionSecurity" : "NONE"
+  },
+  "datasource" : {
+    "platform" : "h2",
+    "hibernateDialect" : "org.hibernate.dialect.H2Dialect",
+    "driverClassName" : "org.h2.Driver",
+    "url" : "jdbc:h2:file:/opt/siteadmin/home/data/site-admin-db;DB_CLOSE_ON_EXIT=FALSE",
+    "username" : "sa",
+    "password" : "",
+    "passwordRedacted" : false
+  },
+  "coordinator" : {
+    "protocol" : "HTTP",
+    "host" : "idol-coordinator",
+    "port" : 40200,
+    "indexProtocol" : "HTTP",
+    "indexPort" : 40201,
+    "serviceProtocol" : "HTTP",
+    "servicePort" : 40202,
+    "productType" : [ "SERVICECOORDINATOR" ],
+    "indexErrorMessage" : "BADLY FORMATTED REQUEST",
+    "productTypeRegex" : null
+  },
+  "serviceDiscovery" : {
+    "paths" : [ "/opt/Autonomy" ]
+  },
+  "tasks" : {
+    "dashboardHistorySecs" : 3600.0,
+    "footerHistorySecs" : 300.0,
+    "historySecs" : 1209600.0
+  },
+  "encryptionCodec" : null
+}

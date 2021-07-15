@@ -1,0 +1,127 @@
+###
+# Copyright (c) 2021 Micro Focus or one of its affiliates.
+#
+# Licensed under the MIT License (the "License"); you may not use this file
+# except in compliance with the License.
+#
+# The only warranties for products and services of Micro Focus and its affiliates
+# and licensors ("Micro Focus") are as may be set forth in the express warranty
+# statements accompanying such products and services. Nothing herein should be
+# construed as constituting an additional warranty. Micro Focus shall not be
+# liable for technical or editorial errors or omissions contained herein. The
+# information contained herein is subject to change without notice.
+###
+
+# Basic IDOL container setup using controller
+# Uses nifi to ingest and index data into content
+# Uses find to make search results available
+# Default admin user is created for find in the community service
+#  - see community/run_community.sh for details
+
+version: "3.7"
+
+# Change the IP to the address of an external IDOL LicenseServer instance
+x-external-licenseserver-host: &external-licenseserver-host
+  - idol-licenseserver:${LICENSESERVER_IP}
+
+x-common-build: &common-build
+    context: ./
+    args:
+      http_proxy: ${HTTP_PROXY}
+      https_proxy: ${HTTP_PROXY}
+      IDOL_REGISTRY: ${IDOL_REGISTRY}
+      IDOL_VERSION: ${IDOL_SERVER_VERSION}
+
+# Any files dropped into this volume will be ingested and indexed
+volumes:
+  idol-ingest-volume:
+
+networks:
+  # network encompasses all containers, use to allow aliases
+  container_net:
+    driver: bridge
+
+services:
+  idol-coordinator:
+    image: ${IDOL_REGISTRY}/coordinator:${IDOL_SERVER_VERSION}
+    extra_hosts: *external-licenseserver-host
+    networks:
+      - container_net 
+  idol-controller-content-bundle:
+    image: ${IMAGE_BUILD_REGISTRY}/controller-content-bundle:${IDOL_SERVER_VERSION}
+    build: 
+      << : *common-build
+      dockerfile: Dockerfile.content_bundle
+    extra_hosts: *external-licenseserver-host
+    networks:
+      container_net:
+        aliases:
+          - idol-content
+    depends_on:
+      - idol-coordinator
+  idol-controller-find-backend-bundle:
+    image: ${IMAGE_BUILD_REGISTRY}/controller-find-backend-bundle:${IDOL_SERVER_VERSION}
+    build: 
+      << : *common-build
+      dockerfile: Dockerfile.find_backend_bundle
+    extra_hosts: *external-licenseserver-host
+    networks:
+      container_net:
+        aliases:
+          - idol-agentstore
+          - idol-community
+          - idol-categorisation-agentstore
+          - idol-view
+          - idol-controller
+    depends_on:
+      - idol-controller-content-bundle
+  # contains community and agentstore for siteadmin, recommended by docs
+  idol-controller-siteadmin-backend-bundle:
+    image: ${IMAGE_BUILD_REGISTRY}/controller-siteadmin-backend-bundle:${IDOL_SERVER_VERSION}
+    build: 
+      << : *common-build
+      dockerfile: Dockerfile.siteadmin_backend_bundle
+    extra_hosts: *external-licenseserver-host
+    depends_on:
+      - idol-controller-find-backend-bundle
+    networks:
+      - container_net
+  idol-find:
+    image: ${IDOL_REGISTRY}/find:${IDOL_SERVER_VERSION}
+    environment:
+      - IDOL_UI_CFG=config_basic.json # this controls the configuration of Find
+    depends_on:
+      - idol-controller-find-backend-bundle
+      - idol-controller-content-bundle
+    ports:
+      - 8000:8000
+    networks:
+      - container_net
+  idol-nifi:
+    image: ${IDOL_REGISTRY}/nifi-minimal:${IDOL_SERVER_VERSION} # choose nifi-minimal or nifi-full
+    environment:
+      - NIFI_WEB_PROXY_CONTEXT_PATH=/idol-nifi
+      - NIFI_WEB_HTTP_PORT=8081
+    extra_hosts: *external-licenseserver-host
+    volumes:
+      - idol-ingest-volume:/idol-ingest
+      - ../basic-idol/nifi/flow/basic.xml:/opt/nifi/flow/this_flow.xml:ro # this controls which NiFi flow is used
+    ports:
+      - 8081:8081
+    networks:
+      - container_net 
+  idol-siteadmin:
+    image: ${IMAGE_BUILD_REGISTRY}/siteadmin-useful-defaults:${IDOL_SERVER_VERSION}
+    build: 
+      << : *common-build
+      dockerfile: Dockerfile.siteadmin
+    ports:
+      - 8080:8000
+    depends_on:
+      - idol-controller-siteadmin-backend-bundle
+      - idol-controller-find-backend-bundle
+      - idol-controller-content-bundle
+    networks:
+      - container_net
+  
+
