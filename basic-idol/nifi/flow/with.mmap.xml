@@ -18,7 +18,7 @@
       <bundle>
         <group>idol.nifi</group>
         <artifact>idol-nifi-framework</artifact>
-        <version>12.7.0</version>
+        <version>12.9.0</version>
       </bundle>
       <maxConcurrentTasks>1</maxConcurrentTasks>
       <schedulingPeriod>0 sec</schedulingPeriod>
@@ -61,7 +61,7 @@
       <bundle>
         <group>idol.nifi</group>
         <artifact>idol-nifi-framework</artifact>
-        <version>12.7.0</version>
+        <version>12.9.0</version>
       </bundle>
       <maxConcurrentTasks>1</maxConcurrentTasks>
       <schedulingPeriod>0 sec</schedulingPeriod>
@@ -73,6 +73,10 @@
       <schedulingStrategy>TIMER_DRIVEN</schedulingStrategy>
       <executionNode>ALL</executionNode>
       <runDurationNanos>0</runDurationNanos>
+      <property>
+        <name>IdolLicenseService</name>
+        <value>5795f8d4-0169-1000-49e2-280b76de445a</value>
+      </property>
       <property>
         <name>DocumentRegistryService</name>
       </property>
@@ -113,7 +117,7 @@
       <bundle>
         <group>idol.nifi</group>
         <artifact>idol-nifi-framework</artifact>
-        <version>12.7.0</version>
+        <version>12.9.0</version>
       </bundle>
       <maxConcurrentTasks>1</maxConcurrentTasks>
       <schedulingPeriod>0 sec</schedulingPeriod>
@@ -178,7 +182,7 @@
       <bundle>
         <group>idol.nifi</group>
         <artifact>idol-nifi-framework</artifact>
-        <version>12.7.0</version>
+        <version>12.9.0</version>
       </bundle>
       <maxConcurrentTasks>10</maxConcurrentTasks>
       <schedulingPeriod>0 sec</schedulingPeriod>
@@ -213,7 +217,7 @@
       <bundle>
         <group>idol.nifi</group>
         <artifact>idol-nifi-framework</artifact>
-        <version>12.7.0</version>
+        <version>12.9.0</version>
       </bundle>
       <maxConcurrentTasks>5</maxConcurrentTasks>
       <schedulingPeriod>0 sec</schedulingPeriod>
@@ -259,7 +263,7 @@
       <bundle>
         <group>idol.nifi</group>
         <artifact>idol-nifi-framework</artifact>
-        <version>12.7.0</version>
+        <version>12.9.0</version>
       </bundle>
       <maxConcurrentTasks>1</maxConcurrentTasks>
       <schedulingPeriod>0 sec</schedulingPeriod>
@@ -400,7 +404,7 @@
       <bundle>
         <group>idol.nifi</group>
         <artifact>idol-nifi-framework</artifact>
-        <version>12.7.0</version>
+        <version>12.9.0</version>
       </bundle>
       <maxConcurrentTasks>1</maxConcurrentTasks>
       <schedulingPeriod>1 sec</schedulingPeriod>
@@ -412,6 +416,10 @@
       <schedulingStrategy>TIMER_DRIVEN</schedulingStrategy>
       <executionNode>ALL</executionNode>
       <runDurationNanos>0</runDurationNanos>
+      <property>
+        <name>IdolLicenseService</name>
+        <value>5795f8d4-0169-1000-49e2-280b76de445a</value>
+      </property>
       <property>
         <name>Host</name>
         <value>idol-content</value>
@@ -492,7 +500,7 @@
       <bundle>
         <group>idol.nifi</group>
         <artifact>idol-nifi-framework</artifact>
-        <version>12.7.0</version>
+        <version>12.9.0</version>
       </bundle>
       <maxConcurrentTasks>1</maxConcurrentTasks>
       <schedulingPeriod>0 sec</schedulingPeriod>
@@ -504,6 +512,10 @@
       <schedulingStrategy>TIMER_DRIVEN</schedulingStrategy>
       <executionNode>ALL</executionNode>
       <runDurationNanos>0</runDurationNanos>
+      <property>
+        <name>IdolLicenseService</name>
+        <value>5795f8d4-0169-1000-49e2-280b76de445a</value>
+      </property>
       <property>
         <name>KeyViewFilterService</name>
         <value>a7d04d28-6a2d-37b9-b0b8-3eaa7e01c277</value>
@@ -527,7 +539,7 @@
       <bundle>
         <group>idol.nifi</group>
         <artifact>idol-nifi-framework</artifact>
-        <version>12.7.0</version>
+        <version>12.9.0</version>
       </bundle>
       <maxConcurrentTasks>1</maxConcurrentTasks>
       <schedulingPeriod>0 sec</schedulingPeriod>
@@ -539,6 +551,10 @@
       <schedulingStrategy>TIMER_DRIVEN</schedulingStrategy>
       <executionNode>ALL</executionNode>
       <runDurationNanos>0</runDurationNanos>
+      <property>
+        <name>IdolLicenseService</name>
+        <value>5795f8d4-0169-1000-49e2-280b76de445a</value>
+      </property>
       <property>
         <name>ComponentNames</name>
         <value>KeyView,${idol.doc.source:getDelimitedField(2,':')}</value>
@@ -558,7 +574,7 @@
       <bundle>
         <group>idol.nifi</group>
         <artifact>idol-nifi-framework</artifact>
-        <version>12.7.0</version>
+        <version>12.9.0</version>
       </bundle>
       <maxConcurrentTasks>1</maxConcurrentTasks>
       <schedulingPeriod>0 sec</schedulingPeriod>
@@ -698,7 +714,7 @@ Type=response
       <bundle>
         <group>idol.nifi.connector</group>
         <artifact>idol-nifi-connector-router-nar</artifact>
-        <version>12.7.0</version>
+        <version>12.9.0</version>
       </bundle>
       <maxConcurrentTasks>1</maxConcurrentTasks>
       <schedulingPeriod>0 sec</schedulingPeriod>
@@ -793,7 +809,7 @@ Type=response
         <bundle>
           <group>idol.nifi.connector</group>
           <artifact>idol-nifi-connector-filesystem</artifact>
-          <version>12.7.0</version>
+          <version>12.9.0</version>
         </bundle>
         <maxConcurrentTasks>1</maxConcurrentTasks>
         <schedulingPeriod>0 sec</schedulingPeriod>
@@ -931,7 +947,7 @@ Type=response
         <bundle>
           <group>idol.nifi.connector</group>
           <artifact>idol-nifi-connector-filesystem</artifact>
-          <version>12.7.0</version>
+          <version>12.9.0</version>
         </bundle>
         <maxConcurrentTasks>1</maxConcurrentTasks>
         <schedulingPeriod>0 sec</schedulingPeriod>
@@ -990,7 +1006,7 @@ Type=response
         <bundle>
           <group>idol.nifi.connector</group>
           <artifact>idol-nifi-connector-router-nar</artifact>
-          <version>12.7.0</version>
+          <version>12.9.0</version>
         </bundle>
         <maxConcurrentTasks>1</maxConcurrentTasks>
         <schedulingPeriod>0 sec</schedulingPeriod>
@@ -1021,7 +1037,7 @@ Type=response
         <bundle>
           <group>idol.nifi.connector</group>
           <artifact>idol-nifi-connector-filesystem</artifact>
-          <version>12.7.0</version>
+          <version>12.9.0</version>
         </bundle>
         <maxConcurrentTasks>1</maxConcurrentTasks>
         <schedulingPeriod>0 sec</schedulingPeriod>
@@ -1321,7 +1337,7 @@ Type=response
         <bundle>
           <group>idol.nifi</group>
           <artifact>idol-nifi-framework</artifact>
-          <version>12.7.0</version>
+          <version>12.9.0</version>
         </bundle>
         <enabled>true</enabled>
         <property>
@@ -1353,7 +1369,7 @@ Type=response
         <bundle>
           <group>idol.nifi</group>
           <artifact>idol-nifi-framework</artifact>
-          <version>12.7.0</version>
+          <version>12.9.0</version>
         </bundle>
         <maxConcurrentTasks>1</maxConcurrentTasks>
         <schedulingPeriod>0 sec</schedulingPeriod>
@@ -1402,7 +1418,7 @@ Type=response
         <bundle>
           <group>idol.nifi</group>
           <artifact>idol-nifi-framework</artifact>
-          <version>12.7.0</version>
+          <version>12.9.0</version>
         </bundle>
         <maxConcurrentTasks>1</maxConcurrentTasks>
         <schedulingPeriod>0 sec</schedulingPeriod>
@@ -1535,7 +1551,7 @@ Type=response
         <bundle>
           <group>idol.nifi</group>
           <artifact>idol-nifi-framework</artifact>
-          <version>12.7.0</version>
+          <version>12.9.0</version>
         </bundle>
         <enabled>true</enabled>
         <property>
@@ -2259,7 +2275,7 @@ Type=response
       <bundle>
         <group>idol.nifi</group>
         <artifact>idol-nifi-framework</artifact>
-        <version>12.7.0</version>
+        <version>12.9.0</version>
       </bundle>
       <enabled>true</enabled>
       <property>
@@ -2282,7 +2298,7 @@ Type=response
       <bundle>
         <group>idol.nifi</group>
         <artifact>idol-nifi-framework</artifact>
-        <version>12.7.0</version>
+        <version>12.9.0</version>
       </bundle>
       <enabled>true</enabled>
       <property>
@@ -2723,7 +2739,7 @@ Type=response
             <bundle>
                 <artifact>idol-nifi-framework</artifact>
                 <group>idol.nifi</group>
-                <version>12.7.0</version>
+                <version>12.9.0</version>
             </bundle>
             <descriptors>
                 <entry>
@@ -2760,7 +2776,7 @@ Type=response
             <bundle>
                 <artifact>idol-nifi-framework</artifact>
                 <group>idol.nifi</group>
-                <version>12.7.0</version>
+                <version>12.9.0</version>
             </bundle>
             <comments/>
             <descriptors>
@@ -2791,7 +2807,7 @@ Type=response
             <bundle>
                 <artifact>idol-nifi-framework</artifact>
                 <group>idol.nifi</group>
-                <version>12.7.0</version>
+                <version>12.9.0</version>
             </bundle>
             <descriptors>
                 <entry>
@@ -3025,7 +3041,7 @@ Type=response
                     <bundle>
                         <artifact>idol-nifi-framework</artifact>
                         <group>idol.nifi</group>
-                        <version>12.7.0</version>
+                        <version>12.9.0</version>
                     </bundle>
                     <config>
                         <bulletinLevel>WARN</bulletinLevel>
@@ -3085,7 +3101,7 @@ Type=response
                     <bundle>
                         <artifact>idol-nifi-framework</artifact>
                         <group>idol.nifi</group>
-                        <version>12.7.0</version>
+                        <version>12.9.0</version>
                     </bundle>
                     <config>
                         <bulletinLevel>WARN</bulletinLevel>
@@ -3149,7 +3165,7 @@ Type=response
             <bundle>
                 <artifact>idol-nifi-framework</artifact>
                 <group>idol.nifi</group>
-                <version>12.7.0</version>
+                <version>12.9.0</version>
             </bundle>
             <config>
                 <bulletinLevel>WARN</bulletinLevel>
@@ -3211,7 +3227,7 @@ Type=response
             <bundle>
                 <artifact>idol-nifi-framework</artifact>
                 <group>idol.nifi</group>
-                <version>12.7.0</version>
+                <version>12.9.0</version>
             </bundle>
             <config>
                 <bulletinLevel>WARN</bulletinLevel>
@@ -3413,7 +3429,7 @@ Type=response
             <bundle>
                 <artifact>idol-nifi-framework</artifact>
                 <group>idol.nifi</group>
-                <version>12.7.0</version>
+                <version>12.9.0</version>
             </bundle>
             <config>
                 <bulletinLevel>WARN</bulletinLevel>
@@ -3522,7 +3538,7 @@ Type=response
             <bundle>
                 <artifact>idol-nifi-framework</artifact>
                 <group>idol.nifi</group>
-                <version>12.7.0</version>
+                <version>12.9.0</version>
             </bundle>
             <config>
                 <bulletinLevel>WARN</bulletinLevel>
@@ -3633,7 +3649,7 @@ Type=response
             <bundle>
                 <artifact>idol-nifi-framework</artifact>
                 <group>idol.nifi</group>
-                <version>12.7.0</version>
+                <version>12.9.0</version>
             </bundle>
             <config>
                 <bulletinLevel>WARN</bulletinLevel>
@@ -3774,7 +3790,7 @@ Type=response
             <bundle>
                 <artifact>idol-nifi-framework</artifact>
                 <group>idol.nifi</group>
-                <version>12.7.0</version>
+                <version>12.9.0</version>
             </bundle>
             <config>
                 <bulletinLevel>WARN</bulletinLevel>
@@ -3826,7 +3842,7 @@ Type=response
             <bundle>
                 <artifact>idol-nifi-framework</artifact>
                 <group>idol.nifi</group>
-                <version>12.7.0</version>
+                <version>12.9.0</version>
             </bundle>
             <config>
                 <bulletinLevel>WARN</bulletinLevel>
@@ -4308,7 +4324,7 @@ Type=response
             <bundle>
                 <artifact>idol-nifi-framework</artifact>
                 <group>idol.nifi</group>
-                <version>12.7.0</version>
+                <version>12.9.0</version>
             </bundle>
             <comments/>
             <deprecated>false</deprecated>
@@ -4357,7 +4373,7 @@ Type=response
             <bundle>
                 <artifact>idol-nifi-framework</artifact>
                 <group>idol.nifi</group>
-                <version>12.7.0</version>
+                <version>12.9.0</version>
             </bundle>
             <deprecated>false</deprecated>
             <descriptors>
@@ -4619,7 +4635,7 @@ Type=response
                     <bundle>
                         <artifact>idol-nifi-framework</artifact>
                         <group>idol.nifi</group>
-                        <version>12.7.0</version>
+                        <version>12.9.0</version>
                     </bundle>
                     <config>
                         <bulletinLevel>WARN</bulletinLevel>
@@ -4681,7 +4697,7 @@ Type=response
                     <bundle>
                         <artifact>idol-nifi-framework</artifact>
                         <group>idol.nifi</group>
-                        <version>12.7.0</version>
+                        <version>12.9.0</version>
                     </bundle>
                     <config>
                         <bulletinLevel>WARN</bulletinLevel>
@@ -4747,7 +4763,7 @@ Type=response
             <bundle>
                 <artifact>idol-nifi-framework</artifact>
                 <group>idol.nifi</group>
-                <version>12.7.0</version>
+                <version>12.9.0</version>
             </bundle>
             <config>
                 <bulletinLevel>WARN</bulletinLevel>
@@ -4861,7 +4877,7 @@ Type=response
             <bundle>
                 <artifact>idol-nifi-connector-filesystem</artifact>
                 <group>idol.nifi.connector</group>
-                <version>12.7.0</version>
+                <version>12.9.0</version>
             </bundle>
             <config>
                 <bulletinLevel>ERROR</bulletinLevel>
@@ -5281,7 +5297,7 @@ Type=response
             <bundle>
                 <artifact>idol-nifi-framework</artifact>
                 <group>idol.nifi</group>
-                <version>12.7.0</version>
+                <version>12.9.0</version>
             </bundle>
             <config>
                 <bulletinLevel>WARN</bulletinLevel>
@@ -5485,7 +5501,7 @@ Type=response
             <bundle>
                 <artifact>idol-nifi-framework</artifact>
                 <group>idol.nifi</group>
-                <version>12.7.0</version>
+                <version>12.9.0</version>
             </bundle>
             <config>
                 <bulletinLevel>WARN</bulletinLevel>
@@ -5550,7 +5566,7 @@ Type=response
             <bundle>
                 <artifact>idol-nifi-framework</artifact>
                 <group>idol.nifi</group>
-                <version>12.7.0</version>
+                <version>12.9.0</version>
             </bundle>
             <config>
                 <bulletinLevel>WARN</bulletinLevel>
