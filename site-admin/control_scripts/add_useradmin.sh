@@ -15,11 +15,14 @@
 
 # Sends a request to add a useradmin user to community, so that siteadmin doesn't require configuration
 
+## Command to call with an HTTP request
+MAKE_REQUEST="wget -qO-"
+
 function add_useradmin {
     # $1 host:port
     local USERNAME=useradmin
     local PASSWORD=useradmin
     local ROLE=useradmin
-    curl "http://"${1}"/a=RoleAdd&RoleName="${ROLE}
-    curl "http://"${1}"/a=UserAdd&RoleName="${ROLE}"&userName="${USERNAME}"&password="${PASSWORD}
+    ${MAKE_REQUEST} "http://"${1}"/a=RoleAdd&RoleName="${ROLE}
+    ${MAKE_REQUEST} "http://"${1}"/a=UserAdd&RoleName="${ROLE}"&userName="${USERNAME}"&password="${PASSWORD}
 }

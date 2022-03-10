@@ -21,16 +21,14 @@ ARG IDOL_REGISTRY
 ARG IDOL_VERSION
 FROM ${IDOL_REGISTRY}/controller:${IDOL_VERSION} as controller
 
-# Curl is required to add and start services via HTTP requests during controller bundle startup
-RUN apt-get update && apt-get install -y curl
-
+ARG IDOL_USER
 # Copy executables and configs to controller image
-COPY --from=content /content/ /content/
+COPY --from=content --chown=${IDOL_USER}:${IDOL_USER} /content/ /content/
 
 # Add control script template which can accept start and stop as arguments,
-COPY control_scripts/control-template.sh /controller/control-template.sh
+COPY --chown=${IDOL_USER}:${IDOL_USER} control_scripts/control-template.sh /controller/control-template.sh
 # Add post startup tasks for controller to send requests adding the services bundled within its container
-COPY control_scripts/add_services.sh /controller/
+COPY --chown=${IDOL_USER}:${IDOL_USER} control_scripts/add_services.sh /controller/
 
 # Setup control script, update logs for each component
 # Finalize controller startup
@@ -38,8 +36,8 @@ RUN for C in content ; do \
     cp /controller/control-template.sh /${C}/control-${C}.sh ; \
     chmod +x /${C}/control-${C}.sh ; \
     sed -i "s#<COMPONENT>#${C}#g" /${C}/control-${C}.sh ; \
-    sed -i "s#^\(LogDirectory *= *\).*#\1/idol-logs-${C}/#" /${C}/cfg/${C}.cfg ; \
-    sed -i "s#^\(LogArchiveDirectory *= *\).*#\1/idol-logs-${C}/archive#" /${C}/cfg/${C}.cfg ; \
+    sed -i "s#^\(LogDirectory *= *\).*#\1/idol-logs/${C}/#" /${C}/cfg/${C}.cfg ; \
+    sed -i "s#^\(LogArchiveDirectory *= *\).*#\1/idol-logs/${C}/archive#" /${C}/cfg/${C}.cfg ; \
     done && \
     sed -i "s#^source ./startup_utils.sh#source ./startup_utils.sh\nsource ./add_services.sh#" /controller/startup_tasks.sh && \
     sed -i "s#^function post_startup_tasks {#function post_startup_tasks {\n    add_content_service idol-controller-content-bundle\n    start_content idol-controller-content-bundle\n    add_to_coordinator idol-controller-content-bundle#" /controller/startup_tasks.sh

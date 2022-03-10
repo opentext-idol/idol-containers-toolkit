@@ -15,6 +15,9 @@
 
 source /controller/startup_utils.sh
 
+## Command to call with an HTTP request
+MAKE_REQUEST="wget -qO-"
+
 ## Functions to add services to controller
 function add_content_service {
     content_controller_hostname=$1
@@ -22,7 +25,7 @@ function add_content_service {
     # Wait for controller to be available
     waitForAci ${content_controller_hostname}:41200
     # Add service
-    curl "http://localhost:41200/a=addservice&execpath=/content/content.exe&configpath=/content/cfg/content.cfg&controlmethod=script&initscriptpath=/content/control-content.sh"
+    ${MAKE_REQUEST} "http://localhost:41200/a=addservice&execpath=/content/content.exe&configpath=/content/cfg/content.cfg&controlmethod=script&initscriptpath=/content/control-content.sh"
 }
 
 function add_support_services {
@@ -34,16 +37,16 @@ function add_support_services {
     waitForAci ${support_controller_hostname}:41200
 
     # Agentstore
-    curl "http://localhost:41200/a=addservice&execpath=/agentstore/agentstore.exe&configpath=/agentstore/cfg/agentstore.cfg&controlmethod=script&initscriptpath=/agentstore/control-agentstore.sh"
+    ${MAKE_REQUEST} "http://localhost:41200/a=addservice&execpath=/agentstore/agentstore.exe&configpath=/agentstore/cfg/agentstore.cfg&controlmethod=script&initscriptpath=/agentstore/control-agentstore.sh"
 
     # Categorisation-agentstore
-    curl "http://localhost:41200/a=addservice&execpath=/categorisation-agentstore/categorisation-agentstore.exe&configpath=/categorisation-agentstore/cfg/categorisation-agentstore.cfg&controlmethod=script&initscriptpath=/categorisation-agentstore/control-categorisation-agentstore.sh"
+    ${MAKE_REQUEST} "http://localhost:41200/a=addservice&execpath=/categorisation-agentstore/categorisation-agentstore.exe&configpath=/categorisation-agentstore/cfg/categorisation-agentstore.cfg&controlmethod=script&initscriptpath=/categorisation-agentstore/control-categorisation-agentstore.sh"
 
     # Community
-    curl "http://localhost:41200/a=addservice&execpath=/community/community.exe&configpath=/community/cfg/community.cfg&controlmethod=script&initscriptpath=/community/control-community.sh"
+    ${MAKE_REQUEST} "http://localhost:41200/a=addservice&execpath=/community/community.exe&configpath=/community/cfg/community.cfg&controlmethod=script&initscriptpath=/community/control-community.sh"
 
     # View
-    curl "http://localhost:41200/a=addservice&execpath=/view/view.exe&configpath=/view/cfg/view.cfg&controlmethod=script&initscriptpath=/view/control-view.sh"
+    ${MAKE_REQUEST} "http://localhost:41200/a=addservice&execpath=/view/view.exe&configpath=/view/cfg/view.cfg&controlmethod=script&initscriptpath=/view/control-view.sh"
 }
 
 function add_siteadmin_backend_services {
@@ -55,10 +58,10 @@ function add_siteadmin_backend_services {
     waitForAci ${siteadmin_backend_controller_hostname}:41200
 
     # Agentstore
-    curl "http://localhost:41200/a=addservice&execpath=/agentstore/agentstore.exe&configpath=/agentstore/cfg/agentstore.cfg&controlmethod=script&initscriptpath=/agentstore/control-agentstore.sh"
+    ${MAKE_REQUEST} "http://localhost:41200/a=addservice&execpath=/agentstore/agentstore.exe&configpath=/agentstore/cfg/agentstore.cfg&controlmethod=script&initscriptpath=/agentstore/control-agentstore.sh"
 
     # Community
-    curl "http://localhost:41200/a=addservice&execpath=/community/community.exe&configpath=/community/cfg/community.cfg&controlmethod=script&initscriptpath=/community/control-community.sh"
+    ${MAKE_REQUEST} "http://localhost:41200/a=addservice&execpath=/community/community.exe&configpath=/community/cfg/community.cfg&controlmethod=script&initscriptpath=/community/control-community.sh"
 }
 
 
@@ -70,7 +73,7 @@ function start_content {
     waitForAci ${content_controller_hostname}:41200
 
     # Start service
-    curl "http://localhost:41200/a=startservice&port=9100"
+    ${MAKE_REQUEST} "http://localhost:41200/a=startservice&port=9100"
     waitForAci localhost:9100
 }
 
@@ -85,20 +88,20 @@ function start_support_services {
     waitForAci ${content_controller_hostname}:41200
 
     # Agentstore
-    curl "http://localhost:41200/a=startservice&port=9050"
+    ${MAKE_REQUEST} "http://localhost:41200/a=startservice&port=9050"
     waitForAci localhost:9050
 
     # Categorisation-agentstore
-    curl "http://localhost:41200/a=startservice&port=9182"
+    ${MAKE_REQUEST} "http://localhost:41200/a=startservice&port=9182"
     waitForAci localhost:9182
 
     # Community
     waitForAci ${content_controller_hostname}:9100
-    curl "http://localhost:41200/a=startservice&port=9030"
+    ${MAKE_REQUEST} "http://localhost:41200/a=startservice&port=9030"
     waitForAci localhost:9030
 
     # View
-    curl "http://localhost:41200/a=startservice&port=9080"
+    ${MAKE_REQUEST} "http://localhost:41200/a=startservice&port=9080"
     waitForAci localhost:9080
 }
 
@@ -113,12 +116,12 @@ function start_siteadmin_backend_services {
     waitForAci ${content_controller_hostname}:41200
 
     # Agentstore
-    curl "http://localhost:41200/a=startservice&port=9050"
+    ${MAKE_REQUEST} "http://localhost:41200/a=startservice&port=9050"
     waitForAci localhost:9050
 
     # Community
     waitForAci ${content_controller_hostname}:9100
-    curl "http://localhost:41200/a=startservice&port=9030"
+    ${MAKE_REQUEST} "http://localhost:41200/a=startservice&port=9030"
     waitForAci localhost:9030
 }
 
@@ -127,5 +130,5 @@ function add_to_coordinator {
     controller_hostname=$1
     # Once coordinator is ready, add this controller to it
     waitForAci idol-coordinator:40200
-    curl "http://idol-coordinator:40200/a=addcontroller&HostName="${controller_hostname}"&Port=41200&ConnectByHostName=True"
+    ${MAKE_REQUEST} "http://idol-coordinator:40200/a=addcontroller&HostName="${controller_hostname}"&Port=41200&ConnectByHostName=True"
 }
