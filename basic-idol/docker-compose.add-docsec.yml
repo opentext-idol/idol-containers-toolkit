@@ -91,6 +91,7 @@ services:
     build:
       context: ./omnigroupserver
       args:
+        - *idol-version
         - *registry
         - *ldap-server
         - *ldap-port

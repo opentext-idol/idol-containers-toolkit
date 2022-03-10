@@ -31,6 +31,7 @@ x-common-build: &common-build
       https_proxy: ${HTTP_PROXY}
       IDOL_REGISTRY: ${IDOL_REGISTRY}
       IDOL_VERSION: ${IDOL_SERVER_VERSION}
+      IDOL_USER: ${IDOL_USER}
 
 # Any files dropped into this volume will be ingested and indexed
 volumes:
@@ -114,6 +115,12 @@ services:
     image: ${IMAGE_BUILD_REGISTRY}/siteadmin-useful-defaults:${IDOL_SERVER_VERSION}
     build: 
       << : *common-build
+      args:
+        http_proxy: ${HTTP_PROXY}
+        https_proxy: ${HTTP_PROXY}
+        IDOL_REGISTRY: ${IDOL_REGISTRY}
+        IDOL_VERSION: ${IDOL_SITEADMIN_VERSION}
+        IDOL_USER: ${IDOL_USER}
       dockerfile: Dockerfile.siteadmin
     ports:
       - 8080:8000
