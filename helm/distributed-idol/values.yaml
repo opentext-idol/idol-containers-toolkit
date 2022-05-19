@@ -1,0 +1,227 @@
+# As per https://helm.sh/docs/topics/charts/#the-chart-file-structure
+# this values.yaml file contains the default configuration values for this distributed-idol chart.
+# These default values can be overridden by using the --values or --set flags on the `helm install`
+# command: see https://helm.sh/docs/helm/helm_install/
+
+##### HIGH LEVEL CHART CONFIGURATION #####
+# This section contains parameters that are most likely to be overridden for
+# the basic choices and constraints around how this chart will be used.
+
+# setupMirrored is a boolean parameter - when `true` this will configure the 
+# DAH and DIH in mirror-mode, meaning the Contents will all be mirrors of each
+# other. When `false`, the DAH and DIH will be configured in non-mirror mode,
+# meaning that documents will be distributed between the content engines.
+# In mirror-mode, the Content engines will autoscale to fulfil query demand.
+# In non-mirror-mode, Content engines will autoscale to fulfil index demand.
+# See https://www.microfocus.com/documentation/idol/IDOL_12_11/DAH_12.11_Documentation/Help/#Configuration/Server/MirrorMode.htm?TocPath=Configuration%2520Parameters%257CServer%257C_____38
+# and https://www.microfocus.com/documentation/idol/IDOL_12_11/DIH_12.11_Documentation/Help/#Configuration/Server/MirrorMode.htm?TocPath=Configuration%2520Parameters%257CServer%257C_____38
+setupMirrored: false
+
+# contentVolumeSize is the size of the PersistentVolumeClaim that is created
+# for each Content instance. The Kubernetes cluster will need to provide
+# enough PersistentVolumes to satisify the claims made for the desired number
+# of Content instances. The size chosen here provides a hard limit on the size
+# of the Content index in each Content instance.
+contentVolumeSize: 16Gi
+
+# backupArchiveVolumeName is the name of a volume available within the Kubernetes cluster.
+# It must have ReadWriteMany AccessMode: https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes
+# This is where the Content engine backups and index command archive will live. It is available to all Content engines.
+backupArchiveVolumeName: "backup-archive-pv"
+
+# initialContentEngineCount is the number of Content engines created on startup - after startup
+# the Content engine autoscaling kicks in and controls the number of Content engines. The minimum
+# valid value of initialContentEngineCount is 1.
+initialContentEngineCount: "2"
+#############################################
+
+
+##### IMAGE CONFIGURATION #####
+# Parameters to specify the IDOL images pulled for this chart are
+# configured here
+
+# idolImageRegistry is the registry from which the IDOL images being run
+# in this chart are pulled from. Override this if IDOL images are to be
+# pulled from a different private registry.
+idolImageRegistry: "microfocusidolserver"
+
+# idolVersion is the image tag that will be used when pulling images, and
+# corresponds to the IDOL version of the components being used.
+idolVersion: "12.11.0"
+
+# imagePullSecrets is a list of names of Kubernetes secrets containing the
+# credentials for pulling images from repositories. Most likely requires
+# a secret for Dockerhub credentials and a secret per private repository used.
+imagePullSecrets:
+  - "dockerhub-secret"
+################################
+
+##### CONTENT AUTOSCALING CONFIGURATION #####
+# This section contains parameters to configure autoscaling of the
+# Content instances.
+
+# autoscalingMinReplicas is the minimum number of Content instances.
+autoscalingMinReplicas: "1"
+
+# autoscalingMaxReplicas is the maximum number of Content instances.
+autoscalingMaxReplicas: "6"
+
+# autoscalingTargetAverageCpuUse is the target CPU use of the Content
+# instances. See metrics.containerResource.target.averageValue in
+# https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/horizontal-pod-autoscaler-v2beta2/#HorizontalPodAutoscalerSpec
+autoscalingTargetAverageCpuUse: 500m
+#############################################
+
+##### PRIMARY CONTENT CONFIGURATION #####
+# The "primary" Content is the one configured to make backups and index command archives to the backup archive volume.
+# The `contentPrimary*` parameters specified below configure this behaviour.
+
+# contentPrimaryBackupInterval corresponds to the [Schedule]::BackupInterval Content configuration parameter.
+# https://www.microfocus.com/documentation/idol/IDOL_12_11/Content_12.11_Documentation/Help/#Configuration/Schedule/BackupInterval.htm%3FTocPath%3DConfiguration%2520Parameters%7CSchedule%7C_____7
+contentPrimaryBackupInterval: "0"
+
+# contentPrimaryBackupTime corresponds to the [Schedule]::BackupTime Content configuration parameter.
+# https://www.microfocus.com/documentation/idol/IDOL_12_11/Content_12.11_Documentation/Help/#Configuration/Schedule/BackupTime.htm%3FTocPath%3DConfiguration%2520Parameters%7CSchedule%7C_____11
+contentPrimaryBackupTime: "02:00"
+#########################################
+
+##### NETWORKING CONFIGURATION #####
+# This section contains parameters to configure various network-related
+# properties in this chart.
+
+# ingressProxyBodySize is the maximum allowed size of the client request body, defining
+# the maximum size of requests that can be made to IDOL components within the installation, e.g.
+# the amount of data sent in DREADDDATA index commands.
+# The value should be an nginx "size" value.
+# See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the
+# corresponding nginx configuration parameter.
+ingressProxyBodySize: 2048m
+#####################################
+
+
+##### INTERNAL VARIABLES #####
+# Values specified below this point in the file should not need to be overriden.
+# They are generally here in values.yaml so that DRY principles and a consistent
+# scheme for specifying these values in the templates can be followed.
+
+# licenseServerHostname is an internal parameter to connect the LicenseServer.
+licenseServerHostname: "idol-licenseserver"
+# licenseServerName is an internal parameter to connect the LicenseServer.
+licenseServerName: "idol-licenseserver"
+# livenessProbePath is an internal parameter to specify the IDOL path used
+# as part of liveness checks.
+livenessProbePath: "/a=getpid"
+# queryserviceName is an internal parameter to specify the query service name.
+queryserviceName: "idol-query-service"
+# indexserviceName is an internal parameter to specify the index service name.
+indexserviceName: "idol-index-service"
+# dihendpointName is an internal parameter to specify the DIH endpoint name.
+dihendpointName: "idol-dih-endpoint"
+# idolingressName is an internal parameter to specify the IDOL ingress name.
+idolingressName: "idol-ingress"
+# prometheusingressName is an internal parameter to specify the Prometheus ingress name.
+prometheusingressName: "prometheus-ingress"
+# autoscalingName is an internal parameter to specify the Content autoscaler name.
+autoscalingName: "child-content-autoscaler"
+
+# These `x-content-port<n>` internal parameters are for DRY purposes.
+x-content-port0: &content-port0 "9100"
+x-content-port1: &content-port1 "9101"
+x-content-port2: &content-port2 "9102"
+# contentName is an internal parameter to specify the name of the various Content objects in the charts.
+contentName: "idol-child-content"
+# contentPrimaryName is an internal parameter to specify the name of various objects for the Content objects of the primary Content engine.
+contentPrimaryName: "idol-child-content-primary"
+# contentDeployment is an internal parameter to specify the name of the Content deployment.
+contentDeployment: "idol-content-deployment"
+# contentImage is an internal parameter to specify the name of the Content image pulled for the Content containers.
+contentImage: "content"
+# contentPorts is an internal list of ports for Content.
+# They have a name - the name of the port, and the service/container specification of that port.
+contentPorts:
+  - name: "aci-port"
+    service: *content-port0
+    container: *content-port0
+  - name: "index-port"
+    service: *content-port1
+    container: *content-port1
+  - name: "service-port"
+    service: *content-port2
+    container: *content-port2
+
+# These `x-dah-port<n>` internal parameters are for DRY purposes.
+x-dah-port0: &dah-port0 "9060"
+x-dah-port1: &dah-port1 "9062"
+# dahName is an internal parameter specifying the name used in various Kubernetes objects relating to the DAH in this chart.
+dahName: "idol-dah"
+# dahDeployment is an internal parameter specifying the name of the DAH deployment.
+dahDeployment: "idol-dah-deployment"
+# dahImage is an internal parameter specifying the name of the DAH image pulled for the DAH containers.
+dahImage: "dah"
+# dahPorts is an internal list of ports for DAH.
+# They have a name - the name of the port, and the service/container/host specification of that port.
+dahPorts:
+  - name: "aci-port"
+    service: *dah-port0
+    container: *dah-port0
+    host: *dah-port0
+  - name: "service-port"
+    service: *dah-port1
+    container: *dah-port1
+    host: *dah-port1
+
+# These `x-dih-port<n>` internal parameters are for DRY purposes.
+x-dih-port0: &dih-port0 "9070"
+x-dih-port1: &dih-port1 "9071"
+x-dih-port2: &dih-port2 "9072"
+# dihName is an internal parameter specifying the name used in various Kubernetes objects relating to the DIH in this chart.
+dihName: "idol-dih"
+# dihDeployment is an internal parameter specifying the name of the DIH deployment.
+dihDeployment: "idol-dih-deployment"
+# dihImage is an internal parameter specifying the name of the DIH image pulled for the DAH containers.
+dihImage: "dih"
+# dihPorts is an internal list of ports for DIH.
+# They have a name - the name of the port, and the service/container/host specification of that port.
+dihPorts:
+  - name: "aci-port"
+    service: *dih-port0
+    container: *dih-port0
+    host: *dih-port0
+  - name: "index-port"
+    service: *dih-port1
+    container: *dih-port1
+    host: *dih-port1
+  - name: "service-port"
+    service: *dih-port2
+    container: *dih-port2
+    host: *dih-port2
+# dihPrometheusPort is an internal parameter specifying the port for accessing the DIH's Prometheus service.
+dihPrometheusPort: "9118"
+# dihPrometheusPortName is an internal parameter for specifying a name for the DIH's Prometheus service's port.
+dihPrometheusPortName: "metrics-port"
+
+# x-prometheus-port0 is an internal parameter for DRY purposes.
+x-prometheus-port0: &prometheus-port0 "9090"
+# prometheusName is an internal parameter specifying the name of the Prometheus container.
+prometheusName: "prometheus"
+# prometheusDeployment is an internal parameter specifying the name of the Prometheus deployment.
+prometheusDeployment: "prometheus-deployment"
+# prometheusService is an internal parameter specifying the name of the Prometheus service.
+prometheusService: "prometheus-service"
+# prometheusPorts is a list of ports pertaining to Prometheus.
+# They each have a name and specify the container and host ports.
+prometheusPorts:
+  - name: "prometheus-port"
+    container: *prometheus-port0
+    host: *prometheus-port0
+
+# These `x-custommetrics-port<n>` are internal parameters for DRY purposes.
+x-custommetrics-port0: &custommetrics-port0 "443"
+x-custommetrics-port1: &custommetrics-port1 "6443"
+# custommetricsService is an internal parameter specifying the name of the custom metrics service.
+custommetricsService: "custom-metrics-apiserver"
+# custommetricsPorts is a list of ports pertaining to the custom metrics service.
+# They each specify the service and host ports.
+custommetricsPorts:
+  - service: *custommetrics-port0
+    host: *custommetrics-port1
