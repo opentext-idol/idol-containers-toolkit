@@ -19,7 +19,7 @@ import os
 import sys
 
 HELM_DIRECTORY = os.path.dirname(__file__)
-BASE_DIRECTORY = os.path.abspath(os.path.join(HELM_DIRECTORY, '..'))
+BASE_DIRECTORY = os.path.abspath(os.path.join(HELM_DIRECTORY, '..', '..'))
 
 sys.path.insert(0, os.path.join(BASE_DIRECTORY, 'common-files', 'python-libs'))
 
