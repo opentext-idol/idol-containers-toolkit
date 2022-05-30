@@ -1,0 +1,85 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.idolingressName }}
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/proxy-body-size: {{ .Values.ingressProxyBodySize }}
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /content/(.*)
+        pathType: Prefix
+        backend:  # no way to pick a specific instance of stateful set
+          service:
+            name: {{ .Values.contentName }}
+            port:
+              number: {{ (index .Values.contentPorts 0).service | int }}
+      - path: /contentPrimary/(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.contentPrimaryName }}
+            port:
+              number: {{ (index .Values.contentPorts 0).service | int }}
+      - path: /dih/(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.dihName }}
+            port:
+              number: {{ (index .Values.dihPorts 0).service | int }}
+      - path: /dah/(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.dahName }}
+            port:
+              number: {{ (index .Values.dahPorts 0).service | int }}
+      - path: /index/(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.indexserviceName }}
+            port: 
+              number: {{ (index .Values.dihPorts 1).service | int }}
+      - path: /metrics/(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.dihName }}
+            port:
+              number: {{ .Values.dihPrometheusPort | int }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.prometheusingressName }}
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /($)
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.prometheusService }}
+            port:
+              number: {{ (index .Values.prometheusPorts 0).host | int }}
+      - path: /((api|static)/.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.prometheusService }}
+            port:
+              number: {{ (index .Values.prometheusPorts 0).host | int }}
+      - path: /(alerts|graph|status|flags|config|rules|targets|service-discovery)
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.prometheusService }}
+            port:
+              number: {{ (index .Values.prometheusPorts 0).host | int }}

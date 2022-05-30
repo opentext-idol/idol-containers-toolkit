@@ -1,0 +1,55 @@
+kind: HorizontalPodAutoscaler
+apiVersion: autoscaling/v2beta2
+metadata:
+  name: {{ .Values.autoscalingName }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet
+    name: {{ .Values.contentName }}
+  minReplicas: {{ .Values.autoscalingMinReplicas | int }}
+  maxReplicas: {{ .Values.autoscalingMaxReplicas | int }}
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+    scaleUp:
+      policies:
+      - type: Pods
+        value: 1
+        periodSeconds: 60
+  metrics:
+{{- if .Values.setupMirrored }}
+  - type: Resource
+    resource:
+      name: cpu 
+      target:
+        type: AverageValue 
+        averageValue: {{ .Values.autoscalingTargetAverageCpuUse }} 
+{{- else }}
+  - type: Object
+    object:
+      describedObject:
+        apiVersion: apps/v1
+        kind: Deployment
+        name: {{ .Values.dihDeployment }}
+      metric:
+        name: dih_full_ratio
+      target:
+        type: Value
+        value: 1
+  - type: Object
+    object:
+      describedObject:
+        apiVersion: apps/v1
+        kind: Deployment
+        name: {{ .Values.dihDeployment }}
+      metric:
+        name: full_ratio_latch
+      target:
+        type: Value
+        value: 1
+{{- end }}
