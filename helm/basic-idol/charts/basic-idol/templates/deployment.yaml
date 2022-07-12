@@ -577,7 +577,7 @@ spec:
         - name: config-volume
           mountPath: /mnt/config/idol
       containers:
-      - image: {{ .Values.maintainer }}/{{ .Values.omnigroupserver.image }}:{{ .Values.omnigroupserver.idolVersion }}
+      - image: {{ .Values.maintainer }}/{{ .Values.omnigroupserver.image }}:{{ .Values.idolVersion }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         name: {{ .Values.omnigroupserver.name }}
         livenessProbe:
