@@ -47,7 +47,7 @@ idolImageRegistry: "microfocusidolserver"
 
 # idolVersion is the image tag that will be used when pulling images, and
 # corresponds to the IDOL version of the components being used.
-idolVersion: "12.11.0"
+idolVersion: "12.12"
 
 # imagePullSecrets is a list of names of Kubernetes secrets containing the
 # credentials for pulling images from repositories. Most likely requires
