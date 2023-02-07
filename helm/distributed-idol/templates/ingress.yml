@@ -2,6 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ .Values.idolingressName }}
+  labels: {{- include "distributedidol.labels" . | nindent 4 }}
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$1
     nginx.ingress.kubernetes.io/proxy-body-size: {{ .Values.ingressProxyBodySize }}
@@ -16,13 +17,15 @@ spec:
             name: {{ .Values.contentName }}
             port:
               number: {{ (index .Values.contentPorts 0).service | int }}
-      - path: /contentPrimary/(.*)
+{{- range $i := untilStep 0 ( .Values.exposedContents | int ) 1 }}
+      - path: /content-{{ $i }}/(.*)
         pathType: Prefix
         backend:
           service:
-            name: {{ .Values.contentPrimaryName }}
+            name: {{ $.Values.contentName }}-{{ $i }}
             port:
-              number: {{ (index .Values.contentPorts 0).service | int }}
+              number: {{ (index $.Values.contentPorts 0).service | int }}
+{{- end }}
       - path: /dih/(.*)
         pathType: Prefix
         backend:
@@ -56,6 +59,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ .Values.prometheusingressName }}
+  labels: {{- include "distributedidol.labels" . | nindent 4 }}
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$1
 spec:

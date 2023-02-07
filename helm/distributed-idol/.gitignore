@@ -1,0 +1,6 @@
+certgen/certs/**
+certgen/ca/front-proxy-ca.crt
+certgen/ca/front-proxy-ca.key
+charts/**
+Chart.lock
+requirements.lock

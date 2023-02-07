@@ -1,204 +1,12 @@
-{{- if not .Values.setupMirrored }}
+{{- if and (.Values.autoscalingEnabled) (not .Values.setupMirrored) }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: dih-prometheus-exporter-python
+  labels: {{- include "distributedidol.labels" . | nindent 4 }}
 data:
   dih_prometheus_exporter.py: |
-    import collections
-    import json
-    import logging
-    import os
-    import re
-    import requests
-    import time
-    from prometheus_client import start_http_server
-    from prometheus_client.core import GaugeMetricFamily, REGISTRY
-
-    no_proxies = {'http': None, 'https': None }
-
-    DIHStatus = collections.namedtuple('DIHStatus', ['full_ratio', 'children'])
-    DIHChild = collections.namedtuple('DIHChild', ['group','host','port'])
-
-    TEMP_STATUS_CODES = set([-7,-12,-13,-16,-17,-25,-34,-35,-36,-38])
-    FINISHED_STATUS_CODES = set([x for x in filter(lambda y: y not in TEMP_STATUS_CODES, range(-1,-38,-1))])
-
-    logging.basicConfig(format='%(asctime)s %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S')
-    logger = logging.getLogger('prometheus-exporter')
-    logger.setLevel(logging.DEBUG)
-    fh = logging.FileHandler('exporter.log')
-    fh.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-    fh.setFormatter(formatter)
-    logger.addHandler(fh)
-
-    def ensure_list(object):
-        if object is None:
-            return []
-        elif isinstance(object, list):
-            return object
-        elif isinstance(object, collections.Sequence) and not isinstance(object, str):
-            return list(object)
-        else:
-            return [object]
-
-    def extract_index_id(responsetext):
-        match = re.search('^INDEXID=(\d+)', responsetext)
-        if not match:
-            return None
-        return match.group(1)
-
-    def log_and_raise(msg):
-        logger.error(msg)
-        raise Exception(msg)
-
-    class DIHCollector(object):
-        def __init__(self):
-            self.aci_port = int(os.environ['IDOL_DIH_SERVICE_PORT_ACI_PORT'])
-            self.index_port = self.aci_port + 1
-            self.redistributing_id = None # ID of currently executing DREREDISTRIBUTE command
-            self.remove_children = None   # set of DIHChild that we expect to be removed
-            self.report_metric = None     # metric value to report to trigger HPA scaledown
-
-        def get_status(self):
-            try:
-                resp = requests.get('http://{{ .Values.dihendpointName }}:{}/action=getstatus&responseformat=json'.format(self.aci_port), proxies=no_proxies)
-                responsedata = resp.json()['autnresponse']['responsedata']
-                {{- if .Values.setupMirrored }}
-                #we can't be full in a mirrored setup, so just report 1.0 always
-                full_ratio = 1.0
-                {{- else }}
-                full_ratio = float(responsedata['full_ratio']['$'])
-                {{- end }}
-                return DIHStatus(full_ratio=float(responsedata['full_ratio']['$']), 
-                  children=[ DIHChild(e['group']['$'], e['host']['$'], e['port']['$']) for e in ensure_list(responsedata['engines']['engine'])])
-            except Exception as e:
-                if resp is not None:
-                    logger.error("{}: Got content '{}'".format(e.__str__(), resp.content))
-                else:
-                    logger.error("{}: No content".format(e.__str__()))
-                return None
-        
-        def get_index_job_status(self, id):
-            resp = requests.get('http://{{ .Values.dihendpointName }}:{}/action=indexerGetStatus&index={}&responseformat=simplejson'.format(self.aci_port, id))
-            jresp = resp.json()['autnresponse']['responsedata']
-            if 'item' not in jresp:
-                log_and_raise('Item with id {0} not found in index queue.'.format(id))
-
-            if len(jresp['item']) != 1:
-                log_and_raise('Unexpected number of results. We were only expecting a single item.')
-
-            item = jresp['item'][0]
-            return item
-
-        def trigger_redistribution(self, to_remove):
-            resp = requests.get('http://{{ .Values.dihendpointName }}:{}/DREREDISTRIBUTE?RemoveGroup={}&dahhost={}&dahport={}'.format(
-                self.index_port, "+".join(to_remove), 
-                os.environ['IDOL_DAH_SERVICE_HOST'], os.environ['IDOL_DAH_SERVICE_PORT']))
-            id = extract_index_id(resp.text)
-            return id
-        
-        def is_empty_enough(self, status):
-            #Return True if we have lots of spare capacity, False otherwise
-            return status and len(status.children) > 1 and status.full_ratio <= 0.4
-
-        def calculate_scaledown_num_engines(self, status):
-            #Try to work out the smallest number of engines possible that can handle the storage without triggering a scaleup
-            #This function should only be used when triggering a scaledown
-            storage_used = len(status.children) * status.full_ratio
-            for n in range(1, len(status.children)):
-                if (storage_used / float(n)) <= 1.0:
-                    return n
-            return len(status.children) - 1
-
-        def calculate_return_metric(self, status, desired_engines):
-            #This is a rearrangement of the equation that the HPA uses to calculate the number of replicas that should exist: desiredReplicas = ceil(currentReplicas * (currentMetric / desiredMetric))
-            #This rearrangement assumes the desired metric value is 1.0
-            return (float(desired_engines) / float(len(status.children))) - 0.01
-
-        def describe(self):
-            yield GaugeMetricFamily(
-                'dih_full_ratio',
-                'Combined full-ratio of the child engines of the DIH',
-                labels=["pod", "deployment"])
-            yield GaugeMetricFamily(
-                'full_ratio_latch',
-                'Metric to control scale down (1.0 if OK, 0.6 if scale down required)',
-                labels=["pod", "deployment"])
-
-        def is_engine_available(self, child):
-            try:
-                r = requests.get(f'http://{child.host}:{child.port}/action=getpid')
-                return True
-            except:
-                return False
-
-        def collect(self):
-            status = self.get_status()
-
-            #Work out what metric value to return: use the real one if we're not redistributing, or an appropriately calculated value (for a suitable length of time,
-            #so that the HPA picks up on it) if we are, such that we get the number of engines we want following a scaledown
-            fullness_ratio = status.full_ratio
-            if self.redistributing_id:
-                item = self.get_index_job_status(self.redistributing_id)
-                status = int(item['status'])
-                if status in FINISHED_STATUS_CODES:
-                    if -1 != status:
-                        log_and_raise("Item with id {self.redistributing_id} has permanant status {status}, wanted: -1, desc: {item['description']}")
-                    logger.info(f'DREREDISTRIBUTE {self.redistributing_id} finished. Reporting scaledown to HPA ({self.report_metric})')
-                    self.redistributing_id = None
-                    fullness_ratio = self.report_metric # report this until child engines are removed from cluster
-            elif self.remove_children is not None:
-                def still_available(c):
-                    if not self.is_engine_available(c):
-                        logger.info(f'Child engine {c.group} {c.host}:{c.port} has been removed')
-                        # should we latch as soon as we see one child has been removed?
-                        return False
-                    return True
-                self.remove_children = list(filter(still_available, self.remove_children))
-                if 0==len(self.remove_children):
-                    logger.info(f'Scaledown completed')
-                    self.remove_children = None
-                    self.report_metric = None # go back to reporting actual full_ratio
-            elif self.is_empty_enough(status):
-                desired_engines = self.calculate_scaledown_num_engines(status)
-                self.remove_children = status.children[desired_engines:]
-                logger.info(f'Triggering scaledown from {len(status.children)} to {desired_engines} engines')
-                self.redistributing_id = self.trigger_redistribution([c.group for c in self.remove_children])
-                self.report_metric = self.calculate_return_metric(status, desired_engines)
-                logger.info(f'Awaiting completion of DREREDISTRIBUTE {self.redistributing_id}')
-
-            if self.report_metric:
-                fullness_ratio = self.report_metric
-
-            metric = GaugeMetricFamily(
-                'dih_full_ratio',
-                'Combined full-ratio of the child engines of the DIH',
-                labels=["pod", "deployment"])
-            
-            if status:
-                metric.add_metric([os.environ['HOSTNAME'], {{ .Values.dihDeployment | quote }}], fullness_ratio)
-
-            yield metric
-
-            #Latch should use the same value as the fullness ratio if we're redistributing, since the HPA will 
-            #prefer the highest replica count calculated from the metrics we give it
-            latch_value = self.report_metric if (self.remove_children and not self.redistributing_id and self.report_metric) else 1.00
-
-            latch = GaugeMetricFamily(
-                'full_ratio_latch',
-                'Metric to control scale down (1.0 if OK, 0.6 if scale down required)',
-                labels=["pod", "deployment"])
-            latch.add_metric([os.environ['HOSTNAME'], {{ .Values.dihDeployment | quote }}], latch_value)
-            yield latch
-            
-    if __name__ == '__main__':
-        logger.info('Starting DIH stats collection')
-        REGISTRY.register(DIHCollector())
-        start_http_server(int(os.environ['IDOL_DIH_SERVICE_PORT_METRICS_PORT']))
-        while True: 
-            time.sleep(1)
+{{ tpl (.Files.Get "resources/dih_prometheus_exporter.py") . | indent 4 }}
   requirements.txt: |
     requests==2.22.0
     prometheus_client==0.7.1
@@ -210,6 +18,7 @@ metadata:
   # Use this service for generic IDOL index port functionality
   # Could point to e.g. a DIH or Content instance
   name: {{ .Values.indexserviceName }}
+  labels: {{- include "distributedidol.labels" . | nindent 4 }}
 spec:
   ports:
   - port: {{ (index .Values.dihPorts 0).service | int }}
@@ -230,7 +39,7 @@ metadata:
   # Use this service for DIH-specific functionality, e.g. enginemanagement
   # Also expose the metrics port of the prometheus-exporter container
   name: {{ .Values.dihName }}
-  labels:
+  labels: {{- include "distributedidol.labels" . | nindent 4 }}
     app: {{ .Values.dihName }}
 spec:
   ports:
@@ -249,61 +58,23 @@ spec:
   selector:
     app: {{ .Values.dihDeployment }}
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  # Use this service for DIH redistribution commands
-  name: {{ .Values.dihendpointName }}
-  labels:
-    app: {{ .Values.dihendpointName }}
-spec:
-  ports:
-  - port: {{ (index .Values.dihPorts 0).service | int }}
-    targetPort: {{ (index .Values.dihPorts 0).container | int }}
-    name: {{ (index .Values.dihPorts 0).name }}
-  - port: {{ (index .Values.dihPorts 1).service | int }}
-    targetPort: {{ (index .Values.dihPorts 1).container | int }}
-    name: {{ (index .Values.dihPorts 1).name }}
-  - port: {{ (index .Values.dihPorts 2).service | int }}
-    targetPort: {{ (index .Values.dihPorts 2).container | int }}
-    name: {{ (index .Values.dihPorts 2).name }}
-  - port: {{ .Values.dihPrometheusPort | int }}
-    targetPort: {{ .Values.dihPrometheusPort | int }}
-    name: {{ .Values.dihPrometheusPortName }}
-  selector:
-    app: {{ .Values.dihDeployment }}
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: dih-persistence-claim
-  labels:
-    app: {{ .Values.dihDeployment }}
-spec:
-  accessModes: [ "ReadWriteOnce" ]
-  resources:
-    requests:
-      storage: 1Gi
----
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: {{ .Values.dihDeployment }}
+  labels: {{- include "distributedidol.labels" . | nindent 4 }}
 spec:
+  serviceName: {{ .Values.dihName | quote }}
   replicas: 1
   selector:
     matchLabels:
       app: {{ .Values.dihDeployment }}
   template:
     metadata:
-      labels:
+      labels: {{- include "distributedidol.labels" . | nindent 8 }}
         app: {{ .Values.dihDeployment }}
     spec:
-      hostname: {{ .Values.dihendpointName }}
-      securityContext:
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
+      setHostnameAsFQDN: true
       initContainers:
       - name: edit-config
         # Use this version of busybox so nslookup output format is stable
@@ -317,22 +88,7 @@ spec:
         - sh
         - "-c"
         - |
-          if [ -e /mnt/store/dih/dih.cfg ]; then exit 0; fi
-          hosts=$(nslookup {{ .Values.contentName }} | grep -o {{ .Values.contentName }}-.* | sort) $(nslookup {{ .Values.contentPrimaryName }} | grep -o {{ .Values.contentPrimaryName }}-.* | sort)
-          port=${IDOL_CONTENT_SERVICE_PORT_ACI_PORT:-{{ (index .Values.contentPorts 0).container | int }}}
-          if [ -z "$hosts" ]; then
-            host=$(nslookup {{ .Values.dihName }} | grep -o {{ .Values.dihName }}\..* | head -1 | sed s/{{ .Values.dihName }}\\./{{ .Values.contentPrimaryName }}-0.{{ .Values.contentPrimaryName }}./)
-            distribution_idol_servers="Number=1\n\n[IDOLServer0]\nHost=$host\nPort=$port\n"
-          else
-            number=$(echo "$hosts" | wc -l)
-            distribution_idol_servers="Number=$number\n"
-            i=0
-            for h in $hosts; do
-              distribution_idol_servers="${distribution_idol_servers}\n[IDOLServer$i]\nHost=$h\nPort=$port\n"
-              i=$((i+1))
-            done
-          fi
-          sed s/XX_DISTRIBUTION_IDOL_SERVERS_XX/"$distribution_idol_servers"/ /mnt/config-map/dih.cfg > /mnt/store/dih/dih.cfg
+{{ tpl (.Files.Get "resources/dih_init.sh") . | indent 10 }}
         volumeMounts:
         - name: config-map
           mountPath: /mnt/config-map
@@ -347,7 +103,19 @@ spec:
         image: {{ .Values.idolImageRegistry }}/{{ .Values.dihImage }}:{{ .Values.idolVersion }}
         imagePullPolicy: IfNotPresent
         command: ["/bin/sh"]
-        args: ["-c", "cd /dih && ln -sf /opt/idol/dih/data ./data && ln -sf /opt/idol/dih/data/dih.cfg ./dih.cfg && ./run_idol.sh"]
+        args: 
+        - -c
+        - |
+          cd /dih
+          ln -sf /opt/idol/dih/data ./data
+          if [ -e /opt/idol/dih/data/dih.cfg ]
+          then
+            echo Using existing dih.cfg
+          else
+            cp /opt/idol/dih/data/dih.install.cfg /opt/idol/dih/data/dih.cfg
+          fi
+          ln -sf /opt/idol/dih/data/dih.cfg ./dih.cfg
+          ./run_idol.sh
         volumeMounts:
         - name: dih-persistent-storage
           mountPath: /opt/idol/dih/data
@@ -373,13 +141,12 @@ spec:
           hostPort: {{ (index .Values.dihPorts 2).host | int }}
           name: {{ (index .Values.dihPorts 2).name }}
           protocol: TCP
-
-{{- if not .Values.setupMirrored }}
+{{- /*
+ Exporter monitors child fullness - unused in mirrored setup 
+*/}}
+{{- if and (.Values.autoscalingEnabled) (not .Values.setupMirrored) }}
       - name: prometheus-exporter
         image: python:3
-        securityContext:
-          runAsUser: 0
-          runAsGroup: 0
 {{- if .Values.httpProxy }}
         envFrom:
           - configMapRef:
@@ -409,11 +176,18 @@ spec:
       - name: config-map
         configMap:
           name: idol-config
-      - name: dih-persistent-storage
-        persistentVolumeClaim:
-          claimName: dih-persistence-claim
-{{- if not .Values.setupMirrored }}
+{{- if and (.Values.autoscalingEnabled) (not .Values.setupMirrored) }}
       - name: dih-prometheus-exporter-python
         configMap:
           name: dih-prometheus-exporter-python
 {{- end }}
+  volumeClaimTemplates:
+  - metadata:
+      name: dih-persistent-storage
+      labels: {{- include "distributedidol.labels" . | nindent 8 }}
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: {{ .Values.dihStorageClass }}
+      resources:
+        requests:
+          storage: 1Gi

@@ -4,6 +4,7 @@ metadata:
   # Use this service for generic IDOL index port functionality
   # Could point to e.g. a DAH or Content instance
   name: {{ .Values.queryserviceName }}
+  labels: {{- include "distributedidol.labels" . | nindent 4 }}
 spec:
   ports:
   - port: {{ (index .Values.dahPorts 0).service | int }}
@@ -21,6 +22,7 @@ metadata:
   # Use this service for DAH-specific functionality, e.g. enginemanagement
   # Could get away with just the ACI port for now, but keep the set in case
   name: {{ .Values.dahName }}
+  labels: {{- include "distributedidol.labels" . | nindent 4 }}
 spec:
   ports:
   - port: {{ (index .Values.dahPorts 0).service | int }}
@@ -36,6 +38,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.dahDeployment }}
+  labels: {{- include "distributedidol.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
@@ -43,7 +46,7 @@ spec:
       app: {{ .Values.dahDeployment }}
   template:
     metadata:
-      labels:
+      labels: {{- include "distributedidol.labels" . | nindent 8 }}
         app: {{ .Values.dahDeployment }}
     spec:
       initContainers:
@@ -59,21 +62,7 @@ spec:
         - sh
         - "-c"
         - |
-          hosts=$(nslookup {{ .Values.contentName }} | grep -o {{ .Values.contentName }}-.* | sort)
-          port=${IDOL_CONTENT_SERVICE_PORT_ACI_PORT:-{{ (index .Values.contentPorts 0).container | int }}}
-          if [ -z "$hosts" ]; then
-            host=$(nslookup {{ .Values.dahName }} | grep -o {{ .Values.dahName }}\..* | head -1 | sed s/{{ .Values.dahName }}\\./{{ .Values.contentName }}-0.{{ .Values.contentName }}./)
-            distribution_idol_servers="Number=1\n\n[IDOLServer0]\nHost=$host\nPort=$port\n"
-          else
-            number=$(echo "$hosts" | wc -l)
-            distribution_idol_servers="Number=$number\n"
-            i=0
-            for h in $hosts; do
-              distribution_idol_servers="${distribution_idol_servers}\n[IDOLServer$i]\nHost=$h\nPort=$port\n"
-              i=$((i+1))
-            done
-          fi
-          sed s/XX_DISTRIBUTION_IDOL_SERVERS_XX/"$distribution_idol_servers"/ /mnt/config-map/dah.cfg > /mnt/config/idol/dah.cfg
+{{ tpl (.Files.Get "resources/dah_init.sh") . | indent 10 }}
         volumeMounts:
         - name: config-map
           mountPath: /mnt/config-map

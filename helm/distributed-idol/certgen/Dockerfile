@@ -1,8 +1,8 @@
-FROM golang:1.12
+FROM golang:1.19
 
 WORKDIR /generator
 
-RUN go get -u github.com/cloudflare/cfssl/cmd/...
+RUN go install github.com/cloudflare/cfssl/cmd/...@v1.6.2
 
 COPY gen.sh /generator/gen.sh
 

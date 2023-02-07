@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Values.contentName }}
-  labels:
+  labels: {{- include "distributedidol.labels" . | nindent 4 }}
     app: {{ .Values.contentName }}
 spec:
   ports:
@@ -21,217 +21,81 @@ spec:
   clusterIP: None
   selector:
     app: {{ .Values.contentName }}
+{{- range $i := untilStep 0 ( .Values.exposedContents | int ) 1 }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.contentPrimaryName }}
-  labels:
-    app: {{ .Values.contentPrimaryName }}
+  name: {{ $.Values.contentName }}-{{ $i }}
+  labels: {{- include "distributedidol.labels" $ | nindent 4 }}
+    app: {{ $.Values.contentName }}-{{ $i }}
 spec:
   ports:
-  - port: {{ (index .Values.contentPorts 0).service | int }}
-    targetPort: {{ (index .Values.contentPorts 0).container | int }}
-    name: {{ (index .Values.contentPorts 0).name }}
+  - port: {{ (index $.Values.contentPorts 0).container | int }}
+    targetPort: {{ (index $.Values.contentPorts 0).container | int }}
+    name: {{ (index $.Values.contentPorts 0).name }}
     protocol: TCP
-  - port: {{ (index .Values.contentPorts 1).service | int }}
-    targetPort: {{ (index .Values.contentPorts 1).container | int }}
-    name: {{ (index .Values.contentPorts 1).name }}
+  - port: {{ (index $.Values.contentPorts 1).container | int }}
+    targetPort: {{ (index $.Values.contentPorts 1).container | int }}
+    name: {{ (index $.Values.contentPorts 1).name }}
     protocol: TCP
-  - port: {{ (index .Values.contentPorts 2).service | int }}
-    targetPort: {{ (index .Values.contentPorts 2).container | int }}
-    name: {{ (index .Values.contentPorts 2).name }}
+  - port: {{ (index $.Values.contentPorts 2).container | int }}
+    targetPort: {{ (index $.Values.contentPorts 2).container | int }}
+    name: {{ (index $.Values.contentPorts 2).name }}
     protocol: TCP
+  clusterIP: None
   selector:
-    app: {{ .Values.contentPrimaryName }}
----
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: {{ .Values.contentPrimaryName }}
-spec:
-  serviceName: {{ .Values.contentPrimaryName | quote }}
-  replicas: 1
-  selector:
-    matchLabels:
-      app: {{ .Values.contentPrimaryName }}
-  template:
-    metadata:
-      labels:
-        app: {{ .Values.contentPrimaryName }}
-    spec:
-      imagePullSecrets:
-        {{- range .Values.imagePullSecrets }}
-        - name: {{ . }}
-        {{- end }}
-      containers:
-      - name: {{ .Values.contentName }}
-        image: {{ .Values.idolImageRegistry }}/{{ .Values.contentImage }}:{{ .Values.idolVersion }}
-        imagePullPolicy: IfNotPresent
-        command: ["/bin/sh"]
-        args: ["-c", "cd /content && ln -sf /opt/idol/content/index ./index && command cp -f /etc/config/idol/content_primary.cfg content.cfg && ./run_idol.sh"]
-        volumeMounts:
-        - name: config-map
-          mountPath: /etc/config/idol
-        - name: index
-          mountPath: /opt/idol/content/index
-        - name: archive-share
-          mountPath: /opt/idol/archive
-          readOnly: false
-        env:
-        - name: IDOL_CONTENT_SERVICE_PORT_ACI_PORT
-          # This doesn't seem to be set by our headless service
-          value: {{ (index .Values.contentPorts 0).container | quote }}
-        - name: IDOL_COMPONENT_CFG
-          # Override default in newer IDOL containers
-          value: "/content/content.cfg"
-        lifecycle:
-          postStart:
-            exec:
-              command:
-              - /bin/sh
-              - "-c"
-              - |
-                logfile=poststart.log
-                hn=$(hostname)
-                host=$(getent hosts $hn | awk '{print $2}')
-                port=${IDOL_CONTENT_SERVICE_PORT_ACI_PORT:-{{ (index .Values.contentPorts 0).container | int }}}
-                if getent hosts {{ .Values.dihName }}; then
-                  dihaciport=${IDOL_DIH_SERVICE_PORT_ACI_PORT:-{{ (index .Values.dihPorts 0).container | int }}}
-                  echo "[$(date)] Extant DIH detected, adding $hn to it." | tee -a $logfile
-                  echo "[$(date)] Waiting for DIH to be ACI-available." | tee -a $logfile
-                  wget -Ogp.xml "http://{{ .Values.dihName }}:$dihaciport/a=getpid"
-                  exit_code=$?
-                  echo "[$(date)] Exit code from DIH wait wget is $exit_code." | tee -a $logfile
-                  while [ $exit_code -ne 0 ]; do
-                    wget -Ogp.xml "http://{{ .Values.dihName }}:$dihaciport/a=getpid"
-                    exit_code=$?
-                    echo "[$(date)] Exit code from DIH wait wget is $exit_code." | tee -a $logfile
-                    if [ $exit_code -eq 0 ]; then
-                      break
-                    fi
-                    sleep 1
-                  done
-                  rm gp.xml
-                  echo "[$(date)] DIH is ACI-available." | tee -a $logfile
-                  echo "[$(date)] Adding $hn to DIH." | tee -a $logfile
-                  wget -Odihadd.xml -nv -t 5 --retry-connrefused --waitretry=10 "http://{{ .Values.dihName }}:$dihaciport/a=enginemanagement&engineaction=add&host=$host&port=$port&disabled=true"
-                  id=$(sed "s/</\n</g" dihadd.xml | grep "engine id" | grep "$host" | awk '{print $2}' | cut -d '=' -f2 | grep -o -E '[0-9]+')
-                  echo "[$(date)] DIH returned id $id for this engine." | tee -a $logfile
-                  wget -O- -nv -t 5 --retry-connrefused --waitretry=10 "http://{{ .Values.dihName }}:$dihaciport/a=enginemanagement&engineaction=edit&id=$id&disabled=false"
-                  echo "[$(date)] Added $hn to DIH." | tee -a $logfile
-                  rm dihadd.xml
-                else
-                  echo "[$(date)] No extant DIH detected." | tee -a $logfile
-                fi
-                if getent hosts {{ .Values.dahName }}; then
-                  dahaciport=${IDOL_DAH_SERVICE_PORT_ACI_PORT:-{{ (index .Values.dahPorts 0).container | int }}}
-                  echo "[$(date)] Extant DAH detected, adding $hn to it." | tee -a $logfile
-                  echo "[$(date)] Waiting for DAH to be ACI-available." | tee -a $logfile
-                  wget -Ogp.xml "http://{{ .Values.dahName }}:$dahaciport/a=getpid"
-                  echo "[$(date)] Exit code from wait wget is $exit_code." | tee -a $logfile
-                  while [ $? -ne 0 ]; do
-                    wget -Ogp.xml "http://{{ .Values.dahName }}:$dahaciport/a=getpid"
-                    exit_code=$?
-                    echo "[$(date)] Exit code from wait wget is $exit_code." | tee -a $logfile
-                    if [ $exit_code -eq 0 ]; then
-                      break
-                    fi
-                    sleep 1
-                  done
-                  rm gp.xml
-                  echo "[$(date)] DAH is ACI-available" | tee -a $logfile
-                  wget -Ogc.xml -nv -t 5 --retry-connrefused --waitretry=10 "http://{{ .Values.dahName }}:$dahaciport/a=getchildren"
-                  sed "s/</\n</g" gc.xml | grep "host" | grep "$hn\."
-                  if [ $? -eq 1 ]; then
-                    echo "[$(date)] $hn not found in DAH, adding it." | tee -a $logfile
-                    wget -O- -nv -t 5 --retry-connrefused --waitretry=10 "http://{{ .Values.dahName }}:$dahaciport/a=enginemanagement&engineaction=engineadd&enginehost=$host&engineport=$port"
-                    echo "[$(date)] Added $hn to DAH" | tee -a $logfile
-                  else
-                    echo "[$(date)] $hn found in DAH, not adding it." | tee -a $logfile
-                  fi
-                  wget -Oengineshowstatus.xml -nv -t 5 --retry-connrefused --waitretry=10 "http://{{ .Values.dahName }}:$dahaciport/a=enginemanagement&engineaction=showstatus"
-                  id=$(sed "s/</\n</g" engineshowstatus.xml | grep "engine id" | grep "$hn" | awk '{print $2}' | cut -d '=' -f2 | grep -o -E '[0-9]+')
-                  echo "[$(date)] DAH returned id $id for this engine." | tee -a $logfile
-                  wget -O- -nv -t 5 --retry-connrefused --waitretry=10 "http://{{ .Values.dahName }}:$dahaciport/a=enginemanagement&engineaction=PowerUp&EngineID=$id"
-                  echo "[$(date)] Ensured this engine is powered up in DAH" | tee -a $logfile
-                  rm engineshowstatus.xml
-                  rm gc.xml
-                else
-                  echo "[$(date)] No extant DAH detected." | tee -a $logfile
-                fi
-        livenessProbe:
-          httpGet:
-            path: {{ .Values.livenessProbePath }}
-            port: {{ (index .Values.contentPorts 0).container | int }}
-{{- template "distributedidol.deployment.standardLivenessProbe" }}
-        ports:
-        - containerPort: {{ (index .Values.contentPorts 0).container | int }}  
-          name: {{ (index .Values.contentPorts 0).name }}
-          protocol: TCP
-        - containerPort: {{ (index .Values.contentPorts 1).container | int }}
-          name: {{ (index .Values.contentPorts 1).name }}
-          protocol: TCP
-        - containerPort: {{ (index .Values.contentPorts 2).container | int }}
-          name: {{ (index .Values.contentPorts 2).name }}
-          protocol: TCP
-      volumes:
-      - name: config-map
-        configMap:
-          name: idol-config
-      - name: archive-share
-        persistentVolumeClaim:
-          claimName: backup-archive-pvc
-  volumeClaimTemplates:
-  - metadata:
-      name: index
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      resources:
-        requests:
-          storage: {{ .Values.contentVolumeSize }}
+    statefulset.kubernetes.io/pod-name: {{ $.Values.contentName }}-{{ $i }}
+{{- end }}
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ .Values.contentName }}
+  labels: {{- include "distributedidol.labels" . | nindent 4 }}
 spec:
   serviceName: {{ .Values.contentName | quote }}
-  replicas: {{ sub (int .Values.initialContentEngineCount) 1 }}
+{{- if .Values.setupMirrored }}
+  replicas: {{ int .Values.initialContentEngineCount }}
+{{- else }}
+  replicas: {{ int .Values.initialContentEngineCount }}
+{{- end }}
   selector:
     matchLabels:
       app: {{ .Values.contentName }}
   template:
     metadata:
-      labels:
+      labels: {{- include "distributedidol.labels" . | nindent 8 }}
         app: {{ .Values.contentName }}
     spec:
       imagePullSecrets:
         {{- range .Values.imagePullSecrets }}
         - name: {{ . }}
         {{- end }}
-      terminationGracePeriodSeconds: 60
+      terminationGracePeriodSeconds: 300
       containers:
       - name: {{ .Values.contentName }}
         image: {{ .Values.idolImageRegistry }}/{{ .Values.contentImage }}:{{ .Values.idolVersion }}
         imagePullPolicy: IfNotPresent
-        command: ["/bin/sh"]
-        args: ["-c", "cd /content && ln -sf /opt/idol/content/index ./index && ./run_idol.sh"]
+        command:
+        - "/bin/bash"
+        args: 
+        - "-c"
+        - |
+{{ tpl (.Files.Get "resources/content_startup.sh") . | indent 10 }}
         volumeMounts:
         - name: config-map
           mountPath: /etc/config/idol
         - name: index
           mountPath: /opt/idol/content/index
+{{- if .Values.setupMirrored }}
         - name: archive-share
           mountPath: /opt/idol/archive
-          readOnly: true
+{{- end }}
         env:
         - name: IDOL_CONTENT_SERVICE_PORT_ACI_PORT
           # This doesn't seem to be set by our headless service
           value: {{ (index .Values.contentPorts 0).container | quote }}
-        - name: IDOL_COMPONENT_CFG
-          # Override default in newer IDOL containers (and hack for extra command line parameter)
-          value: "/content/cfg/content.cfg"
         - name: IDOL_COMMAND_PARAMS
           value: "-idolcluster"
         lifecycle:
@@ -241,213 +105,14 @@ spec:
               - /bin/bash
               - "-c"
               - |
-                restoreFromBackup() {
-                  logfile=$1
-                  if [ "${IDOL_CHILD_CONTENT_PRIMARY_SERVICE_HOST}" == "" ];
-                  then
-                    echo "[$(date)] No content primary to restore from, skipping restore." | tee -a $logfile
-                    return
-                  fi
-                  restoreTime=$(date -Iseconds)
-                  GETBACKUPDATA_FILE=gbd.xml
-                  wget -O${GETBACKUPDATA_FILE} \
-                  "http://${IDOL_CHILD_CONTENT_PRIMARY_SERVICE_HOST}:${IDOL_CHILD_CONTENT_PRIMARY_SERVICE_PORT_ACI_PORT}/action=getbackupdata&backupforrestoretime=${restoreTime}"
-                  backupFile=$(sed "s/</\n</g" ${GETBACKUPDATA_FILE} | grep "<file" | awk -F">" {'print $2'})
-                
-                  parameters=""
-                  if [ "${backupFile}" == "" ];
-                  then
-                    echo "[$(date)] No backup to restore from. Restoring from archived index commands only." | tee -a $logfile
-                    parameters="ReplayArchivePath=/opt/idol/archive/indexcommands&RestoreTime=$restoreTime"
-                  else
-                    backupTimeEpochSeconds=$(sed "s/</\n</g" ${GETBACKUPDATA_FILE} | grep "<time" | awk -F">" {'print $2'})
-                    backupTimeISO8601=$(date --date="@${backupTimeEpochSeconds}" -Iseconds)
-                    echo "[$(date)] Restoring from backup file ${backupFile} with time ${backupTimeISO8601} and archived index commands" | tee -a $logfile
-                    parameters="path=$backupFile&BackupTime=$backupTimeISO8601&ReplayArchivePath=/opt/idol/archive/indexcommands&RestoreTime=$restoreTime"
-                  fi
-                  rm ${GETBACKUPDATA_FILE}
-                  echo "[$(date)] Sending DREINITIAL with restore parameters '${parameters}'" | tee -a $logfile
-                  doDreinitial ${parameters}
-                }
-
-                function waitForAci() {
-                  exit_code=1
-                  while [ $exit_code -ne 0 ]; do
-                    wget -O- "http://$1:$2/a=getpid" | grep "<autn:pid>"
-                    exit_code=$?
-                    if [ $exit_code -ne 0 ]; then
-                      sleep 1
-                    fi
-                  done
-                }
-                function getInitialId() {
-                  initial_id=$(wget -O- -nv -t5 --retry-connrefused --waitretry=10 "http://localhost:{{ (index .Values.contentPorts 0).container | int }}/a=getstatus" | sed "s/</\n</g" | grep initialid  | cut -d ">" -f2)
-                }
-                function doDreinitial() {
-                  other_params=${1:-}
-                  getInitialId
-                  echo "[$(date)] Previous initial id was $initial_id" | tee -a $logfile
-                  new_id=$(($initial_id+1))
-                  echo "[$(date)] Using initialid $new_id" | tee -a $logfile
-                  wget -q -nv -t 5 --retry-connrefused --waitretry=10 "http://localhost:{{ (index .Values.contentPorts 1).container | int }}/DREINITIAL?initialid=$new_id&${other_params}" 
-                  initial_id=0
-                  while [ $initial_id != $new_id ]; do
-                    getInitialId
-                    sleep 1
-                  done
-                }
-                logfile=poststart.log
-                hn=$(hostname)
-                host=$(getent hosts $hn | awk '{print $2}')
-                port=${IDOL_CONTENT_SERVICE_PORT_ACI_PORT:-{{ (index .Values.contentPorts 0).container | int }}}
-                if getent hosts {{ .Values.dihName }}; then
-                  dihaciport=${IDOL_DIH_SERVICE_PORT_ACI_PORT:-{{ (index .Values.dihPorts 0).container | int }}}
-                  echo "[$(date)] Extant DIH detected, adding $hn to it." | tee -a $logfile
-                  echo "[$(date)] Waiting for DIH to be ACI-available." | tee -a $logfile
-                  waitForAci idol-dih $dihaciport
-                  echo "[$(date)] DIH is ACI-available." | tee -a $logfile
-                  wget -Ogs.xml -nv -t 5 --retry-connrefused --waitretry=10 "http://idol-dih:$dihaciport/a=getstatus"
-                  sed "s/</\n</g" gs.xml | grep "host" | grep "$hn\."
-                  if [ $? -eq 1 ]; then
-{{- if not .Values.setupMirrored }}
-                    echo "[$(date)] $hn not found in DIH. Ensuring clean data index" | tee -a $logfile
-                    doDreinitial
-{{- end }}
-                    echo "[$(date)] Adding $hn to DIH." | tee -a $logfile
-                    wget -Odihadd.xml -nv -t 5 --retry-connrefused --waitretry=10 "http://idol-dih:$dihaciport/a=enginemanagement&engineaction=add&host=$host&port=$port&disabled=true"
-                    id=$(sed "s/</\n</g" dihadd.xml | grep "engine id" | grep "$host" | awk '{print $2}' | cut -d '=' -f2 | grep -o -E '[0-9]+')
-                    echo "[$(date)] DIH returned id $id for this engine." | tee -a $logfile
-{{- if .Values.setupMirrored }}
-                    echo "[$(date)] This is a mirrored setup with an extant DIH. Restoring from backup" | tee -a $logfile
-                    restoreFromBackup $logfile
-{{- end }}
-                    wget -O- -nv -t 5 --retry-connrefused --waitretry=10 "http://idol-dih:$dihaciport/a=enginemanagement&engineaction=edit&id=$id&disabled=false"
-                    echo "[$(date)] Added $hn to DIH." | tee -a $logfile
-                    rm dihadd.xml
-                  else
-                    echo "[$(date)] $hn found in DIH, not adding and treating as extant engine." | tee -a $logfile
-{{- if .Values.setupMirrored }}
-                    echo "[$(date)] This is a mirrored setup with an extant DIH. Restoring from backup" | tee -a $logfile
-                    restoreFromBackup $logfile
-{{- end }}
-                  fi
-                  rm gs.xml
-                else
-                  echo "[$(date)] No extant DIH detected." | tee -a $logfile
-                fi
-                if getent hosts {{ .Values.dahName }}; then
-                  dahaciport=${IDOL_DAH_SERVICE_PORT_ACI_PORT:-{{ (index .Values.dahPorts 0).container | int }}}
-                  echo "[$(date)] Extant DAH detected, adding $hn to it." | tee -a $logfile
-                  echo "[$(date)] Waiting for DAH to be ACI-available." | tee -a $logfile
-                  waitForAci idol-dah $dahaciport
-                  echo "[$(date)] DAH is ACI-available" | tee -a $logfile
-                  wget -Ogc.xml -nv -t 5 --retry-connrefused --waitretry=10 "http://{{ .Values.dahName }}:$dahaciport/a=getchildren"
-                  sed "s/</\n</g" gc.xml | grep "host" | grep "$hn\."
-                  if [ $? -eq 1 ]; then
-                    echo "[$(date)] $hn not found in DAH, adding it." | tee -a $logfile
-                    wget -O- -nv -t 5 --retry-connrefused --waitretry=10 "http://{{ .Values.dahName }}:$dahaciport/a=enginemanagement&engineaction=engineadd&enginehost=$host&engineport=$port"
-                    echo "[$(date)] Added $hn to DAH" | tee -a $logfile
-                  else
-                    echo "[$(date)] $hn found in DAH, not adding it." | tee -a $logfile
-                  fi
-                  wget -Oengineshowstatus.xml -nv -t 5 --retry-connrefused --waitretry=10 "http://{{ .Values.dahName }}:$dahaciport/a=enginemanagement&engineaction=showstatus"
-                  id=$(sed "s/</\n</g" engineshowstatus.xml | grep "engine id" | grep "$hn" | awk '{print $2}' | cut -d '=' -f2 | grep -o -E '[0-9]+')
-                  echo "[$(date)] DAH returned id $id for this engine." | tee -a $logfile
-                  wget -O- -nv -t 5 --retry-connrefused --waitretry=10 "http://{{ .Values.dahName }}:$dahaciport/a=enginemanagement&engineaction=PowerUp&EngineID=$id"
-                  echo "[$(date)] Ensured this engine is powered up in DAH" | tee -a $logfile
-                  rm engineshowstatus.xml
-                  rm gc.xml
-                else
-                  echo "[$(date)] No extant DAH detected." | tee -a $logfile
-                fi
+{{ tpl (.Files.Get "resources/content_postStart.sh") . | indent 16 }}
           preStop:
             exec:
               command:
               - /bin/bash
               - "-c"
               - |
-{{- if .Values.setupMirrored }}
-                function waitForAci() {
-                  exit_code=1
-                  while [ $exit_code -ne 0 ]; do
-                    wget -O- "http://$1:$2/a=getpid" | grep "<autn:pid>"
-                    exit_code=$?
-                    if [ $exit_code -ne 0 ]; then
-                      sleep 1
-                    fi
-                  done
-                }
-
-                function getDIHEngineID() {
-                  wget -Oenginedih.xml -nv -t 5 --retry-connrefused --waitretry=10 "http://idol-dih:$1/a=getstatus"
-                  id=$(sed "s@<engine@\n<engine@g" enginedih.xml | grep "$2" | awk '{match($0, /<group>([0-9]+)<\/group>/); print substr($0, RSTART, RLENGTH)}' | awk '{match($0, /[0-9]+/); print substr($0, RSTART, RLENGTH)}')
-                  rm enginedih.xml
-                  echo $id
-                }
-
-                function waitForDIHRemovedEngine() {
-                  result=1
-                  while [ $result -ne -1 ]; do
-                    result=$(getDIHEngineID $1 $2)
-                    if [ $result -ne -1 ]; then
-                      sleep 1
-                    fi
-                  done
-                }
-
-                logfile=prestop.log
-                hn=$(hostname)
-                host=$(getent hosts $hn | awk '{print $2}')
-                port=${IDOL_CONTENT_SERVICE_PORT_ACI_PORT:-{{ (index .Values.contentPorts 0).container | int }}}
-                if getent hosts {{ .Values.dihName }}; then
-                  dihaciport=${IDOL_DIH_SERVICE_PORT_ACI_PORT:-{{ (index .Values.dihPorts 0).container | int }}}
-                  dihindexport=${IDOL_DIH_SERVICE_PORT_INDEX_PORT:-{{ (index .Values.dihPorts 1).container | int }}}
-                  echo "[$(date)] Extant DIH detected, removing ourselves ($hn) from it." | tee -a $logfile
-                  echo "[$(date)] Waiting for DIH to be ACI-available." | tee -a $logfile
-                  waitForAci idol-dih $dihaciport
-                  echo "[$(date)] DIH is ACI-available." | tee -a $logfile
-                  engineid=$(getDIHEngineID $dihaciport $host)
-                  if [ $engineid -gt -1 ]; then
-                    echo "[$(date)] Removing $hn from DIH." | tee -a $logfile
-                    echo "[$(date)] DIH returned id $engineid for this engine." | tee -a $logfile
-                    wget -nv -t 5 --retry-connrefused --waitretry=10 "http://idol-dih:$dihindexport/DREREDISTRIBUTE?RemoveGroup=$engineid"
-                    waitForDIHRemovedEngine $dihaciport $host
-                    echo "[$(date)] Removed $hn from DIH." | tee -a $logfile
-                  else
-                    echo "[$(date)] $hn not found in DIH, nothing to do." | tee -a $logfile
-                  fi
-                else
-                  echo "[$(date)] No extant DIH detected." | tee -a $logfile
-                fi
-
-                function getDAHEngineID() {
-                  wget -Oengineshowstatus.xml -nv -t 5 --retry-connrefused --waitretry=10 "http://{{ .Values.dahName }}:$1/a=enginemanagement&engineaction=showstatus"
-                  id=$(sed "s/</\n</g" engineshowstatus.xml | grep "engine id" | grep "$2" | awk '{print $2}' | cut -d '=' -f2 | grep -o -E '[0-9]+')
-                  rm engineshowstatus.xml
-                  echo $id
-                }
-
-                if getent hosts {{ .Values.dahName }}; then
-                  dahaciport=${IDOL_DAH_SERVICE_PORT_ACI_PORT:-{{ (index .Values.dahPorts 0).container | int }}}
-                  echo "[$(date)] Extant DIH detected, powering down ourselves ($hn) in it." | tee -a $logfile
-                  echo "[$(date)] Waiting for DAH to be ACI-available." | tee -a $logfile
-                  waitForAci idol-dah $dahaciport
-                  echo "[$(date)] DAH is ACI-available" | tee -a $logfile
-                  engineid=$(getDAHEngineID $dahaciport $host)
-                  if [ $engineid -gt -1 ]; then
-                    echo "[$(date)] Powering down $hn in DAH." | tee -a $logfile
-                    echo "[$(date)] DAH returned id $engineid for this engine." | tee -a $logfile
-                    wget -O- -nv -t 5 --retry-connrefused --waitretry=10 "http://{{ .Values.dahName }}:$dahaciport/a=enginemanagement&engineaction=PowerDown&EngineID=$engineid"
-                    echo "[$(date)] Powered down $hn in DAH" | tee -a $logfile
-                  else
-                    echo "[$(date)] $hn not found in DAH, nothing to do." | tee -a $logfile
-                  fi
-                else
-                  echo "[$(date)] No extant DAH detected." | tee -a $logfile
-                fi
-{{- else }}
-                echo "Nothing to do in non-mirror mode"
-{{- end }}
+{{ tpl (.Files.Get "resources/content_preStop.sh") . | indent 16 }}
         livenessProbe:
           httpGet:
             path: {{ .Values.livenessProbePath }}
@@ -467,14 +132,18 @@ spec:
       - name: config-map
         configMap:
           name: idol-config
+{{- if .Values.setupMirrored }}
       - name: archive-share
         persistentVolumeClaim:
           claimName: backup-archive-pvc
+{{- end }}
   volumeClaimTemplates:
   - metadata:
       name: index
+      labels: {{- include "distributedidol.labels" . | nindent 8 }}
     spec:
       accessModes: [ "ReadWriteOnce" ]
+      storageClassName: {{ .Values.contentStorageClass }}
       resources:
         requests:
           storage: {{ .Values.contentVolumeSize }}

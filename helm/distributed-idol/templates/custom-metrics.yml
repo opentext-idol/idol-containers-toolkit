@@ -1,7 +1,9 @@
+{{- if .Values.autoscalingEnabled }}
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Values.custommetricsService }}
+  labels: {{- include "distributedidol.labels" . | nindent 4 }}
 spec:
   ports:
   - port: {{ (index .Values.custommetricsPorts 0).service | int }}
@@ -13,6 +15,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: custom-metrics:system:auth-delegator
+  labels: {{- include "distributedidol.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -26,6 +29,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: custom-metrics-auth-reader
+  labels: {{- include "distributedidol.labels" . | nindent 4 }}
   namespace: kube-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -39,7 +43,7 @@ subjects:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  labels:
+  labels: {{- include "distributedidol.labels" . | nindent 4 }}
     app: {{ .Values.custommetricsService }}
   name: {{ .Values.custommetricsService }}
 spec:
@@ -49,7 +53,7 @@ spec:
       app: {{ .Values.custommetricsService }}
   template:
     metadata:
-      labels:
+      labels: {{- include "distributedidol.labels" . | nindent 8 }}
         app: {{ .Values.custommetricsService }}
       name: {{ .Values.custommetricsService }}
     spec:
@@ -60,7 +64,7 @@ spec:
         {{- end }}
       containers:
       - name: {{ .Values.custommetricsService }}
-        image: directxman12/k8s-prometheus-adapter-amd64:v0.5.0
+        image: registry.k8s.io/prometheus-adapter/prometheus-adapter:v0.10.0
         args:
         - --secure-port={{ (index .Values.custommetricsPorts 0).host | int }}
         - --tls-cert-file=/var/run/serving-cert/serving.crt
@@ -96,6 +100,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: custom-metrics-resource-reader
+  labels: {{- include "distributedidol.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -109,11 +114,13 @@ kind: ServiceAccount
 apiVersion: v1
 metadata:
   name: {{ .Values.custommetricsService }}
+  labels: {{- include "distributedidol.labels" . | nindent 4 }}
 ---
 apiVersion: apiregistration.k8s.io/v1
 kind: APIService
 metadata:
   name: v1beta1.custom.metrics.k8s.io
+  labels: {{- include "distributedidol.labels" . | nindent 4 }}
 spec:
   service:
     name: {{ .Values.custommetricsService }}
@@ -128,6 +135,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: custom-metrics-server-resources
+  labels: {{- include "distributedidol.labels" . | nindent 4 }}
 rules:
 - apiGroups:
   - custom.metrics.k8s.io
@@ -138,6 +146,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: adapter-config
+  labels: {{- include "distributedidol.labels" . | nindent 4 }}
 data:
   config.yaml: |
     rules:
@@ -160,6 +169,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: custom-metrics-resource-reader
+  labels: {{- include "distributedidol.labels" . | nindent 4 }}
 rules:
 - apiGroups:
   - ""
@@ -175,6 +185,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: hpa-controller-custom-metrics
+  labels: {{- include "distributedidol.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -183,3 +194,4 @@ subjects:
 - kind: ServiceAccount
   name: horizontal-pod-autoscaler
   namespace: kube-system
+{{- end }}

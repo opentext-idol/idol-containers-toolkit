@@ -13,8 +13,8 @@
 # meaning that documents will be distributed between the content engines.
 # In mirror-mode, the Content engines will autoscale to fulfil query demand.
 # In non-mirror-mode, Content engines will autoscale to fulfil index demand.
-# See https://www.microfocus.com/documentation/idol/IDOL_12_11/DAH_12.11_Documentation/Help/#Configuration/Server/MirrorMode.htm?TocPath=Configuration%2520Parameters%257CServer%257C_____38
-# and https://www.microfocus.com/documentation/idol/IDOL_12_11/DIH_12.11_Documentation/Help/#Configuration/Server/MirrorMode.htm?TocPath=Configuration%2520Parameters%257CServer%257C_____38
+# See https://www.microfocus.com/documentation/idol/IDOL_12_12/DAH_12.12_Documentation/Help/#Configuration/Server/MirrorMode.htm?TocPath=Configuration%2520Parameters%257CServer%257C_____38
+# and https://www.microfocus.com/documentation/idol/IDOL_12_12/DIH_12.12_Documentation/Help/#Configuration/Server/MirrorMode.htm?TocPath=Configuration%2520Parameters%257CServer%257C_____38
 setupMirrored: false
 
 # contentVolumeSize is the size of the PersistentVolumeClaim that is created
@@ -24,15 +24,26 @@ setupMirrored: false
 # of the Content index in each Content instance.
 contentVolumeSize: 16Gi
 
-# backupArchiveVolumeName is the name of a volume available within the Kubernetes cluster.
-# It must have ReadWriteMany AccessMode: https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes
-# This is where the Content engine backups and index command archive will live. It is available to all Content engines.
-backupArchiveVolumeName: "backup-archive-pv"
+# contentStorageClass is the name of the storage class used to provision a PersistentVolume
+# for each Content instance.
+# The associated PVCs are named index-<contentName>-<pod number>
+contentStorageClass: "idol-content-storage-class"
 
-# initialContentEngineCount is the number of Content engines created on startup - after startup
-# the Content engine autoscaling kicks in and controls the number of Content engines. The minimum
-# valid value of initialContentEngineCount is 1.
-initialContentEngineCount: "2"
+# dihStorageClass is the name of the storage class used to provision the persistent volume for the
+# dih configuration and data
+# The associated PVC is named dih-persistent-storage-<dihDeployment>-0
+dihStorageClass: "idol-dih-storage-class"
+
+# backupArchiveStorageClass is the name of the storage class used to provision the persistent volume for the 
+# the mirror-mode Content engine backups and index command archive. It is available to all Content engines.
+# It must support the ReadWriteMany AccessMode: https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes
+backupArchiveStorageClass: "idol-backup-archive-sc"
+
+# initialContentEngineCount is the number of Content engines created on startup.
+# After startup the Content engine autoscaling kicks in and controls the number of Content engines. 
+# The minimum valid value of initialContentEngineCount is 1.
+# For an upgrade, you must specify the number of Content engines that were present.
+initialContentEngineCount: "1"
 #############################################
 
 
@@ -60,15 +71,29 @@ imagePullSecrets:
 # This section contains parameters to configure autoscaling of the
 # Content instances.
 
+# autoscalingEnabled controls automatic scaling of the number of Content instances.
+# See maxDocumentCount for non-mirror mode or autoscalingTargetAverageCpuUse for mirror
+# With autoscalingEnabled=false, you can scale using:
+#  kubectl scale statefuleset <contentName> --replicas=<N>
+# In a non-mirrored setup, you should redistribute the data before scaling down
+# - see the DREREDISTRIBUTE documentation
+autoscalingEnabled: true
+
 # autoscalingMinReplicas is the minimum number of Content instances.
-autoscalingMinReplicas: "1"
+# Ignored in non-mirror-mode
+autoscalingMinReplicas: "2"
 
 # autoscalingMaxReplicas is the maximum number of Content instances.
 autoscalingMaxReplicas: "6"
 
+# maxDocumentCount corresponds to [Server]::MaxDocumentCount Content configuration parameter
+# Used in non-mirror mode
+maxDocumentCount: "5000"
+
 # autoscalingTargetAverageCpuUse is the target CPU use of the Content
 # instances. See metrics.containerResource.target.averageValue in
 # https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/horizontal-pod-autoscaler-v2beta2/#HorizontalPodAutoscalerSpec
+# Used in mirror mode
 autoscalingTargetAverageCpuUse: 500m
 #############################################
 
@@ -77,11 +102,11 @@ autoscalingTargetAverageCpuUse: 500m
 # The `contentPrimary*` parameters specified below configure this behaviour.
 
 # contentPrimaryBackupInterval corresponds to the [Schedule]::BackupInterval Content configuration parameter.
-# https://www.microfocus.com/documentation/idol/IDOL_12_11/Content_12.11_Documentation/Help/#Configuration/Schedule/BackupInterval.htm%3FTocPath%3DConfiguration%2520Parameters%7CSchedule%7C_____7
+# https://www.microfocus.com/documentation/idol/IDOL_12_12/Content_12.12_Documentation/Help/#Configuration/Schedule/BackupInterval.htm%3FTocPath%3DConfiguration%2520Parameters%7CSchedule%7C_____7
 contentPrimaryBackupInterval: "0"
 
 # contentPrimaryBackupTime corresponds to the [Schedule]::BackupTime Content configuration parameter.
-# https://www.microfocus.com/documentation/idol/IDOL_12_11/Content_12.11_Documentation/Help/#Configuration/Schedule/BackupTime.htm%3FTocPath%3DConfiguration%2520Parameters%7CSchedule%7C_____11
+# https://www.microfocus.com/documentation/idol/IDOL_12_12/Content_12.12_Documentation/Help/#Configuration/Schedule/BackupTime.htm%3FTocPath%3DConfiguration%2520Parameters%7CSchedule%7C_____11
 contentPrimaryBackupTime: "02:00"
 #########################################
 
@@ -115,8 +140,6 @@ livenessProbePath: "/a=getpid"
 queryserviceName: "idol-query-service"
 # indexserviceName is an internal parameter to specify the index service name.
 indexserviceName: "idol-index-service"
-# dihendpointName is an internal parameter to specify the DIH endpoint name.
-dihendpointName: "idol-dih-endpoint"
 # idolingressName is an internal parameter to specify the IDOL ingress name.
 idolingressName: "idol-ingress"
 # prometheusingressName is an internal parameter to specify the Prometheus ingress name.
@@ -130,8 +153,6 @@ x-content-port1: &content-port1 "9101"
 x-content-port2: &content-port2 "9102"
 # contentName is an internal parameter to specify the name of the various Content objects in the charts.
 contentName: "idol-child-content"
-# contentPrimaryName is an internal parameter to specify the name of various objects for the Content objects of the primary Content engine.
-contentPrimaryName: "idol-child-content-primary"
 # contentDeployment is an internal parameter to specify the name of the Content deployment.
 contentDeployment: "idol-content-deployment"
 # contentImage is an internal parameter to specify the name of the Content image pulled for the Content containers.
@@ -225,3 +246,6 @@ custommetricsService: "custom-metrics-apiserver"
 custommetricsPorts:
   - service: *custommetrics-port0
     host: *custommetrics-port1
+
+# exposedContents Allows ingress access to individual content engines. Set to max number of engines to expose
+exposedContents: 0

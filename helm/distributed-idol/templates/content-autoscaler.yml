@@ -1,13 +1,15 @@
+{{- if .Values.autoscalingEnabled }}
 kind: HorizontalPodAutoscaler
-apiVersion: autoscaling/v2beta2
+apiVersion: autoscaling/v2
 metadata:
   name: {{ .Values.autoscalingName }}
+  labels: {{- include "distributedidol.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: StatefulSet
     name: {{ .Values.contentName }}
-  minReplicas: {{ .Values.autoscalingMinReplicas | int }}
+  minReplicas: {{ ternary .Values.autoscalingMinReplicas "1" .Values.setupMirrored | int }}
   maxReplicas: {{ .Values.autoscalingMaxReplicas | int }}
   behavior:
     scaleDown:
@@ -52,4 +54,5 @@ spec:
       target:
         type: Value
         value: 1
+{{- end }}
 {{- end }}
