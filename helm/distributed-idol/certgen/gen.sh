@@ -1,4 +1,7 @@
 #!/bin/bash
+# BEGIN COPYRIGHT NOTICE
+# (c) Copyright 2022 Micro Focus or one of its affiliates.
+# END COPYRIGHT NOTICE
 
 # expects the PURPOSE, SERVICE_NAME and NAMESPACE env variables to be 
 # set appropriately.

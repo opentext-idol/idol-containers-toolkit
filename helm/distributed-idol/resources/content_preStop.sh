@@ -1,3 +1,6 @@
+# BEGIN COPYRIGHT NOTICE
+# (c) Copyright 2023 Micro Focus or one of its affiliates.
+# END COPYRIGHT NOTICE
 {{/* 
 preStop hook is used in mirror mode to remove engine from DIH/DAH.
 In non-mirror mode this is a no-op

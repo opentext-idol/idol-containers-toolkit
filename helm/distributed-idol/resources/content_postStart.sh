@@ -1,3 +1,6 @@
+# BEGIN COPYRIGHT NOTICE
+# (c) Copyright 2023 Micro Focus or one of its affiliates.
+# END COPYRIGHT NOTICE
 function getHostname() {
   host=$(cat /etc/hostname)
   domain=$(cat /etc/resolv.conf | grep search | awk '{print $2}')

@@ -1,3 +1,7 @@
+# BEGIN COPYRIGHT NOTICE
+# (c) Copyright 2022 Micro Focus or one of its affiliates.
+# END COPYRIGHT NOTICE
+
 # As per https://helm.sh/docs/topics/charts/#the-chart-file-structure
 # this values.yaml file contains the default configuration values for this distributed-idol chart.
 # These default values can be overridden by using the --values or --set flags on the `helm install`

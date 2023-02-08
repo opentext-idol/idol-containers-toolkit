@@ -1,3 +1,6 @@
+# BEGIN COPYRIGHT NOTICE
+# (c) Copyright 2022 Micro Focus or one of its affiliates.
+# END COPYRIGHT NOTICE
 FROM golang:1.19
 
 WORKDIR /generator

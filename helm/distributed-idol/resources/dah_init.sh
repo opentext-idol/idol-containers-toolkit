@@ -1,3 +1,6 @@
+# BEGIN COPYRIGHT NOTICE
+# (c) Copyright 2023 Micro Focus or one of its affiliates.
+# END COPYRIGHT NOTICE
 # This is run by the dah edit-config initContainer to populate initial dah config
 
 logfile=/mnt/config/idol/edit-config.log
