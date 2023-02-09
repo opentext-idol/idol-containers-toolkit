@@ -1,8 +1,12 @@
-{{- if not .Values.setupMirrored }}
+# BEGIN COPYRIGHT NOTICE
+# (c) Copyright 2022 Micro Focus or one of its affiliates.
+# END COPYRIGHT NOTICE
+{{- if and (.Values.autoscalingEnabled) (not .Values.setupMirrored) }}
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Values.prometheusService }}
+  labels: {{- include "distributedidol.labels" . | nindent 4 }}
 spec:
   ports:
   - port: {{ (index .Values.prometheusPorts 0).host | int }}
@@ -15,6 +19,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.prometheusDeployment }}
+  labels: {{- include "distributedidol.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
@@ -22,7 +27,7 @@ spec:
       app: {{ .Values.prometheusDeployment }}
   template:
     metadata:
-      labels:
+      labels: {{- include "distributedidol.labels" . | nindent 8 }}
         app: {{ .Values.prometheusDeployment }}
     spec:
       imagePullSecrets:

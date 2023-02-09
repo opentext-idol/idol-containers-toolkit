@@ -8,7 +8,15 @@
             "type": "string",
             "pattern": "^\\d+(?:\\.\\d+)?(?:Ki|Mi|Gi|Ti|Pi|Ei|m|k|M|G|T|P|E)?$"
         },
-        "backupArchiveVolumeName": {
+        "contentStorageClass": {
+            "type": "string",
+            "minLength": 1
+        },
+        "backupArchiveStorageClass": {
+            "type": "string",
+            "minLength": 1
+        },
+        "dihStorageClass": {
             "type": "string",
             "minLength": 1
         },
@@ -39,6 +47,9 @@
         "licenseServerPort": {
             "type": "string",
             "pattern": "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$"
+        },
+        "autoscalingEnabled": {
+            "type": "boolean"
         },
         "autoscalingMinReplicas": {
             "type": "string",
@@ -87,10 +98,6 @@
             "type": "string",
             "minLength": 1
         },
-        "dihendpointName": {
-            "type": "string",
-            "minLength": 1
-        },
         "idolingressName": {
             "type": "string",
             "minLength": 1
@@ -104,10 +111,6 @@
             "minLength": 1
         },
         "contentName": {
-            "type": "string",
-            "minLength": 1
-        },
-        "contentPrimaryName": {
             "type": "string",
             "minLength": 1
         },
@@ -311,12 +314,16 @@
               ],
               "additionalProperties": false
           }
+        },
+        "exposedContents": {
+            "type": "integer",
+            "minimum": 0
         }
     },
     "required": [
         "setupMirrored",
         "contentVolumeSize",
-        "backupArchiveVolumeName",
+        "backupArchiveStorageClass",
         "initialContentEngineCount",
         "idolImageRegistry",
         "idolVersion",
@@ -334,12 +341,10 @@
         "livenessProbePath",
         "queryserviceName",
         "indexserviceName",
-        "dihendpointName",
         "idolingressName",
         "prometheusingressName",
         "autoscalingName",
         "contentName",
-        "contentPrimaryName",
         "contentDeployment",
         "contentImage",
         "contentPorts",
@@ -358,7 +363,8 @@
         "prometheusService",
         "prometheusPorts",
         "custommetricsService",
-        "custommetricsPorts"
+        "custommetricsPorts",
+        "exposedContents"
     ],
     "title": "Values",
     "type": "object"

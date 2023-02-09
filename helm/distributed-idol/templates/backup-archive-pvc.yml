@@ -1,13 +1,20 @@
+# BEGIN COPYRIGHT NOTICE
+# (c) Copyright 2022 Micro Focus or one of its affiliates.
+# END COPYRIGHT NOTICE
+{{- if .Values.setupMirrored }}
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: backup-archive-pvc
+  labels: {{- include "distributedidol.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/resource-policy": keep  
 spec:
   accessModes:
     - ReadWriteMany
   resources:
     requests:
       storage: {{ .Values.contentVolumeSize }}
-  volumeName: {{ .Values.backupArchiveVolumeName }}
-  storageClassName: ""
+  storageClassName: {{ .Values.backupArchiveStorageClass }}
+{{- end }}
