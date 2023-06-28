@@ -16,7 +16,7 @@
 source /controller/startup_utils.sh
 
 ## Command to call with an HTTP request
-MAKE_REQUEST="wget -qO-"
+MAKE_REQUEST="curl -s"
 
 ## Functions to add services to controller
 function add_content_service {

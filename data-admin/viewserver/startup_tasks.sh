@@ -9,10 +9,4 @@ function overwrite_proxy {
     sed -i "s/XX_PROXY_PORT_XX/${_HTTP_PROXY_PORT}/g" /view/view.cfg
 }
 
-function pre_startup_tasks {
-    overwrite_proxy
-}
-
-function post_startup_tasks {
-    :
-}
+overwrite_proxy

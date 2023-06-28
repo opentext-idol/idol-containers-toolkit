@@ -53,7 +53,7 @@ services:
     extra_hosts: *external-licenseserver-host
     volumes:
       - ./answerserver/answerserver.cfg:/answerserver/cfg/answerserver.cfg
-      - ./answerserver/startup_tasks.sh:/answerserver/startup_tasks.sh
+      - ./answerserver/startup_tasks.sh:/answerserver/prestart_scripts/002_startup_tasks.sh
   idol-qms-agentstore:
     image: ${IDOL_REGISTRY}/qms-agentstore:${IDOL_SERVER_VERSION}
     extra_hosts: *external-licenseserver-host
@@ -73,7 +73,7 @@ services:
     environment: *http-proxy-settings
     volumes:
       - ./viewserver/view.cfg:/view/cfg/view.cfg
-      - ./viewserver/startup_tasks.sh:/view/startup_tasks.sh
+      - ./viewserver/startup_tasks.sh:/view/prestart_scripts/002_startup_tasks.sh
   idol-dataadmin-community:
     image: ${IDOL_REGISTRY}/community:${IDOL_SERVER_VERSION}
     extra_hosts: *external-licenseserver-host
@@ -84,7 +84,8 @@ services:
       - IDOL_AGENTSTORE_PORT=20050
     volumes:
       - ./community/community.cfg:/community/cfg/community.cfg
-      - ./community/startup_tasks.sh:/community/startup_tasks.sh
+      - ./community/startup_tasks.sh:/community/prestart_scripts/001_startup.sh
+      - ./community/poststart_tasks.sh:/community/poststart_scripts/001_poststart.sh
   idol-dataadmin:
     image: ${IDOL_REGISTRY}/dataadmin:${IDOL_SERVER_VERSION}
     ports:

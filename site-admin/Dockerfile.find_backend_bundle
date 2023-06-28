@@ -43,6 +43,7 @@ COPY --from=view --chown=${IDOL_USER}:${IDOL_USER}  /view/ /view/
 COPY --chown=${IDOL_USER}:${IDOL_USER} control_scripts/control-template.sh /controller/control-template.sh
 # Add post startup tasks for controller to send requests adding the services bundled within its container
 COPY --chown=${IDOL_USER}:${IDOL_USER} control_scripts/add_services.sh /controller/
+COPY --chown=${IDOL_USER}:${IDOL_USER} control_scripts/register_find_services.sh /controller/poststart_scripts/002_add_services.sh
 
 # Rename categorisation-agentstore config for consistency
 # Setup control script, update logs for each component
@@ -54,6 +55,4 @@ RUN mv /categorisation-agentstore/cfg/agentstore.cfg /categorisation-agentstore/
     sed -i "s#<COMPONENT>#${C}#g" /${C}/control-${C}.sh ; \
     sed -i "s#^\(LogDirectory *= *\).*#\1/idol-logs/${C}/#" /${C}/cfg/${C}.cfg ; \
     sed -i "s#^\(LogArchiveDirectory *= *\).*#\1/idol-logs/${C}/archive#" /${C}/cfg/${C}.cfg ; \
-    done && \
-    sed -i "s#^source ./startup_utils.sh#source ./startup_utils.sh\nsource ./add_services.sh#" /controller/startup_tasks.sh && \
-    sed -i "s#^function post_startup_tasks {#function post_startup_tasks {\n    add_support_services idol-controller-find-backend-bundle\n    start_support_services idol-controller-find-backend-bundle idol-controller-content-bundle\n    add_to_coordinator idol-controller-find-backend-bundle#" /controller/startup_tasks.sh
+    done
