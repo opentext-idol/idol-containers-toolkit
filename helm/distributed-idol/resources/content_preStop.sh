@@ -6,10 +6,12 @@ preStop hook is used in mirror mode to remove engine from DIH/DAH.
 In non-mirror mode this is a no-op
 */}}
 {{- if .Values.setupMirrored }}
+HTTP_REQ_PARAMS="--silent --show-error --retry 5 --retry-connrefused --retry-max-time 10"
+
 function waitForAci() {
   exit_code=1
   while [ $exit_code -ne 0 ]; do
-    wget -O- "http://$1:$2/a=getpid" | grep "<autn:pid>"
+    curl -o - "http://$1:$2/a=getpid" | grep "<autn:pid>"
     exit_code=$?
     if [ $exit_code -ne 0 ]; then
       sleep 1
@@ -18,7 +20,7 @@ function waitForAci() {
 }
 
 function getDIHEngineID() {
-  wget -Oenginedih.xml -nv -t 5 --retry-connrefused --waitretry=10 "http://idol-dih:$1/a=getstatus"
+  curl -o enginedih.xml ${HTTP_REQ_PARAMS} "http://idol-dih:$1/a=getstatus"
   id=$(sed "s@<engine@\n<engine@g" enginedih.xml | grep "$2" | awk '{match($0, /<group>([0-9]+)<\/group>/); print substr($0, RSTART, RLENGTH)}' | awk '{match($0, /[0-9]+/); print substr($0, RSTART, RLENGTH)}')
   rm enginedih.xml
   echo $id
@@ -73,7 +75,7 @@ else
     if [ $engineid -gt -1 ]; then
       echo "[$(date)] Removing $hostname from DIH." | tee -a $logfile
       echo "[$(date)] DIH returned id $engineid for this engine." | tee -a $logfile
-      wget -nv -t 5 --retry-connrefused --waitretry=10 "http://idol-dih:$dihindexport/DREREDISTRIBUTE?RemoveGroup=$engineid"
+      curl ${HTTP_REQ_PARAMS} "http://idol-dih:$dihindexport/DREREDISTRIBUTE?RemoveGroup=$engineid"
       waitForDIHRemovedEngine $dihaciport $hostname
       echo "[$(date)] Removed $hostname from DIH." | tee -a $logfile
     else
@@ -84,7 +86,7 @@ else
   fi
 
   function getDAHEngineID() {
-    wget -Oengineshowstatus.xml -nv -t 5 --retry-connrefused --waitretry=10 "http://{{ .Values.dahName }}:$1/a=enginemanagement&engineaction=showstatus"
+    curl -o engineshowstatus.xml ${HTTP_REQ_PARAMS}  "http://{{ .Values.dahName }}:$1/a=enginemanagement&engineaction=showstatus"
     id=$(sed "s/</\n</g" engineshowstatus.xml | grep "engine id" | grep "$2" | awk '{print $2}' | cut -d '=' -f2 | grep -o -E '[0-9]+')
     rm engineshowstatus.xml
     echo $id
@@ -100,7 +102,7 @@ else
     if [ $engineid -gt -1 ]; then
       echo "[$(date)] Powering down $hostname in DAH." | tee -a $logfile
       echo "[$(date)] DAH returned id $engineid for this engine." | tee -a $logfile
-      wget -O- -nv -t 5 --retry-connrefused --waitretry=10 "http://{{ .Values.dahName }}:$dahaciport/a=enginemanagement&engineaction=PowerDown&EngineID=$engineid"
+      curl -o - ${HTTP_REQ_PARAMS}  "http://{{ .Values.dahName }}:$dahaciport/a=enginemanagement&engineaction=PowerDown&EngineID=$engineid"
       echo "[$(date)] Powered down $hostname in DAH" | tee -a $logfile
     else
       echo "[$(date)] $hostname not found in DAH, nothing to do." | tee -a $logfile

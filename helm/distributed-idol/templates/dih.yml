@@ -119,6 +119,15 @@ spec:
           fi
           ln -sf /opt/idol/dih/data/dih.cfg ./dih.cfg
           ./run_idol.sh
+        
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - /bin/bash
+              - "-c"
+              - |
+{{ tpl (.Files.Get "resources/dih_preStop.sh") . | indent 16 }}
         volumeMounts:
         - name: dih-persistent-storage
           mountPath: /opt/idol/dih/data
