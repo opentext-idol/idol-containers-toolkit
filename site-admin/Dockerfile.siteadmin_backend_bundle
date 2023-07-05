@@ -33,6 +33,7 @@ COPY --from=community --chown=${IDOL_USER}:${IDOL_USER} /community/ /community/
 COPY --chown=${IDOL_USER}:${IDOL_USER} control_scripts/control-template.sh /controller/control-template.sh
 # Add post startup tasks for controller to send requests adding the services bundled within its container
 COPY --chown=${IDOL_USER}:${IDOL_USER} control_scripts/add_services.sh /controller/
+COPY --chown=${IDOL_USER}:${IDOL_USER} control_scripts/register_backend_services.sh /controller/poststart_scripts/002_add_services.sh
 
 # Setup control script, update logs for each component
 # Finalize controller startup
@@ -42,7 +43,5 @@ RUN for C in agentstore community ; do \
     sed -i "s#<COMPONENT>#${C}#g" /${C}/control-${C}.sh ; \
     sed -i "s#^\(LogDirectory *= *\).*#\1/idol-logs/${C}/#" /${C}/cfg/${C}.cfg ; \
     sed -i "s#^\(LogArchiveDirectory *= *\).*#\1/idol-logs/${C}/archive#" /${C}/cfg/${C}.cfg ; \
-    done && \
-    sed -i "s#^source ./startup_utils.sh#source ./startup_utils.sh\nsource ./add_services.sh#" /controller/startup_tasks.sh && \
-    sed -i "s#^function post_startup_tasks {#function post_startup_tasks {\n    add_siteadmin_backend_services idol-controller-siteadmin-backend-bundle\n    start_siteadmin_backend_services idol-controller-siteadmin-backend-bundle idol-controller-content-bundle\n    add_to_coordinator idol-controller-siteadmin-backend-bundle#" /controller/startup_tasks.sh
+    done
 

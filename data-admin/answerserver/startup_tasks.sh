@@ -29,11 +29,4 @@ function wait_for_pg_isready {
     done
 }
 
-function pre_startup_tasks {
-    wait_for_pg_isready idol-factbank-postgres 5432 postgres factbank-data 1 60
-    :
-}
-
-function post_startup_tasks {
-    :
-}
+wait_for_pg_isready idol-factbank-postgres 5432 postgres factbank-data 1 60

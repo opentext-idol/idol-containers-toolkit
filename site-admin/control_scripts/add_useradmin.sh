@@ -16,7 +16,7 @@
 # Sends a request to add a useradmin user to community, so that siteadmin doesn't require configuration
 
 ## Command to call with an HTTP request
-MAKE_REQUEST="wget -qO-"
+MAKE_REQUEST="curl -s"
 
 function add_useradmin {
     # $1 host:port

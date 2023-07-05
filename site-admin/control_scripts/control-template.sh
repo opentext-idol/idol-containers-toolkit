@@ -3,12 +3,17 @@
 # Get to correct directory to run <COMPONENT>.
 pushd /<COMPONENT> > /dev/null 2>&1
 
-# Include startup tasks and utils
-source /<COMPONENT>/startup_tasks.sh
+run_prestart_scripts() {
+  for script in /<COMPONENT>/prestart_scripts/*.sh; do [ -f "$script" ] && source "$script"; done
+}
+
+run_poststart_scripts() {
+  for script in /<COMPONENT>/poststart_scripts/*.sh; do [ -f "$script" ] && source "$script"; done
+}
 
 if [ $1 == 'start' ]
 then
-    pre_startup_tasks
+    run_prestart_scripts
 
     echo "--------------------------------------------------------------------"
     echo "Micro Focus <COMPONENT> Server"
@@ -20,7 +25,7 @@ then
     serverpid=$!
     echo "Started <COMPONENT> Server with PID $serverpid"
 
-    post_startup_tasks
+    run_poststart_scripts
 fi
 
 if [ $1 == 'stop' ]
