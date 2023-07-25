@@ -103,11 +103,9 @@ spec:
 {{- template "distributedidol.deployment.standardLivenessProbe" }}
         ports:
         - containerPort: {{ (index .Values.dahPorts 0).container | int }}
-          hostPort: {{ (index .Values.dahPorts 0).host | int }}
           name: {{ (index .Values.dahPorts 0).name }}
           protocol: TCP
         - containerPort: {{ (index .Values.dahPorts 1).container | int }}
-          hostPort: {{ (index .Values.dahPorts 1).host | int }}
           name: {{ (index .Values.dahPorts 1).name }}
           protocol: TCP
       volumes:

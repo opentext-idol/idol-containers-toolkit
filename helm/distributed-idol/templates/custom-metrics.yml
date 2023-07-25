@@ -79,7 +79,6 @@ spec:
         - --config=/etc/adapter/config.yaml
         ports:
         - containerPort: {{ (index .Values.custommetricsPorts 0).host | int }}
-          hostPort: {{ (index .Values.custommetricsPorts 0).host | int }}
         volumeMounts:
         - mountPath: /var/run/serving-cert
           name: volume-serving-cert

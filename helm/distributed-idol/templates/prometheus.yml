@@ -43,7 +43,6 @@ spec:
           mountPath: /etc/prometheus
         ports:
         - containerPort: {{ (index .Values.prometheusPorts 0).container | int }}
-          hostPort: {{ (index .Values.prometheusPorts 0).host | int }}
           name: {{ (index .Values.prometheusPorts 0).name }}
           protocol: TCP
       volumes:
