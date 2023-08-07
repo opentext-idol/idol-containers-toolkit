@@ -61,10 +61,8 @@ spec:
 {{- template "basicidol.deployment.standardLivenessProbe" }}
         ports:
         - containerPort: {{ (index .Values.content.ports 0).container | int }}
-          hostPort: {{ (index .Values.content.ports 0).host | int }}
           protocol: {{ .Values.portProtocol }}
         - containerPort: {{ (index .Values.content.ports 1).container | int }}
-          hostPort: {{ (index .Values.content.ports 1).host | int }}
           protocol: {{ .Values.portProtocol }}
 {{- if .Values.isIncluded.documentSecurity }}
         command: ["/bin/sh"]
@@ -114,10 +112,8 @@ spec:
 {{- template "basicidol.deployment.standardLivenessProbe" }}
         ports:
         - containerPort: {{ (index .Values.agentstore.ports 0).container | int }}
-          hostPort: {{ (index .Values.agentstore.ports 0).host | int }}
           protocol: {{ .Values.portProtocol }}
         - containerPort: {{ (index .Values.agentstore.ports 1).container | int }}
-          hostPort: {{ (index .Values.agentstore.ports 1).host | int }}
           protocol: {{ .Values.portProtocol }}
       imagePullSecrets:
       - name: {{ .Values.secret.name }}
@@ -151,13 +147,10 @@ spec:
 {{- template "basicidol.deployment.standardLivenessProbe" }}
         ports:
         - containerPort: {{ (index .Values.categorisationAgentstore.ports 0).container | int }}
-          hostPort: {{ (index .Values.categorisationAgentstore.ports 0).host | int }}
           protocol: {{ .Values.portProtocol }}
         - containerPort: {{ (index .Values.categorisationAgentstore.ports 1).container | int }}
-          hostPort: {{ (index .Values.categorisationAgentstore.ports 1).host | int }}
           protocol: {{ .Values.portProtocol }}
         - containerPort: {{ (index .Values.categorisationAgentstore.ports 2).container | int }}
-          hostPort: {{ (index .Values.categorisationAgentstore.ports 2).host | int }}
           protocol: {{ .Values.portProtocol }}
       imagePullSecrets:
       - name: {{ .Values.secret.name }}
@@ -221,10 +214,8 @@ spec:
 {{- template "basicidol.deployment.communityLivenessProbe" }}
         ports:
         - containerPort: {{ (index .Values.community.ports 0).container | int }}
-          hostPort: {{ (index .Values.community.ports 0).host | int }}
           protocol: {{ .Values.portProtocol }}
         - containerPort: {{ (index .Values.community.ports 1).container | int }}
-          hostPort: {{ (index .Values.community.ports 1).host | int }}
           protocol: {{ .Values.portProtocol }}
 {{- if .Values.isIncluded.documentSecurity }}
         command: ["/bin/sh"]
@@ -274,7 +265,6 @@ spec:
 {{- template "basicidol.deployment.standardLivenessProbe" }}
         ports:
         - containerPort: {{ (index .Values.view.ports 0).container | int }}
-          hostPort: {{ (index .Values.view.ports 0).host | int }}
           protocol: {{ .Values.portProtocol }}
       imagePullSecrets:
       - name: {{ .Values.secret.name }}
@@ -312,7 +302,6 @@ spec:
 {{- template "basicidol.deployment.findNifiLivenessProbe" }}
         ports:
         - containerPort: {{ (index .Values.find.ports 0).container | int }}
-          hostPort: {{ (index .Values.find.ports 0).host | int }}
           protocol: {{ .Values.portProtocol }}
       imagePullSecrets:
       - name: {{ .Values.secret.name }}
@@ -361,7 +350,6 @@ spec:
 {{- template "basicidol.deployment.findNifiLivenessProbe" }}
         ports:
         - containerPort: {{ .Values.nifi.ports.ui.container | int }}
-          hostPort: {{ .Values.nifi.ports.ui.host | int }}
           protocol: {{ .Values.portProtocol }}
 {{- if .Values.isIncluded.mmap }}
       - image: {{ .Values.maintainer }}/{{ .Values.mmapMediaserver.image }}:{{ .Values.idolVersion }}
@@ -377,10 +365,8 @@ spec:
 {{- template "basicidol.deployment.mmapMediaPlaylistserverLivenessProbe" }}
         ports:
         - containerPort: {{ .Values.mmapMediaserver.ports.aci.container | int }}
-          hostPort: {{ .Values.mmapMediaserver.ports.aci.host | int }}
           protocol: {{ .Values.portProtocol }}
         - containerPort: {{ .Values.mmapMediaserver.ports.index.container | int }}
-          hostPort: {{ .Values.mmapMediaserver.ports.index.host | int }}
           protocol: {{ .Values.portProtocol }}
       - image: {{ .Values.maintainer }}/{{ .Values.mmapPlaylistserver.image }}:{{ .Values.idolVersion }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
@@ -395,7 +381,6 @@ spec:
 {{- template "basicidol.deployment.mmapMediaPlaylistserverLivenessProbe" }}
         ports:
         - containerPort: {{ .Values.mmapPlaylistserver.ports.aci.container | int }}
-          hostPort: {{ .Values.mmapPlaylistserver.ports.aci.host | int }}
           protocol: {{ .Values.portProtocol }}
       - image: {{ .Values.maintainer }}/{{ .Values.mmapApp.image }}:{{ .Values.idolVersion }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
@@ -417,13 +402,10 @@ spec:
 {{- template "basicidol.deployment.mmapAppLivenessProbe" }}
         ports:
         - containerPort: {{ .Values.mmapApp.ports.ui.container | int }}
-          hostPort: {{ .Values.mmapApp.ports.ui.host | int }}
           protocol: {{ .Values.portProtocol }}
         - containerPort: {{ .Values.mmapApp.ports.ajp.container | int }}
-          hostPort: {{ .Values.mmapApp.ports.ajp.host | int }}
           protocol: {{ .Values.portProtocol }}
         - containerPort: {{ .Values.mmapApp.ports.ssl.container | int }}
-          hostPort: {{ .Values.mmapApp.ports.ssl.host | int }}
           protocol: {{ .Values.portProtocol }}
 {{- end }}
       imagePullSecrets:
@@ -521,7 +503,6 @@ spec:
 {{- template "basicidol.deployment.reverseProxyLivenessProbe" }}
         ports:
         - containerPort: {{ (index .Values.reverseProxy.ports 0).container | int }}
-          hostPort: {{ (index .Values.reverseProxy.ports 0).host | int }}
           protocol: {{ .Values.portProtocol }}
       imagePullSecrets:
       - name: {{ .Values.secret.name }}
@@ -587,10 +568,8 @@ spec:
 {{- template "basicidol.deployment.standardLivenessProbe" }}
         ports:
         - containerPort: {{ (index .Values.omnigroupserver.ports 0).container | int }}
-          hostPort: {{ (index .Values.omnigroupserver.ports 0).host | int }}
           protocol: {{ .Values.portProtocol }}
         - containerPort: {{ (index .Values.omnigroupserver.ports 1).container | int }}
-          hostPort: {{ (index .Values.omnigroupserver.ports 1).host | int }}
           protocol: {{ .Values.portProtocol }}
         command: ["/bin/sh"]
         args: ["-c", "cd /omnigroupserver && command cp -f /etc/config/idol/omnigroupserver.cfg omnigroupserver.cfg && ./run_idol.sh"]
