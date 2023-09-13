@@ -9,7 +9,7 @@ metadata:
   labels: {{- include "distributedidol.labels" . | nindent 4 }}
 spec:
   ports:
-  - port: {{ (index .Values.prometheusPorts 0).host | int }}
+  - port: {{ (index .Values.prometheusPorts 0).port | int }}
     targetPort: {{ (index .Values.prometheusPorts 0).container | int }}
     name: {{ (index .Values.prometheusPorts 0).name }}
   selector:
