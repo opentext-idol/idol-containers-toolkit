@@ -19,7 +19,7 @@ spec:
           service:
             name: {{ .Values.contentName }}
             port:
-              number: {{ (index .Values.contentPorts 0).service | int }}
+              name: {{ (index .Values.contentPorts 0).name }}
 {{- range $i := untilStep 0 ( .Values.exposedContents | int ) 1 }}
       - path: /content-{{ $i }}/(.*)
         pathType: Prefix
@@ -27,7 +27,7 @@ spec:
           service:
             name: {{ $.Values.contentName }}-{{ $i }}
             port:
-              number: {{ (index $.Values.contentPorts 0).service | int }}
+              name: {{ (index $.Values.contentPorts 0).name }}
 {{- end }}
       - path: /dih/(.*)
         pathType: Prefix
@@ -35,28 +35,28 @@ spec:
           service:
             name: {{ .Values.dihName }}
             port:
-              number: {{ (index .Values.dihPorts 0).service | int }}
+              name: {{ (index .Values.dihPorts 0).name }}
       - path: /dah/(.*)
         pathType: Prefix
         backend:
           service:
             name: {{ .Values.dahName }}
             port:
-              number: {{ (index .Values.dahPorts 0).service | int }}
+              name: {{ (index .Values.dahPorts 0).name }}
       - path: /index/(.*)
         pathType: Prefix
         backend:
           service:
             name: {{ .Values.indexserviceName }}
             port: 
-              number: {{ (index .Values.dihPorts 1).service | int }}
+              name: {{ (index .Values.dihPorts 1).name }}
       - path: /metrics/(.*)
         pathType: Prefix
         backend:
           service:
             name: {{ .Values.dihName }}
             port:
-              number: {{ .Values.dihPrometheusPort | int }}
+              name: {{ .Values.dihPrometheusPortName }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -75,18 +75,18 @@ spec:
           service:
             name: {{ .Values.prometheusService }}
             port:
-              number: {{ (index .Values.prometheusPorts 0).service | int }}
+              name: {{ (index .Values.prometheusPorts 0).name }}
       - path: /((api|static)/.*)
         pathType: Prefix
         backend:
           service:
             name: {{ .Values.prometheusService }}
             port:
-              number: {{ (index .Values.prometheusPorts 0).service | int }}
+              name: {{ (index .Values.prometheusPorts 0).name }}
       - path: /(alerts|graph|status|flags|config|rules|targets|service-discovery)
         pathType: Prefix
         backend:
           service:
             name: {{ .Values.prometheusService }}
             port:
-              number: {{ (index .Values.prometheusPorts 0).service | int }}
+              name: {{ (index .Values.prometheusPorts 0).name }}

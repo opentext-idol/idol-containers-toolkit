@@ -10,7 +10,7 @@ metadata:
 spec:
   ports:
   - port: {{ (index .Values.prometheusPorts 0).service | int }}
-    targetPort: {{ (index .Values.prometheusPorts 0).container | int }}
+    targetPort: {{ (index .Values.prometheusPorts 0).name }}
     name: {{ (index .Values.prometheusPorts 0).name }}
   selector:
     app: {{ .Values.prometheusDeployment }}
