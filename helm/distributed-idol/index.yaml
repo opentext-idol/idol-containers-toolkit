@@ -6,6 +6,20 @@ entries:
   distributed-idol:
   - apiVersion: v2
     appVersion: 23.3.0
+    created: "2023-09-13T16:14:54.852460093+01:00"
+    dependencies:
+    - condition: setupMirrored
+      name: metrics-server
+      repository: https://kubernetes-sigs.github.io/metrics-server
+      version: 3.8.2
+    description: A configurable distributed IDOL setup
+    digest: 8b44c9a3fe583bf7a8586c1df91576825986f356159e6299a5f7126eec879847
+    name: distributed-idol
+    urls:
+    - release/distributed-idol-0.4.0.tgz
+    version: 0.4.0
+  - apiVersion: v2
+    appVersion: 23.3.0
     created: "2023-07-03T09:53:58.923999341+01:00"
     dependencies:
     - condition: setupMirrored

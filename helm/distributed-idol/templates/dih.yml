@@ -25,13 +25,13 @@ metadata:
 spec:
   ports:
   - port: {{ (index .Values.dihPorts 0).service | int }}
-    targetPort: {{ (index .Values.dihPorts 0).container | int }}
+    targetPort: {{ (index .Values.dihPorts 0).name }}
     name: {{ (index .Values.dihPorts 0).name }}
   - port: {{ (index .Values.dihPorts 1).service | int }}
-    targetPort: {{ (index .Values.dihPorts 1).container | int }}
+    targetPort: {{ (index .Values.dihPorts 1).name }}
     name: {{ (index .Values.dihPorts 1).name }}
   - port: {{ (index .Values.dihPorts 2).service | int }}
-    targetPort: {{ (index .Values.dihPorts 2).container | int }}
+    targetPort: {{ (index .Values.dihPorts 2).name }}
     name: {{ (index .Values.dihPorts 2).name }}
   selector:
     app: {{ .Values.dihDeployment }}
@@ -47,16 +47,16 @@ metadata:
 spec:
   ports:
   - port: {{ (index .Values.dihPorts 0).service | int }}
-    targetPort: {{ (index .Values.dihPorts 0).container | int }}
+    targetPort: {{ (index .Values.dihPorts 0).name }}
     name: {{ (index .Values.dihPorts 0).name }}
   - port: {{ (index .Values.dihPorts 1).service | int }}
-    targetPort: {{ (index .Values.dihPorts 1).container | int }}
+    targetPort: {{ (index .Values.dihPorts 1).name }}
     name: {{ (index .Values.dihPorts 1).name }}
   - port: {{ (index .Values.dihPorts 2).service | int }}
-    targetPort: {{ (index .Values.dihPorts 2).container | int }}
+    targetPort: {{ (index .Values.dihPorts 2).name }}
     name: {{ (index .Values.dihPorts 2).name }}
   - port: {{ .Values.dihPrometheusPort | int }}
-    targetPort: {{ .Values.dihPrometheusPort | int }}
+    targetPort: {{ .Values.dihPrometheusPortName }}
     name: {{ .Values.dihPrometheusPortName }}
   selector:
     app: {{ .Values.dihDeployment }}
@@ -142,15 +142,12 @@ spec:
 {{- template "distributedidol.deployment.standardLivenessProbe" }}
         ports:
         - containerPort: {{ (index .Values.dihPorts 0).container | int }}
-          hostPort: {{ (index .Values.dihPorts 0).host | int }}
           name: {{ (index .Values.dihPorts 0).name }}
           protocol: TCP
         - containerPort: {{ (index .Values.dihPorts 1).container | int }}
-          hostPort: {{ (index .Values.dihPorts 1).host | int }}
           name: {{ (index .Values.dihPorts 1).name }}
           protocol: TCP
         - containerPort: {{ (index .Values.dihPorts 2).container | int }}
-          hostPort: {{ (index .Values.dihPorts 2).host | int }}
           name: {{ (index .Values.dihPorts 2).name }}
           protocol: TCP
 {{- /*
@@ -180,7 +177,6 @@ spec:
           mountPath: /mnt/python
         ports:
         - containerPort: {{ .Values.dihPrometheusPort | int }}
-          hostPort: {{ .Values.dihPrometheusPort | int }}
           name: {{ .Values.dihPrometheusPortName }}
           protocol: TCP
 {{- end }}

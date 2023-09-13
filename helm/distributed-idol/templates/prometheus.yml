@@ -9,8 +9,8 @@ metadata:
   labels: {{- include "distributedidol.labels" . | nindent 4 }}
 spec:
   ports:
-  - port: {{ (index .Values.prometheusPorts 0).host | int }}
-    targetPort: {{ (index .Values.prometheusPorts 0).container | int }}
+  - port: {{ (index .Values.prometheusPorts 0).service | int }}
+    targetPort: {{ (index .Values.prometheusPorts 0).name }}
     name: {{ (index .Values.prometheusPorts 0).name }}
   selector:
     app: {{ .Values.prometheusDeployment }}
@@ -43,7 +43,6 @@ spec:
           mountPath: /etc/prometheus
         ports:
         - containerPort: {{ (index .Values.prometheusPorts 0).container | int }}
-          hostPort: {{ (index .Values.prometheusPorts 0).host | int }}
           name: {{ (index .Values.prometheusPorts 0).name }}
           protocol: TCP
       volumes:

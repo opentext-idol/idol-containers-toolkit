@@ -10,7 +10,7 @@ metadata:
 spec:
   ports:
   - port: {{ (index .Values.custommetricsPorts 0).service | int }}
-    targetPort: {{ (index .Values.custommetricsPorts 0).host | int }}
+    targetPort: {{ (index .Values.custommetricsPorts 0).container | int }}
   selector:
     app: {{ .Values.custommetricsService }}
 ---
@@ -69,7 +69,7 @@ spec:
       - name: {{ .Values.custommetricsService }}
         image: registry.k8s.io/prometheus-adapter/prometheus-adapter:v0.10.0
         args:
-        - --secure-port={{ (index .Values.custommetricsPorts 0).host | int }}
+        - --secure-port={{ (index .Values.custommetricsPorts 0).container | int }}
         - --tls-cert-file=/var/run/serving-cert/serving.crt
         - --tls-private-key-file=/var/run/serving-cert/serving.key
         - --logtostderr=true
@@ -78,8 +78,7 @@ spec:
         - --v=10
         - --config=/etc/adapter/config.yaml
         ports:
-        - containerPort: {{ (index .Values.custommetricsPorts 0).host | int }}
-          hostPort: {{ (index .Values.custommetricsPorts 0).host | int }}
+        - containerPort: {{ (index .Values.custommetricsPorts 0).container | int }}
         volumeMounts:
         - mountPath: /var/run/serving-cert
           name: volume-serving-cert

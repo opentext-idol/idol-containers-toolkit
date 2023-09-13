@@ -11,6 +11,11 @@
 # This section contains parameters that are most likely to be overridden for
 # the basic choices and constraints around how this chart will be used.
 
+# licenseServerIp is the IP address of the LicenseServer instance
+licenseServerIp: "this value must be replaced with a valid ip address"
+# licenseServerPort is the ACI port of the LicenseServer instance
+licenseServerPort: "20000"
+
 # setupMirrored is a boolean parameter - when `true` this will configure the 
 # DAH and DIH in mirror-mode, meaning the Contents will all be mirrors of each
 # other. When `false`, the DAH and DIH will be configured in non-mirror mode,
@@ -189,11 +194,9 @@ dahPorts:
   - name: "aci-port"
     service: *dah-port0
     container: *dah-port0
-    host: *dah-port0
   - name: "service-port"
     service: *dah-port1
     container: *dah-port1
-    host: *dah-port1
 
 # These `x-dih-port<n>` internal parameters are for DRY purposes.
 x-dih-port0: &dih-port0 "9070"
@@ -211,15 +214,12 @@ dihPorts:
   - name: "aci-port"
     service: *dih-port0
     container: *dih-port0
-    host: *dih-port0
   - name: "index-port"
     service: *dih-port1
     container: *dih-port1
-    host: *dih-port1
   - name: "service-port"
     service: *dih-port2
     container: *dih-port2
-    host: *dih-port2
 # dihPrometheusPort is an internal parameter specifying the port for accessing the DIH's Prometheus service.
 dihPrometheusPort: "9118"
 # dihPrometheusPortName is an internal parameter for specifying a name for the DIH's Prometheus service's port.
@@ -237,8 +237,8 @@ prometheusService: "prometheus-service"
 # They each have a name and specify the container and host ports.
 prometheusPorts:
   - name: "prometheus-port"
+    service: *prometheus-port0
     container: *prometheus-port0
-    host: *prometheus-port0
 
 # These `x-custommetrics-port<n>` are internal parameters for DRY purposes.
 x-custommetrics-port0: &custommetrics-port0 "443"
@@ -249,7 +249,7 @@ custommetricsService: "custom-metrics-apiserver"
 # They each specify the service and host ports.
 custommetricsPorts:
   - service: *custommetrics-port0
-    host: *custommetrics-port1
+    container: *custommetrics-port1
 
 # exposedContents Allows ingress access to individual content engines. Set to max number of engines to expose
 exposedContents: 0

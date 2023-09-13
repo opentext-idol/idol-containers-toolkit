@@ -10,15 +10,15 @@ metadata:
 spec:
   ports:
   - port: {{ (index .Values.contentPorts 0).service | int }}
-    targetPort: {{ (index .Values.contentPorts 0).container | int }}
+    targetPort: {{ (index .Values.contentPorts 0).name }}
     name: {{ (index .Values.contentPorts 0).name }}
     protocol: TCP
   - port: {{ (index .Values.contentPorts 1).service | int }}
-    targetPort: {{ (index .Values.contentPorts 1).container | int }}
+    targetPort: {{ (index .Values.contentPorts 1).name }}
     name: {{ (index .Values.contentPorts 1).name }}
     protocol: TCP
   - port: {{ (index .Values.contentPorts 2).service | int }}
-    targetPort: {{ (index .Values.contentPorts 2).container | int }}
+    targetPort: {{ (index .Values.contentPorts 2).name }}
     name: {{ (index .Values.contentPorts 2).name }}
     protocol: TCP
   clusterIP: None
@@ -35,15 +35,15 @@ metadata:
 spec:
   ports:
   - port: {{ (index $.Values.contentPorts 0).container | int }}
-    targetPort: {{ (index $.Values.contentPorts 0).container | int }}
+    targetPort: {{ (index $.Values.contentPorts 0).name }}
     name: {{ (index $.Values.contentPorts 0).name }}
     protocol: TCP
   - port: {{ (index $.Values.contentPorts 1).container | int }}
-    targetPort: {{ (index $.Values.contentPorts 1).container | int }}
+    targetPort: {{ (index $.Values.contentPorts 1).name }}
     name: {{ (index $.Values.contentPorts 1).name }}
     protocol: TCP
   - port: {{ (index $.Values.contentPorts 2).container | int }}
-    targetPort: {{ (index $.Values.contentPorts 2).container | int }}
+    targetPort: {{ (index $.Values.contentPorts 2).name }}
     name: {{ (index $.Values.contentPorts 2).name }}
     protocol: TCP
   clusterIP: None

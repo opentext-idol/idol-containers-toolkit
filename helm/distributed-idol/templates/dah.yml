@@ -11,10 +11,10 @@ metadata:
 spec:
   ports:
   - port: {{ (index .Values.dahPorts 0).service | int }}
-    targetPort: {{ (index .Values.dahPorts 0).container | int }}
+    targetPort: {{ (index .Values.dahPorts 0).name }}
     name: {{ (index .Values.dahPorts 0).name }}
   - port: {{ (index .Values.dahPorts 1).service | int }}
-    targetPort: {{ (index .Values.dahPorts 1).container | int }}
+    targetPort: {{ (index .Values.dahPorts 1).name }}
     name: {{ (index .Values.dahPorts 1).name }}
   selector:
     app: {{ .Values.dahDeployment }}
@@ -29,10 +29,10 @@ metadata:
 spec:
   ports:
   - port: {{ (index .Values.dahPorts 0).service | int }}
-    targetPort: {{ (index .Values.dahPorts 0).container | int }}
+    targetPort: {{ (index .Values.dahPorts 0).name }}
     name: {{ (index .Values.dahPorts 0).name }}
   - port: {{ (index .Values.dahPorts 1).service | int }}
-    targetPort: {{ (index .Values.dahPorts 1).container | int }}
+    targetPort: {{ (index .Values.dahPorts 1).name }}
     name: {{ (index .Values.dahPorts 1).name }}
   selector:
     app: {{ .Values.dahDeployment }}
@@ -103,11 +103,9 @@ spec:
 {{- template "distributedidol.deployment.standardLivenessProbe" }}
         ports:
         - containerPort: {{ (index .Values.dahPorts 0).container | int }}
-          hostPort: {{ (index .Values.dahPorts 0).host | int }}
           name: {{ (index .Values.dahPorts 0).name }}
           protocol: TCP
         - containerPort: {{ (index .Values.dahPorts 1).container | int }}
-          hostPort: {{ (index .Values.dahPorts 1).host | int }}
           name: {{ (index .Values.dahPorts 1).name }}
           protocol: TCP
       volumes:

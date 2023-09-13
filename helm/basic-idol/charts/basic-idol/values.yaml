@@ -48,11 +48,9 @@ content:
     - name: aci-port
       service: *content-port0
       container: *content-port0
-      host: *content-port0
     - name: index-port
       service: *content-port1
       container: *content-port1
-      host: *content-port1
       
 agentstore:
   x-agentstore-port0: &agentstore-port0 9050
@@ -63,9 +61,7 @@ agentstore:
   ports:
     - service: *agentstore-port0
       container: *agentstore-port0
-      host: *agentstore-port0 
     - container: *agentstore-port1
-      host: *agentstore-port1
       
 categorisationAgentstore:
   #port0 is always the livenessProbe port
@@ -78,11 +74,8 @@ categorisationAgentstore:
   ports:
     - service: *categorisation-agentstore-port0
       container: *categorisation-agentstore-port0
-      host: *categorisation-agentstore-port0
     - container: *categorisation-agentstore-port1
-      host: *categorisation-agentstore-port1
     - container: *categorisation-agentstore-port2
-      host: *categorisation-agentstore-port2
       
 community:
   x-community-port0: &community-port0 9030
@@ -94,11 +87,9 @@ community:
     - name: aci-port
       service: *community-port0
       container: *community-port0
-      host: *community-port0
     - name: service-port
       service: *community-port1
       container: *community-port1
-      host: *community-port1
       
 view:
   x-view-port0: &view-port0 9080
@@ -108,7 +99,6 @@ view:
   ports:
     - service: *view-port0
       container: *view-port0
-      host: *view-port0
       
 find:
   x-find-port0: &find-port0 8000
@@ -121,7 +111,6 @@ find:
   ports:
     - service: *find-port0
       container: *find-port0
-      host: *find-port0
       livenessProbePath: /
 
 #NiFi does not use lists, but rather names each environment variable, volume, and port, which I feel could be more manageable    
@@ -155,7 +144,6 @@ nifi:
       name: ui-port
       service: *nifi-port0
       container: *nifi-port0
-      host: 8001
       livenessProbePath: /nifi/
     connectorAci:
       name: connector-aci-port
@@ -175,7 +163,6 @@ reverseProxy:
   ports:
     - service: *reverseproxy-port0
       container: *reverseproxy-port0
-      host: *reverseproxy-port0
       livenessProbePath: /find
 
 mmapMediaserver:
@@ -193,12 +180,10 @@ mmapMediaserver:
       name: aci-port
       service: *mediaserver-port0
       container: *mediaserver-port0
-      host: *mediaserver-port0
     index:
       name: index-port
       service: *mediaserver-port1
       container: *mediaserver-port1
-      host: *mediaserver-port1
 
 mmapPlaylistserver:
   x-mediaserver-port0: &playlistserver-port0 24000
@@ -213,7 +198,6 @@ mmapPlaylistserver:
     aci:
       service: *playlistserver-port0
       container: *playlistserver-port0
-      host: *playlistserver-port0
 
 mmapApp:
   x-mediaserver-port0: &mmap-port0 8080
@@ -241,17 +225,14 @@ mmapApp:
       name: ui-port
       service: *mmap-port0
       container: *mmap-port0
-      host: 8002
       livenessProbePath: /
     ajp:
       name: ajp-port
       service: *mmap-port1
       container: *mmap-port1
-      host: *mmap-port1
     ssl:
       name: ssl-port
       container: 8443
-      host: 8444
 
 mmapDb:
   x-mmap-db-port0: &mmap-db-port0 5432
@@ -292,11 +273,9 @@ omnigroupserver:
     - name: aci-port
       service: *omnigroupserver-port0
       container: *omnigroupserver-port0
-      host: *omnigroupserver-port0
     - name: service-port
       service: *omnigroupserver-port1
       container: *omnigroupserver-port1
-      host: *omnigroupserver-port1
   volumes:
     cfg:
       name: omnigroupserver-cfg-mount
