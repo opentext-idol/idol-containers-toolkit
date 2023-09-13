@@ -75,18 +75,18 @@ spec:
           service:
             name: {{ .Values.prometheusService }}
             port:
-              number: {{ (index .Values.prometheusPorts 0).port | int }}
+              number: {{ (index .Values.prometheusPorts 0).service | int }}
       - path: /((api|static)/.*)
         pathType: Prefix
         backend:
           service:
             name: {{ .Values.prometheusService }}
             port:
-              number: {{ (index .Values.prometheusPorts 0).port | int }}
+              number: {{ (index .Values.prometheusPorts 0).service | int }}
       - path: /(alerts|graph|status|flags|config|rules|targets|service-discovery)
         pathType: Prefix
         backend:
           service:
             name: {{ .Values.prometheusService }}
             port:
-              number: {{ (index .Values.prometheusPorts 0).port | int }}
+              number: {{ (index .Values.prometheusPorts 0).service | int }}

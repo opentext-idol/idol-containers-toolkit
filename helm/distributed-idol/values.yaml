@@ -237,8 +237,8 @@ prometheusService: "prometheus-service"
 # They each have a name and specify the container and host ports.
 prometheusPorts:
   - name: "prometheus-port"
+    service: *prometheus-port0
     container: *prometheus-port0
-    port: *prometheus-port0
 
 # These `x-custommetrics-port<n>` are internal parameters for DRY purposes.
 x-custommetrics-port0: &custommetrics-port0 "443"
@@ -249,7 +249,7 @@ custommetricsService: "custom-metrics-apiserver"
 # They each specify the service and host ports.
 custommetricsPorts:
   - service: *custommetrics-port0
-    port: *custommetrics-port1
+    container: *custommetrics-port1
 
 # exposedContents Allows ingress access to individual content engines. Set to max number of engines to expose
 exposedContents: 0
