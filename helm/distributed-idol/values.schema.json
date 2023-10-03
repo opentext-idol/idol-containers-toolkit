@@ -75,6 +75,13 @@
             "type": "string",
             "pattern": "^\\d+(?:\\.\\d+)?(?:Ki|Mi|Gi|Ti|Pi|Ei|m|k|M|G|T|P|E)?$"
         },
+        "ingressType": {
+            "type": "string",
+            "enum": ["nginx","haproxy"]
+        },
+        "ingressHost": {
+            "type": "string"
+        },
         "httpProxy": {
             "type": "string"
         },
