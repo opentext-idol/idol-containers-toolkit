@@ -44,7 +44,7 @@ def ensure_list(object: object):
         return [object]
 
 def extract_index_id(responsetext: str) -> str:
-    match = re.search('^INDEXID=(\d+)', responsetext)
+    match = re.search(r'^INDEXID=(\d+)', responsetext)
     if not match:
         return None
     return match.group(1)
