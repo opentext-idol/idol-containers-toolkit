@@ -21,6 +21,7 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-body-size: {{ .Values.ingressProxyBodySize }}
 {{- else if eq .Values.ingressType "haproxy" }}
     haproxy.router.openshift.io/rewrite-target: / 
+    haproxy.router.openshift.io/proxy-body-size: {{ .Values.ingressProxyBodySize }}
 {{- end }}
 spec:
   rules:
