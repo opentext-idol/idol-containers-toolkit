@@ -155,7 +155,7 @@ spec:
 */}}
 {{- if and (.Values.autoscalingEnabled) (not .Values.setupMirrored) }}
       - name: prometheus-exporter
-        image: python:3
+        image: python:3.11
 {{- if .Values.httpProxy }}
         envFrom:
           - configMapRef:
@@ -175,6 +175,10 @@ spec:
         volumeMounts:
         - name: dih-prometheus-exporter-python
           mountPath: /mnt/python
+        - name: python-src-app
+          mountPath: /usr/src/app
+        - name: python-local
+          mountPath: /.local
         ports:
         - containerPort: {{ .Values.dihPrometheusPort | int }}
           name: {{ .Values.dihPrometheusPortName }}
@@ -188,6 +192,10 @@ spec:
       - name: dih-prometheus-exporter-python
         configMap:
           name: dih-prometheus-exporter-python
+      - name: python-src-app  # working directory for exporter
+        emptyDir: {}
+      - name: python-local  # for pip downloads
+        emptyDir: {}
 {{- end }}
   volumeClaimTemplates:
   - metadata:

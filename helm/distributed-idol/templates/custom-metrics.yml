@@ -26,7 +26,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: {{ .Values.custommetricsService }}
-  namespace: default
+  namespace: {{ include "distributedidol.namespace" . | quote }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -41,7 +41,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: {{ .Values.custommetricsService }}
-  namespace: default
+  namespace: {{ include "distributedidol.namespace" . | quote }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -67,31 +67,24 @@ spec:
         {{- end }}
       containers:
       - name: {{ .Values.custommetricsService }}
-        image: registry.k8s.io/prometheus-adapter/prometheus-adapter:v0.10.0
+        image: registry.k8s.io/prometheus-adapter/prometheus-adapter:v0.11.1
         args:
+        - /adapter
         - --secure-port={{ (index .Values.custommetricsPorts 0).container | int }}
-        - --tls-cert-file=/var/run/serving-cert/serving.crt
-        - --tls-private-key-file=/var/run/serving-cert/serving.key
-        - --logtostderr=true
+        - --cert-dir=/tmp/cert
         - --prometheus-url=http://{{ .Values.prometheusService }}:9090/
         - --metrics-relist-interval=1m
-        - --v=10
+        - --v=4
         - --config=/etc/adapter/config.yaml
         ports:
         - containerPort: {{ (index .Values.custommetricsPorts 0).container | int }}
         volumeMounts:
-        - mountPath: /var/run/serving-cert
-          name: volume-serving-cert
-          readOnly: true
         - mountPath: /etc/adapter/
           name: config
           readOnly: true
         - mountPath: /tmp
           name: tmp-vol
       volumes:
-      - name: volume-serving-cert
-        secret:
-          secretName: cm-adapter-serving-certs
       - name: config
         configMap:
           name: adapter-config
@@ -110,7 +103,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: {{ .Values.custommetricsService }}
-  namespace: default
+  namespace: {{ include "distributedidol.namespace" . | quote }}
 ---
 kind: ServiceAccount
 apiVersion: v1
@@ -126,7 +119,7 @@ metadata:
 spec:
   service:
     name: {{ .Values.custommetricsService }}
-    namespace: default
+    namespace: {{ include "distributedidol.namespace" . | quote }}
   group: custom.metrics.k8s.io
   version: v1beta1
   insecureSkipTLSVerify: true

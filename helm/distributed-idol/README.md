@@ -49,7 +49,6 @@ There are some values that are required but do not have defaults. The user of th
 ### Required Secrets
 
 - `dockerhub-secret` : for pulling images from Docker Hub
-- `cm-adapter-serving-certs` : for autoscaling, contains a TLS certificate and private key
 
 By default the Helm chart is configured to pull images from Docker Hub and expects a Kubernetes secret called `dockerhub-secret` to be created. This secret must contain the credentials required to pull images from Docker Hub. For example (substituting appropriate values for username and API token):
 
@@ -62,15 +61,6 @@ kubectl create secret docker-registry dockerhub-secret
 In practice (at present), access to the IDOL images on dockerhub is restricted to the user `microfocusidolreadonly`, so this will be the value of `${DOCKERHUB_USER}` in the example.
 
 If a different name is required for this Kubernetes secret, override the `imagePullSecrets` list value.
-
-The `cm-adapter-serving-certs` secret used by the custom metrics adapter can be generated given certificate and key files. For example:
-
-```sh
-kubectl create secret generic cm-adapter-serving-certs
-    --from-file=serving.crt --from-file=serving.key
-```
-
-See [certgen/README.md](certgen/README.md) directory for a helper script to generate these.
 
 ### Optional Values
 
@@ -85,11 +75,13 @@ There are some values that are optional or sometimes overriden:
 
 The cluster must provide an [IngressController](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/). For example on a [minikube](https://minikube.sigs.k8s.io/docs/) cluster, you can [enable an NGINX controller](https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/) and see the exposed address using `kubectl get ingress`.
 
+By default the chart is setup ingress for `nginx`. If you are deploying on OpenShift/OKD then you should set `ingressType=haproxy` and specify your `ingressHost`.
+
 ### Storage Classes and Persistent Volumes
 
 This system uses [Storage Classes](https://kubernetes.io/docs/concepts/storage/storage-classes/#introduction) to provide [Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) as persistent storage for the DIH and Content components.
 
-Note: uninstalling does not delete the PersistentVolumeClaims. If you redeploy the helm chart, it reuses any existing PV or PVCs.
+> Note: uninstalling does not delete the PersistentVolumeClaims. If you redeploy the helm chart, it reuses any existing PV or PVCs.
 
 | [values.yaml](values.yaml)               | default value              | purpose
 | ---                       | ---                        | --- |
@@ -132,7 +124,7 @@ You can optionally expose individual Content engine ACI ports at `http://<ingres
 
 To upgrade to a newer version of IDOL, use a `helm upgrade` command. Note that you must provide the number of Content engines currently deployed. For example:
 
-```
+```sh
 helm upgrade --reuse-values 
     --set-string idolVersion=<new_version>
     --set-string initialContentEngineCount=<current engine count>
@@ -147,11 +139,14 @@ This example redeploys new versions of the DAH, DIH, and Content, which replace 
 Use `helm uninstall`
 
 ```sh
-helm uninstall <release name>
+helm uninstall <release_name>
 ```
 
 If you no longer require the PVCs, you can manually delete them:
 
 ```sh
-kubectl delete pvc <pvc name>
+# delete individually
+kubectl delete pvc <pvc_name>
+# or delete all matching by label
+kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 ```
