@@ -1,0 +1,26 @@
+# BEGIN COPYRIGHT NOTICE
+# (c) Copyright 2022 Micro Focus or one of its affiliates.
+# END COPYRIGHT NOTICE
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.licenseServerService }}
+  labels: {{- include "idol-library.labels" . | nindent 4 }}
+spec:
+  ports:
+    - port: {{ .Values.licenseServerPort | int }}
+      targetPort: {{ .Values.licenseServerPort | int }}
+      name: aci-port
+  # no selector, create endpoint manually
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: {{ .Values.licenseServerService }}
+  labels: {{- include "idol-library.labels" . | nindent 4 }}
+subsets:
+  - addresses:
+      - ip: {{ .Values.licenseServerIp | quote }}
+    ports:
+      - port: {{ .Values.licenseServerPort | int }}
+        name: aci-port
