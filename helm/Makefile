@@ -1,3 +1,6 @@
+# BEGIN COPYRIGHT NOTICE
+# (c) Copyright 2023 Micro Focus or one of its affiliates.
+# END COPYRIGHT NOTICE
 
 SUBCHARTS:=idol-library \
 	idol-licenseserver \

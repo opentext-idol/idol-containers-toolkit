@@ -6,7 +6,7 @@ entries:
   distributed-idol:
   - apiVersion: v2
     appVersion: 23.4.0
-    created: "2023-10-18T15:05:30.528104594+01:00"
+    created: "2023-10-18T17:09:11.453157282+01:00"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
@@ -20,7 +20,7 @@ entries:
       repository: https://kubernetes-sigs.github.io/metrics-server
       version: 3.8.2
     description: A configurable distributed IDOL setup
-    digest: 6cd2f80cdb06cd33c6e2ec7ddece54bc071c3ccc6e0f9c643341c25dc43e219b
+    digest: cc56a0f3f6504d1a9bc0f08d6770102c6715f8aa3e1b55fd6bc2a97fac3d347d
     name: distributed-idol
     urls:
     - release/distributed-idol-0.6.0.tgz
@@ -83,9 +83,9 @@ entries:
     version: 0.2.0
   idol-library:
   - apiVersion: v2
-    created: "2023-10-18T15:05:30.528364984+01:00"
+    created: "2023-10-18T17:09:11.453440593+01:00"
     description: An IDOL Helm library chart for Kubernetes
-    digest: b2e21cef92d2ab8fbb7aa1b667d830e39e981c135f52ebf487b4003e47474e12
+    digest: bfc46e2db8fe1d953b4ad798c8ae818b5548f578be8639558f93af1889e5093d
     name: idol-library
     type: library
     urls:
@@ -93,16 +93,16 @@ entries:
     version: 0.1.0
   idol-licenseserver:
   - apiVersion: v2
-    created: "2023-10-18T15:05:30.528890595+01:00"
+    created: "2023-10-18T17:09:11.455319006+01:00"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
       version: 0.1.0
     description: Creates an IDOL LicenseServer proxy service accessible to other elements
       of the cluster
-    digest: 8aa629787cd8d33162dafb8759d0e16e76ab01b9a85709232ff513f7729b0474
+    digest: 932d1a721c6be191e6b2c43d406eba1fe1d5e0721ca566689d6c8f0ebd4d9c7a
     name: idol-licenseserver
     urls:
     - release/idol-licenseserver-0.1.0.tgz
     version: 0.1.0
-generated: "2023-10-18T15:05:30.507607139+01:00"
+generated: "2023-10-18T17:09:11.432147296+01:00"
