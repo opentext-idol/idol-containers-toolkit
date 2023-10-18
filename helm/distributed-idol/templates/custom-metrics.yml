@@ -26,7 +26,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: {{ .Values.custommetricsService }}
-  namespace: {{ include "distributedidol.namespace" . | quote }}
+  namespace: {{ include "idol-library.namespace" . | quote }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -41,7 +41,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: {{ .Values.custommetricsService }}
-  namespace: {{ include "distributedidol.namespace" . | quote }}
+  namespace: {{ include "idol-library.namespace" . | quote }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -103,7 +103,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: {{ .Values.custommetricsService }}
-  namespace: {{ include "distributedidol.namespace" . | quote }}
+  namespace: {{ include "idol-library.namespace" . | quote }}
 ---
 kind: ServiceAccount
 apiVersion: v1
@@ -119,7 +119,7 @@ metadata:
 spec:
   service:
     name: {{ .Values.custommetricsService }}
-    namespace: {{ include "distributedidol.namespace" . | quote }}
+    namespace: {{ include "idol-library.namespace" . | quote }}
   group: custom.metrics.k8s.io
   version: v1beta1
   insecureSkipTLSVerify: true

@@ -4,7 +4,7 @@
 # - Run make release/distributed-idol-x.y.z.tgz 
 # - Run make index.yaml
 
-VERSION?=0.5.0
+VERSION?=0.6.0
 
 .PHONY: clean-charts
 

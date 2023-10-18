@@ -11,11 +11,6 @@
 # This section contains parameters that are most likely to be overridden for
 # the basic choices and constraints around how this chart will be used.
 
-# licenseServerIp is the IP address of the LicenseServer instance
-licenseServerIp: "this value must be replaced with a valid ip address"
-# licenseServerPort is the ACI port of the LicenseServer instance
-licenseServerPort: "20000"
-
 # setupMirrored is a boolean parameter - when `true` this will configure the 
 # DAH and DIH in mirror-mode, meaning the Contents will all be mirrors of each
 # other. When `false`, the DAH and DIH will be configured in non-mirror mode,
@@ -67,7 +62,7 @@ idolImageRegistry: "microfocusidolserver"
 
 # idolVersion is the image tag that will be used when pulling images, and
 # corresponds to the IDOL version of the components being used.
-idolVersion: "23.3"
+idolVersion: "23.4"
 
 # imagePullSecrets is a list of names of Kubernetes secrets containing the
 # credentials for pulling images from repositories. Most likely requires
@@ -147,10 +142,12 @@ ingressHost: ""
 # They are generally here in values.yaml so that DRY principles and a consistent
 # scheme for specifying these values in the templates can be followed.
 
-# licenseServerHostname is an internal parameter to connect the LicenseServer.
+# licenseServerHostname maps to [License] LicenseServerHost in the IDOL cfg files
+# Should point to a resolvable IDOL LicenseServer (or Kubernetes service abstraction - see the idol-licenseserver chart)
 licenseServerHostname: "idol-licenseserver"
-# licenseServerName is an internal parameter to connect the LicenseServer.
-licenseServerName: "idol-licenseserver"
+# licenseServerPort is the ACI port of the LicenseServer instance
+licenseServerPort: "20000"
+
 # livenessProbePath is an internal parameter to specify the IDOL path used
 # as part of liveness checks.
 livenessProbePath: "/a=getpid"
@@ -262,3 +259,9 @@ custommetricsPorts:
 
 # exposedContents Allows ingress access to individual content engines. Set to max number of engines to expose
 exposedContents: 0
+
+# subchart values
+idol-licenseserver:
+# create a cluster service proxying to a LicenseServer instance
+  enabled: true
+  licenseServerIp: this must be set to a valid IP address

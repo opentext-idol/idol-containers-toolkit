@@ -40,10 +40,6 @@
                 "minLength": 1
             }
         },
-        "licenseServerIp": {
-            "type": "string",
-            "format": "ipv4"
-        },
         "licenseServerPort": {
             "type": "string",
             "pattern": "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$"
@@ -86,10 +82,6 @@
             "type": "string"
         },
         "licenseServerHostname": {
-            "type": "string",
-            "minLength": 1
-        },
-        "licenseServerName": {
             "type": "string",
             "minLength": 1
         },
@@ -325,7 +317,6 @@
         "idolImageRegistry",
         "idolVersion",
         "imagePullSecrets",
-        "licenseServerIp",
         "licenseServerPort",
         "autoscalingMinReplicas",
         "autoscalingMaxReplicas",
@@ -334,7 +325,6 @@
         "contentPrimaryBackupTime",
         "ingressProxyBodySize",
         "licenseServerHostname",
-        "licenseServerName",
         "livenessProbePath",
         "queryserviceName",
         "indexserviceName",
