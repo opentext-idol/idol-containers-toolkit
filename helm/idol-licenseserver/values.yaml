@@ -1,0 +1,15 @@
+# BEGIN COPYRIGHT NOTICE
+# (c) Copyright 2023 Micro Focus or one of its affiliates.
+# END COPYRIGHT NOTICE
+
+# As per https://helm.sh/docs/topics/charts/#the-chart-file-structure
+# this values.yaml file contains the default configuration values for this chart.
+# These default values can be overridden by using the --values or --set flags on the `helm install`
+# command: see https://helm.sh/docs/helm/helm_install/
+
+# licenseServerIp is the IP address of the LicenseServer instance
+licenseServerIp: "this value must be replaced with a valid ip address"
+# licenseServerPort is the ACI port of the LicenseServer instance
+licenseServerPort: "20000"
+# licenseServerService is the name of the Service/Endpoint this chart creates
+licenseServerService: idol-licenseserver

@@ -1,3 +1,7 @@
+# BEGIN COPYRIGHT NOTICE
+# (c) Copyright 2023 Micro Focus or one of its affiliates.
+# END COPYRIGHT NOTICE
+
 {{/* Generate distributed-idol deployment liveness probe timeouts */}}
 {{- define "distributedidol.deployment.standardLivenessProbe" }}
           initialDelaySeconds: 8
@@ -8,13 +12,6 @@
 
 {{/* Standard labels */}}
 {{- define "distributedidol.labels" }}
-app.kubernetes.io/name: {{ default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
-app.kubernetes.io/instance: {{ .Release.Name }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
-helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
-{{- end -}}
+{{- include "idol-library.labels" . }}
+{{- end }}
 
-{{/* Allow the release namespace to be overridden for multi-namespace deployments in combined charts */}}
-{{- define "distributedidol.namespace" -}}
-{{- default .Release.Namespace .Values.namespaceOverride -}}
-{{- end -}}
