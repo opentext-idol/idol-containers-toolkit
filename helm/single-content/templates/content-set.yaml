@@ -1,0 +1,145 @@
+# BEGIN COPYRIGHT NOTICE
+# (c) Copyright 2022 Micro Focus or one of its affiliates.
+# END COPYRIGHT NOTICE
+apiVersion: v1
+kind: Service
+metadata:
+  # Use this service for generic IDOL query port functionality
+  # Could point to e.g. a DAH or Content instance
+  name: {{ .Values.queryserviceName }}
+  labels: {{- include "singlecontent.labels" . | nindent 4 }}
+spec:
+  ports:
+  - port: {{ (index .Values.contentPorts 0).service | int }}
+    targetPort: {{ (index .Values.contentPorts 0).name }}
+    name: {{ (index .Values.contentPorts 0).name }}
+  - port: {{ (index .Values.contentPorts 1).service | int }}
+    targetPort: {{ (index .Values.contentPorts 1).name }}
+    name: {{ (index .Values.contentPorts 1).name }}
+  selector:
+    app: {{ .Values.contentName }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  # Use this service for generic IDOL index port functionality
+  # Could point to e.g. a DIH or Content instance
+  name: {{ .Values.indexserviceName }}
+  labels: {{- include "singlecontent.labels" . | nindent 4 }}
+spec:
+  ports:
+  - port: {{ (index .Values.contentPorts 0).service | int }}
+    targetPort: {{ (index .Values.contentPorts 0).name }}
+    name: {{ (index .Values.contentPorts 0).name }}
+  - port: {{ (index .Values.contentPorts 1).service | int }}
+    targetPort: {{ (index .Values.contentPorts 1).name }}
+    name: {{ (index .Values.contentPorts 1).name }}
+  - port: {{ (index .Values.contentPorts 2).service | int }}
+    targetPort: {{ (index .Values.contentPorts 2).name }}
+    name: {{ (index .Values.contentPorts 2).name }}
+  selector:
+    app: {{ .Values.contentName }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.contentName }}
+  labels: {{- include "singlecontent.labels" . | nindent 4 }}
+    app: {{ .Values.contentName }}
+spec:
+  ports:
+  - port: {{ (index .Values.contentPorts 0).service | int }}
+    targetPort: {{ (index .Values.contentPorts 0).name }}
+    name: {{ (index .Values.contentPorts 0).name }}
+    protocol: TCP
+  - port: {{ (index .Values.contentPorts 1).service | int }}
+    targetPort: {{ (index .Values.contentPorts 1).name }}
+    name: {{ (index .Values.contentPorts 1).name }}
+    protocol: TCP
+  - port: {{ (index .Values.contentPorts 2).service | int }}
+    targetPort: {{ (index .Values.contentPorts 2).name }}
+    name: {{ (index .Values.contentPorts 2).name }}
+    protocol: TCP
+  clusterIP: None
+  selector:
+    app: {{ .Values.contentName }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.contentName }}
+  labels: {{- include "singlecontent.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ .Values.contentName | quote }}
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.contentName }}
+  template:
+    metadata:
+      labels: {{- include "singlecontent.labels" . | nindent 8 }}
+        app: {{ .Values.contentName }}
+    spec:
+      imagePullSecrets:
+        {{- range .Values.imagePullSecrets }}
+        - name: {{ . }}
+        {{- end }}
+      terminationGracePeriodSeconds: 300
+      containers:
+      - name: {{ .Values.contentName }}
+        image: {{ .Values.idolImageRegistry }}/{{ .Values.contentImage }}:{{ .Values.idolVersion }}
+        imagePullPolicy: IfNotPresent
+        command:
+        - "/bin/bash"
+        args: 
+        - "-c"
+        - |
+{{ tpl (.Files.Get "resources/content_startup.sh") . | indent 10 }}
+        volumeMounts:
+        - name: config-map
+          mountPath: /etc/config/idol
+        - name: index
+          mountPath: /opt/idol/content/index
+        env:
+        - name: IDOL_CONTENT_SERVICE_PORT_ACI_PORT
+          # This doesn't seem to be set by our headless service
+          value: {{ (index .Values.contentPorts 0).container | quote }}
+        - name: IDOL_COMMAND_PARAMS
+          value: "-idolcluster"
+        lifecycle:
+          postStart:
+            exec:
+              command:
+              - /bin/bash
+              - "-c"
+              - |
+{{ tpl (.Files.Get "resources/content_postStart.sh") . | indent 16 }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.livenessProbePath }}
+            port: {{ (index .Values.contentPorts 0).container | int }}
+{{- template "singlecontent.deployment.standardLivenessProbe" }}
+        ports:
+        - containerPort: {{ (index .Values.contentPorts 0).container | int }}
+          name: {{ (index .Values.contentPorts 0).name }}
+          protocol: TCP
+        - containerPort: {{ (index .Values.contentPorts 1).container | int }}
+          name: {{ (index .Values.contentPorts 1).name }}
+          protocol: TCP
+        - containerPort: {{ (index .Values.contentPorts 2).container | int }}
+          name: {{ (index .Values.contentPorts 2).name }}
+          protocol: TCP
+      volumes:
+      - name: config-map
+        configMap:
+          name: idol-config
+  volumeClaimTemplates:
+  - metadata:
+      name: index
+      labels: {{- include "singlecontent.labels" . | nindent 8 }}
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: {{ .Values.contentStorageClass }}
+      resources:
+        requests:
+          storage: {{ .Values.contentVolumeSize }}
