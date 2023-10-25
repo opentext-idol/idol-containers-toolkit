@@ -1,0 +1,148 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+
+# As per https://helm.sh/docs/topics/charts/#the-chart-file-structure
+# this values.yaml file contains the default configuration values for this chart.
+# These default values can be overridden by using the --values or --set flags on the `helm install`
+# command: see https://helm.sh/docs/helm/helm_install/
+
+##### HIGH LEVEL CHART CONFIGURATION #####
+# This section contains parameters that are most likely to be overridden for
+# the basic choices and constraints around how this chart will be used.
+
+# LEFT INTENTIONALLY BLANK
+
+#############################################
+
+
+##### IMAGE CONFIGURATION #####
+# Parameters to specify the IDOL images pulled for this chart are
+# configured here
+
+# idolImageRegistry is the registry from which the IDOL images being run
+# in this chart are pulled from. Override this if IDOL images are to be
+# pulled from a different private registry.
+idolImageRegistry: "microfocusidolserver"
+
+# idolVersion is the image tag that will be used when pulling images, and
+# corresponds to the IDOL version of the components being used.
+idolVersion: "23.4"
+
+# imagePullSecrets is a list of names of Kubernetes secrets containing the
+# credentials for pulling images from repositories. Most likely requires
+# a secret for Dockerhub credentials and a secret per private repository used.
+imagePullSecrets:
+  - "dockerhub-secret"
+################################
+
+
+##### NETWORKING CONFIGURATION #####
+# This section contains parameters to configure various network-related
+# properties in this chart.
+
+# ingressProxyBodySize is the maximum allowed size of the client request body, defining
+# the maximum size of requests that can be made to IDOL components within the installation, e.g.
+# the amount of data sent in DREADDDATA index commands.
+# The value should be an nginx "size" value.
+# See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the
+# corresponding nginx configuration parameter.
+ingressProxyBodySize: 2048m
+
+# ingressType controls ingress setup for that controller type.
+# Valid values are nginx or haproxy (used by OpenShift)
+ingressType: nginx
+
+# ingressHost is an optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules)
+# For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration)
+ingressHost: ""
+
+# ingressPort is the external port the ingress is exposed on.
+# For Kubernetes-in-Docker, this may be different to the container ingress port.
+ingressPort: "8000"
+
+# exposeServers can be set to `true` to create ingress endpoints for ACI servers
+exposeServers: true
+
+#####################################
+
+
+##### INTERNAL VARIABLES #####
+# Values specified below this point in the file should not need to be overriden.
+# They are generally here in values.yaml so that DRY principles and a consistent
+# scheme for specifying these values in the templates can be followed.
+
+# licenseServerHostname maps to [License] LicenseServerHost in the IDOL cfg files
+# Should point to a resolvable IDOL LicenseServer (or Kubernetes service abstraction - see the idol-licenseserver chart)
+licenseServerHostname: "idol-licenseserver"
+# licenseServerPort is the ACI port of the LicenseServer instance
+licenseServerPort: "20000"
+
+# livenessProbePath is an internal parameter to specify the IDOL path used
+# as part of liveness checks.
+livenessProbePath: "/a=getpid"
+# name of port to use for ACI actions (action=query, etc.)
+idolACIPortName: "aci-port"
+# name of port to use for Index actions (DREADDDATA, etc.)
+idolIndexPortName: "index-port"
+# name of port to use for Service actions (Action=GetConfig, etc.)
+idolServicePortName: "service-port"
+# name of port to use for Web Application servers
+webappPortName: "web-app"
+
+# queryserviceName is an internal parameter to specify the query service name.
+queryserviceName: "idol-query-service"
+# list of ports for the queryservice
+queryserviceACIPort: "9100"
+# findingressName is an internal parameter to specify the IDOL ingress name.
+findingressName: "idol-find-ingress"
+
+# agentStoreName is an internal parameter to specify the name of the various AgentStore objects in the charts.
+agentStoreName: "idol-agentstore"
+# agentStoreImage is an internal parameter to specify the name of the AgentStore image pulled for the AgentStore container.
+agentStoreImage: "agentstore"
+# an internal list of ports for AgentStore.
+agentStoreACIPort: "9050"
+agentStoreIndexPort: "9051"
+agentStoreServicePort: "9052"
+
+# communityName is an internal parameter to specify the name of the various Community objects in the charts.
+communityName: "idol-community"
+# communityImage is an internal parameter to specify the name of the Community image pulled for the Community container.
+communityImage: "community"
+# an internal list of ports for Community.
+communityACIPort: "9030"
+communityServicePort: "9032"
+
+# viewServerName is an internal parameter to specify the name of the various ViewServer objects in the charts.
+viewServerName: "idol-view"
+# viewServerImage is an internal parameter to specify the name of the ViewServer image pulled for the ViewServer container.
+viewServerImage: "view"
+# an internal list of ports for ViewServer.
+viewServerACIPort: "9080"
+
+# Find UI internal name parameter
+findUIName: "idol-find"
+# Find UI container image name
+findUIImage: "find"
+# Find UI port number
+findUIPort: "8000"
+# Find environment variables
+findUIEnvVars:
+  - name: IDOL_UI_CFG
+    value: config_basic.json
+
+################################
+
+##### SUBCHART VALUES #####
+idol-licenseserver:
+# create a cluster service proxying to a LicenseServer instance
+  enabled: true
+  licenseServerIp: this must be set to a valid IP address

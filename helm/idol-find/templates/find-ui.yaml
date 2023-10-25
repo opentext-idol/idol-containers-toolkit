@@ -1,0 +1,59 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.findUIName }}
+  labels: {{- include "idolfind.labels" . | nindent 4 }}
+spec:
+  ports:
+  - port: {{ .Values.findUIPort | int }}
+    targetPort: {{ .Values.webappPortName }}
+    name: {{ .Values.webappPortName }}
+  selector:
+    app: {{ .Values.findUIName }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.findUIName }}
+  labels: {{- include "idolfind.labels" . | nindent 4 }}
+spec:
+  replicas: {{ default 1 .Values.findUIReplicas | int }}
+  selector:
+    matchLabels:
+      app: {{ .Values.findUIName }}
+  template:
+    metadata:
+      labels: {{- include "idolfind.labels" . | nindent 8 }}
+        app: {{ .Values.findUIName }}
+    spec:
+      imagePullSecrets:
+        {{- range .Values.imagePullSecrets }}
+        - name: {{ . }}
+        {{- end }}
+      initContainers:
+      - name: check-community-availability
+        image: yauritux/busybox-curl
+        args: 
+        - sh 
+        - -c 
+        - {{ printf "curl \"http://%s:%d%s\"" .Values.communityName (.Values.communityACIPort | int) .Values.livenessProbePath }}
+      containers:
+      - name: {{ .Values.findUIName }}
+        image: {{ .Values.idolImageRegistry }}/{{ .Values.findUIImage }}:{{ .Values.idolVersion }}
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: {{ .Values.findUIPort | int }}
+          name: {{ .Values.webappPortName }}
+          protocol: TCP
+        env:
+{{ toYaml .Values.findUIEnvVars | indent 8 }}
