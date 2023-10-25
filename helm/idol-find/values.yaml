@@ -101,8 +101,10 @@ webappPortName: "web-app"
 queryserviceName: "idol-query-service"
 # list of ports for the queryservice
 queryserviceACIPort: "9100"
-# findingressName is an internal parameter to specify the IDOL ingress name.
-findingressName: "idol-find-ingress"
+# findIngressName is an internal parameter to specify the IDOL ingress name.
+findIngressName: "idol-find-ingress"
+# findEndpointName is an internal parameter to specify the URL path to proxy Find.
+findEndpointName: "find"
 
 # agentStoreName is an internal parameter to specify the name of the various AgentStore objects in the charts.
 agentStoreName: "idol-agentstore"
