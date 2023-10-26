@@ -55,5 +55,13 @@ spec:
         - containerPort: {{ .Values.findUIPort | int }}
           name: {{ .Values.webappPortName }}
           protocol: TCP
+        volumeMounts:
+        - name: config-map
+          mountPath: /opt/find/home/config_map
         env:
-{{ toYaml .Values.findUIEnvVars | indent 8 }}
+        - name: IDOL_UI_CFG
+          value: config_map/find_config.json
+      volumes:
+      - name: config-map
+        configMap:
+          name: {{ .Release.Name }}-idol-config

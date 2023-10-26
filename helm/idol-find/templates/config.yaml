@@ -16,3 +16,6 @@ metadata:
 data:
   community.cfg: |
 {{ tpl (.Files.Get "resources/community.cfg") . | indent 4 }}
+
+  find_config.json: |
+{{ tpl (.Files.Get "resources/find_config.json") . | indent 4 }}

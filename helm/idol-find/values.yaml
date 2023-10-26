@@ -79,6 +79,15 @@ exposeServers: true
 # They are generally here in values.yaml so that DRY principles and a consistent
 # scheme for specifying these values in the templates can be followed.
 
+# queryserviceName is an internal parameter to specify the query service name.
+queryserviceName: "idol-query-service"
+# list of ports for the queryservice
+queryserviceACIPort: "9100"
+# nifiserviceName is an internal parameter to specify the NiFi service name.
+nifiserviceName: "idol-nifi"
+# list of ports for the NiFi service
+nifiserviceACIPort: "11000"
+
 # licenseServerHostname maps to [License] LicenseServerHost in the IDOL cfg files
 # Should point to a resolvable IDOL LicenseServer (or Kubernetes service abstraction - see the idol-licenseserver chart)
 licenseServerHostname: "idol-licenseserver"
@@ -97,10 +106,6 @@ idolServicePortName: "service-port"
 # name of port to use for Web Application servers
 webappPortName: "web-app"
 
-# queryserviceName is an internal parameter to specify the query service name.
-queryserviceName: "idol-query-service"
-# list of ports for the queryservice
-queryserviceACIPort: "9100"
 # findIngressName is an internal parameter to specify the IDOL ingress name.
 findIngressName: "idol-find-ingress"
 # findEndpointName is an internal parameter to specify the URL path to proxy Find.
@@ -124,7 +129,7 @@ communityACIPort: "9030"
 communityServicePort: "9032"
 
 # viewServerName is an internal parameter to specify the name of the various ViewServer objects in the charts.
-viewServerName: "idol-view"
+viewServerName: "idol-viewserver"
 # viewServerImage is an internal parameter to specify the name of the ViewServer image pulled for the ViewServer container.
 viewServerImage: "view"
 # an internal list of ports for ViewServer.
@@ -136,10 +141,10 @@ findUIName: "idol-find"
 findUIImage: "find"
 # Find UI port number
 findUIPort: "8000"
-# Find environment variables
-findUIEnvVars:
-  - name: IDOL_UI_CFG
-    value: config_basic.json
+# URL scheme Find should use
+findHTTPScheme: "HTTP"
+# Login method Find should use
+findLoginMethod: "autonomy"
 
 ################################
 
