@@ -1,0 +1,43 @@
+# autoscalingEnabled - deploy a horizontal pod autoscaler for the nifi statefulset
+autoScalingEnabled: true
+# autoscalingMinReplicas - the minimum size of the nifi statefulset
+autoScalingMinReplicas: 1
+# autoscalingMaxReplicas - the maximum size of the nifi statefulset
+autoScalingMaxReplicas: 8
+
+# idolImageRegistry - used to construct container image name: <idolImageRegistry>/<nifiImage>:<idolVersion>
+idolImageRegistry: microfocusidolserver
+# idolVersion - used to construct container image name: <idolImageRegistry>/<nifiImage>:<idolVersion>
+idolVersion: "23.4"
+
+# imagePullSecrets - secrets used to pull container images
+imagePullSecrets:
+- "dockerhub-secret"
+
+nifi:
+  # nifiImage - used to construct container image name: <idolImageRegistry>/<nifi.imageName>:<idolVersion>
+  imageName: nifi-full
+  ingress:
+    # nifi.ingress.enabled - whether to deploy ingress for nifi
+    enabled: true
+    # nifi.ingress.annotations - optional ingress annotations
+    annotations: {}
+    # nifi.ingress.host - optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules
+    host: ""
+    # nifi.ingress.proxyHost - optional nifi.web.proxy.context.path value (see https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#web-properties)
+    proxyPath: ""
+    # nifi.ingress.proxyHost - optional nifi.web.proxy.host value (see https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#web-properties)
+    proxyHost: ""
+
+nifiRegistry:
+  ingress:
+    # nifiRegistry.ingress.enabled - whether to deploy ingress for nifi
+    enabled: true
+    # nifiRegistry.ingress.annotations - optional ingress annotations
+    annotations: {}
+    # nifiRegistry.ingress.host - optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules
+    host: ""
+
+# sub-chart values
+idol-licenseserver:
+  enabled: false

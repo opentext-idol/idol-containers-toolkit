@@ -1,0 +1,204 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nifi
+  labels: {{- include "idol-nifi.labels" . | nindent 4 -}}
+    name: nifi
+    app: nifi
+  annotations:
+    app.kubernetes.io/name: nifi
+    app.kubernetes.io/part-of: nifi
+spec:
+  revisionHistoryLimit: 1
+  serviceName: nifi
+  podManagementPolicy: OrderedReady
+  selector:
+    matchLabels:
+      app: nifi
+  template:
+    metadata:
+      labels: {{- include "idol-nifi.labels" . | nindent 8 -}}
+        app: nifi
+    spec:
+      terminationGracePeriodSeconds: 90
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      setHostnameAsFQDN: true
+      dnsPolicy: ClusterFirstWithHostNet
+      restartPolicy: Always
+      securityContext:
+        runAsGroup: 1000
+        runAsUser: 1000
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: wait-for-zookeeper
+          image: docker.io/busybox:1.36
+          command:
+          - sh
+          - -c
+          - |
+            echo "Connecting to Zookeeper ${NIFI_ZK_CONNECT_STRING}"
+            until nc -vzw 1 zookeeper 2181 ; do
+              echo "Waiting for zookeeper to start"
+              sleep 3
+            done
+          envFrom:
+          - configMapRef:
+              name: nifi-cm
+              optional: false
+          resources:
+            requests:
+              cpu: 20m
+              memory: 10Mi
+            limits:
+              cpu: 20m
+              memory: 10Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            privileged: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+      imagePullSecrets:
+        {{- range .Values.imagePullSecrets }}
+        - name: {{ . }}
+        {{- end }}
+      containers:
+      - name: nifi
+        image: {{ .Values.idolImageRegistry }}/{{ .Values.nifi.imageName }}:{{ .Values.idolVersion }}
+        #image: idol-docker-images.svsartifactory.swinfra.net/nifi-full:23.4
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        - containerPort: 11443
+          name: cluster
+        - containerPort: 8443
+          name: https
+        - containerPort: 6342
+          name: cluster-lb
+        env:
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP # Use pod ip
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name # Use pod name
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace # Use pod namespace
+          - name: NIFI_UI_BANNER_TEXT
+            value: $(POD_NAME) # Use pod name for banner
+          - name: NIFI_WEB_HTTP_HOST
+            value: $(POD_NAME).nifi.$(POD_NAMESPACE).svc.cluster.local # Use pod fqdn as web host
+          - name: NIFI_CLUSTER_NODE_ADDRESS
+            value: $(POD_NAME).nifi.$(POD_NAMESPACE).svc.cluster.local # Use pod fqdn as node address
+          - name: NIFI_REMOTE_INPUT_SOCKET_HOST
+            value: $(POD_NAME).nifi.$(POD_NAMESPACE).svc.cluster.local # Use pod fqdn as input socket address
+          - name: NIFI_REMOTE_INPUT_HOST
+            value: $(POD_NAME).nifi.$(POD_NAMESPACE).svc.cluster.local # Use pod fqdn as input host address
+          - name: HOSTNAME
+            value: $(POD_IP) # Use pod ip as hostname
+          - name: NODE_IDENTITY
+            value: $(POD_NAME) # Use pod name as identity
+        envFrom:
+          - configMapRef:
+              name: nifi-cm
+              optional: false
+        volumeMounts:
+          - name: data
+            mountPath: /opt/nifi/nifi-current/data
+            subPath: data
+            readOnly: false
+          - name: data
+            mountPath: /opt/nifi/nifi-current/keytool
+            subPath: keytool
+            readOnly: false
+          - name: scripts
+            mountPath: /scripts
+            readOnly: false
+        lifecycle:
+          postStart:
+            exec:
+              command:
+              - /bin/bash
+              - -c
+              - |
+                logfile=/opt/nifi/nifi-current/logs/post-start.log
+                /scripts/security.sh | tee -a ${logfile}
+                /scripts/wait.sh | tee -a ${logfile}
+                /scripts/connect-registry.sh | tee -a ${logfile}
+                echo [$(date)] postStart completed | tee -a ${logfile}
+          preStop:
+            exec:
+              command:
+              - sh
+              - -c
+              - |
+                host=nifi-0.${NIFI_WEB_HTTP_HOST#*.}
+                port=$NIFI_WEB_HTTP_PORT
+                cluster_node_id=`curl -s http://$NIFI_WEB_HTTP_HOST:$NIFI_WEB_HTTP_PORT/nifi-api/controller/cluster | jq -r ".cluster.nodes[] | select(.address==\"$NIFI_WEB_HTTP_HOST\") | .nodeId "`
+
+                setAndWaitForStatus () {
+                    curl -s -X PUT http://$host:$port/nifi-api/controller/cluster/nodes/$cluster_node_id -H 'Content-Type: application/json' -d "{\"node\":{\"nodeId\":\"$cluster_node_id\",\"status\": \"$1\"}}"
+                    cluster_node_status="$1"
+                    while [ "$cluster_node_status" != "$2" ]
+                    do
+                        sleep 1
+                        cluster_node_status=`curl -s http://$host:$port/nifi-api/controller/cluster/nodes/$cluster_node_id | jq .node.status -r`
+                    done
+                }
+
+                if [ ! -z "$cluster_node_id" ]
+                then
+                    setAndWaitForStatus "DISCONNECTING" "DISCONNECTED"
+                    setAndWaitForStatus "OFFLOADING" "OFFLOADED"
+                    curl -s -X DELETE http://$host:$port/nifi-api/controller/cluster/nodes/$cluster_node_id
+                fi
+        livenessProbe:
+          exec:
+            command:
+              - pgrep
+              - java
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+          successThreshold: 1
+        readinessProbe:
+          tcpSocket:
+            port: cluster
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+          successThreshold: 1
+        resources:
+          requests:
+            cpu: 400m
+            memory: 2Gi
+          limits:
+            cpu: 400m
+            memory: 2Gi
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          capabilities:
+            drop:
+              - ALL
+      volumes:
+        - name: data
+          emptyDir:
+            sizeLimit: 3Gi
+        - name: scripts
+          configMap:
+            name: nifi-ssl-cm
+            optional: false
+            defaultMode: 0755

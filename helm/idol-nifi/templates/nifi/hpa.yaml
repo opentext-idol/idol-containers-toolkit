@@ -1,0 +1,31 @@
+{{- if .Values.autoScalingEnabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: nifi
+  labels: {{- include "idol-nifi.labels" . | nindent 4 -}}
+    app.kubernetes.io/name: nifi
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet
+    name: nifi
+  minReplicas: {{ .Values.autoScalingMinReplicas | int }}
+  maxReplicas: {{ .Values.autoScalingMaxReplicas | int }}
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 300
+  metrics:
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 90
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 90
+{{- end }}

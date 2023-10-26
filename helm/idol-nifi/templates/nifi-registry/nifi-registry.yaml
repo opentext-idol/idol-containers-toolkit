@@ -1,0 +1,112 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nifi-registry
+  labels: {{- include "idol-nifi.labels" . | nindent 4 -}}
+    name: nifi-registry
+    app: nifi-registry
+  annotations:
+    app.kubernetes.io/name: nifi-registry
+    app.kubernetes.io/part-of: nifi
+spec:
+  revisionHistoryLimit: 1
+  serviceName: nifi-registry
+  podManagementPolicy: OrderedReady
+  selector:
+    matchLabels:
+      app: nifi-registry
+  template:
+    metadata:
+      labels: {{- include "idol-nifi.labels" . | nindent 8 }}
+        app: nifi-registry
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      setHostnameAsFQDN: true
+      dnsPolicy: ClusterFirstWithHostNet
+      restartPolicy: Always
+      securityContext:
+        runAsGroup: 1000
+        runAsUser: 1000
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      imagePullSecrets:
+      - name: dockerhub-secret
+      containers:
+      - name: nifi-registry
+        image: docker.io/apache/nifi-registry:1.23.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 18080
+          name: http
+        - containerPort: 18443
+          name: https
+        env:
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+        envFrom:
+          - configMapRef:
+              name: nifi-registry-cm
+              optional: false
+        livenessProbe:
+          exec:
+            command:
+              - pgrep
+              - java
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+          successThreshold: 1
+        readinessProbe:
+          tcpSocket:
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+          successThreshold: 1
+        resources:
+          requests:
+            cpu: 200m
+            memory: 1Gi
+          limits:
+            cpu: 200m
+            memory: 1Gi
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          capabilities:
+            drop:
+              - ALL
+        volumeMounts:
+          - mountPath: /data
+            name: data
+            subPath: data
+        lifecycle:
+          postStart:
+            exec:
+              command:
+              - /bin/bash
+              - -c
+              - |
+                logfile=/opt/nifi-registry/nifi-registry-current/logs/post-start.log
+                bucketname=default-bucket
+                echo [$(date)] Checking registry for "${bucketname}" | tee -a ${logfile}
+                result=$("${NIFI_TOOLKIT_HOME}/bin/cli.sh" registry list-buckets -u "http://${HOSTNAME}:18080" | grep "${bucketname}")
+                rc=$?
+                until [ 0 == $rc ]
+                do
+                  "${NIFI_TOOLKIT_HOME}/bin/cli.sh" registry create-bucket --bucketName "${bucketname}" -u "http://${HOSTNAME}:18080"
+                  result=$("${NIFI_TOOLKIT_HOME}/bin/cli.sh" registry list-buckets -u "http://${HOSTNAME}:18080" | grep "${bucketname}")
+                  rc=$?
+                done
+                echo [$(date)] Got bucket "${bucketname}": "${result}" | tee -a ${logfile}
+      volumes:
+        - name: data
+          emptyDir:
+            sizeLimit: 2Gi
