@@ -19,3 +19,6 @@ data:
 
   find_config.json: |
 {{ tpl (.Files.Get "resources/find_config.json") . | indent 4 }}
+
+  view.cfg: |
+{{ tpl (.Files.Get "resources/view.cfg") . | indent 4 }}

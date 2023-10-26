@@ -134,6 +134,7 @@ viewServerName: "idol-viewserver"
 viewServerImage: "view"
 # an internal list of ports for ViewServer.
 viewServerACIPort: "9080"
+viewServerServicePort: "9082"
 
 # Find UI internal name parameter
 findUIName: "idol-find"

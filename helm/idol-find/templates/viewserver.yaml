@@ -53,3 +53,13 @@ spec:
         - containerPort: {{ .Values.viewServerACIPort | int }}
           name: {{ .Values.idolACIPortName }}
           protocol: TCP
+        volumeMounts:
+        - name: config-map
+          mountPath: /etc/config/idol
+        env:
+        - name: IDOL_COMPONENT_CFG
+          value: "/etc/config/idol/view.cfg"
+      volumes:
+      - name: config-map
+        configMap:
+          name: {{ .Release.Name }}-idol-config
