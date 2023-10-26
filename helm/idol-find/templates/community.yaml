@@ -47,6 +47,11 @@ spec:
       - name: {{ .Values.communityName }}
         image: {{ .Values.idolImageRegistry }}/{{ .Values.communityImage }}:{{ .Values.idolVersion }}
         imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.livenessProbePath }}
+            port: {{ .Values.communityACIPort | int }}
+{{- template "idolfind.deployment.standardLivenessProbe" .Values.communityLivenessProbe }}
         ports:
         - containerPort: {{ .Values.communityACIPort | int }}
           name: {{ .Values.idolACIPortName }}

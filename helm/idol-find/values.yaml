@@ -127,6 +127,9 @@ communityImage: "community"
 # an internal list of ports for Community.
 communityACIPort: "9030"
 communityServicePort: "9032"
+# overrides for liveness probe settings
+communityLivenessProbe:
+  initialDelaySeconds: 30
 
 # viewServerName is an internal parameter to specify the name of the various ViewServer objects in the charts.
 viewServerName: "idol-viewserver"
@@ -146,6 +149,13 @@ findUIPort: "8000"
 findHTTPScheme: "HTTP"
 # Login method Find should use
 findLoginMethod: "autonomy"
+# overrides for liveness probe settings
+findUILivenessProbe:
+  path: "/"
+  initialDelaySeconds: 300
+  timeoutSeconds: 10
+  periodSeconds: 30
+  failureThreshold: 5
 
 ################################
 

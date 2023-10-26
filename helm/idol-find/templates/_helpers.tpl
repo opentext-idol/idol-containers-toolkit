@@ -11,10 +11,10 @@
 
 {{/* Generate idol-find deployment liveness probe timeouts */}}
 {{- define "idolfind.deployment.standardLivenessProbe" }}
-          initialDelaySeconds: 8
-          timeoutSeconds: 3
-          periodSeconds: 10
-          failureThreshold: 3
+          initialDelaySeconds: {{ .initialDelaySeconds | default 8 | int }}
+          timeoutSeconds: {{ .timeoutSeconds | default 3 | int }}
+          periodSeconds: {{ .periodSeconds | default 10 | int }}
+          failureThreshold: {{ .failureThreshold | default 3 | int }}
 {{- end -}}
 
 {{/* Standard labels */}}

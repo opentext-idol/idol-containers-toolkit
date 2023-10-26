@@ -51,6 +51,11 @@ spec:
       - name: {{ .Values.findUIName }}
         image: {{ .Values.idolImageRegistry }}/{{ .Values.findUIImage }}:{{ .Values.idolVersion }}
         imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.findUILivenessProbe.path }}
+            port: {{ .Values.findUIPort | int }}
+{{- template "idolfind.deployment.standardLivenessProbe" .Values.findUILivenessProbe }}
         ports:
         - containerPort: {{ .Values.findUIPort | int }}
           name: {{ .Values.webappPortName }}

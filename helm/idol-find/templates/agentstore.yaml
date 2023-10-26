@@ -51,7 +51,7 @@ spec:
           httpGet:
             path: {{ .Values.livenessProbePath }}
             port: {{ .Values.agentStoreACIPort | int }}
-{{- template "idolfind.deployment.standardLivenessProbe" }}
+{{- template "idolfind.deployment.standardLivenessProbe" .Values.agentStoreLivenessProbe }}
         ports:
         - containerPort: {{ .Values.agentStoreACIPort | int }}
           name: {{ .Values.idolACIPortName }}
