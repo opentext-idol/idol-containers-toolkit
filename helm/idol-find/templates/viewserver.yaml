@@ -56,6 +56,8 @@ spec:
         volumeMounts:
         - name: config-map
           mountPath: /etc/config/idol
+        - name: viewing-dir
+          mountPath: /idol-ingest
         env:
         - name: IDOL_COMPONENT_CFG
           value: "/etc/config/idol/view.cfg"
@@ -63,3 +65,5 @@ spec:
       - name: config-map
         configMap:
           name: {{ .Release.Name }}-idol-config
+      - name: viewing-dir
+        emptyDir: {}
