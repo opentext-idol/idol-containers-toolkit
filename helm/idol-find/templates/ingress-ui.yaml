@@ -33,6 +33,9 @@ metadata:
     haproxy.router.openshift.io/proxy-body-size: {{ .Values.ingressProxyBodySize }}
 {{- end }}
 spec:
+{{- if .Values.ingressClassName }}
+  ingressClassName: {{ .Values.ingressClassName }}
+{{- end }}
   rules:
   - http:
       paths:

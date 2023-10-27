@@ -60,13 +60,16 @@ ingressProxyBodySize: 2048m
 # Valid values are nginx or haproxy (used by OpenShift)
 ingressType: nginx
 
+# ingressClassName is an optional parameter to override the default ingress class
+ingressClassName: ""
+
 # ingressHost is an optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules)
 # For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration)
 ingressHost: ""
 
 # ingressPort is the external port the ingress is exposed on.
 # For Kubernetes-in-Docker, this may be different to the container ingress port.
-ingressPort: "8000"
+ingressPort: ""
 
 # exposeServers can be set to `true` to create ingress endpoints for ACI servers
 exposeServers: true

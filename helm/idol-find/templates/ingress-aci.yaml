@@ -1,7 +1,7 @@
 # BEGIN COPYRIGHT NOTICE
 # (c) Copyright 2022 Micro Focus or one of its affiliates.
 # END COPYRIGHT NOTICE
-
+{{- if .Values.exposeServers }}
 {{- /*
  nginx ingress needs path capture to achieve prefix type routing
 */}}
@@ -11,7 +11,6 @@
 {{- $pathSuffix = "(.*)"}}
 {{- $pathType = "ImplementationSpecific" }}
 {{- end }}
-{{- if .Values.exposeServers }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -26,6 +25,9 @@ metadata:
     haproxy.router.openshift.io/proxy-body-size: {{ .Values.ingressProxyBodySize }}
 {{- end }}
 spec:
+{{- if .Values.ingressClassName }}
+  ingressClassName: {{ .Values.ingressClassName }}
+{{- end }}
   rules:
   - http:
       paths:
