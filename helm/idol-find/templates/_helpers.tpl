@@ -9,16 +9,12 @@
 #
 # END COPYRIGHT NOTICE
 
-{{/* Generate idol-find deployment liveness probe timeouts */}}
+{{/* Generate standard liveness probe timeouts */}}
 {{- define "idolfind.deployment.standardLivenessProbe" }}
-          initialDelaySeconds: {{ .initialDelaySeconds | default 8 | int }}
-          timeoutSeconds: {{ .timeoutSeconds | default 3 | int }}
-          periodSeconds: {{ .periodSeconds | default 10 | int }}
-          failureThreshold: {{ .failureThreshold | default 3 | int }}
+{{- include "idol-library.standardLivenessProbe" . }}
 {{- end -}}
 
 {{/* Standard labels */}}
 {{- define "idolfind.labels" }}
 {{- include "idol-library.labels" . }}
 {{- end }}
-
