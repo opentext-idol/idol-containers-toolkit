@@ -14,11 +14,8 @@ metadata:
   name: {{ .Release.Name }}-idol-config
   labels: {{- include "idolfind.labels" . | nindent 4 }}
 data:
-  community.cfg: |
-{{ tpl (.Files.Get "resources/community.cfg") . | indent 4 }}
-
-  find_config.json: |
-{{ tpl (.Files.Get "resources/find_config.json") . | indent 4 }}
-
-  view.cfg: |
-{{ tpl (.Files.Get "resources/view.cfg") . | indent 4 }}
+  {{- $ctx := . }}
+  {{- range tuple "agentstore.cfg" "community.cfg" "find_config.json" "view.cfg" }}
+  {{ . }}: |-
+{{ tpl (. | print "resources/" | $ctx.Files.Get) $ctx | indent 4 }}
+  {{- end }}

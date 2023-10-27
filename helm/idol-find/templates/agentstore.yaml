@@ -59,6 +59,13 @@ spec:
         - containerPort: {{ .Values.agentStoreIndexPort | int }}
           name: {{ .Values.idolIndexPortName }}
           protocol: TCP
+        volumeMounts:
+        - name: config-map
+          mountPath: /etc/config/idol
         env:
-        - name: IDOL_COMMAND_PARAMS
-          value: {{ printf "-aciport %d -indexport %d -serviceport %d" (.Values.agentStoreACIPort | int) (.Values.agentStoreIndexPort | int) (.Values.agentStoreServicePort | int) | quote }}
+        - name: IDOL_COMPONENT_CFG
+          value: "/etc/config/idol/agentstore.cfg"
+      volumes:
+      - name: config-map
+        configMap:
+          name: {{ .Release.Name }}-idol-config
