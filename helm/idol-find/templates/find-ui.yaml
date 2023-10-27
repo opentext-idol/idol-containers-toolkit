@@ -12,7 +12,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Values.findUIName }}
-  labels: {{- include "idolfind.labels" . | nindent 4 }}
+  labels: {{- include "idol-library.labels" . | nindent 4 }}
 spec:
   ports:
   - port: {{ .Values.findUIPort | int }}
@@ -25,7 +25,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.findUIName }}
-  labels: {{- include "idolfind.labels" . | nindent 4 }}
+  labels: {{- include "idol-library.labels" . | nindent 4 }}
 spec:
   replicas: {{ default 1 .Values.findUIReplicas | int }}
   selector:
@@ -33,7 +33,7 @@ spec:
       app: {{ .Values.findUIName }}
   template:
     metadata:
-      labels: {{- include "idolfind.labels" . | nindent 8 }}
+      labels: {{- include "idol-library.labels" . | nindent 8 }}
         app: {{ .Values.findUIName }}
     spec:
       imagePullSecrets:
@@ -55,7 +55,7 @@ spec:
           httpGet:
             path: {{ .Values.findUILivenessProbe.path }}
             port: {{ .Values.findUIPort | int }}
-{{- template "idolfind.deployment.standardLivenessProbe" .Values.findUILivenessProbe }}
+{{- template "idol-library.standardLivenessProbe" .Values.findUILivenessProbe }}
         ports:
         - containerPort: {{ .Values.findUIPort | int }}
           name: {{ .Values.webappPortName }}

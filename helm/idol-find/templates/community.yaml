@@ -12,7 +12,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Values.communityName }}
-  labels: {{- include "idolfind.labels" . | nindent 4 }}
+  labels: {{- include "idol-library.labels" . | nindent 4 }}
 spec:
   ports:
   - port: {{ .Values.communityACIPort | int }}
@@ -28,7 +28,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.communityName }}
-  labels: {{- include "idolfind.labels" . | nindent 4 }}
+  labels: {{- include "idol-library.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
@@ -36,7 +36,7 @@ spec:
       app: {{ .Values.communityName }}
   template:
     metadata:
-      labels: {{- include "idolfind.labels" . | nindent 8 }}
+      labels: {{- include "idol-library.labels" . | nindent 8 }}
         app: {{ .Values.communityName }}
     spec:
       imagePullSecrets:
@@ -51,7 +51,7 @@ spec:
           httpGet:
             path: {{ .Values.livenessProbePath }}
             port: {{ .Values.communityACIPort | int }}
-{{- template "idolfind.deployment.standardLivenessProbe" .Values.communityLivenessProbe }}
+{{- template "idol-library.standardLivenessProbe" .Values.communityLivenessProbe }}
         ports:
         - containerPort: {{ .Values.communityACIPort | int }}
           name: {{ .Values.idolACIPortName }}

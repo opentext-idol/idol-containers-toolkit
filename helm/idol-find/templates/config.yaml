@@ -12,7 +12,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-idol-config
-  labels: {{- include "idolfind.labels" . | nindent 4 }}
+  labels: {{- include "idol-library.labels" . | nindent 4 }}
 data:
   {{- $ctx := . }}
   {{- range tuple "agentstore.cfg" "community.cfg" "find_config.json" "view.cfg" }}

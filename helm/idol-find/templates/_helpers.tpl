@@ -8,13 +8,3 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-
-{{/* Generate standard liveness probe timeouts */}}
-{{- define "idolfind.deployment.standardLivenessProbe" }}
-{{- include "idol-library.standardLivenessProbe" . }}
-{{- end -}}
-
-{{/* Standard labels */}}
-{{- define "idolfind.labels" }}
-{{- include "idol-library.labels" . }}
-{{- end }}
