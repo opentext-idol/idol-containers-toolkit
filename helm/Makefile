@@ -4,6 +4,7 @@
 
 SUBCHARTS:=idol-library \
 	idol-licenseserver \
+	idol-find \
 	distributed-idol
 
 PACKAGE_SUBCHARTS:=$(addprefix package-,${SUBCHARTS})
