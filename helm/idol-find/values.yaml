@@ -41,6 +41,13 @@ idolVersion: "23.4"
 # a secret for Dockerhub credentials and a secret per private repository used.
 imagePullSecrets:
   - "dockerhub-secret"
+
+# licenseServerHostname maps to [License] LicenseServerHost in the IDOL cfg files
+# Should point to a resolvable IDOL LicenseServer (or Kubernetes service abstraction - see the idol-licenseserver chart)
+licenseServerHostname: "idol-licenseserver"
+# licenseServerPort is the ACI port of the LicenseServer instance
+licenseServerPort: "20000"
+
 ################################
 
 
@@ -90,12 +97,6 @@ queryserviceACIPort: "9100"
 nifiserviceName: "idol-nifi"
 # list of ports for the NiFi service
 nifiserviceACIPort: "11000"
-
-# licenseServerHostname maps to [License] LicenseServerHost in the IDOL cfg files
-# Should point to a resolvable IDOL LicenseServer (or Kubernetes service abstraction - see the idol-licenseserver chart)
-licenseServerHostname: "idol-licenseserver"
-# licenseServerPort is the ACI port of the LicenseServer instance
-licenseServerPort: "20000"
 
 # livenessProbePath is an internal parameter to specify the IDOL path used
 # as part of liveness checks.
