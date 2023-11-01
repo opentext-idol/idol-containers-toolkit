@@ -5,7 +5,8 @@
 SUBCHARTS:=idol-library \
 	idol-licenseserver \
 	idol-find \
-	distributed-idol
+	distributed-idol \
+	single-content
 
 PACKAGE_SUBCHARTS:=$(addprefix package-,${SUBCHARTS})
 CLEAN_SUBCHARTS:=$(addprefix clean-,${SUBCHARTS})
