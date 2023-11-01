@@ -1,0 +1,234 @@
+{
+    "$schema": "https://json-schema.org/draft-07/schema#",
+    "title": "Values",
+    "type": "object",
+    "properties": {
+        "idolImageRegistry": {
+            "type": "string",
+            "format": "hostname"
+        },
+        "idolVersion": {
+            "type": "string",
+            "minLength": 1
+        },
+        "imagePullSecrets": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "string",
+                "minLength": 1
+            }
+        },
+        "licenseServerHostname": {
+            "type": "string",
+            "format": "hostname"
+        },
+        "licenseServerPort": {
+            "$ref": "#/$defs/port_number"
+        },
+        "ingressProxyBodySize": {
+            "type": "string",
+            "pattern": "^\\d+(?:\\.\\d+)?(?:Ki|Mi|Gi|Ti|Pi|Ei|m|k|M|G|T|P|E)?$"
+        },
+        "ingressType": {
+            "type": "string",
+            "enum": ["nginx","haproxy"]
+        },
+        "ingressClassName": {
+            "type": "string"
+        },
+        "ingressHost": {
+            "type": "string"
+        },
+        "ingressPort": {
+            "$ref": "#/$defs/port_number"
+        },
+        "exposeServers": {
+            "type": "boolean"
+        },
+        "queryserviceName": {
+            "type": "string",
+            "format": "hostname"
+        },
+        "queryserviceACIPort": {
+            "$ref": "#/$defs/port_number"
+        },
+        "nifiserviceName": {
+            "type": "string",
+            "format": "hostname"
+        },
+        "nifiserviceACIPort": {
+            "$ref": "#/$defs/port_number"
+        },
+        "livenessProbePath": {
+            "type": "string",
+            "minLength": 1
+        },
+        "idolACIPortName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "idolIndexPortName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "idolServicePortName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "webappPortName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "findIngressName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "findEndpointName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "agentStoreName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "agentStoreImage": {
+            "type": "string",
+            "minLength": 1
+        },
+        "agentStoreACIPort": {
+            "$ref": "#/$defs/port_number"
+        },
+        "agentStoreIndexPort": {
+            "$ref": "#/$defs/port_number"
+        },
+        "agentStoreServicePort": {
+            "$ref": "#/$defs/port_number"
+        },
+        "agentStoreLivenessProbe": {
+            "$ref": "#/$defs/liveness_probe"
+        },
+        "communityName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "communityImage": {
+            "type": "string",
+            "minLength": 1
+        },
+        "communityACIPort": {
+            "$ref": "#/$defs/port_number"
+        },
+        "communityServicePort": {
+            "$ref": "#/$defs/port_number"
+        },
+        "communityLivenessProbe": {
+            "$ref": "#/$defs/liveness_probe"
+        },
+        "viewServerName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "viewServerImage": {
+            "type": "string",
+            "minLength": 1
+        },
+        "viewServerACIPort": {
+            "$ref": "#/$defs/port_number"
+        },
+        "viewServerServicePort": {
+            "$ref": "#/$defs/port_number"
+        },
+        "findUIName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "findUIImage": {
+            "type": "string",
+            "minLength": 1
+        },
+        "findUIPort": {
+            "$ref": "#/$defs/port_number"
+        },
+        "findHTTPScheme": {
+            "type": "string",
+            "minLength": 1
+        },
+        "findLoginMethod": {
+            "type": "string",
+            "minLength": 1
+        },
+        "findUILivenessProbe": {
+            "allOf": [{"$ref": "#/$defs/liveness_probe"}],
+            "properties": {
+                "path": {
+                    "type": "string"
+                }
+            },
+            "required": ["path"]
+        }
+    },
+    "required": [
+        "idolImageRegistry",
+        "idolVersion",
+        "imagePullSecrets",
+        "licenseServerHostname",
+        "licenseServerPort",
+        "ingressProxyBodySize",
+        "ingressType",
+        "livenessProbePath",
+        "queryserviceName",
+        "queryserviceACIPort",
+        "nifiserviceName",
+        "nifiserviceACIPort",
+        "idolACIPortName",
+        "idolIndexPortName",
+        "idolServicePortName",
+        "webappPortName",
+        "findIngressName",
+        "findEndpointName",
+        "agentStoreName",
+        "agentStoreImage",
+        "agentStoreACIPort",
+        "agentStoreIndexPort",
+        "agentStoreServicePort",
+        "communityName",
+        "communityImage",
+        "communityACIPort",
+        "communityServicePort",
+        "viewServerName",
+        "viewServerImage",
+        "viewServerACIPort",
+        "viewServerServicePort",
+        "findUIName",
+        "findUIImage",
+        "findUIPort",
+        "findHTTPScheme",
+        "findLoginMethod",
+        "findUILivenessProbe"
+    ],
+
+    "$defs": {
+        "port_number": {
+            "type": "string",
+            "pattern": "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$"
+        },
+        "liveness_probe": {
+            "type": "object",
+            "properties": {
+                "initialDelaySeconds": {
+                    "type": "integer"
+                },
+                "timeoutSeconds": {
+                    "type": "integer"
+                },
+                "periodSeconds": {
+                    "type": "integer"
+                },
+                "failureThreshold": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
+}

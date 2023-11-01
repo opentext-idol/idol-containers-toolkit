@@ -1,0 +1,51 @@
+# BEGIN COPYRIGHT NOTICE
+# (c) Copyright 2022 Micro Focus or one of its affiliates.
+# END COPYRIGHT NOTICE
+
+{{- /*
+ nginx ingress needs path capture to achieve prefix type routing
+*/}}
+{{- $pathSuffix := "" }}
+{{- $pathType := "Prefix" }}
+{{- if eq .Values.ingressType "nginx" }}
+{{- $pathSuffix = "(.*)"}}
+{{- $pathType = "ImplementationSpecific" }}
+{{- end }}
+
+{{- $portSuffix := "" }}
+{{- if .Values.ingressPort }}
+{{- $portSuffix = printf ":%d" (.Values.ingressPort | int) }}
+{{- end }}
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.findIngressName }}
+  labels: {{- include "idol-library.labels" . | nindent 4 }}
+  annotations:
+{{- if eq .Values.ingressType "nginx" }}
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/proxy-redirect-from: ~^(https?://[^:/]+)(:\d+)?(/.+)$
+    nginx.ingress.kubernetes.io/proxy-redirect-to: {{ printf "$1%s/%s$3" $portSuffix .Values.findEndpointName }}
+    nginx.ingress.kubernetes.io/proxy-body-size: {{ .Values.ingressProxyBodySize }}
+{{- else if eq .Values.ingressType "haproxy" }}
+    haproxy.router.openshift.io/rewrite-target: / 
+    haproxy.router.openshift.io/proxy-body-size: {{ .Values.ingressProxyBodySize }}
+{{- end }}
+spec:
+{{- if .Values.ingressClassName }}
+  ingressClassName: {{ .Values.ingressClassName }}
+{{- end }}
+  rules:
+  - http:
+      paths:
+      - path: {{ printf "/%s/%s" .Values.findEndpointName $pathSuffix }}
+        pathType: {{ $pathType }}
+        backend:
+          service:
+            name: {{ .Values.findUIName }}
+            port:
+              name: {{ .Values.webappPortName }}
+{{- if .Values.ingressHost }}
+    host: {{ .Values.ingressHost }}
+{{- end }}

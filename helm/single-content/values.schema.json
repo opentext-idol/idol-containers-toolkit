@@ -1,0 +1,121 @@
+{
+    "$schema": "https://json-schema.org/draft-07/schema#",
+    "properties": {
+        "contentVolumeSize": {
+            "type": "string",
+            "pattern": "^\\d+(?:\\.\\d+)?(?:Ki|Mi|Gi|Ti|Pi|Ei|m|k|M|G|T|P|E)?$"
+        },
+        "contentStorageClass": {
+            "type": "string",
+            "minLength": 1
+        },
+        "idolImageRegistry": {
+            "type": "string",
+            "format": "hostname"
+        },
+        "idolVersion": {
+            "type": "string",
+            "minLength": 1
+        },
+        "imagePullSecrets": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "string",
+                "minLength": 1
+            }
+        },
+        "licenseServerPort": {
+            "type": "string",
+            "pattern": "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$"
+        },
+        "ingressProxyBodySize": {
+            "type": "string",
+            "pattern": "^\\d+(?:\\.\\d+)?(?:Ki|Mi|Gi|Ti|Pi|Ei|m|k|M|G|T|P|E)?$"
+        },
+        "ingressType": {
+            "type": "string",
+            "enum": ["nginx","haproxy"]
+        },
+        "ingressHost": {
+            "type": "string"
+        },
+        "httpProxy": {
+            "type": "string"
+        },
+        "licenseServerHostname": {
+            "type": "string",
+            "minLength": 1
+        },
+        "livenessProbePath": {
+            "type": "string",
+            "minLength": 1
+        },
+        "queryserviceName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "indexserviceName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "idolingressName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "contentName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "contentImage": {
+            "type": "string",
+            "minLength": 1
+        },
+        "contentPorts": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "service": {
+                        "type": "string",
+                        "pattern": "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$"
+                    },
+                    "container": {
+                        "type": "string",
+                        "pattern": "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$"
+                    }
+                },
+                "required": [
+                    "name",
+                    "service",
+                    "container"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "required": [
+        "contentVolumeSize",
+        "idolImageRegistry",
+        "idolVersion",
+        "imagePullSecrets",
+        "licenseServerPort",
+        "ingressProxyBodySize",
+        "licenseServerHostname",
+        "livenessProbePath",
+        "queryserviceName",
+        "indexserviceName",
+        "idolingressName",
+        "contentName",
+        "contentImage",
+        "contentPorts"
+    ],
+    "title": "Values",
+    "type": "object"
+}
