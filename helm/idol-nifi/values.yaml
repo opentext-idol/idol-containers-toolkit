@@ -1,10 +1,3 @@
-# autoscalingEnabled - deploy a horizontal pod autoscaler for the nifi statefulset
-autoScalingEnabled: true
-# autoscalingMinReplicas - the minimum size of the nifi statefulset
-autoScalingMinReplicas: 1
-# autoscalingMaxReplicas - the maximum size of the nifi statefulset
-autoScalingMaxReplicas: 8
-
 # idolImageRegistry - used to construct container image name: <idolImageRegistry>/<nifiImage>:<idolVersion>
 idolImageRegistry: microfocusidolserver
 # idolVersion - used to construct container image name: <idolImageRegistry>/<nifiImage>:<idolVersion>
@@ -31,8 +24,45 @@ ingressProxyBodySize: 2048m
 ingressType: nginx
 
 nifi:
+  autoScaling:
+    # autoScaling.enabled - deploy a horizontal pod autoscaler for the nifi statefulset
+    enabled: true
+    # autoScaling.minReplicas - the minimum size of the nifi statefulset
+    minReplicas: 1
+    # autoScaling.maxReplicas - the maximum size of the nifi statefulset
+    maxReplicas: 8
+    # metrics - one or more metrics controlling the horizontal pod autoscaler (https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/horizontal-pod-autoscaler-v2/#HorizontalPodAutoscalerSpec)
+    metrics:
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 90
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 90
+
+  # resources - https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits
+  resources:
+    requests:
+      cpu: 400m
+      # nifi.resources.requests.memoryMi - memory requested in mebibytes (value used in jvm memory calculation)
+      memoryMi: 3072
+    limits:
+      cpu: 400m
+      # nifi.resources.limits.memoryMi - memory limit in mebibytes (value used in jvm memory calculation)
+      memoryMi: 4096
+  
+  # jvmMemoryRatio - What proportion of the pod memory to allocate for JVM usage
+  jvmMemoryRatio: 0.9
+
   # nifiImage - used to construct container image name: <idolImageRegistry>/<nifi.imageName>:<idolVersion>
   imageName: nifi-full
+
   ingress:
     # nifi.ingress.enabled - whether to deploy ingress for nifi
     enabled: true

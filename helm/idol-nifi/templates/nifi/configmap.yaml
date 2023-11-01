@@ -5,6 +5,7 @@ metadata:
   labels: {{- include "idol-nifi.labels" . | nindent 4 -}}
     app: nifi
 data:
+  JAVA_HOME: "/usr/lib/jvm/jre-11"
   JAVA_OPTS: "-XX:UseAVX=0 -Djavax.net.debug=ssl,handshake"
   KEYSTORE_PASSWORD: "th1s1s3up34e5r37"
   KEYSTORE_PATH: "${NIFI_HOME}/keytool/keystore.p12"
@@ -24,8 +25,8 @@ data:
   NIFI_CLUSTER_PROTOCOL_IS_SECURE: "true"
   NIFI_ELECTION_MAX_CANDIDATES: "1"
   NIFI_ELECTION_MAX_WAIT: "2 min"
-  NIFI_JVM_HEAP_INIT: "2g"
-  NIFI_JVM_HEAP_MAX: "2g"
+  NIFI_JVM_HEAP_INIT: {{ printf "%dm" ( mulf .Values.nifi.resources.requests.memoryMi .Values.nifi.jvmMemoryRatio | int ) }}
+  NIFI_JVM_HEAP_MAX: {{ printf "%dm" ( mulf .Values.nifi.resources.limits.memoryMi .Values.nifi.jvmMemoryRatio | int ) }}
   NIFI_SECURITY_AUTORELOAD_ENABLED: "true"
   NIFI_SECURITY_AUTORELOAD_INTERVAL: "5 min"
   NIFI_SECURITY_NEEDCLIENTAUTH: "true"

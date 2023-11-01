@@ -1,4 +1,4 @@
-{{- if .Values.autoScalingEnabled }}
+{{- if .Values.nifi.autoScaling.enabled }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -10,22 +10,14 @@ spec:
     apiVersion: apps/v1
     kind: StatefulSet
     name: nifi
-  minReplicas: {{ .Values.autoScalingMinReplicas | int }}
-  maxReplicas: {{ .Values.autoScalingMaxReplicas | int }}
+  minReplicas: {{ .Values.nifi.autoScaling.minReplicas | int }}
+  maxReplicas: {{ .Values.nifi.autoScaling.maxReplicas | int }}
   behavior:
     scaleUp:
       stabilizationWindowSeconds: 300
   metrics:
-    - type: Resource
-      resource:
-        name: memory
-        target:
-          type: Utilization
-          averageUtilization: 90
-    - type: Resource
-      resource:
-        name: cpu
-        target:
-          type: Utilization
-          averageUtilization: 90
+{{ with .Values.nifi.autoScaling.metrics }}
+{{- toYaml . | trim | indent 4 }}
+{{- end }}
+
 {{- end }}
