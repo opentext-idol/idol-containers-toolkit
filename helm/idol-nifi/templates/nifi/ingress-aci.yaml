@@ -1,0 +1,44 @@
+# BEGIN COPYRIGHT NOTICE
+# (c) Copyright 2022 Micro Focus or one of its affiliates.
+# END COPYRIGHT NOTICE
+{{- if .Values.nifi.ingress.enabled -}}
+{{- /*
+ nginx ingress needs path capture to achieve prefix type routing
+*/}}
+{{- $pathSuffix := "" }}
+{{- $pathType := "Prefix" }}
+{{- if eq .Values.ingressType "nginx" }}
+{{- $pathSuffix = "(.*)"}}
+{{- $pathType = "ImplementationSpecific" }}
+{{- end }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nifi-aci
+  labels: {{- include "idol-nifi.labels" . | nindent 4 }}
+  annotations:
+{{- if eq .Values.ingressType "nginx" }}
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/proxy-body-size: {{ .Values.ingressProxyBodySize }}
+{{- else if eq .Values.ingressType "haproxy" }}
+    haproxy.router.openshift.io/rewrite-target: / 
+    haproxy.router.openshift.io/proxy-body-size: {{ .Values.ingressProxyBodySize }}
+{{- end }}
+spec:
+{{- if .Values.ingressClassName }}
+  ingressClassName: {{ .Values.ingressClassName }}
+{{- end }}
+  rules:
+  - http:
+      paths:
+      - path: {{ print "/connector-aci/" $pathSuffix }}
+        pathType: {{ $pathType }}
+        backend:
+          service:
+            name: nifi
+            port:
+              name: connector-aci
+{{- if .Values.nifi.ingress.aciHost }}
+    host: {{ .Values.nifi.ingress.aciHost | quote }}
+{{- end }}
+{{- end }}

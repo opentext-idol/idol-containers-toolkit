@@ -29,3 +29,7 @@ spec:
     port: 11443
     targetPort: 11443
     name: cluster
+  - protocol: TCP
+    port: 11000
+    targetPort: 11000
+    name: connector-aci

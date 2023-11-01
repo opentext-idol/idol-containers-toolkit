@@ -80,6 +80,8 @@ spec:
           name: https
         - containerPort: 6342
           name: cluster-lb
+        - containerPort: 11000
+          name: connector-aci
         env:
           - name: POD_IP
             valueFrom:

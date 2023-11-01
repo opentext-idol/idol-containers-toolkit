@@ -14,12 +14,14 @@ metadata:
     nginx.ingress.kubernetes.io/auth-type: basic
     nginx.ingress.kubernetes.io/auth-secret: nifi-basic-auth
     nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
-{{/* ingress setup is very dependent on cluster ingress controller so allow user value annotations */}}
+{{/* ingress setup is very dependent on cluster ingress controller so allow user value annotations */ -}}
 {{ with .Values.nifiRegistry.ingress.annotations }}
 {{- toYaml . | trim | indent 4 }}
 {{- end }}
 spec:
-  ingressClassName: "nginx"
+{{- if .Values.ingressClassName }}
+  ingressClassName: {{ .Values.ingressClassName | quote }}
+{{- end }}
   rules:
   - http:
       paths:
@@ -29,21 +31,21 @@ spec:
           service:
             name: nifi-registry
             port:
-              number: 18080
+              name: http
       - path: /nifi-registry-api
         pathType: Prefix
         backend:
           service:
             name: nifi-registry
             port:
-              number: 18080
+              name: http
       - path: /nifi-registry-docs
         pathType: Prefix
         backend:
           service:
             name: nifi-registry
             port:
-              number: 18080
+              name: http
 {{- if .Values.nifiRegistry.ingress.host }}
     host: {{ .Values.nifiRegistry.ingress.host | quote }}
 {{- end }}

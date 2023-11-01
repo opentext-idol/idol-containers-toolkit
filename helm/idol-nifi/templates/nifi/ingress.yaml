@@ -1,4 +1,13 @@
 {{- if .Values.nifi.ingress.enabled -}}
+{{- /*
+ nginx ingress needs path capture to achieve prefix type routing
+*/}}
+{{- $pathSuffix := "" }}
+{{- $pathType := "Prefix" }}
+{{- if eq .Values.ingressType "nginx" }}
+{{- $pathSuffix = "(.*)"}}
+{{- $pathType = "ImplementationSpecific" }}
+{{- end }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -9,18 +18,25 @@ metadata:
   annotations: 
     app.kubernetes.io/name: nifi
     app.kubernetes.io/part-of: nifi
+{{- if eq .Values.ingressType "nginx" }}
+    nginx.ingress.kubernetes.io/proxy-body-size: {{ .Values.ingressProxyBodySize }}
     nginx.ingress.kubernetes.io/affinity: cookie
     nginx.ingress.kubernetes.io/affinity-mode: persistent
     nginx.ingress.kubernetes.io/auth-type: basic
     nginx.ingress.kubernetes.io/auth-secret: nifi-basic-auth
     nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
-{{/* ingress setup is very dependent on cluster ingress controller so allow user value annotations */}}
+{{- else if eq .Values.ingressType "haproxy" }}
+    haproxy.router.openshift.io/rewrite-target: / 
+    haproxy.router.openshift.io/proxy-body-size: {{ .Values.ingressProxyBodySize }}
+{{- end }}
+{{/* ingress setup is very dependent on cluster ingress controller so allow user value annotations */ -}}
 {{ with .Values.nifi.ingress.annotations }}
 {{- toYaml . | trim | indent 4 }}
 {{- end }}
-
 spec:
-  ingressClassName: "nginx"
+{{- if .Values.ingressClassName }}
+  ingressClassName: {{ .Values.ingressClassName | quote }}
+{{- end }}
   rules:
   - http:
       paths:
@@ -30,7 +46,7 @@ spec:
           service:
             name: nifi
             port:
-              number: 8080
+              name: http
 {{- if .Values.nifi.ingress.host }}
     host: {{ .Values.nifi.ingress.host | quote }}
 {{- end }}
