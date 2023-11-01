@@ -1,21 +1,10 @@
 {
     "$schema": "https://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/values",
+    "$ref": "#/definitions/Values",
     "definitions": {
-        "values": {
+        "Values": {
             "type": "object",
             "properties": {
-                "autoScalingEnabled": {
-                    "type": "boolean"
-                },
-                "autoScalingMinReplicas": {
-                    "type": "integer",
-                    "minimum": 1
-                },
-                "autoScalingMaxReplicas": {
-                    "type": "integer",
-                    "minimum": 1
-                },
                 "idolImageRegistry": {
                     "type": "string",
                     "minLength": 1
@@ -26,76 +15,216 @@
                 },
                 "imagePullSecrets": {
                     "type": "array",
-                    "minItems": 1,
                     "items": {
                         "type": "string",
                         "minLength": 1
                     }
                 },
-                "nifi": {
-                    "$ref":"#/definitions/nifi"
+                "ingressClassName": {
+                    "type": "string"
                 },
-                "nifiRegistry":{
-                    "$ref":"#/definitions/nifiRegistry"
+                "ingressBasicAuthData": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "ingressProxyBodySize": {
+                    "type": "string",
+                    "pattern": "^\\d+(?:\\.\\d+)?(?:Ki|Mi|Gi|Ti|Pi|Ei|m|k|M|G|T|P|E)?$"
+                },
+                "ingressType": {
+                    "type": "string",
+                    "enum": ["nginx","haproxy"]
+                },
+                "nifi": {
+                    "$ref": "#/definitions/Nifi"
+                },
+                "nifiRegistry": {
+                    "$ref": "#/definitions/NifiRegistry"
+                },
+                "idol-licenseserver": {
+                    "$ref": "#/definitions/IdolLicenseserver"
                 }
-            }
+            },
+            "required": [
+                "idol-licenseserver",
+                "idolImageRegistry",
+                "idolVersion",
+                "imagePullSecrets",
+                "ingressBasicAuthData",
+                "ingressProxyBodySize",
+                "ingressType",
+                "nifi",
+                "nifiRegistry"
+            ],
+            "title": "Values"
         },
-        "nifi": {
+        "IdolLicenseserver": {
             "type": "object",
-                "properties": {
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "enabled"
+            ],
+            "title": "IdolLicenseserver"
+        },
+        "Nifi": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "autoScaling": {
+                    "$ref": "#/definitions/AutoScaling"
+                },
+                "resources": {
+                    "$ref": "#/definitions/Resources"
+                },
+                "jvmMemoryRatio": {
+                    "type": "number",
+                    "minimum": 0.01,
+                    "maximum": 0.99
+                },
                 "imageName": {
                     "type": "string",
                     "minLength": 1
                 },
                 "ingress": {
-                    "type": "object",
-                    "properties": {
-                        "enabled": {
-                            "type": "boolean"
-                        },
-                        "annotations": {
-                            "type": "object"
-                        },
-                        "host": {
-                            "type": "string"
-                        },
-                        "proxyPath":{
-                            "type": "string"
-                        },
-                        "proxyHost":{
-                            "type": "string"
-                        }
+                    "$ref": "#/definitions/NifiIngress"
+                }
+            },
+            "required": [
+                "autoScaling",
+                "imageName",
+                "ingress",
+                "jvmMemoryRatio",
+                "resources"
+            ],
+            "title": "Nifi"
+        },
+        "AutoScaling": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "minReplicas": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "maxReplicas": {
+                    "type": "integer"
+                },
+                "metrics": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
                     }
                 }
             },
             "required": [
-                "imageName"
-            ]
+                "enabled",
+                "maxReplicas",
+                "metrics",
+                "minReplicas"
+            ],
+            "title": "AutoScaling"
         },
-        "nifiRegistry":{
+        "NifiIngress": {
             "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "annotations": {
+                    "type": "object"
+                },
+                "host": {
+                    "type": "string"
+                },
+                "proxyPath": {
+                    "type": "string"
+                },
+                "proxyHost": {
+                    "type": "string"
+                },
+                "aciHost": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "enabled"
+            ],
+            "title": "NifiIngress"
+        },
+        "Resources": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "requests": {
+                    "$ref": "#/definitions/Limits"
+                },
+                "limits": {
+                    "$ref": "#/definitions/Limits"
+                }
+            },
+            "required": [
+                "limits",
+                "requests"
+            ],
+            "title": "Resources"
+        },
+        "Limits": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "cpu": {
+                    "type": "string"
+                },
+                "memoryMi": {
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "cpu",
+                "memoryMi"
+            ],
+            "title": "Limits"
+        },
+        "NifiRegistry": {
+            "type": "object",
+            "additionalProperties": false,
             "properties": {
                 "ingress": {
-                    "type": "object",
-                    "properties": {
-                        "enabled": {
-                            "type": "boolean"
-                        },
-                        "annotations": {
-                            "type": "object"
-                        },
-                        "host": {
-                            "type": "string"
-                        }
-                    }
+                    "$ref": "#/definitions/NifiRegistryIngress"
                 }
-            }
+            },
+            "required": [
+                "ingress"
+            ],
+            "title": "NifiRegistry"
+        },
+        "NifiRegistryIngress": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "annotations": {
+                    "type": "object"
+                },
+                "host": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "enabled",
+                "host"
+            ],
+            "title": "NifiRegistryIngress"
         }
-    },
-    "required": [
-        "idolImageRegistry",
-        "idolVersion",
-        "nifi"
-    ],
-    "title": "Values"
+    }
 }

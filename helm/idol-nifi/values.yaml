@@ -21,6 +21,8 @@ ingressBasicAuthData: YWRtaW46JGFwcjEkSDY1dnBkTU8kMXAxOGMxN3BuZVFUT2ZjVC9TZkZzMQ
 # corresponding nginx configuration parameter.
 ingressProxyBodySize: 2048m
 
+# ingressType - setup ingress for that controller type.
+# Valid values are nginx or haproxy (used by OpenShift)
 ingressType: nginx
 
 nifi:
