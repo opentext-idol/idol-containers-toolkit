@@ -87,26 +87,21 @@ spec:
           - mountPath: /data
             name: data
             subPath: data
+          - name: scripts
+            mountPath: /scripts
+            readOnly: false
         lifecycle:
           postStart:
             exec:
               command:
               - /bin/bash
-              - -c
-              - |
-                logfile=/opt/nifi-registry/nifi-registry-current/logs/post-start.log
-                bucketname=default-bucket
-                echo [$(date)] Checking registry for "${bucketname}" | tee -a ${logfile}
-                result=$("${NIFI_TOOLKIT_HOME}/bin/cli.sh" registry list-buckets -u "http://${HOSTNAME}:18080" | grep "${bucketname}")
-                rc=$?
-                until [ 0 == $rc ]
-                do
-                  "${NIFI_TOOLKIT_HOME}/bin/cli.sh" registry create-bucket --bucketName "${bucketname}" -u "http://${HOSTNAME}:18080"
-                  result=$("${NIFI_TOOLKIT_HOME}/bin/cli.sh" registry list-buckets -u "http://${HOSTNAME}:18080" | grep "${bucketname}")
-                  rc=$?
-                done
-                echo [$(date)] Got bucket "${bucketname}": "${result}" | tee -a ${logfile}
+              - /scripts/postStart.sh
       volumes:
         - name: data
           emptyDir:
             sizeLimit: 2Gi
+        - name: scripts
+          configMap:
+            name: nifi-registry-scripts-cm
+            optional: false
+            defaultMode: 0755
