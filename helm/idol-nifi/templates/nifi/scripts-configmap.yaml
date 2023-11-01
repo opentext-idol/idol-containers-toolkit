@@ -1,80 +1,21 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: nifi-ssl-cm
+  name: nifi-scripts-cm
   labels: {{- include "idol-nifi.labels" . | nindent 4 -}}
     app: nifi
 data:
   security.sh: |
-    #!/bin/bash
-    set -ex -o allexport
-
-    ORGANISATION_UNIT=${ORGANISATION_UNIT:-'Cloud Services Application'}
-    ORGANISATION=${ORGANISATION:-'Cloud Services'}
-    PUBLIC_DNS=${POD_NAME:-'nifi.tld'}
-    CITY=${CITY:-'London'}
-    STATE=${STATE:-'London'}
-    COUNTRY_CODE=${COUNTRY_CODE:-'GB'}
-    KEY_PASS=${KEY_PASS:-$KEYSTORE_PASS}
-    KEYSTORE_PASS=${KEYSTORE_PASS:-$NIFI_SENSITIVE_PROPS_KEY}
-    KEYSTORE_PASSWORD=${KEYSTORE_PASSWORD:-$NIFI_SENSITIVE_PROPS_KEY}
-    KEYSTORE_PATH=${NIFI_HOME}/keytool/keystore.p12
-    KEYSTORE_TYPE=jks
-    TRUSTSTORE_PASS=${TRUSTSTORE_PASS:-$NIFI_SENSITIVE_PROPS_KEY}
-    TRUSTSTORE_PASSWORD=${TRUSTSTORE_PASSWORD:-$NIFI_SENSITIVE_PROPS_KEY}
-    TRUSTSTORE_PATH=${NIFI_HOME}/keytool/truststore.jks
-    TRUSTSTORE_TYPE=jks
-
-    if [[ ! -f "${NIFI_HOME}/keytool/keystore.p12" ]]
-    then
-      echo "Creating keystore"
-      keytool -genkey -noprompt -alias nifi-keystore \
-      -dname "CN=${POD_NAME},OU=${ORGANISATION_UNIT},O=${ORGANISATION},L=${CITY},S=${STATE},C=${COUNTRY_CODE}" \
-      -keystore ${NIFI_HOME}/keytool/keystore.p12 \
-      -storepass ${KEYSTORE_PASS:-$NIFI_SENSITIVE_PROPS_KEY} \
-      -KeySize 2048 \
-      -keypass "${KEY_PASS:-$NIFI_SENSITIVE_PROPS_KEY}" \
-      -keyalg RSA \
-      -storetype pkcs12
-    fi
-
-    if [[ ! -f "${NIFI_HOME}/keytool/truststore.jks" ]]
-    then
-      echo "Creating truststore"
-      keytool -genkey -noprompt -alias nifi-truststore \
-      -dname "CN=${POD_NAME},OU=${ORGANISATION_UNIT},O=${ORGANISATION},L=${CITY},S=${STATE},C=${COUNTRY_CODE}" \
-      -keystore ${NIFI_HOME}/keytool/truststore.jks \
-      -storetype jks \
-      -keypass ${KEYSTORE_PASS:-$NIFI_SENSITIVE_PROPS_KEY} \
-      -storepass ${KEY_PASS:-$NIFI_SENSITIVE_PROPS_KEY} \
-      -KeySize 2048
-    fi
-
-    #/usr/bin/bash ${NIFI_HOME}/../scripts/secure.sh 
-    #eval ${NIFI_HOME}/../scripts/secure.sh 
+{{ tpl (.Files.Get "resources/nifi-security.sh") . | indent 4 }}
   wait.sh: |
-    #!/bin/bash
-    set -ex -o allexport
-    timeout 10m bash -c "until ${NIFI_TOOLKIT_HOME}/bin/cli.sh nifi current-user >/dev/null; do echo [\$(date)] Waiting for NiFi CLI...; sleep 5; done"
+{{ tpl (.Files.Get "resources/nifi-wait.sh") . | indent 4 }}
   connect-registry.sh: |
-    #!/bin/bash
-    set -x -o allexport
-    grep nifi-0. /etc/hostname
-    notprimary=$?
-    if [ 1 == ${notprimary} ]; then
-        echo Skipping registry check as non-primary instance
-        exit 0
-    fi
-    for i in ${NIFI_REGISTRY_HOSTS//,/ }
-    do
-        echo [$(date)] Checking/registering registry ${i} 
-        result=$("${NIFI_TOOLKIT_HOME}/bin/cli.sh" nifi list-reg-clients | grep "${i}")
-        rc=$?
-        until [ 0 == $rc ]
-        do
-          "${NIFI_TOOLKIT_HOME}/bin/cli.sh" nifi create-reg-client --registryClientName "${i}" --registryClientUrl "http://${i}:18080"
-          result=$("${NIFI_TOOLKIT_HOME}/bin/cli.sh" nifi list-reg-clients | grep "${i}")
-          rc=$?
-        done
-        echo [$(date)] Got registry client: "${result}"
-    done
+{{ tpl (.Files.Get "resources/nifi-connect-registry.sh") . | indent 4 }}
+  preStop.sh: |
+{{ tpl (.Files.Get "resources/nifi-preStop.sh") . | indent 4 }}
+  postStart.sh: |
+{{ tpl (.Files.Get "resources/nifi-postStart.sh") . | indent 4 }}
+  import-flow.sh: | 
+{{ tpl (.Files.Get "resources/nifi-import-flow.sh") . | indent 4 }}
+  flow-basic-idol.json: |
+{{ tpl (.Files.Get "resources/flow-basic-idol.json") . | indent 4 }}
