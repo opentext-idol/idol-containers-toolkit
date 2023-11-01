@@ -5,4 +5,5 @@ metadata:
   labels: {{- include "idol-nifi.labels" . | nindent 4 -}}
     app: nifi-registry
 data:
+  NIFI_REGISTRY_WEB_HTTP_PORT: "18080"
 

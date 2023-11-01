@@ -70,8 +70,7 @@ spec:
       containers:
       - name: nifi
         image: {{ .Values.idolImageRegistry }}/{{ .Values.nifi.imageName }}:{{ .Values.idolVersion }}
-        #image: idol-docker-images.svsartifactory.swinfra.net/nifi-full:23.4
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
           name: http

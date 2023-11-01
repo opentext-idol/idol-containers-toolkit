@@ -18,7 +18,7 @@ spec:
       app: zookeeper
   template:
     metadata:
-      labels: {{- include "idol-nifi.labels" . | nindent 8 }}
+      labels: {{- include "idol-nifi.labels" . | nindent 8 -}}
         app: zookeeper
     spec:
       automountServiceAccountToken: false
