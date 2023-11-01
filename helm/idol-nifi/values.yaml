@@ -13,6 +13,9 @@ idolVersion: "23.4"
 # imagePullSecrets - secrets used to pull container images
 imagePullSecrets:
 - "dockerhub-secret"
+# ingressBasicAuthData - base64 encoded htpasswd https://httpd.apache.org/docs/2.4/misc/password_encryptions.html. Default is admin/admin
+ingressBasicAuthData: YWRtaW46JGFwcjEkSDY1dnBkTU8kMXAxOGMxN3BuZVFUT2ZjVC9TZkZzMQo=
+
 
 nifi:
   # nifiImage - used to construct container image name: <idolImageRegistry>/<nifi.imageName>:<idolVersion>
