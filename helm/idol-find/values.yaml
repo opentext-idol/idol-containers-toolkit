@@ -92,7 +92,7 @@ exposeServers: true
 # queryserviceName is an internal parameter to specify the query service name.
 queryserviceName: "idol-query-service"
 # list of ports for the queryservice
-queryserviceACIPort: "9100"
+queryserviceACIPort: "9060"
 # nifiserviceName is an internal parameter to specify the NiFi service name.
 nifiserviceName: "idol-nifi"
 # list of ports for the NiFi service
