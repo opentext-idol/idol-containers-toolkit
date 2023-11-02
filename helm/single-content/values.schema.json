@@ -1,5 +1,7 @@
 {
     "$schema": "https://json-schema.org/draft-07/schema#",
+    "title": "Values",
+    "type": "object",
     "properties": {
         "contentVolumeSize": {
             "type": "string",
@@ -26,8 +28,7 @@
             }
         },
         "licenseServerPort": {
-            "type": "string",
-            "pattern": "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$"
+            "$ref": "#/$defs/port_number"
         },
         "ingressProxyBodySize": {
             "type": "string",
@@ -55,9 +56,15 @@
             "type": "string",
             "minLength": 1
         },
+        "queryserviceACIPort": {
+            "$ref": "#/$defs/port_number"
+        },
         "indexserviceName": {
             "type": "string",
             "minLength": 1
+        },
+        "indexserviceACIPort": {
+            "$ref": "#/$defs/port_number"
         },
         "idolingressName": {
             "type": "string",
@@ -83,12 +90,10 @@
                         "minLength": 1
                     },
                     "service": {
-                        "type": "string",
-                        "pattern": "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$"
+                        "$ref": "#/$defs/port_number"
                     },
                     "container": {
-                        "type": "string",
-                        "pattern": "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$"
+                        "$ref": "#/$defs/port_number"
                     }
                 },
                 "required": [
@@ -110,12 +115,19 @@
         "licenseServerHostname",
         "livenessProbePath",
         "queryserviceName",
+        "queryserviceACIPort",
         "indexserviceName",
+        "indexserviceACIPort",
         "idolingressName",
         "contentName",
         "contentImage",
         "contentPorts"
     ],
-    "title": "Values",
-    "type": "object"
+
+    "$defs": {
+        "port_number": {
+            "type": "string",
+            "pattern": "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$"
+        }
+    }
 }

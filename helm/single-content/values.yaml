@@ -85,8 +85,12 @@ licenseServerPort: "20000"
 livenessProbePath: "/a=getpid"
 # queryserviceName is an internal parameter to specify the query service name.
 queryserviceName: "idol-query-service"
+# queryserviceACIPort is the port idol-query-service will serve ACI connections on.
+queryserviceACIPort: "9060"
 # indexserviceName is an internal parameter to specify the index service name.
 indexserviceName: "idol-index-service"
+# indexserviceACIPort is the port idol-index-service will serve ACI connections on.
+indexserviceACIPort: "9070"
 # idolingressName is an internal parameter to specify the IDOL ingress name.
 idolingressName: "idol-ingress"
 
