@@ -22,13 +22,30 @@ if [ 0 == ${RC} ]; then
 fi
 
 # Get NiFi Root ID
-ROOTID=$(${NIFITOOLKITCMD} nifi get-root-id)
+#ROOTID=$(${NIFITOOLKITCMD} nifi get-root-id)
 
 # Check if flow exists in the registry
-BUCKETID=$(${NIFITOOLKITCMD} registry list-buckets -u "${NIFI_REGISTRY_URL}" -ot json | jq ".[] | select(.name==\"${BUCKET_NAME}\")" | jq -r .identifier)
+BUCKETID=
+until [ -n "${BUCKETID}" ];
+do
+    BUCKETID=$(${NIFITOOLKITCMD} registry list-buckets -u "${NIFI_REGISTRY_URL}" -ot json | jq ".[] | select(.name==\"${BUCKET_NAME}\")" | jq -r .identifier)
+    if [ -z "${BUCKETID}" ];
+    then
+        sleep 5s
+    fi
+done
 echo "BUCKETID=${BUCKETID}"
-FLOWID=$(${NIFITOOLKITCMD} registry list-flows -u "${NIFI_REGISTRY_URL}" --bucketIdentifier "${BUCKETID}" -ot json | jq ".[] | select(.name==\"${FLOW_NAME}\")" | jq -r .identifier)
 
+FLOWS=$(${NIFITOOLKITCMD} registry list-flows -u "${NIFI_REGISTRY_URL}" --bucketIdentifier "${BUCKETID}" -ot json)
+RC=$?
+until [ 0 == ${RC} ];
+do
+    sleep 5s
+    FLOWS=$(${NIFITOOLKITCMD} registry list-flows -u "${NIFI_REGISTRY_URL}" --bucketIdentifier "${BUCKETID}" -ot json)
+    RC=$?
+done
+
+FLOWID=$(echo ${FLOWS} | jq ".[] | select(.name==\"${FLOW_NAME}\")" | jq -r .identifier)
 if [ -z "${FLOWID}" ]; then
     # flow not found - create
     FLOWID=$(${NIFITOOLKITCMD} registry create-flow -u "${NIFI_REGISTRY_URL}" --bucketIdentifier "${BUCKETID}" -fn "${FLOW_NAME}")
@@ -55,5 +72,5 @@ echo Enabling services and starting processors...
 # Some processors can be slow to start up, so be forgiving
 set +e
 ${NIFITOOLKITCMD} nifi pg-enable-services -pgid "${PROCESSGROUP}" -verbose
-sleep 30
+sleep 30s
 ${NIFITOOLKITCMD} nifi pg-start -pgid "${PROCESSGROUP}" -verbose
