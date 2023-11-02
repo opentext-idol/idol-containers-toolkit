@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: nifi
+  name: idol-nifi
   labels: {{- include "idol-nifi.labels" . | nindent 4 -}}
     name: nifi
     app: nifi
@@ -47,7 +47,7 @@ spec:
             done
           envFrom:
           - configMapRef:
-              name: nifi-cm
+              name: idol-nifi-env
               optional: false
           resources:
             requests:
@@ -111,7 +111,7 @@ spec:
             value: $(POD_NAME) # Use pod name as identity
         envFrom:
           - configMapRef:
-              name: nifi-cm
+              name: idol-nifi-env
               optional: false
         volumeMounts:
           - name: data
@@ -177,6 +177,6 @@ spec:
             sizeLimit: 3Gi
         - name: scripts
           configMap:
-            name: nifi-scripts-cm
+            name: idol-nifi-scripts
             optional: false
             defaultMode: 0755

@@ -2,14 +2,14 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: nifi
+  name: idol-nifi
   labels: {{- include "idol-nifi.labels" . | nindent 4 -}}
     app.kubernetes.io/name: nifi
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: StatefulSet
-    name: nifi
+    name: idol-nifi
   minReplicas: {{ .Values.nifi.autoScaling.minReplicas | int }}
   maxReplicas: {{ .Values.nifi.autoScaling.maxReplicas | int }}
   behavior:
