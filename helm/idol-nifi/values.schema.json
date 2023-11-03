@@ -35,6 +35,13 @@
                     "type": "string",
                     "enum": ["nginx","haproxy"]
                 },
+                "indexserviceName": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "indexserviceACIPort": {
+                    "#ref": "#/definitions/port_number"
+                },
                 "nifi": {
                     "$ref": "#/definitions/Nifi"
                 },
@@ -53,6 +60,8 @@
                 "ingressBasicAuthData",
                 "ingressProxyBodySize",
                 "ingressType",
+                "indexserviceName",
+                "indexserviceACIPort",
                 "nifi",
                 "nifiRegistry"
             ],
@@ -225,6 +234,10 @@
                 "host"
             ],
             "title": "NifiRegistryIngress"
+        },
+        "port_number": {
+            "type": "string",
+            "pattern": "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$"
         }
     }
 }

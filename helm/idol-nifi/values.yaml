@@ -36,6 +36,12 @@ ingressProxyBodySize: 2048m
 # Valid values are nginx or haproxy (used by OpenShift)
 ingressType: nginx
 
+# indexserviceName - the hostname of the indexing IDOL component
+indexserviceName: "idol-index-service"
+
+# indexserviceACIPort - the ACI port of the indexing IDOL component
+indexserviceACIPort: "9070"
+
 nifi:
   autoScaling:
     # autoScaling.enabled - deploy a horizontal pod autoscaler for the nifi statefulset
@@ -68,10 +74,10 @@ nifi:
     limits:
       cpu: 400m
       # nifi.resources.limits.memoryMi - memory limit in mebibytes (value used in jvm memory calculation)
-      memoryMi: 4096
+      memoryMi: 8192
   
   # jvmMemoryRatio - What proportion of the pod memory to allocate for JVM usage
-  jvmMemoryRatio: 0.9
+  jvmMemoryRatio: 0.5
 
   # nifiImage - used to construct container image name: <idolImageRegistry>/<nifi.imageName>:<idolVersion>
   imageName: nifi-full
@@ -101,4 +107,9 @@ nifiRegistry:
 
 # sub-chart values
 idol-licenseserver:
+  # idol-licenseserver.enabled - whether to deploy an IDOL LicenseServer service abstraction
   enabled: false
+  # idol-licenseserver.licenseServerService - the hostname of the IDOL LicenseServer (or abstraction)
+  licenseServerService: "idol-licenseserver"
+  # idol-licenseserver.licenseServerPort - the ACI port of the IDOL LicenseServer (or abstraction)
+  licenseServerPort: "20000"

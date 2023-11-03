@@ -75,14 +75,37 @@ echo "PROCESSGROUP=${PROCESSGROUP}"
 # Set any parameter values
 PARAMCONTEXT=$(${NIFITOOLKITCMD} nifi pg-get-param-context -pgid "${PROCESSGROUP}")
 echo "PARAMCONTEXT=${PARAMCONTEXT}"
-#${NIFITOOLKITCMD} nifi set-param -pcid ${PARAMCONTEXT} -pn "IDOL Host" -pv "${IDOL_HOST}"
-#${NIFITOOLKITCMD} nifi set-param -pcid ${PARAMCONTEXT} -pn "IDOL LicenseServer Host" -pv "${IDOL_LICENSESERVER_HOST}"
-#${NIFITOOLKITCMD} nifi set-param -pcid ${PARAMCONTEXT} -pn "IDOL ACI Port" -pv "9100"
+${NIFITOOLKITCMD} nifi set-param -pcid ${PARAMCONTEXT} -pn "LicenseServerHost" -pv "{{ (index .Values "idol-licenseserver").licenseServerService }}"
+${NIFITOOLKITCMD} nifi set-param -pcid ${PARAMCONTEXT} -pn "LicenseServerACIPort" -pv "{{ (index .Values "idol-licenseserver").licenseServerPort }}"
+${NIFITOOLKITCMD} nifi set-param -pcid ${PARAMCONTEXT} -pn "IndexHost" -pv "{{ .Values.indexserviceName }}"
+${NIFITOOLKITCMD} nifi set-param -pcid ${PARAMCONTEXT} -pn "IndexACIPort" -pv "{{ .Values.indexserviceACIPort }}"
 
 
-echo Enabling services and starting processors...
+echo Enabling services 
 # Some processors can be slow to start up, so be forgiving
 set +e
 ${NIFITOOLKITCMD} nifi pg-enable-services -pgid "${PROCESSGROUP}" -verbose
 sleep 30s
-${NIFITOOLKITCMD} nifi pg-start -pgid "${PROCESSGROUP}" -verbose
+
+echo Starting processors
+for i in {1..12} 
+do 
+    ${NIFITOOLKITCMD} nifi pg-start -pgid "${PROCESSGROUP}" -verbose
+    sleep 5s
+    NIFISTATUS=$(${NIFITOOLKITCMD} nifi pg-status -pgid "${PROCESSGROUP}" -ot json)
+    RC=$?
+    if [ 0 != ${RC} ]; then
+        sleep 5s
+        continue
+    fi
+    INVALID=$(echo ${NIFISTATUS} | jq .invalidCount)
+    STOPPED=$(echo ${NIFISTATUS} | jq .stoppedCount)
+    RUNNING=$(echo ${NIFISTATUS} | jq .runningCount)
+    echo "Processor status: ${RUNNING} running, ${STOPPED} stopped, ${INVALID} invalid"
+    if [ "0" == $((STOPPED+INVALID)) ]; then
+        break
+    fi
+done
+${NIFITOOLKITCMD} nifi pg-status -pgid "${PROCESSGROUP}" 
+echo "Flow import completed"
+
