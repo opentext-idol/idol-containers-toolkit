@@ -65,6 +65,14 @@ spec:
         env:
         - name: IDOL_COMPONENT_CFG
           value: "/etc/config/idol/community.cfg"
+        - name: IDOL_CONTENT_HOST
+          value: {{ .Values.queryserviceName | quote }}
+        - name: IDOL_CONTENT_ACI_PORT
+          value: {{ .Values.queryserviceACIPort | quote }}
+        - name: IDOL_AGENTSTORE_HOST
+          value: {{ .Values.agentStoreName | quote }}
+        - name: IDOL_AGENTSTORE_ACI_PORT
+          value: {{ .Values.agentStoreACIPort | quote }}
       volumes:
       - name: config-map
         configMap:

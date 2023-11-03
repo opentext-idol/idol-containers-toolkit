@@ -6,11 +6,14 @@ kind: Service
 metadata:
   # Use this service for generic IDOL query port functionality
   # Could point to e.g. a DAH or Content instance
+  # Note that non-ACI port numbers must in practice match those
+  # configured in the underlying IDOL server, as clients will
+  # read these from the action=GetStatus response.
   name: {{ .Values.queryserviceName }}
   labels: {{- include "singlecontent.labels" . | nindent 4 }}
 spec:
   ports:
-  - port: {{ (index .Values.contentPorts 0).service | int }}
+  - port: {{ .Values.queryserviceACIPort | int }}
     targetPort: {{ (index .Values.contentPorts 0).name }}
     name: {{ (index .Values.contentPorts 0).name }}
   - port: {{ (index .Values.contentPorts 1).service | int }}
@@ -24,11 +27,14 @@ kind: Service
 metadata:
   # Use this service for generic IDOL index port functionality
   # Could point to e.g. a DIH or Content instance
+  # Note that non-ACI port numbers must in practice match those
+  # configured in the underlying IDOL server, as clients will
+  # read these from the action=GetStatus response.
   name: {{ .Values.indexserviceName }}
   labels: {{- include "singlecontent.labels" . | nindent 4 }}
 spec:
   ports:
-  - port: {{ (index .Values.contentPorts 0).service | int }}
+  - port: {{ .Values.indexserviceACIPort | int }}
     targetPort: {{ (index .Values.contentPorts 0).name }}
     name: {{ (index .Values.contentPorts 0).name }}
   - port: {{ (index .Values.contentPorts 1).service | int }}
@@ -51,16 +57,12 @@ spec:
   - port: {{ (index .Values.contentPorts 0).service | int }}
     targetPort: {{ (index .Values.contentPorts 0).name }}
     name: {{ (index .Values.contentPorts 0).name }}
-    protocol: TCP
   - port: {{ (index .Values.contentPorts 1).service | int }}
     targetPort: {{ (index .Values.contentPorts 1).name }}
     name: {{ (index .Values.contentPorts 1).name }}
-    protocol: TCP
   - port: {{ (index .Values.contentPorts 2).service | int }}
     targetPort: {{ (index .Values.contentPorts 2).name }}
     name: {{ (index .Values.contentPorts 2).name }}
-    protocol: TCP
-  clusterIP: None
   selector:
     app: {{ .Values.contentName }}
 ---
