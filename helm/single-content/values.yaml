@@ -1,0 +1,122 @@
+# BEGIN COPYRIGHT NOTICE
+# (c) Copyright 2022-2023 Micro Focus or one of its affiliates.
+# END COPYRIGHT NOTICE
+
+# As per https://helm.sh/docs/topics/charts/#the-chart-file-structure
+# this values.yaml file contains the default configuration values for this distributed-idol chart.
+# These default values can be overridden by using the --values or --set flags on the `helm install`
+# command: see https://helm.sh/docs/helm/helm_install/
+
+##### HIGH LEVEL CHART CONFIGURATION #####
+# This section contains parameters that are most likely to be overridden for
+# the basic choices and constraints around how this chart will be used.
+
+# contentVolumeSize is the size of the PersistentVolumeClaim that is created
+# for each Content instance. The Kubernetes cluster will need to provide
+# enough PersistentVolumes to satisify the claims made for the desired number
+# of Content instances. The size chosen here provides a hard limit on the size
+# of the Content index in each Content instance.
+contentVolumeSize: 16Gi
+
+# contentStorageClass is the name of the storage class used to provision a PersistentVolume
+# for each Content instance.
+# The associated PVCs are named index-<contentName>-<pod number>
+contentStorageClass: "idol-content-storage-class"
+#############################################
+
+
+##### IMAGE CONFIGURATION #####
+# Parameters to specify the IDOL images pulled for this chart are
+# configured here
+
+# idolImageRegistry is the registry from which the IDOL images being run
+# in this chart are pulled from. Override this if IDOL images are to be
+# pulled from a different private registry.
+idolImageRegistry: "microfocusidolserver"
+
+# idolVersion is the image tag that will be used when pulling images, and
+# corresponds to the IDOL version of the components being used.
+idolVersion: "23.4"
+
+# imagePullSecrets is a list of names of Kubernetes secrets containing the
+# credentials for pulling images from repositories. Most likely requires
+# a secret for Dockerhub credentials and a secret per private repository used.
+imagePullSecrets:
+  - "dockerhub-secret"
+################################
+
+
+##### NETWORKING CONFIGURATION #####
+# This section contains parameters to configure various network-related
+# properties in this chart.
+
+# ingressProxyBodySize is the maximum allowed size of the client request body, defining
+# the maximum size of requests that can be made to IDOL components within the installation, e.g.
+# the amount of data sent in DREADDDATA index commands.
+# The value should be an nginx "size" value.
+# See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the
+# corresponding nginx configuration parameter.
+ingressProxyBodySize: 2048m
+
+# ingressType controls ingress setup for that controller type.
+# Valid values are nginx or haproxy (used by OpenShift)
+ingressType: nginx
+
+# ingressHost is an optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules)
+# For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration)
+ingressHost: ""
+
+#####################################
+
+
+##### INTERNAL VARIABLES #####
+# Values specified below this point in the file should not need to be overriden.
+# They are generally here in values.yaml so that DRY principles and a consistent
+# scheme for specifying these values in the templates can be followed.
+
+# licenseServerHostname maps to [License] LicenseServerHost in the IDOL cfg files
+# Should point to a resolvable IDOL LicenseServer (or Kubernetes service abstraction - see the idol-licenseserver chart)
+licenseServerHostname: "idol-licenseserver"
+# licenseServerPort is the ACI port of the LicenseServer instance
+licenseServerPort: "20000"
+
+# livenessProbePath is an internal parameter to specify the IDOL path used
+# as part of liveness checks.
+livenessProbePath: "/a=getpid"
+# queryserviceName is an internal parameter to specify the query service name.
+queryserviceName: "idol-query-service"
+# queryserviceACIPort is the port idol-query-service will serve ACI connections on.
+queryserviceACIPort: "9060"
+# indexserviceName is an internal parameter to specify the index service name.
+indexserviceName: "idol-index-service"
+# indexserviceACIPort is the port idol-index-service will serve ACI connections on.
+indexserviceACIPort: "9070"
+# idolingressName is an internal parameter to specify the IDOL ingress name.
+idolingressName: "idol-ingress"
+
+# These `x-content-port<n>` internal parameters are for DRY purposes.
+x-content-port0: &content-port0 "9100"
+x-content-port1: &content-port1 "9101"
+x-content-port2: &content-port2 "9102"
+# contentName is an internal parameter to specify the name of the various Content objects in the charts.
+contentName: "idol-content"
+# contentImage is an internal parameter to specify the name of the Content image pulled for the Content containers.
+contentImage: "content"
+# contentPorts is an internal list of ports for Content.
+# They have a name - the name of the port, and the service/container specification of that port.
+contentPorts:
+  - name: "aci-port"
+    service: *content-port0
+    container: *content-port0
+  - name: "index-port"
+    service: *content-port1
+    container: *content-port1
+  - name: "service-port"
+    service: *content-port2
+    container: *content-port2
+
+# subchart values
+idol-licenseserver:
+# create a cluster service proxying to a LicenseServer instance
+  enabled: true
+  licenseServerIp: this must be set to a valid IP address

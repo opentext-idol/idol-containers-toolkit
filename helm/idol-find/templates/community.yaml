@@ -1,0 +1,79 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.communityName }}
+  labels: {{- include "idol-library.labels" . | nindent 4 }}
+spec:
+  ports:
+  - port: {{ .Values.communityACIPort | int }}
+    targetPort: {{ .Values.idolACIPortName }}
+    name: {{ .Values.idolACIPortName }}
+  - port: {{ .Values.communityServicePort | int }}
+    targetPort: {{ .Values.idolServicePortName }}
+    name: {{ .Values.idolServicePortName }}
+  selector:
+    app: {{ .Values.communityName }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.communityName }}
+  labels: {{- include "idol-library.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.communityName }}
+  template:
+    metadata:
+      labels: {{- include "idol-library.labels" . | nindent 8 }}
+        app: {{ .Values.communityName }}
+    spec:
+      imagePullSecrets:
+        {{- range .Values.imagePullSecrets }}
+        - name: {{ . }}
+        {{- end }}
+      containers:
+      - name: {{ .Values.communityName }}
+        image: {{ .Values.idolImageRegistry }}/{{ .Values.communityImage }}:{{ .Values.idolVersion }}
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.livenessProbePath }}
+            port: {{ .Values.communityACIPort | int }}
+{{- template "idol-library.standardLivenessProbe" .Values.communityLivenessProbe }}
+        ports:
+        - containerPort: {{ .Values.communityACIPort | int }}
+          name: {{ .Values.idolACIPortName }}
+          protocol: TCP
+        - containerPort: {{ .Values.communityServicePort | int }}
+          name: {{ .Values.idolServicePortName }}
+          protocol: TCP
+        volumeMounts:
+        - name: config-map
+          mountPath: /etc/config/idol
+        env:
+        - name: IDOL_COMPONENT_CFG
+          value: "/etc/config/idol/community.cfg"
+        - name: IDOL_CONTENT_HOST
+          value: {{ .Values.queryserviceName | quote }}
+        - name: IDOL_CONTENT_ACI_PORT
+          value: {{ .Values.queryserviceACIPort | quote }}
+        - name: IDOL_AGENTSTORE_HOST
+          value: {{ .Values.agentStoreName | quote }}
+        - name: IDOL_AGENTSTORE_ACI_PORT
+          value: {{ .Values.agentStoreACIPort | quote }}
+      volumes:
+      - name: config-map
+        configMap:
+          name: {{ .Release.Name }}-idol-config

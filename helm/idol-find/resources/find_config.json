@@ -1,0 +1,308 @@
+{
+  "login" : {
+    "name" : "CommunityAuthentication",
+    "defaultLogin" : {
+      "username" : null,
+      "password" : null
+    },
+    "community" : {
+      "protocol" : {{ .Values.findHTTPScheme | quote }},
+      "host" : {{ .Values.communityName | quote }},
+      "port" : {{ .Values.communityACIPort | int }}
+    },
+    "method" : {{ .Values.findLoginMethod | quote }}
+  },
+  "content" : {
+    "protocol" : {{ .Values.findHTTPScheme | quote }},
+    "host" : {{ .Values.queryserviceName | quote }},
+    "port" : {{ .Values.queryserviceACIPort | int }}
+  },
+  "referenceField" : "DREREFERENCE",
+  "queryManipulation" : {
+    "server" : {
+      "protocol" : {{ .Values.findHTTPScheme | quote }},
+      "host" : "localhost",
+      "port" : 16000
+    },
+    "expandQuery" : true,
+    "synonymDatabaseMatch" : true,
+    "blacklist" : "ISO_BLACKLIST",
+    "typeAheadMode" : "Index",
+    "enabled" : false
+  },
+  "view" : {
+    "connector" : {
+      "protocol" : {{ .Values.findHTTPScheme | quote }},
+      "host" : {{ .Values.nifiserviceName | quote }},
+      "port" : {{ .Values.nifiserviceACIPort | int }}
+    },
+    "viewingMode" : "UNIVERSAL",
+    "highlighting" : true,
+    "protocol" : {{ .Values.findHTTPScheme | quote }},
+    "host" : {{ .Values.viewServerName | quote }},
+    "port" : {{ .Values.viewServerACIPort | int }}
+  },
+  "answerServer" : {
+    "server" : {
+      "protocol" : {{ .Values.findHTTPScheme | quote }},
+      "host" : "localhost",
+      "port" : 7700
+    },
+    "systemNames" : [ ],
+    "enabled" : false,
+    "conversationSystemName" : ""
+  },
+  "entitySearch" : {
+    "server" : {
+      "protocol" : {{ .Values.findHTTPScheme | quote }},
+      "host" : "localhost",
+      "port" : 9050
+    },
+    "enabled" : false,
+    "absWeight" : null,
+    "agentBooleanField" : "AGENTBOOL",
+    "combine" : "FieldCheck",
+    "idolPrintFields" : [ "WIKIPEDIA_ENG", "WIKIPEDIA_IMAGE", "PERSON_DATE_OF_BIRTH", "PERSON_DATE_OF_DEATH", "PERSON_PROFESSION", "WIKIPEDIA_IMAGE", "LAT", "LON", "PLACE_COUNTRY_CODE", "PLACE_REGION1", "PLACE_POPULATION", "PLACE_TIMEZONE", "WIKIPEDIA_IMAGE", "URL_HOMEPAGE", "COMPANY_GOOGLE" ],
+    "answerServer" : {
+      "server" : {
+        "protocol" : {{ .Values.findHTTPScheme | quote }},
+        "host" : "localhost",
+        "port" : 7700
+      },
+      "systemNames" : [ ],
+      "enabled" : false,
+      "conversationSystemName" : null
+    },
+    "answerServerDatabaseMatch" : "Wikipedia",
+    "answerServerContentField" : "DRECONTENT",
+    "answerServerTimeoutSecs" : -1.0,
+    "databaseChoices" : null,
+    "databaseChoicesVisible" : true
+  },
+  "mmap" : {
+    "enabled" : false,
+    "baseUrl" : "/mmap-app"
+  },
+  "messageOfTheDay" : {
+    "message" : "",
+    "cssClass" : null
+  },
+  "uiCustomization" : {
+    "options" : {
+      "enableTypeAhead" : {
+        "bi" : true,
+        "user" : true
+      },
+      "enableDashboards" : {
+        "bi" : true,
+        "user" : false
+      },
+      "enableSideBar" : {
+        "bi" : true,
+        "user" : false
+      },
+      "enableMetaFilter" : {
+        "bi" : true,
+        "user" : false
+      },
+      "enableRelatedConcepts" : {
+        "bi" : false,
+        "user" : true
+      },
+      "resultViewOrder" : {
+        "bi" : [ "topic-map", "list", "sunburst", "trending", "table", "map", "recommendation" ],
+        "user" : [ "list" ]
+      },
+      "enableSavedSearch" : {
+        "bi" : true,
+        "user" : false
+      }
+    },
+    "filterOrder" : [ "metaFilter", "indexesFilter", "datesFilter", "geographyFilter", "-", "parametricFilter" ],
+    "defaultDeselectedDatabases" : [ ],
+    "parametricNeverShow" : [ ],
+    "parametricAlwaysShow" : [ ],
+    "parametricOrder" : [ ],
+    "specialUrlPrefixes" : {
+      "application/msword" : "ms-word:ofv|u|",
+      "application/mspowerpoint" : "ms-powerpoint:ofv|u|",
+      "application/vnd.ms-powerpoint" : "ms-powerpoint:ofv|u|",
+      "application/msexcel" : "ms-excel:ofv|u|",
+      "application/vnd.ms-excel" : "ms-excel:ofv|u|",
+      "application/vnd.visio" : "ms-visio:ofv|u|",
+      "application/msaccess" : "ms-access:ofv|u|",
+      "application/x-msaccess" : "ms-access:ofv|u|",
+      "application/msproject" : "ms-project:ofv|u|",
+      "application/vnd.ms-project" : "ms-project:ofv|u|",
+      "application/x-mspublisher" : "ms-publisher:ofv|u|"
+    },
+    "previewWhitelistUrls" : {
+      "^(https?://)?www\\.youtube(-nocookie)?\\.com/embed/.*" : "<iframe class=\"preview-document-frame\" allow=\"autoplay; encrypted-media\" allowfullscreen src=\"<%-reference%>\">",
+      "^(https?://)?www\\.facebook\\.com/plugins/.*" : "<iframe class=\"preview-document-frame\" allow=\"autoplay; encrypted-media\" allowfullscreen src=\"<%-reference%>\">",
+      "^(https?://)?video\\.xx\\.fbcdn\\.net/.*" : "<iframe class=\"preview-document-frame\" allow=\"autoplay; encrypted-media\" allowfullscreen src=\"<%-reference%>\">",
+      "^(https?:\\/\\/)?www.youtube.com\\/watch(.*?)[?&]v=([^&?]+)(.*)" : "<iframe class=\"preview-document-frame\" allow=\"autoplay; encrypted-media\" allowfullscreen src=\"https://www.youtube-nocookie.com/embed/<%-match[3]%>?<%-match[2]%><%-match[4]%>\">"
+    },
+    "errorCallSupportString" : null,
+    "openSharedDashboardQueryAsNewSearch" : false,
+    "parametricValuesSort" : "DocumentCount",
+    "profile" : {
+      "intentBasedRanking" : false,
+      "maxProfiles" : 3,
+      "maxResultsPerProfile" : 2,
+      "maxTerms" : 30,
+      "highlightTerms" : true,
+      "updateProfileOnView" : false
+    },
+    "listViewPagingSize" : 30
+  },
+  "fieldsInfo" : {
+    "contentType" : {
+      "names" : [ "AU_REPOSITORY_METADATA_TYPE_STRING", "REPOSITORY_METADATA_TYPE_STRING" ],
+      "values" : [ ]
+    },
+    "url" : {
+      "names" : [ "REPOSITORY_METADATA_URL_FILE_STRING", "AU_REPOSITORY_METADATA_URL_FILE_STRING" ],
+      "values" : [ ]
+    },
+    "offset" : {
+      "advanced" : true,
+      "names" : [ "OFFSET" ],
+      "values" : [ ]
+    },
+    "authors" : {
+      "names" : [ "AU_DOCUMENT_METADATA_AUTHOR_STRING", "DOCUMENT_METADATA_AUTHOR_STRING" ],
+      "values" : [ ]
+    },
+    "categories" : {
+      "names" : [ "AU_REPOSITORY_METADATA_CATEGORY_STRING", "REPOSITORY_METADATA_CATEGORY_STRING" ],
+      "values" : [ ]
+    },
+    "dateCreated" : {
+      "type" : "date",
+      "names" : [ "DOCUMENT_METADATA_DATE_CREATED_EPOCHSECONDS", "AU_DOCUMENT_METADATA_DATE_CREATED_EPOCHSECONDS" ],
+      "values" : [ ]
+    },
+    "dateModified" : {
+      "type" : "date",
+      "names" : [ "DOCUMENT_METADATA_DATE_MODIFIED_EPOCHSECONDS", "AU_DOCUMENT_METADATA_DATE_MODIFIED_EPOCHSECONDS" ],
+      "values" : [ ]
+    },
+    "mmapEventSourceType" : {
+      "advanced" : true,
+      "names" : [ "MMAP_EVENT_SOURCE_TYPE" ],
+      "values" : [ ]
+    },
+    "mmapEventSourceName" : {
+      "advanced" : true,
+      "names" : [ "MMAP_EVENT_SOURCE_NAME" ],
+      "values" : [ ]
+    },
+    "mmapEventTime" : {
+      "advanced" : true,
+      "names" : [ "MMAP_EVENT_TIME" ],
+      "values" : [ ]
+    },
+    "mmapUrl" : {
+      "advanced" : true,
+      "names" : [ "MMAP_PROXY_URL" ],
+      "values" : [ ]
+    },
+    "thumbnail" : {
+      "advanced" : true,
+      "names" : [ "PREVIEW_THUMBNAIL_BASE64" ],
+      "values" : [ ]
+    },
+    "thumbnailUrl" : {
+      "advanced" : true,
+      "names" : [ "THUMBNAIL_URL" ],
+      "values" : [ ]
+    },
+    "sourceType" : {
+      "advanced" : true,
+      "names" : [ "SOURCETYPE" ],
+      "values" : [ ]
+    },
+    "transcript" : {
+      "advanced" : true,
+      "names" : [ "TRANSCRIPTION_CONTENT" ],
+      "values" : [ ]
+    },
+    "latitude" : {
+      "type" : "number",
+      "advanced" : true,
+      "names" : [ "NODE_PLACE/LAT", "LAT" ],
+      "values" : [ ]
+    },
+    "longitude" : {
+      "type" : "number",
+      "advanced" : true,
+      "names" : [ "NODE_PLACE/LON", "LON" ],
+      "values" : [ ]
+    }
+  },
+  "map" : {
+    "tileUrlTemplate" : "",
+    "enabled" : false,
+    "attribution" : "",
+    "locationFields" : [ {
+      "displayName" : "DefaultLocation",
+      "latitudeField" : "latitude",
+      "longitudeField" : "longitude",
+      "geoindexField" : null,
+      "iconName" : "hp-record",
+      "iconColor" : "white",
+      "markerColor" : "blue"
+    } ],
+    "resultsStep" : 2500,
+    "initialLocation" : {
+      "latitude" : 51.5074,
+      "longitude" : 0.1278
+    }
+  },
+  "trending" : {
+    "dateField" : "AUTN_DATE",
+    "defaultNumberOfBuckets" : 20,
+    "minNumberOfBuckets" : 3,
+    "maxNumberOfBuckets" : 100,
+    "numberOfValues" : 10
+  },
+  "themeTracker" : {
+    "category" : {
+      "protocol" : {{ .Values.findHTTPScheme | quote }},
+      "host" : "localhost",
+      "port" : 19120
+    },
+    "enabled" : false,
+    "databaseNames" : [ "News" ],
+    "minScore" : 50.0,
+    "jobName" : "BLACK_MDN_EVERYTHING_SG"
+  },
+  "combineMethod" : "Simple",
+  "minScore" : 0,
+  "statsServer" : {
+    "server" : {
+      "protocol" : {{ .Values.findHTTPScheme | quote }},
+      "host" : "localhost",
+      "port" : 19870
+    },
+    "enabled" : false
+  },
+  "topicMapMaxResults" : 1000,
+  "documentSummaryMaxLength" : 250,
+  "export" : {
+    "powerpoint" : {
+      "templateFile" : "",
+      "marginTop" : null,
+      "marginLeft" : null,
+      "marginRight" : null,
+      "marginBottom" : null,
+      "enabled" : true
+    },
+    "enabled" : true
+  },
+  "savedSearches" : {
+    "pollForUpdates" : true,
+    "pollingInterval" : 5
+  },
+  "idolFieldPathNormalizerXMLPrefixes" : [ "DOCUMENTS" ]
+}

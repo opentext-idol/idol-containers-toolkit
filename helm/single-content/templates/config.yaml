@@ -1,0 +1,22 @@
+# BEGIN COPYRIGHT NOTICE
+# (c) Copyright 2022 Micro Focus or one of its affiliates.
+# END COPYRIGHT NOTICE
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: idol-config
+  labels: {{- include "singlecontent.labels" . | nindent 4 }}
+data:
+  content.cfg: |
+{{ tpl (.Files.Get "resources/content.cfg") . | indent 4 }}
+
+{{- if .Values.httpProxy }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: http-proxy-config
+  labels: {{- include "singlecontent.labels" . | nindent 4 }}
+data:
+  https_proxy: {{ .Values.httpProxy }}
+{{- end }}

@@ -14,6 +14,15 @@ helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | 
 {{- end }}
 
 
+{{/* Generate standard IDOL deployment liveness probe timeouts */}}
+{{- define "idol-library.standardLivenessProbe" }}
+          initialDelaySeconds: {{ .initialDelaySeconds | default 8 | int }}
+          timeoutSeconds: {{ .timeoutSeconds | default 3 | int }}
+          periodSeconds: {{ .periodSeconds | default 10 | int }}
+          failureThreshold: {{ .failureThreshold | default 3 | int }}
+{{- end -}}
+
+
 {{/* Allow the release namespace to be overridden for multi-namespace deployments in combined charts */}}
 {{- define "idol-library.namespace" -}}
 {{- default .Release.Namespace .Values.namespaceOverride -}}
