@@ -19,6 +19,13 @@ BUCKET_NAME="default-bucket"
 
 # The flow file we want to import
 FLOWFILE="${IDOL_NIFI_FLOWFILE:-/scripts/flow-basic-idol.json}"
+
+if [ ! -f "${FLOWFILE}" ]; then
+    echo "FLOWFILE ${FLOWFILE} does not exist"
+    echo "Flow import skipped"
+    exit 0
+fi
+
 # The name of the flow - extracted from the flow file
 FLOW_NAME=$(jq -r .flowContents.name "${FLOWFILE}")
 

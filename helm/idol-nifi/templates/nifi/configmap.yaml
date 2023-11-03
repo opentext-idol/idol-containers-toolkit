@@ -56,3 +56,4 @@ data:
   TRUSTSTORE_PASSWORD: "th1s1s3up34e5r37"
   TRUSTSTORE_PATH: "${NIFI_HOME}/keytool/truststore.jks"
   TRUSTSTORE_TYPE: "jks"
+  IDOL_NIFI_FLOWFILE: {{ .Values.nifi.flowfile | quote }}

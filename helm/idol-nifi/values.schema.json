@@ -119,12 +119,17 @@
                     "type": "string",
                     "minLength": 1
                 },
+                "flowfile": {
+                    "type":"string",
+                    "minLength": 1
+                },
                 "ingress": {
                     "$ref": "#/definitions/NifiIngress"
                 }
             },
             "required": [
                 "autoScaling",
+                "flowfile",
                 "imageName",
                 "ingress",
                 "jvmMemoryRatio",

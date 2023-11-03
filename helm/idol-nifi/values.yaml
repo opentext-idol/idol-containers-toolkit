@@ -102,6 +102,11 @@ nifi:
   # nifiImage - used to construct container image name: <idolImageRegistry>/<nifi.imageName>:<idolVersion>
   imageName: nifi-full
 
+  # flowfile - the flowfile definition to import. 
+  # Set this to any non-existing path to bypass flow import (start with a blank flow).
+  # Customize the NiFi image and set this to a filepath within that image to import your own customized flow.
+  flowfile: /scripts/flow-basic-idol.json
+
   ingress:
     # nifi.ingress.enabled - whether to deploy ingress for nifi
     enabled: true
