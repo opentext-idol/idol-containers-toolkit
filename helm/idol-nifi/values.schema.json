@@ -42,11 +42,32 @@
                 "indexserviceACIPort": {
                     "#ref": "#/definitions/port_number"
                 },
+                "podSecurityContext":{
+                    "type": "object",
+                    "properties": {
+                        "enabled": { 
+                            "type": "boolean"
+                        }
+                    },
+                    "required": ["enabled"]
+                },
+                "containerSecurityContext":{
+                    "type": "object",
+                    "properties": {
+                        "enabled": { 
+                            "type": "boolean"
+                        }
+                    },
+                    "required": ["enabled"]
+                },
                 "nifi": {
                     "$ref": "#/definitions/Nifi"
                 },
                 "nifiRegistry": {
                     "$ref": "#/definitions/NifiRegistry"
+                },
+                "zookeeper": {
+                    "$ref": "#/definitions/Zookeeper"
                 },
                 "idol-licenseserver": {
                     "$ref": "#/definitions/IdolLicenseserver"
@@ -204,14 +225,17 @@
         },
         "NifiRegistry": {
             "type": "object",
-            "additionalProperties": false,
             "properties": {
                 "ingress": {
                     "$ref": "#/definitions/NifiRegistryIngress"
+                },
+                "resources": {
+                    "type": "object"
                 }
             },
             "required": [
-                "ingress"
+                "ingress",
+                "resources"
             ],
             "title": "NifiRegistry"
         },
@@ -234,6 +258,16 @@
                 "host"
             ],
             "title": "NifiRegistryIngress"
+        },
+        "Zookeeper": {
+            "type": "object",
+            "properties": {
+                "resources":{
+                    "type": "object"
+                }
+            },
+            "required": ["resources"],
+            "title": "Zookeeper"
         },
         "port_number": {
             "type": "string",

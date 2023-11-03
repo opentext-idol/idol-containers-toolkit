@@ -36,42 +36,36 @@ spec:
       setHostnameAsFQDN: true
       dnsPolicy: ClusterFirstWithHostNet
       restartPolicy: Always
-      securityContext:
-        runAsGroup: 1000
-        runAsUser: 1000
-        runAsNonRoot: true
-        seccompProfile:
-          type: RuntimeDefault
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
       initContainers:
-        - name: wait-for-zookeeper
-          image: docker.io/busybox:1.36
-          command:
-          - sh
-          - -c
-          - |
-            echo "Connecting to Zookeeper ${NIFI_ZK_CONNECT_STRING}"
-            until nc -vzw 1 zookeeper 2181 ; do
-              echo "Waiting for zookeeper to start"
-              sleep 3
-            done
-          envFrom:
-          - configMapRef:
-              name: idol-nifi-env
-              optional: false
-          resources:
-            requests:
-              cpu: 20m
-              memory: 10Mi
-            limits:
-              cpu: 20m
-              memory: 10Mi
-          securityContext:
-            allowPrivilegeEscalation: false
-            privileged: false
-            readOnlyRootFilesystem: true
-            capabilities:
-              drop:
-                - ALL
+      - name: wait-for-zookeeper
+        image: docker.io/busybox:1.36
+        command:
+        - sh
+        - -c
+        - |
+          echo "Connecting to Zookeeper ${NIFI_ZK_CONNECT_STRING}"
+          until nc -vzw 1 zookeeper 2181 ; do
+            echo "Waiting for zookeeper to start"
+            sleep 3
+          done
+        envFrom:
+        - configMapRef:
+            name: idol-nifi-env
+            optional: false
+        resources:
+          requests:
+            cpu: 20m
+            memory: 10Mi
+          limits:
+            cpu: 20m
+            memory: 10Mi
+        {{- if .Values.containerSecurityContext.enabled }}
+        securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+          readOnlyRootFilesystem: true
+        {{- end }}
       imagePullSecrets:
         {{- range .Values.imagePullSecrets }}
         - name: {{ . }}
@@ -174,12 +168,9 @@ spec:
           limits:
             cpu: {{ .Values.nifi.resources.limits.cpu }}
             memory: {{ printf "%dMi" ( .Values.nifi.resources.limits.memoryMi | int) }}
-        securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
-          capabilities:
-            drop:
-              - ALL
+        {{- if .Values.containerSecurityContext.enabled }}
+        securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+        {{- end }}
       volumes:
         - name: data
           emptyDir:

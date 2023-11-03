@@ -42,6 +42,26 @@ indexserviceName: "idol-index-service"
 # indexserviceACIPort - the ACI port of the indexing IDOL component
 indexserviceACIPort: "9070"
 
+# podSecurityContext - pod security context definition 
+# See https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+podSecurityContext:
+  enabled: true
+  runAsGroup: 1000
+  runAsUser: 1000
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+# containerSecurityContext - container security context definition 
+# See https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+containerSecurityContext:
+  enabled: true
+  allowPrivilegeEscalation: false
+  privileged: false
+  capabilities:
+    drop:
+      - ALL
+
 nifi:
   autoScaling:
     # autoScaling.enabled - deploy a horizontal pod autoscaler for the nifi statefulset
@@ -104,6 +124,25 @@ nifiRegistry:
     annotations: {}
     # nifiRegistry.ingress.host - optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules
     host: ""
+  
+  # nifiRegistry.resources - https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits
+  resources:
+    requests:
+      cpu: 200m
+      memory: 1Gi
+    limits: 
+      cpu: 1000m
+      memory: 1Gi
+
+zookeeper:
+  # zookeeper.resources - https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits
+  resources:
+    requests:
+      cpu: 200m
+      memory: 500Mi
+    limits:
+      cpu: 200m
+      memory: 500Mi
 
 # sub-chart values
 idol-licenseserver:

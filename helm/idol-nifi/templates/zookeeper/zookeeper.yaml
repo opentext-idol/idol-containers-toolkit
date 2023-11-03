@@ -35,12 +35,9 @@ spec:
       setHostnameAsFQDN: true
       dnsPolicy: ClusterFirstWithHostNet
       restartPolicy: Always
-      securityContext:
-        runAsGroup: 1000
-        runAsUser: 1000
-        runAsNonRoot: true
-        seccompProfile:
-          type: RuntimeDefault
+{{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
+{{- end }}
       imagePullSecrets:
       - name: dockerhub-secret
       containers:
@@ -83,20 +80,13 @@ spec:
           timeoutSeconds: 10
           failureThreshold: 3
           successThreshold: 1
-        resources:
-          requests:
-            cpu: 200m
-            memory: 500Mi
-          limits:
-            cpu: 200m
-            memory: 500Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          privileged: false
+        {{- if .Values.zookeeper.resources }}
+        resources: {{ toYaml .Values.zookeeper.resources | nindent 10 }}
+        {{- end }}
+        {{- if .Values.containerSecurityContext.enabled }}
+        securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 10 }}
           readOnlyRootFilesystem: true
-          capabilities:
-            drop:
-              - ALL
+        {{- end }}
         volumeMounts:
           - mountPath: /data
             name: data
