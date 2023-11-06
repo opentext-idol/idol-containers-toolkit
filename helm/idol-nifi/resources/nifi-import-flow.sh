@@ -31,7 +31,16 @@ FLOW_NAME=$(jq -r .flowContents.name "${FLOWFILE}")
 
 # Check if a process group with the right name already exists in NiFi - done if we find one
 echo "Checking for flow ${FLOW_NAME}"
-OUTPUT=$(${NIFITOOLKITCMD} nifi pg-list | grep "${FLOW_NAME}")
+PGLIST=$(${NIFITOOLKITCMD} nifi pg-list)
+RC=$?
+until [ 0 == ${RC} ];
+do
+    sleep 5s
+    PGLIST=$(${NIFITOOLKITCMD} nifi pg-list)
+    RC=$?
+done
+
+OUTPUT=$(echo "${PGLIST}" | grep "${FLOW_NAME}")
 RC=$?
 echo "RC=${RC} OUTPUT=${OUTPUT}"
 if [ 0 == ${RC} ]; then
@@ -77,21 +86,37 @@ echo "FLOWVERSION=${FLOWVERSION}"
 
 # Import the flow as a process group
 PROCESSGROUP=$(${NIFITOOLKITCMD} nifi pg-import -b "${BUCKETID}" -f "${FLOWID}" -fv "${FLOWVERSION}" -cto 60000 -rto 60000)
+RC=$?
+if [ 0 != ${RC} ]; then
+    echo "nifi pg-import failed (RC=${RC}). Manual flow import may be required"
+    exit 0
+fi
 echo "PROCESSGROUP=${PROCESSGROUP}"
 
 # Set any parameter values
 PARAMCONTEXT=$(${NIFITOOLKITCMD} nifi pg-get-param-context -pgid "${PROCESSGROUP}")
-echo "PARAMCONTEXT=${PARAMCONTEXT}"
-${NIFITOOLKITCMD} nifi set-param -pcid ${PARAMCONTEXT} -pn "LicenseServerHost" -pv "{{ (index .Values "idol-licenseserver").licenseServerService }}"
-${NIFITOOLKITCMD} nifi set-param -pcid ${PARAMCONTEXT} -pn "LicenseServerACIPort" -pv "{{ (index .Values "idol-licenseserver").licenseServerPort }}"
-${NIFITOOLKITCMD} nifi set-param -pcid ${PARAMCONTEXT} -pn "IndexHost" -pv "{{ .Values.indexserviceName }}"
-${NIFITOOLKITCMD} nifi set-param -pcid ${PARAMCONTEXT} -pn "IndexACIPort" -pv "{{ .Values.indexserviceACIPort }}"
+RC=$?
+if [ 0 != ${RC} ]; then
+    echo "nifi pg-get-param-context failed (RC=${RC}). Manual flow setup may be required"
+    # but continue
+else
+    echo "PARAMCONTEXT=${PARAMCONTEXT}"
+    ${NIFITOOLKITCMD} nifi set-param -pcid ${PARAMCONTEXT} -pn "LicenseServerHost" -pv "{{ (index .Values "idol-licenseserver").licenseServerService }}"
+    ${NIFITOOLKITCMD} nifi set-param -pcid ${PARAMCONTEXT} -pn "LicenseServerACIPort" -pv "{{ (index .Values "idol-licenseserver").licenseServerPort }}"
+    ${NIFITOOLKITCMD} nifi set-param -pcid ${PARAMCONTEXT} -pn "IndexHost" -pv "{{ .Values.indexserviceName }}"
+    ${NIFITOOLKITCMD} nifi set-param -pcid ${PARAMCONTEXT} -pn "IndexACIPort" -pv "{{ .Values.indexserviceACIPort }}"
+fi
 
 
 echo Enabling services 
 # Some processors can be slow to start up, so be forgiving
 set +e
 ${NIFITOOLKITCMD} nifi pg-enable-services -pgid "${PROCESSGROUP}" -verbose
+RC=$?
+if [ 0 != ${RC} ]; then
+    echo "nifi pg-enable-services failed (RC=${RC}). Services/processors may not be started."
+    # but continue
+fi
 sleep 30s
 
 echo Starting processors
