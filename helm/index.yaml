@@ -152,7 +152,7 @@ entries:
   idol-nifi:
   - apiVersion: v2
     appVersion: 23.4.0
-    created: "2023-11-03T15:36:55.17402971Z"
+    created: "2023-11-06T15:51:28.149701031Z"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
@@ -162,7 +162,7 @@ entries:
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
       version: 0.1.0
     description: A configurable IDOL NiFi setup
-    digest: 086f59baed3017024a5a10358e24522bb3645d35f17e214f00b56c4772f238c4
+    digest: f200f7aba8c104bf55e811900bfcf242d50ec221aa43c7e7efa50b0050514fe2
     name: idol-nifi
     urls:
     - release/idol-nifi-0.1.0.tgz
@@ -202,4 +202,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2023-11-03T15:36:55.170901406Z"
+generated: "2023-11-06T15:51:28.146316705Z"
