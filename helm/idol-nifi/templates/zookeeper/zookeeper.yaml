@@ -1,0 +1,103 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: zookeeper
+  labels: {{- include "idol-nifi.labels" . | nindent 4 -}}
+    name: zookeeper
+    app: zookeeper
+  annotations:
+    app.kubernetes.io/name: zookeeper
+    app.kubernetes.io/part-of: nifi
+spec:
+  revisionHistoryLimit: 1
+  serviceName: zookeeper
+  podManagementPolicy: OrderedReady
+  selector:
+    matchLabels:
+      app: zookeeper
+  template:
+    metadata:
+      labels: {{- include "idol-nifi.labels" . | nindent 8 -}}
+        app: zookeeper
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      setHostnameAsFQDN: true
+      dnsPolicy: ClusterFirstWithHostNet
+      restartPolicy: Always
+{{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
+{{- end }}
+      imagePullSecrets:
+      - name: dockerhub-secret
+      containers:
+      - name: zookeeper
+        image: docker.io/zookeeper:3.8
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 2181
+          name: zk
+        - containerPort: 8080
+          name: http
+        - containerPort: 7070
+          name: metrics
+        env:
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          - name: ZOO_SERVERS
+            value: "server.1=$(POD_IP):2888:3888;2181"
+        envFrom:
+          - configMapRef:
+              name: zookeeper-cm
+              optional: false
+        livenessProbe:
+          exec:
+            command:
+              - which
+              - java
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+          successThreshold: 1
+        readinessProbe:
+          tcpSocket:
+              port: zk
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+          successThreshold: 1
+        {{- if .Values.zookeeper.resources }}
+        resources: {{ toYaml .Values.zookeeper.resources | nindent 10 }}
+        {{- end }}
+        {{- if .Values.containerSecurityContext.enabled }}
+        securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+          readOnlyRootFilesystem: true
+        {{- end }}
+        volumeMounts:
+          - mountPath: /data
+            name: data
+            subPath: data
+          - mountPath: /datalog
+            name: data
+            subPath: datalog
+          - mountPath: /conf
+            name: data
+            subPath: conf
+      volumes:
+        - name: data
+          emptyDir:
+            sizeLimit: 2Gi

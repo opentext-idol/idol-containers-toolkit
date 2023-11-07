@@ -1,0 +1,106 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nifi-registry
+  labels: {{- include "idol-nifi.labels" . | nindent 4 -}}
+    name: nifi-registry
+    app: nifi-registry
+  annotations:
+    app.kubernetes.io/name: nifi-registry
+    app.kubernetes.io/part-of: nifi
+spec:
+  revisionHistoryLimit: 1
+  serviceName: nifi-registry
+  podManagementPolicy: OrderedReady
+  selector:
+    matchLabels:
+      app: nifi-registry
+  template:
+    metadata:
+      labels: {{- include "idol-nifi.labels" . | nindent 8 }}
+        app: nifi-registry
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      setHostnameAsFQDN: true
+      dnsPolicy: ClusterFirstWithHostNet
+      restartPolicy: Always
+{{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
+{{- end }}
+      imagePullSecrets:
+      - name: dockerhub-secret
+      containers:
+      - name: nifi-registry
+        image: docker.io/apache/nifi-registry:1.23.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 18080
+          name: http
+        - containerPort: 18443
+          name: https
+        env:
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+        envFrom:
+          - configMapRef:
+              name: nifi-registry-cm
+              optional: false
+        livenessProbe:
+          exec:
+            command:
+              - pgrep
+              - java
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+          successThreshold: 1
+        readinessProbe:
+          tcpSocket:
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+          successThreshold: 1
+        {{- if .Values.nifiRegistry.resources }}
+        resources: {{ toYaml .Values.nifiRegistry.resources | nindent 10 }}
+        {{- end }}
+        {{- if .Values.containerSecurityContext.enabled }}
+        securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+        {{- end }}
+        volumeMounts:
+          - mountPath: /data
+            name: data
+            subPath: data
+          - name: scripts
+            mountPath: /scripts
+            readOnly: false
+        lifecycle:
+          postStart:
+            exec:
+              command:
+              - /bin/bash
+              - /scripts/postStart.sh
+      volumes:
+        - name: data
+          emptyDir:
+            sizeLimit: 2Gi
+        - name: scripts
+          configMap:
+            name: nifi-registry-scripts-cm
+            optional: false
+            defaultMode: 0755

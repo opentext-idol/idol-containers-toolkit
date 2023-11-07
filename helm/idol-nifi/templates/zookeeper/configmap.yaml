@@ -1,0 +1,26 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zookeeper-cm
+  labels: {{- include "idol-nifi.labels" . | nindent 4 -}}
+    app: zookeeper
+data:
+  ALLOW_ANONYMOUS_LOGIN: "yes"
+  ZOO_ADMINSERVER_ENABLED: "false"
+  ZOO_AUTOPURGE_PURGEINTERVAL: "2"
+  ZOO_AUTOPURGE_SNAPRETAINCOUNT: "10"
+  ZOO_CFG_EXTRA: "metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider metricsProvider.httpPort=7070"
+  ZOO_INIT_LIMIT: "10"
+  ZOO_STANDALONE_ENABLED: "true"
+  ZOO_SYNC_LIMIT: "6"
+  ZOO_TICK_TIME: "4000"

@@ -1,0 +1,51 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+{{- if .Values.nifi.ingress.enabled -}}
+{{- /*
+ nginx ingress needs path capture to achieve prefix type routing
+*/}}
+{{- $pathSuffix := "" }}
+{{- $pathType := "Prefix" }}
+{{- if eq .Values.ingressType "nginx" }}
+{{- $pathSuffix = "(.*)"}}
+{{- $pathType = "ImplementationSpecific" }}
+{{- end }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: idol-nifi-aci
+  labels: {{- include "idol-nifi.labels" . | nindent 4 }}
+  annotations:
+{{- if eq .Values.ingressType "nginx" }}
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/proxy-body-size: {{ .Values.ingressProxyBodySize }}
+{{- else if eq .Values.ingressType "haproxy" }}
+    haproxy.router.openshift.io/rewrite-target: / 
+    haproxy.router.openshift.io/proxy-body-size: {{ .Values.ingressProxyBodySize }}
+{{- end }}
+spec:
+{{- if .Values.ingressClassName }}
+  ingressClassName: {{ .Values.ingressClassName }}
+{{- end }}
+  rules:
+  - http:
+      paths:
+      - path: {{ print "/connector-aci/" $pathSuffix }}
+        pathType: {{ $pathType }}
+        backend:
+          service:
+            name: idol-nifi
+            port:
+              name: connector-aci
+{{- if .Values.nifi.ingress.aciHost }}
+    host: {{ .Values.nifi.ingress.aciHost | quote }}
+{{- end }}
+{{- end }}

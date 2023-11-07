@@ -1,0 +1,59 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: idol-nifi-env
+  labels: {{- include "idol-nifi.labels" . | nindent 4 -}}
+    app: nifi
+data:
+  JAVA_HOME: "/usr/lib/jvm/jre-11"
+  JAVA_OPTS: "-XX:UseAVX=0 -Djavax.net.debug=ssl,handshake"
+  KEYSTORE_PASSWORD: "th1s1s3up34e5r37"
+  KEYSTORE_PATH: "${NIFI_HOME}/keytool/keystore.p12"
+  KEYSTORE_TYPE: "PKCS12"
+  NIFI_ANALYTICS_PREDICT_ENABLED: "true"
+  NIFI_CLUSTER_IS_NODE: "true"
+  NIFI_CLUSTER_LOAD_BALANCE_HOST: "nifi"
+  NIFI_CLUSTER_NODE_CONNECTION_TIMEOUT: "5 min"
+  NIFI_CLUSTER_NODE_EVENT_HISTORY_SIZE: "25"
+  NIFI_CLUSTER_NODE_LOAD_BALANCE_PORT: "6342"
+  NIFI_CLUSTER_NODE_PROTOCOL_MAX_THREADS: "20"
+  NIFI_CLUSTER_NODE_PROTOCOL_PORT: "11443"
+  NIFI_CLUSTER_NODE_PROTOCOL_THREADS: "10"
+  NIFI_CLUSTER_NODE_READ_TIMEOUT: "5 min"
+  NIFI_CLUSTER_PROTOCOL_CONNECTION_HANDSHAKE_TIMEOUT: "3 min"
+  NIFI_CLUSTER_PROTOCOL_HEARTBEAT_INTERVAL: "2 min"
+  NIFI_CLUSTER_PROTOCOL_IS_SECURE: "true"
+  NIFI_ELECTION_MAX_CANDIDATES: "1"
+  NIFI_ELECTION_MAX_WAIT: "2 min"
+  NIFI_JVM_HEAP_INIT: {{ printf "%dm" ( mulf .Values.nifi.resources.requests.memoryMi .Values.nifi.jvmMemoryRatio | int ) }}
+  NIFI_JVM_HEAP_MAX: {{ printf "%dm" ( mulf .Values.nifi.resources.limits.memoryMi .Values.nifi.jvmMemoryRatio | int ) }}
+  NIFI_SECURITY_AUTORELOAD_ENABLED: "true"
+  NIFI_SECURITY_AUTORELOAD_INTERVAL: "5 min"
+  NIFI_SECURITY_NEEDCLIENTAUTH: "true"
+  NIFI_SENSITIVE_PROPS_KEY_PROTECTED: "th1s1s3up34e5r37"
+  NIFI_SENSITIVE_PROPS_KEY: "th1s1s3up34e5r37"
+  NIFI_WEB_HTTP_PORT: "8080"
+  NIFI_WEB_HTTPS_PORT: "8443"
+{{- if .Values.nifi.ingress.proxyPath }}
+  NIFI_WEB_PROXY_CONTEXT_PATH: {{ .Values.nifi.ingress.proxyPath | quote }}
+{{- end }}
+{{- if .Values.nifi.ingress.proxyHost }}
+  NIFI_WEB_PROXY_HOST: {{ .Values.nifi.ingress.proxyHost | quote }}
+{{- end }}
+  NIFI_ZK_CONNECT_STRING: "zookeeper:2181"
+  NIFI_ZOOKEEPER_CONNECT_STRING: "zookeeper:2181"
+  NIFI_REGISTRY_HOSTS: nifi-registry
+  TRUSTSTORE_PASSWORD: "th1s1s3up34e5r37"
+  TRUSTSTORE_PATH: "${NIFI_HOME}/keytool/truststore.jks"
+  TRUSTSTORE_TYPE: "jks"
+  IDOL_NIFI_FLOWFILE: {{ .Values.nifi.flowfile | quote }}

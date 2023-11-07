@@ -149,6 +149,24 @@ entries:
     urls:
     - release/idol-licenseserver-0.1.0.tgz
     version: 0.1.0
+  idol-nifi:
+  - apiVersion: v2
+    appVersion: 23.4.0
+    created: "2023-11-06T15:51:28.149701031Z"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.1.0
+    - condition: idol-licenseserver.enabled
+      name: idol-licenseserver
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.1.0
+    description: A configurable IDOL NiFi setup
+    digest: f200f7aba8c104bf55e811900bfcf242d50ec221aa43c7e7efa50b0050514fe2
+    name: idol-nifi
+    urls:
+    - release/idol-nifi-0.1.0.tgz
+    version: 0.1.0
   single-content:
   - apiVersion: v2
     appVersion: 23.4.0
@@ -184,4 +202,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2023-11-03T11:06:41.5946766Z"
+generated: "2023-11-06T15:51:28.146316705Z"

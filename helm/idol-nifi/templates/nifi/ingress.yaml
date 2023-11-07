@@ -1,0 +1,63 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+{{- if .Values.nifi.ingress.enabled -}}
+{{- /*
+ nginx ingress needs path capture to achieve prefix type routing
+*/}}
+{{- $pathSuffix := "" }}
+{{- $pathType := "Prefix" }}
+{{- if eq .Values.ingressType "nginx" }}
+{{- $pathSuffix = "(.*)"}}
+{{- $pathType = "ImplementationSpecific" }}
+{{- end }}
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: idol-nifi
+  labels: {{- include "idol-nifi.labels" . | nindent 4 -}}
+    app: nifi
+  annotations: 
+    app.kubernetes.io/name: nifi
+    app.kubernetes.io/part-of: nifi
+{{- if eq .Values.ingressType "nginx" }}
+    nginx.ingress.kubernetes.io/proxy-body-size: {{ .Values.ingressProxyBodySize }}
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/affinity-mode: persistent
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: nifi-basic-auth
+    nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
+{{- else if eq .Values.ingressType "haproxy" }}
+    haproxy.router.openshift.io/rewrite-target: / 
+    haproxy.router.openshift.io/proxy-body-size: {{ .Values.ingressProxyBodySize }}
+{{- end }}
+{{/* ingress setup is very dependent on cluster ingress controller so allow user value annotations */ -}}
+{{ with .Values.nifi.ingress.annotations }}
+{{- toYaml . | trim | indent 4 }}
+{{- end }}
+spec:
+{{- if .Values.ingressClassName }}
+  ingressClassName: {{ .Values.ingressClassName | quote }}
+{{- end }}
+  rules:
+  - http:
+      paths:
+      - path: {{ default "/" .Values.nifi.ingress.proxyPath | quote }}
+        pathType: Prefix
+        backend:
+          service:
+            name: idol-nifi
+            port:
+              name: http
+{{- if .Values.nifi.ingress.host }}
+    host: {{ .Values.nifi.ingress.host | quote }}
+{{- end }}
+{{- end -}}

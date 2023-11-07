@@ -1,0 +1,31 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: idol-nifi-scripts
+  labels: {{- include "idol-nifi.labels" . | nindent 4 -}}
+    app: nifi
+data:
+  security.sh: |
+{{ tpl (.Files.Get "resources/nifi-security.sh") . | indent 4 }}
+  wait.sh: |
+{{ tpl (.Files.Get "resources/nifi-wait.sh") . | indent 4 }}
+  connect-registry.sh: |
+{{ tpl (.Files.Get "resources/nifi-connect-registry.sh") . | indent 4 }}
+  preStop.sh: |
+{{ tpl (.Files.Get "resources/nifi-preStop.sh") . | indent 4 }}
+  postStart.sh: |
+{{ tpl (.Files.Get "resources/nifi-postStart.sh") . | indent 4 }}
+  import-flow.sh: | 
+{{ tpl (.Files.Get "resources/nifi-import-flow.sh") . | indent 4 }}
+  flow-basic-idol.json: |
+{{ tpl (.Files.Get "resources/flow-basic-idol.json") . | indent 4 }}

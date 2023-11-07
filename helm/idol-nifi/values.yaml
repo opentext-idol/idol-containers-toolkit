@@ -1,0 +1,159 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+
+# idolImageRegistry - used to construct container image name: <idolImageRegistry>/<nifiImage>:<idolVersion>
+idolImageRegistry: microfocusidolserver
+# idolVersion - used to construct container image name: <idolImageRegistry>/<nifiImage>:<idolVersion>
+idolVersion: "23.4"
+
+# imagePullSecrets - secrets used to pull container images
+imagePullSecrets:
+- "dockerhub-secret"
+
+# ingressClassName - Optional, https://kubernetes.io/docs/concepts/services-networking/ingress/#the-ingress-resource, applied to all ingress objects
+ingressClassName: ""
+
+# ingressBasicAuthData - base64 encoded htpasswd https://httpd.apache.org/docs/2.4/misc/password_encryptions.html. Default is admin/admin
+ingressBasicAuthData: YWRtaW46JGFwcjEkSDY1dnBkTU8kMXAxOGMxN3BuZVFUT2ZjVC9TZkZzMQo=
+
+# ingressProxyBodySize - the maximum allowed size of the client request body, defining
+# the maximum size of requests that can be made to IDOL components within the installation, e.g.
+# the amount of data sent in DREADDDATA index commands.
+# The value should be an nginx "size" value.
+# See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the
+# corresponding nginx configuration parameter.
+ingressProxyBodySize: 2048m
+
+# ingressType - setup ingress for that controller type.
+# Valid values are nginx or haproxy (used by OpenShift)
+ingressType: nginx
+
+# indexserviceName - the hostname of the indexing IDOL component
+indexserviceName: "idol-index-service"
+
+# indexserviceACIPort - the ACI port of the indexing IDOL component
+indexserviceACIPort: "9070"
+
+# podSecurityContext - pod security context definition 
+# See https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+podSecurityContext:
+  enabled: true
+  runAsGroup: 1000
+  runAsUser: 1000
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+# containerSecurityContext - container security context definition 
+# See https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+containerSecurityContext:
+  enabled: true
+  allowPrivilegeEscalation: false
+  privileged: false
+  capabilities:
+    drop:
+      - ALL
+
+nifi:
+  autoScaling:
+    # autoScaling.enabled - deploy a horizontal pod autoscaler for the nifi statefulset
+    enabled: true
+    # autoScaling.minReplicas - the minimum size of the nifi statefulset
+    minReplicas: 1
+    # autoScaling.maxReplicas - the maximum size of the nifi statefulset
+    maxReplicas: 8
+    # metrics - one or more metrics controlling the horizontal pod autoscaler (https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/horizontal-pod-autoscaler-v2/#HorizontalPodAutoscalerSpec)
+    metrics:
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 90
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 90
+
+  # resources - https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits
+  resources:
+    requests:
+      cpu: 400m
+      # nifi.resources.requests.memoryMi - memory requested in mebibytes (value used in jvm memory calculation)
+      memoryMi: 3072
+    limits:
+      cpu: 400m
+      # nifi.resources.limits.memoryMi - memory limit in mebibytes (value used in jvm memory calculation)
+      memoryMi: 8192
+  
+  # jvmMemoryRatio - What proportion of the pod memory to allocate for JVM usage
+  jvmMemoryRatio: 0.5
+
+  # nifiImage - used to construct container image name: <idolImageRegistry>/<nifi.imageName>:<idolVersion>
+  imageName: nifi-full
+
+  # flowfile - the flowfile definition to import. 
+  # Set this to any non-existing path to bypass flow import (start with a blank flow).
+  # Customize the NiFi image and set this to a filepath within that image to import your own customized flow.
+  flowfile: /scripts/flow-basic-idol.json
+
+  ingress:
+    # nifi.ingress.enabled - whether to deploy ingress for nifi
+    enabled: true
+    # nifi.ingress.annotations - optional ingress annotations
+    annotations: {}
+    # nifi.ingress.host - optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules
+    host: ""
+    # nifi.ingress.proxyHost - optional nifi.web.proxy.context.path value (see https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#web-properties)
+    proxyPath: ""
+    # nifi.ingress.proxyHost - optional nifi.web.proxy.host value (see https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#web-properties)
+    proxyHost: ""
+    # nifi.ingress.aciHost - optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules
+    aciHost: ""
+
+nifiRegistry:
+  ingress:
+    # nifiRegistry.ingress.enabled - whether to deploy ingress for nifi
+    enabled: true
+    # nifiRegistry.ingress.annotations - optional ingress annotations
+    annotations: {}
+    # nifiRegistry.ingress.host - optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules
+    host: ""
+  
+  # nifiRegistry.resources - https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits
+  resources:
+    requests:
+      cpu: 200m
+      memory: 1Gi
+    limits: 
+      cpu: 1000m
+      memory: 1Gi
+
+zookeeper:
+  # zookeeper.resources - https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits
+  resources:
+    requests:
+      cpu: 200m
+      memory: 500Mi
+    limits:
+      cpu: 200m
+      memory: 500Mi
+
+# sub-chart values
+idol-licenseserver:
+  # idol-licenseserver.enabled - whether to deploy an IDOL LicenseServer service abstraction
+  enabled: false
+  # idol-licenseserver.licenseServerService - the hostname of the IDOL LicenseServer (or abstraction)
+  licenseServerService: "idol-licenseserver"
+  # idol-licenseserver.licenseServerPort - the ACI port of the IDOL LicenseServer (or abstraction)
+  licenseServerPort: "20000"
