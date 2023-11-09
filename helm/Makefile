@@ -6,6 +6,7 @@ SUBCHARTS:=idol-library \
 	idol-licenseserver \
 	idol-find \
 	idol-nifi \
+	idol-stack \
 	distributed-idol \
 	single-content
 
