@@ -1,0 +1,36 @@
+
+idolImageRegistry: microfocusidolserver
+idolVersion: "23.4"
+
+imagePullSecrets:
+- "dockerhub-secret"
+
+ingressHost: ""
+ingressClassName: ""
+ingressProxyBodySize: 2048m
+ingressType: "nginx"
+
+playlistserverLivenessProbe:
+  initialDelaySeconds: 30
+
+mmapLivenessProbe:
+  initialDelaySeconds: 30
+
+processedVideoStorageClass: storage-class-smb-abuild-test
+processedVideoVolumeSize: 4Gi
+staticVideoStorageClass: storage-class-smb-abuild-test
+staticVideoVolumeSize: 4Gi
+
+postgresql:
+  auth:
+    database: "mmap-events" # DO NOT CHANGE
+    username: "mmap"        # DO NOT CHANGE
+    password: ieBPwmujrKEY9sh6oaybA8wyf
+  primary:
+    persistence:
+      storageClass: standard
+    initdb:
+      scriptsConfigMap: idol-mmap-postgres-init
+
+idol-licenseserver:
+  enabled: false

@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: idol-mmap
+  labels: {{- include "idol-library.labels" . | nindent 4 }}
+spec:
+  serviceName: idol-mmap
+  replicas: 1
+  selector:
+    matchLabels:
+      app: idol-mmap
+  template:
+    metadata:
+      labels: {{- include "idol-library.labels" . | nindent 8 }}
+        app: idol-mmap
+    spec:
+      imagePullSecrets:
+        {{- range .Values.imagePullSecrets }}
+        - name: {{ . }}
+        {{- end }}
+      terminationGracePeriodSeconds: 300
+      containers:
+      - name: idol-mmap
+        image: {{ .Values.idolImageRegistry }}/mmap_app:{{ .Values.idolVersion }}
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: MMAP_POSTGRES_PASSWORD
+          value: {{ .Values.postgresql.auth.password | quote }}
+        volumeMounts:
+        - name: static-video
+          mountPath: /mmap/data/static-video/final
+        - name: processed-video
+          mountPath: /mmap/input-data/static-video
+        livenessProbe:
+          httpGet:
+            path: /vms/api/v1/channels/
+            port: http
+{{- template "idol-library.standardLivenessProbe" .Values.mmapLivenessProbe }}
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        - containerPort: 8443
+          name: https
+          protocol: TCP
+      volumes:
+      - name: static-video
+        persistentVolumeClaim:
+          claimName: static-video
+      - name: processed-video
+        persistentVolumeClaim:
+          claimName: processed-video
