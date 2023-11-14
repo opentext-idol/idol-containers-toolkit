@@ -6,12 +6,14 @@ SUBCHARTS:=idol-library \
 	idol-licenseserver \
 	idol-find \
 	idol-nifi \
+	idol-omnigroupserver \
 	idol-stack \
 	distributed-idol \
 	single-content
 
 PACKAGE_SUBCHARTS:=$(addprefix package-,${SUBCHARTS})
 CLEAN_SUBCHARTS:=$(addprefix clean-,${SUBCHARTS})
+README_SUBCHARTS:=$(addsuffix /README.md,idol-omnigroupserver)
 
 UPDATE_DEPENDENCIES?=-u
 
@@ -28,8 +30,11 @@ index.yaml: $(wildcard staging/release/*)
 	mv staging/index.yaml index.yaml
 
 # packages releases to staging directory
-${PACKAGE_SUBCHARTS}: package-% : 
+${PACKAGE_SUBCHARTS}: package-% : %/README.md
 	helm package ${UPDATE_DEPENDENCIES} -d staging/release $*/
+
+${README_SUBCHARTS}: %/README.md: %/values.yaml %/Chart.yaml %/README.md.gotmpl
+	docker run --rm -v `pwd`/$*:/helm-docs -u `id -u` jnorwood/helm-docs:latest
 
 package-all: ${PACKAGE_SUBCHARTS}
 
