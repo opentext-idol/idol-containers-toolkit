@@ -23,7 +23,7 @@
             "type": "string",
             "minLength": 1
         },
-        "licenseServerService": {
+        "licenseServerHostname": {
             "type": "string",
             "format": "hostname"
         },
@@ -60,7 +60,7 @@
             "$ref": "#/$defs/liveness_probe"
         },
         "idol-licenseserver": {
-            "$ref": "#/$defs/IdolLicenseserver"
+            "$ref": "#/$defs/optional_subchart"
         }
 
     },
@@ -69,7 +69,7 @@
         "idolVersion",
         "imagePullSecrets",
         "image",
-        "licenseServerService",
+        "licenseServerHostname",
         "licenseServerPort",
         "enableIngress",
         "name",
@@ -101,7 +101,7 @@
                 }
             }
         },
-        "IdolLicenseserver": {
+        "optional_subchart": {
             "type": "object",
             "properties": {
                 "enabled": {
@@ -110,8 +110,7 @@
             },
             "required": [
                 "enabled"
-            ],
-            "title": "IdolLicenseserver"
+            ]
         }
     }
 }

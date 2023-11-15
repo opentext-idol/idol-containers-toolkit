@@ -35,8 +35,8 @@ additional config-map with the OGS config file - see `.Values.existingConfigMap`
 | ingressClassName | string | `""` | Optional parameter to override the default ingress class |
 | ingressHost | string | `""` | Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules). For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration) |
 | ingressType | string | `"nginx"` | Ingress controller type to setup for. Valid values are nginx or haproxy (used by OpenShift) |
+| licenseServerHostname | string | `"idol-licenseserver"` | the hostname of the IDOL LicenseServer (or abstraction) |
 | licenseServerPort | string | `"20000"` | the ACI port of the IDOL LicenseServer (or abstraction) |
-| licenseServerService | string | `"idol-licenseserver"` | the hostname of the IDOL LicenseServer (or abstraction) |
 | livenessProbe.initialDelaySeconds | int | `30` |  |
 | name | string | `"idol-omnigroupserver"` | used to name deployment, service, ingress |
 | servicePort | string | `"3058"` | port service will serve service connections on |

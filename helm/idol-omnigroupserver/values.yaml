@@ -26,8 +26,8 @@ imagePullSecrets:
 # image -- used to construct container image name: {idolImageRegistry}/{image}:{idolVersion}
 image: "omnigroupserver"
 
-# licenseServerService -- the hostname of the IDOL LicenseServer (or abstraction)
-licenseServerService: idol-licenseserver
+# licenseServerHostname -- the hostname of the IDOL LicenseServer (or abstraction)
+licenseServerHostname: idol-licenseserver
 # licenseServerPort -- the ACI port of the IDOL LicenseServer (or abstraction)
 licenseServerPort: "20000"
 
