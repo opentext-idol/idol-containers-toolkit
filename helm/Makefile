@@ -4,6 +4,7 @@
 
 SUBCHARTS:=idol-library \
 	idol-licenseserver \
+	idol-community \
 	idol-find \
 	idol-nifi \
 	idol-omnigroupserver \
@@ -13,7 +14,7 @@ SUBCHARTS:=idol-library \
 
 PACKAGE_SUBCHARTS:=$(addprefix package-,${SUBCHARTS})
 CLEAN_SUBCHARTS:=$(addprefix clean-,${SUBCHARTS})
-README_SUBCHARTS:=$(addsuffix /README.md,idol-omnigroupserver)
+README_SUBCHARTS:=$(addsuffix /README.md,idol-omnigroupserver idol-community)
 
 UPDATE_DEPENDENCIES?=-u
 

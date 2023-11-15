@@ -81,6 +81,28 @@ entries:
     urls:
     - release/distributed-idol-0.2.0.tgz
     version: 0.2.0
+  idol-community:
+  - apiVersion: v2
+    appVersion: "23.4"
+    created: "2023-11-15T13:53:13.428915598Z"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.2.0
+    - condition: idol-licenseserver.enabled
+      name: idol-licenseserver
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.1.0
+    - condition: idol-licenseserver.enabled
+      name: single-content
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.2.0
+    description: Adds IDOL Community
+    digest: e76e4edee0c971bbf9b98a7d0ac3172214139e3a7b6f3c9cb90b33747e9d353c
+    name: idol-community
+    urls:
+    - release/idol-community-0.1.0.tgz
+    version: 0.1.0
   idol-find:
   - apiVersion: v2
     appVersion: 23.4.0
@@ -251,4 +273,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2023-11-15T12:33:26.664216817Z"
+generated: "2023-11-15T13:53:13.424692914Z"
