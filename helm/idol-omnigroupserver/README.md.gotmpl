@@ -1,0 +1,27 @@
+{{ template "chart.header" . }}
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.badgesSection" . }}
+
+Provides an IDOL OmniGroupServer deployment.
+
+Whilst this can be deployed 'as-is', it is expected that a real deployment will
+require configuration particular to the repositories the OGS instance needs to
+provide user/group information for.
+
+Consumers of this chart are encouraged to use this as a subchart, providing an
+additional config-map with the OGS config file - see `.Values.existingConfigMap`
+
+> Full documentation for OmniGroupServer available from https://www.microfocus.com/documentation/idol/IDOL_23_4/OmniGroupServer_23.4_Documentation/Help/index.html
+
+{{ template "chart.homepageLine" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.requirementsSection" . }}
+
+{{ template "chart.valuesSection" . }}
+
+{{ template "helm-docs.versionFooter" . }}
