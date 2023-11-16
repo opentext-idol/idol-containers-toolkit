@@ -14,7 +14,8 @@ SUBCHARTS:=idol-library \
 
 PACKAGE_SUBCHARTS:=$(addprefix package-,${SUBCHARTS})
 CLEAN_SUBCHARTS:=$(addprefix clean-,${SUBCHARTS})
-README_SUBCHARTS:=$(addsuffix /README.md,idol-omnigroupserver idol-community)
+# subcharts for which we use helm-docs to generate the README.md from README.md.gotmpl
+README_SUBCHARTS:=$(basename $(wildcard */README.md.gotmpl))
 
 UPDATE_DEPENDENCIES?=-u
 
