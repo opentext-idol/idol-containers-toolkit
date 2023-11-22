@@ -1,0 +1,36 @@
+{{ template "chart.header" . }}
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{/* gotemplate can't assign template output to a variable */}}
+{{- $component := "Community" }}
+{{- $appVersion := .AppVersion }}
+{{- $versionList := slice (splitList "." $appVersion) 0 2 }}
+
+{{- $docsLink := printf "https://www.microfocus.com/documentation/idol/IDOL_%s/%s_%s_Documentation/Help/" (join "_" $versionList ) $component (join "." $versionList) }}
+
+Provides an IDOL {{ $component }} deployment. By default this will provide basic user
+setup suitable to be used to login to IDOL Find.
+
+Depends on connections to:
+
+- IDOL LicenseServer (`licenseServerHostname`)
+- IDOL Content/Agentstore (`queryserviceName`, `queryserviceACIPort`, `agentStoreName`, `agentStoreACIPort`)
+
+To setup document security you will need to provide your own configuration (see `existingConfigMap`)
+and may wish to deploy alongside the _idol-omnigroupserver_ chart.
+
+> Full documentation for {{ $component }} available from {{ $docsLink }}
+
+{{ template "chart.homepageLine" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.requirementsSection" . }}
+
+{{ template "chart.valuesSection" . }}
+
+{{ template "helm-docs.versionFooter" . }}

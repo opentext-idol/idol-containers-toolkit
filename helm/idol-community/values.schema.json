@@ -1,0 +1,137 @@
+{
+    "$schema": "https://json-schema.org/draft-07/schema#",
+    "title": "Values",
+    "type": "object",
+    "properties": {
+        "idolImageRegistry": {
+            "type": "string",
+            "format": "hostname"
+        },
+        "idolVersion": {
+            "type": "string",
+            "minLength": 1
+        },
+        "imagePullSecrets": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "string",
+                "minLength": 1
+            }
+        },
+        "image": {
+            "type": "string",
+            "minLength": 1
+        },
+        "licenseServerHostname": {
+            "type": "string",
+            "format": "hostname"
+        },
+        "licenseServerPort": {
+            "$ref": "#/$defs/port_number"
+        },
+        "existingConfigMap": {
+            "type": "string"
+        },
+        "queryserviceName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "queryserviceACIPort": {
+            "$ref": "#/$defs/port_number"
+        },
+        "agentStoreName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "agentStoreACIPort": {
+            "$ref": "#/$defs/port_number"
+        },
+        "enableIngress": {
+            "type": "boolean"
+        },
+        "ingressType": {
+            "type": "string",
+            "enum": ["nginx","haproxy"]
+        },
+        "ingressClassName": {
+            "type": "string"
+        },
+        "ingressHost": {
+            "type": "string"
+        },
+        "name": {
+            "type": "string",
+            "minLength": 1
+        },
+        "aciPort": {
+            "$ref": "#/$defs/port_number"
+        },
+        "servicePort": {
+            "$ref": "#/$defs/port_number"
+        },
+        "livenessProbe": {
+            "$ref": "#/$defs/liveness_probe"
+        },
+        "idol-licenseserver": {
+            "$ref": "#/$defs/optional_subchart"
+        },
+        "single-content": {
+            "$ref": "#/$defs/optional_subchart"
+        }
+    },
+    "required": [
+        "idolImageRegistry",
+        "idolVersion",
+        "imagePullSecrets",
+        "image",
+        "licenseServerHostname",
+        "licenseServerPort",
+        "queryserviceName",
+        "queryserviceACIPort",
+        "agentStoreName",
+        "agentStoreACIPort",
+        "enableIngress",
+        "name",
+        "aciPort",
+        "servicePort",
+        "livenessProbe",
+        "idol-licenseserver",
+        "single-content"
+    ],
+
+    "$defs": {
+        "port_number": {
+            "type": "string",
+            "pattern": "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$"
+        },
+        "liveness_probe": {
+            "type": "object",
+            "properties": {
+                "initialDelaySeconds": {
+                    "type": "integer"
+                },
+                "timeoutSeconds": {
+                    "type": "integer"
+                },
+                "periodSeconds": {
+                    "type": "integer"
+                },
+                "failureThreshold": {
+                    "type": "integer"
+                }
+            }
+        },
+        "optional_subchart": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "enabled"
+            ]
+        }
+    }
+}

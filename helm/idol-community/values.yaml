@@ -1,0 +1,83 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+
+# As per https://helm.sh/docs/topics/charts/#the-chart-file-structure
+# this values.yaml file contains the default configuration values for this chart.
+# These default values can be overridden by using the --values or --set flags on the `helm install`
+# command: see https://helm.sh/docs/helm/helm_install/
+
+# idolImageRegistry -- used to construct container image name: {idolImageRegistry}/{image}:{idolVersion}
+idolImageRegistry: "microfocusidolserver"
+# idolVersion -- used to construct container image name: {idolImageRegistry}/{image}:{idolVersion}
+idolVersion: "23.4"
+# imagePullSecrets -- secrets used to pull container images
+imagePullSecrets:
+- "dockerhub-secret"
+
+# image -- used to construct container image name: {idolImageRegistry}/{image}:{idolVersion}
+image: "community"
+
+# licenseServerHostname -- the hostname of the IDOL LicenseServer (or abstraction)
+licenseServerHostname: "idol-licenseserver"
+# licenseServerPort -- the ACI port of the IDOL LicenseServer (or abstraction)
+licenseServerPort: "20000"
+
+# existingConfigMap -- if specified, mounted at /etc/config/idol and expected to provide community.cfg
+existingConfigMap: ""
+
+# queryserviceName -- query service/hostname (maps to Community DataDRE configuration).
+queryserviceName: "idol-query-service"
+# queryserviceACIPort -- query service aci port (maps to Community DataDRE configuration).
+queryserviceACIPort: "9060"
+# agentStoreName -- agentstore service/hostname (maps to Community AgentDRE configuration).
+agentStoreName: "idol-agentstore"
+# agentStoreACIPort -- agentstore service aci port (maps to Community AgentDRE configuration).
+agentStoreACIPort: "9050"
+
+##### INGRESS VARIABLES #####
+
+# enableIngress -- Create ingress resource
+enableIngress: true
+
+# ingressType -- Ingress controller type to setup for.
+# Valid values are nginx or haproxy (used by OpenShift)
+ingressType: nginx
+
+# ingressClassName -- Optional parameter to override the default ingress class
+ingressClassName: ""
+
+# ingressHost -- Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules).
+# For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration)
+ingressHost: ""
+
+##### INTERNAL VARIABLES #####
+# name -- used to name deployment, service, ingress
+name: "idol-community"
+# aciPort -- port service will serve ACI connections on
+aciPort: "9030"
+# servicePort -- port service will serve service connections on
+servicePort: "9032"
+# livenessProbe -- container livenessProbe settings
+livenessProbe:
+  initialDelaySeconds: 30
+
+
+##### SUB-CHART VARIABLES #####
+idol-licenseserver:
+  # -- whether to deploy the idol-licenseserver sub-chart
+  enabled: false
+
+single-content:
+  # -- whether to deploy the single-content sub-chart. 
+  # You may use this to get a basic Community running by setting the agentStoreName/agentStoreACIPort
+  # to the queryserviceName/queryserviceACIPort values.
+  enabled: false
+
