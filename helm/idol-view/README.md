@@ -25,7 +25,7 @@ You may wish to deploy this chart alongside _idol-nifi_.
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.2.0 |
+| file://../idol-library | idol-library | 0.3.0 |
 
 ## Values
 
@@ -34,13 +34,13 @@ You may wish to deploy this chart alongside _idol-nifi_.
 | aciPort | string | `"9080"` | port service will serve ACI connections on |
 | agentStoreACIPort | string | `"9050"` | Default configuration for [Viewing]::IdolPort |
 | agentStoreName | string | `"idol-agentstore"` | Default configuration for [Viewing]::IdolHost |
-| enableIngress | bool | `true` | Create ingress resource |
 | existingConfigMap | string | `""` | if specified, mounted at /etc/config/idol and expected to provide community.cfg |
 | idolImageRegistry | string | `"microfocusidolserver"` | used to construct container image name: {idolImageRegistry}/{image}:{idolVersion} |
 | idolVersion | string | `"23.4"` | used to construct container image name: {idolImageRegistry}/{image}:{idolVersion} |
 | image | string | `"view"` | used to construct container image name: {idolImageRegistry}/{image}:{idolVersion} |
 | imagePullSecrets | list | `["dockerhub-secret"]` | secrets used to pull container images |
 | ingressClassName | string | `""` | Optional parameter to override the default ingress class |
+| ingressEnabled | bool | `true` | Create ingress resource |
 | ingressHost | string | `""` | Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules). For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration) |
 | ingressType | string | `"nginx"` | Ingress controller type to setup for. Valid values are nginx or haproxy (used by OpenShift) |
 | licenseServerHostname | string | `"idol-licenseserver"` | the hostname of the IDOL LicenseServer (or abstraction) |
