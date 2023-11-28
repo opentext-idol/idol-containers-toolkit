@@ -171,7 +171,7 @@ entries:
   idol-mmap:
   - apiVersion: v2
     appVersion: 23.4.0
-    created: "2023-11-24T11:00:16.3488326Z"
+    created: "2023-11-24T17:24:17.3195322Z"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
@@ -184,7 +184,7 @@ entries:
       repository: https://charts.bitnami.com/bitnami
       version: 13.2.3
     description: A configurable IDOL mmap setup
-    digest: 40dca7eec7f1d60d36323e460040da8b99c56f707e0b4cd194c88462a8877c9f
+    digest: 29a79ea44fc8f6716e6918803b897e44425d9b44a778479e1613a912f0d7d830
     name: idol-mmap
     urls:
     - release/idol-mmap-0.1.0.tgz
@@ -291,4 +291,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2023-11-24T11:00:16.3426646Z"
+generated: "2023-11-24T17:24:17.3134136Z"
