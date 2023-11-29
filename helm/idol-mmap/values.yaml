@@ -31,6 +31,10 @@ postgresql:
       storageClass: standard
     initdb:
       scriptsConfigMap: idol-mmap-postgres-init
+    containerSecurityContext:
+      enabled: true         # Set to false to run on OpenShift
+    podSecurityContext:
+      enabled: true         # Set to false to run on OpenShift
 
 idol-licenseserver:
   enabled: false
