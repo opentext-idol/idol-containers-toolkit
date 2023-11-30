@@ -12,44 +12,52 @@
 {{/*
     Common ingress template
 */}}
+{{- $root := get . "root" | required "missing root" -}}
+{{- $component := get . "component" | required "missing component" -}}
+{{- $ingress := get . "ingress" | required "missing ingress" -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ .Values.name | quote }}
+  name: {{ $component.name | quote }}
   labels: {{- include "idol-library.labels" . | nindent 4 }}
   annotations:
-{{- if eq .Values.ingressType "nginx" }}
+{{- if eq $ingress.type "nginx" }}
     nginx.ingress.kubernetes.io/rewrite-target: /$1
-  {{- if .Values.ingressProxyBodySize }}
-    nginx.ingress.kubernetes.io/proxy-body-size: {{ .Values.ingressProxyBodySize }}
+  {{- if $ingress.proxyBodySize }}
+    nginx.ingress.kubernetes.io/proxy-body-size: {{ $ingress.ProxyBodySize }}
   {{- end -}}
-{{- else if eq .Values.ingressType "haproxy" }}
+{{- else if eq $ingress.type "haproxy" }}
     haproxy.router.openshift.io/rewrite-target: / 
-  {{- if .Values.ingressProxyBodySize }}
-    haproxy.router.openshift.io/proxy-body-size: {{ .Values.ingressProxyBodySize }}
+  {{- if $ingress.proxyBodySize }}
+    haproxy.router.openshift.io/proxy-body-size: {{ $ingress.proxyBodySize }}
   {{- end -}}
 {{- end }}
 spec:
-{{- if .Values.ingressClassName }}
-  ingressClassName: {{ .Values.ingressClassName }}
+{{- if $ingress.className }}
+  ingressClassName: {{ $ingress.className }}
 {{- end }}
   rules:
   - http:
-{{- if .Values.ingressHost }}
-    host: {{ .Values.ingressHost }}
+{{- if $ingress.host }}
+    host: {{ $ingress.host }}
 {{- end }}
 {{- end }}
 
 
 {{/*
 Generates ingress
-Takes:
-- top context
-- template to merge into deployment base
+@param .root The root context
+@param .component The component values
+@param .ingress The ingress specific values
+@param .destination Template to merge onto
 */}}
 {{- define "idol-library.ingress" -}}
-{{- if .Values.ingressEnabled }}
-{{- include "idol-library.util.merge" (append . "idol-library.ingress.base") -}}
+{{- $root := get . "root" | required "missing root" -}}
+{{- $component := get . "component" | required "missing component" -}}
+{{- $ingress := get . "ingress" | required "missing ingress" -}}
+{{- if $ingress.enabled }}
+{{- $_ := set . "source" "idol-library.ingress.base" -}}
+{{- include "idol-library.util.merge" $_ -}}
 {{- end -}}
 {{- end -}}
 
@@ -58,18 +66,21 @@ Takes:
  nginx ingress needs path capture to achieve prefix type routing
 */}}
 {{- define "idol-library.ingress.pathsuffix" -}}
-{{ eq .Values.ingressType "nginx" | ternary "(.*)" "" }}
+{{- $ingress := get . "ingress" | required "missing ingress" -}}
+{{ eq $ingress.type "nginx" | ternary "(.*)" "" }}
 {{- end -}}
 
 {{- define "idol-library.ingress.pathtype" -}}
-{{- eq .Values.ingressType "nginx" | ternary "ImplementationSpecific" "Prefix" -}}
+{{- $ingress := get . "ingress" | required "missing ingress" -}}
+{{- eq $ingress.type "nginx" | ternary "ImplementationSpecific" "Prefix" -}}
 {{- end -}}
 
-{{/* 
-Takes 
-- top context
-- path string
+{{/* Modifies path value appropriate to ingress type
+@param .ingress The ingress values
+@param .path The base path to be modified
 */}}
 {{- define "idol-library.ingress.path" -}}
-{{ include "idol-library.ingress.pathsuffix" (first .) | print (last .) }}
+{{- $ingress := get . "ingress" | required "missing ingress" -}}
+{{- $path := get . "path" | required "missing path" -}}
+{{ include "idol-library.ingress.pathsuffix" . | print $path }}
 {{- end -}}

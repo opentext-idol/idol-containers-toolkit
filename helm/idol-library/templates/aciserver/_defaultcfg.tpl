@@ -11,17 +11,24 @@
 {{/*
 Generates the configmap containing default configuration file for an ACI Server
 See "idol-library.aciserver.deployment"
+Assumes config file exists in resources/ directory
+
+@param .root The root context
+@param .component The component values
+@param .componentName Base name for the config file
 */}}
 {{- define "idol-library.aciserver.defaultcfg" -}}
-{{- if not .Values.existingConfigMap }}
-{{- $componentName := trimPrefix "idol-" .Values.name }}
+{{- $root := get . "root" | required "root" -}}
+{{- $component := get . "component" | required "component" -}}
+{{- $componentName := get . "componentName" | required "componentName" -}}
+{{- if not $component.existingConfigMap }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.name }}-default-cfg
+  name: {{ $component.name }}-default-cfg
   labels: {{- include "idol-library.labels" . | nindent 4 }}
 data:
   {{ $componentName }}.cfg: |
-{{ tpl (print "resources/" $componentName ".cfg" | .Files.Get) . | indent 4 }}
+{{ tpl (print "resources/" $componentName ".cfg" | $root.Files.Get) $root | indent 4 }}
 {{- end -}}
 {{- end -}}

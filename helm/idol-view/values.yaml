@@ -14,16 +14,22 @@
 # These default values can be overridden by using the --values or --set flags on the `helm install`
 # command: see https://helm.sh/docs/helm/helm_install/
 
-# idolImageRegistry -- used to construct container image name: {idolImageRegistry}/{image}:{idolVersion}
-idolImageRegistry: "microfocusidolserver"
-# idolVersion -- used to construct container image name: {idolImageRegistry}/{image}:{idolVersion}
-idolVersion: "23.4"
-# imagePullSecrets -- secrets used to pull container images
-imagePullSecrets:
-- "dockerhub-secret"
+global:
+  # -- Global override value for idolImage.registry
+  idolImageRegistry: ""
+  # -- Global override value for idolImage.version
+  idolVersion: ""
+  # -- Global secrets used to pull container images
+  imagePullSecrets:
+  - "dockerhub-secret"
 
-# image -- used to construct container image name: {idolImageRegistry}/{image}:{idolVersion}
-image: "view"
+idolImage:
+  # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
+  registry: "microfocusidolserver"
+  # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
+  version: "23.4"
+  # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
+  repo: "view"
 
 # licenseServerHostname -- the hostname of the IDOL LicenseServer (or abstraction)
 licenseServerHostname: "idol-licenseserver"
@@ -32,6 +38,12 @@ licenseServerPort: "20000"
 
 # existingConfigMap -- if specified, mounted at /etc/config/idol and expected to provide community.cfg
 existingConfigMap: ""
+
+# -- Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
+additionalVolumes: []
+
+# -- Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1)
+additionalVolumeMounts: []
 
 # -- Default configuration for [Viewing]::IdolHost
 agentStoreName: "idol-agentstore"
@@ -49,19 +61,20 @@ queryserviceACIPort: "9060"
 
 ##### INGRESS VARIABLES #####
 
-# ingressEnabled -- Create ingress resource
-ingressEnabled: true
+ingress:
+  # -- Create ingress resource
+  enabled: true
 
-# ingressType -- Ingress controller type to setup for.
-# Valid values are nginx or haproxy (used by OpenShift)
-ingressType: nginx
+  # -- Ingress controller type to setup for.
+  # Valid values are nginx or haproxy (used by OpenShift)
+  type: nginx
 
-# ingressClassName -- Optional parameter to override the default ingress class
-ingressClassName: ""
+  # -- Optional parameter to override the default ingress class
+  className: ""
 
-# ingressHost -- Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules).
-# For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration)
-ingressHost: ""
+  # -- Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules).
+  # For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration)
+  host: ""
 
 ##### INTERNAL VARIABLES #####
 # name -- used to name deployment, service, ingress
@@ -73,3 +86,5 @@ servicePort: "9082"
 # livenessProbe -- container livenessProbe settings
 livenessProbe:
   initialDelaySeconds: 30
+
+

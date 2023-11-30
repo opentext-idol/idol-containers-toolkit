@@ -8,18 +8,24 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
+{{ include "idol-library.ingress" (dict 
+    "root" .
+    "component" .Values
+    "ingress" .Values.ingress
+    "destination" "idol-view.ingress")  -}}
 {{- define "idol-view.ingress" -}}
 {{/* Any View specific merges to base template go here */}}
+{{- $root := get . "root" | required "missing root" -}}
+{{- $component := get . "component" | required "missing component" -}}
 spec:
   rules:
   - http:
       paths:
-      - path: {{ include "idol-library.ingress.path" (list .  "/view/") }}
-        pathType: {{ include "idol-library.ingress.pathtype" . }}
+      - path: {{ include "idol-library.ingress.path" (dict "ingress" $component.ingress "path" "/view/") }}
+        pathType: {{ include "idol-library.ingress.pathtype" $component }}
         backend:
           service:
-            name:  {{ .Values.name | quote }}
+            name:  {{ $component.name | quote }}
             port:
               name: aci-port
 {{- end -}}
-{{- include "idol-library.ingress" (list . "idol-view.ingress") -}}

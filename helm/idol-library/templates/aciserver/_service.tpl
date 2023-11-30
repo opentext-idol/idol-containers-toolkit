@@ -12,29 +12,39 @@
 {{/*
     Common template for a generic ACI server service
 */}}
+{{- $root := get . "root" | required "missing root" -}}
+{{- $component := get . "component" | required "missing component" -}}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.name | quote }}
+  name: {{ $component.name | quote }}
   labels: {{- include "idol-library.labels" . | nindent 4 }}
 spec:
   ports:
-  - port: {{ .Values.aciPort | int }}
+  - port: {{ $component.aciPort | int }}
     targetPort: aci-port
     name: aci-port
-  - port: {{ .Values.servicePort | int }}
+  - port: {{ $component.servicePort | int }}
     targetPort: service-port
     name: service-port
+  {{ if $component.indexPort }}
+  - port: {{ $component.indexPort | int }}
+    targetPort: index-port
+    name: index-port
+  {{ end }}
   selector:
-    app: {{ .Values.name | quote }}
+    app: {{ $component.name | quote }}
 {{- end -}}
 
 {{/*
 Generates Service for an ACI Server
-Takes:
-- top context
-- template to merge into deployment base
+@param .root The root context
+@param .component The component values
+@param .destination Template to merge onto
 */}}
 {{- define "idol-library.aciserver.service" -}}
-{{- include "idol-library.util.merge" (append . "idol-library.aciserver.service.base") -}}
+{{- $root := get . "root" | required "missing root" -}}
+{{- $component := get . "component" | required "missing component" -}}
+{{- $_ := set . "source" "idol-library.aciserver.service.base" -}}
+{{- include "idol-library.util.merge" $_ -}}
 {{- end -}}

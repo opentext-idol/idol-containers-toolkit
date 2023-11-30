@@ -13,66 +13,73 @@
 {{/*
     Common template for a generic ACI server deployment
 */}}
+{{ $root := get . "root" | required "missing root" }}
+{{ $component := get . "component" | required "missing component" }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.name | quote }}
+  name: {{ $component.name | quote }}
   labels: {{- include "idol-library.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ .Values.name | quote }}
+      app: {{ $component.name | quote }}
   template:
     metadata:
       labels: {{- include "idol-library.labels" . | nindent 8 }}
-        app: {{ .Values.name | quote }}
+        app: {{ $component.name | quote }}
     spec:
       imagePullSecrets:
-        {{- range .Values.imagePullSecrets }}
+        {{- range $root.Values.global.imagePullSecrets }}
         - name: {{ . }}
         {{- end }}
       containers:
-      - name: {{ .Values.name | quote }}
-        image: {{ .Values.idolImageRegistry }}/{{ .Values.image }}:{{ .Values.idolVersion }}
+      - name: {{ $component.name | quote }}
+        image: {{ print (default $component.idolImage.registry (dig "global" "idolImageRegistry" "" ($root.Values | merge dict )))
+                      "/"  $component.idolImage.repo  ":" 
+                      (default $component.idolImage.version (dig "global" "idolVersion" "" ($root.Values | merge dict ))) }}
         imagePullPolicy: IfNotPresent
         livenessProbe:
           httpGet:
             path: /a=getpid
-            port: {{ .Values.aciPort | int }}
-{{- template "idol-library.standardLivenessProbe" .Values.livenessProbe }}
+            port: {{ $component.aciPort | int }}
+{{- template "idol-library.standardLivenessProbe" $component.livenessProbe }}
         ports:
-        - containerPort: {{ .Values.aciPort | int }}
+        - containerPort: {{ $component.aciPort | int }}
           name: aci-port
           protocol: TCP
-        - containerPort: {{ .Values.servicePort | int }}
+        - containerPort: {{ $component.servicePort | int }}
           name: service-port
           protocol: TCP
         volumeMounts:
         - name: config-map
           mountPath: /etc/config/idol
-        {{- range .Values.additionalVolumeMounts }}
+        {{- range $component.additionalVolumeMounts }}
         - {{ . | toYaml | nindent 10 }}
         {{- end }}
         env:
         - name: IDOL_COMPONENT_CFG
-          value: {{ printf "/etc/config/idol/%s.cfg" (trimPrefix "idol-" .Values.name) }}
+          value: {{ printf "/etc/config/idol/%s.cfg" (trimPrefix "idol-" $component.name) }}
       volumes:
       - name: config-map
         configMap:
-          name: {{ default (printf "%s-default-cfg" .Values.name) .Values.existingConfigMap }}
-      {{- range .Values.additionalVolumes }}
+          name: {{ default (printf "%s-default-cfg" $component.name) $component.existingConfigMap }}
+      {{- range $component.additionalVolumes }}
       - {{ . | toYaml | nindent 8 }}
       {{- end }}
 {{- end -}}
 
 {{/*
 Generates deployment for an ACI Server
-Takes:
-- top context
-- template to merge into deployment base
+@param .root The root context
+@param .component The component values
+@param .destination Template to merge onto
 See also "idol-library.aciserver.defaultcfg"
 */}}
 {{- define "idol-library.aciserver.deployment" -}}
-{{- include "idol-library.util.merge" (append . "idol-library.aciserver.deployment.base") -}}
+{{- $root := get . "root" | required "missing root" -}}
+{{- $component := get . "component" | required "missing component" -}}
+{{- $_ := set . "source" "idol-library.aciserver.deployment.base" -}}
+{{- include "idol-library.util.merge" $_ -}}
 {{- end -}}

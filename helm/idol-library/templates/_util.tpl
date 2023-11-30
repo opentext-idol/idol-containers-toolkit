@@ -10,16 +10,20 @@
 # END COPYRIGHT NOTICE
 {{- /*
 idol-library.util.merge will merge two YAML templates and output the result.
+See https://helm.sh/docs/chart_template_guide/function_list/#merge-mustmerge
 
-This takes an array of three values:
-- the top context
-- the template name of the overrides (destination)
-- the template name of the base (source)
+@param .root The root context
+@param .component Component values 
+@param .destination Destination template (these values take precedence)
+@param .source Source template
 
 */ -}}
 {{- define "idol-library.util.merge" -}}
-{{- $top := first . -}}
-{{- $overrides := fromYaml (include (index . 1) $top) | default (dict ) -}}
-{{- $tpl := fromYaml (include (index . 2) $top) | default (dict ) -}}
+{{- $root := get . "root" | required "missing root" -}}
+{{- $component := get . "component" | required "missing component" -}}
+{{- $dest := get . "destination" | required "destination" -}}
+{{- $src := get . "source" | required "source" -}}
+{{- $overrides := fromYaml (include $dest .) | default (dict ) -}}
+{{- $tpl := fromYaml (include $src .) | default (dict ) -}}
 {{- toYaml (merge $overrides $tpl) -}}
 {{- end -}}

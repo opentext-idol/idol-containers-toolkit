@@ -8,7 +8,10 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-{{- include "idol-library.aciserver.service" (list . "idol-view.service") -}}
+{{ include "idol-library.aciserver.service" (dict 
+    "root" .
+    "component" .Values
+    "destination" "idol-view.service") }}
 {{- define "idol-view.service" -}}
 {{/* Any View specific merges to base template go here */}}
 {{- end -}}
