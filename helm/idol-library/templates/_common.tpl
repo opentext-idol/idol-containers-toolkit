@@ -2,13 +2,18 @@
 # (c) Copyright 2023 Micro Focus or one of its affiliates.
 # END COPYRIGHT NOTICE
 
-{{/* Standard labels */}}
+{{/* Standard labels 
+@param .root The root context
+@param .component The component values
+*/}}
 {{- define "idol-library.labels" -}}
-app.kubernetes.io/name: {{ default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
-app.kubernetes.io/instance: {{ .Release.Name }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
-helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
-{{ with .Values.labels }}
+{{- $root := get . "root" | required "missing root" -}}
+{{- $component := get . "component" | required "missing component" -}}
+app.kubernetes.io/name: {{ default $root.Chart.Name $component.nameOverride | trunc 63 | trimSuffix "-" }}
+app.kubernetes.io/instance: {{ $root.Release.Name }}
+app.kubernetes.io/managed-by: {{ $root.Release.Service }}
+helm.sh/chart: {{ printf "%s-%s" $root.Chart.Name $root.Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{ with $component.labels }}
 {{- toYaml . | trim }}
 {{- end }}
 {{- end }}

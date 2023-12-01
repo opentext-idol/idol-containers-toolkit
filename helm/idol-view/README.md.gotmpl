@@ -1,0 +1,41 @@
+{{ template "chart.header" . }}
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{- $component := "View" }}
+{{- $appVersion := .AppVersion }}
+{{- $versionList := slice (splitList "." $appVersion) 0 2 }}
+
+{{- $docsLink := printf "https://www.microfocus.com/documentation/idol/IDOL_%s/%s_%s_Documentation/Help/" (join "_" $versionList ) $component (join "." $versionList) }}
+
+Provides an IDOL {{ $component }} deployment.
+
+Default configuration is to provide UniversalViewing against an IDOL NiFi instance. 
+
+Depends on connections to:
+
+- IDOL LicenseServer (`licenseServerHostname`)
+- IDOL Content/Agentstore (`queryserviceName`, `queryserviceACIPort`, `agentStoreName`, `agentStoreACIPort`)
+- IDOL NiFi (`nifiserviceName`, `nifiserviceACIPort`) 
+
+The config file can be overridden via `existingConfigMap`.
+
+This chart may be used to provide document rendering functionality. For example, 
+as part of an IDOL Find set.
+
+You may wish to deploy this chart alongside _idol-nifi_.
+
+> Full documentation for View available from {{ $docsLink }}
+
+{{ template "chart.homepageLine" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.requirementsSection" . }}
+
+{{ template "chart.valuesSection" . }}
+
+{{ template "helm-docs.versionFooter" . }}

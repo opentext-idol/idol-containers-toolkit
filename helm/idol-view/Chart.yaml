@@ -1,0 +1,19 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+apiVersion: v2
+name: idol-view
+version: "0.1.0"
+appVersion: "23.4"
+description: Adds IDOL View
+dependencies:
+- name: idol-library
+  version: "0.3.0"
+  repository: file://../idol-library

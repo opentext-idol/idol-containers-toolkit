@@ -1,0 +1,172 @@
+{
+    "$schema": "https://json-schema.org/draft-07/schema#",
+    "title": "Values",
+    "type": "object",
+    "properties": {
+        "global":{
+            "$ref": "#/$defs/global"
+        },
+        "idolImage": {
+            "$ref": "#/$defs/idolImage"
+        },
+        "licenseServerHostname": {
+            "type": "string",
+            "format": "hostname"
+        },
+        "licenseServerPort": {
+            "$ref": "#/$defs/port_number"
+        },
+        "existingConfigMap": {
+            "type": "string"
+        },
+        "agentStoreName": {
+            "type": "string",
+            "format": "hostname"
+        },
+        "agentStoreACIPort":{
+            "$ref": "#/$defs/port_number"
+        },
+        "nifiserviceName": {
+            "type": "string",
+            "format": "hostname"
+        },
+        "nifiserviceACIPort":{
+            "$ref": "#/$defs/port_number"
+        },
+        "queryserviceName": {
+            "type": "string",
+            "format": "hostname"
+        },
+        "queryserviceACIPort":{
+            "$ref": "#/$defs/port_number"
+        },
+        "ingress": {
+            "$ref": "#/$defs/ingress"
+        },
+        "name": {
+            "type": "string",
+            "minLength": 1
+        },
+        "aciPort": {
+            "$ref": "#/$defs/port_number"
+        },
+        "servicePort": {
+            "$ref": "#/$defs/port_number"
+        },
+        "livenessProbe": {
+            "$ref": "#/$defs/liveness_probe"
+        },
+        "additionalVolumes":{
+            "type": "array"
+        },
+        "additionalVolumeMounts":{
+            "type": "array"
+        }
+    },
+    "required": [
+        "global",
+        "idolImage",
+        "licenseServerHostname",
+        "licenseServerPort",
+        "ingress",
+        "nifiserviceACIPort",
+        "agentStoreName",
+        "agentStoreACIPort",
+        "queryserviceName",
+        "queryserviceACIPort",
+        "name",
+        "aciPort",
+        "servicePort",
+        "livenessProbe"
+    ],
+
+    "$defs": {
+        "port_number": {
+            "type": "string",
+            "pattern": "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$"
+        },
+        "liveness_probe": {
+            "type": "object",
+            "properties": {
+                "initialDelaySeconds": {
+                    "type": "integer"
+                },
+                "timeoutSeconds": {
+                    "type": "integer"
+                },
+                "periodSeconds": {
+                    "type": "integer"
+                },
+                "failureThreshold": {
+                    "type": "integer"
+                }
+            }
+        },
+        "ingress":{
+            "type": "object",
+            "properties":{
+                "enabled": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": ["nginx","haproxy"]
+                },
+                "className": {
+                    "type": "string"
+                },
+                "host": {
+                    "type": "string"
+                }
+            },
+            "required":[
+                "enabled",
+                "type"
+            ]
+        },
+        "idolImage":{
+            "type": "object",
+            "properties":{
+                "registry": {
+                    "type": "string",
+                    "format": "hostname"
+                },
+                "version": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "repo": {
+                    "type": "string",
+                    "minLength": 1
+                }
+            },
+            "required":[
+                "registry",
+                "version",
+                "repo"
+            ]
+        },
+        "global":{
+            "type": "object",
+            "properties":{
+                "idolImageRegistry": {
+                    "type": "string"
+                },
+                "idolVersion": {
+                    "type": "string"
+                },
+                "imagePullSecrets": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                }
+            },
+            "required":[
+                "imagePullSecrets"
+            ]
+        }
+    }
+}

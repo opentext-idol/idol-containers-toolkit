@@ -1,0 +1,90 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+
+# As per https://helm.sh/docs/topics/charts/#the-chart-file-structure
+# this values.yaml file contains the default configuration values for this chart.
+# These default values can be overridden by using the --values or --set flags on the `helm install`
+# command: see https://helm.sh/docs/helm/helm_install/
+
+global:
+  # -- Global override value for idolImage.registry
+  idolImageRegistry: ""
+  # -- Global override value for idolImage.version
+  idolVersion: ""
+  # -- Global secrets used to pull container images
+  imagePullSecrets:
+  - "dockerhub-secret"
+
+idolImage:
+  # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
+  registry: "microfocusidolserver"
+  # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
+  version: "23.4"
+  # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
+  repo: "view"
+
+# licenseServerHostname -- the hostname of the IDOL LicenseServer (or abstraction)
+licenseServerHostname: "idol-licenseserver"
+# licenseServerPort -- the ACI port of the IDOL LicenseServer (or abstraction)
+licenseServerPort: "20000"
+
+# existingConfigMap -- if specified, mounted at /etc/config/idol and expected to provide community.cfg
+existingConfigMap: ""
+
+# -- Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
+additionalVolumes: []
+
+# -- Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1)
+additionalVolumeMounts: []
+
+# -- Default configuration for [Viewing]::IdolHost
+agentStoreName: "idol-agentstore"
+# -- Default configuration for [Viewing]::IdolPort
+agentStoreACIPort: "9050"
+
+# -- Optional default configuration for [Viewing]::DistributedConnectorHost
+nifiserviceName: "idol-nifi"
+# -- Optional default configuration for [Viewing]::DistributedConnectorPort
+nifiserviceACIPort: "11000"
+# -- Default configuration for [UniversalViewing]::DocumentStoreHost
+queryserviceName: "idol-query-service"
+# -- Default configuration for [UniversalViewing]::DocumentStorePort
+queryserviceACIPort: "9060"
+
+##### INGRESS VARIABLES #####
+
+ingress:
+  # -- Create ingress resource
+  enabled: true
+
+  # -- Ingress controller type to setup for.
+  # Valid values are nginx or haproxy (used by OpenShift)
+  type: nginx
+
+  # -- Optional parameter to override the default ingress class
+  className: ""
+
+  # -- Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules).
+  # For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration)
+  host: ""
+
+##### INTERNAL VARIABLES #####
+# name -- used to name deployment, service, ingress
+name: "idol-view"
+# aciPort -- port service will serve ACI connections on
+aciPort: "9080"
+# servicePort -- port service will serve service connections on
+servicePort: "9082"
+# livenessProbe -- container livenessProbe settings
+livenessProbe:
+  initialDelaySeconds: 30
+
+
