@@ -1,0 +1,46 @@
+# BEGIN COPYRIGHT NOTICE
+# (c) Copyright 2022 Micro Focus or one of its affiliates.
+# END COPYRIGHT NOTICE
+
+{{- /*
+ nginx ingress needs path capture to achieve prefix type routing
+*/}}
+{{- $pathSuffix := "" }}
+{{- $pathType := "Prefix" }}
+{{- if eq .Values.ingressType "nginx" }}
+{{- $pathSuffix = "(.*)"}}
+{{- $pathType = "ImplementationSpecific" }}
+{{- end }}
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: idol-mmap
+  labels: {{- include "idol-library.labels" . | nindent 4 }}
+  annotations:
+{{- if eq .Values.ingressType "nginx" }}
+    nginx.ingress.kubernetes.io/proxy-body-size: {{ .Values.ingressProxyBodySize }}
+{{- else if eq .Values.ingressType "haproxy" }}
+    haproxy.router.openshift.io/proxy-body-size: {{ .Values.ingressProxyBodySize }}
+{{- end }}
+spec:
+{{- if .Values.ingressClassName }}
+  ingressClassName: {{ .Values.ingressClassName }}
+{{- end }}
+  rules:
+  - http:
+      paths:
+{{- range tuple "/idolmedia" "/media" "/vms" "/idolplayer" "/player"}}
+      - path: {{.}}
+        pathType: Prefix
+        backend:
+          service:
+            name: idol-mmap
+            port:
+              name: http
+{{- end }}
+
+{{- if .Values.ingressHost }}
+    host: {{ .Values.ingressHost }}
+{{- end }}

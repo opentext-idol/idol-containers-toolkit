@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: idol-playlistserver
+  labels: {{- include "idol-library.labels" . | nindent 4 }}
+spec:
+  serviceName: idol-playlistserver
+  replicas: 1
+  selector:
+    matchLabels:
+      app: idol-playlistserver
+  template:
+    metadata:
+      labels: {{- include "idol-library.labels" . | nindent 8 }}
+        app: idol-playlistserver
+    spec:
+      imagePullSecrets:
+        {{- range .Values.imagePullSecrets }}
+        - name: {{ . }}
+        {{- end }}
+      terminationGracePeriodSeconds: 300
+      containers:
+      - name: mediaserver
+        image: {{ .Values.idolImageRegistry }}/mediaserver-playlistserver:{{ .Values.idolVersion }}
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: static-video
+          mountPath: /mmap/data/static-video/final
+        livenessProbe:
+          httpGet:
+            path: /a=getpid
+            port: 14000
+{{- template "idol-library.standardLivenessProbe" .Values.playlistserverLivenessProbe }}
+        ports:
+        - containerPort: 24000
+          name: aci-port
+          protocol: TCP
+        - containerPort: 24001
+          name: service-port
+          protocol: TCP
+      volumes:
+      - name: static-video
+        persistentVolumeClaim:
+          claimName: static-video

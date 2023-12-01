@@ -1,0 +1,18 @@
+# BEGIN COPYRIGHT NOTICE
+# (c) Copyright 2022 Micro Focus or one of its affiliates.
+# END COPYRIGHT NOTICE
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: processed-video
+  labels: {{- include "idol-library.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/resource-policy": keep  
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: {{ .Values.processedVideoVolumeSize }}
+  storageClassName: {{ .Values.processedVideoStorageClass }}
+
