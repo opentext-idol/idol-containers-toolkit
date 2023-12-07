@@ -88,11 +88,11 @@ nifi:
   # resources - https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits
   resources:
     requests:
-      cpu: 400m
+      cpu: 2000m
       # nifi.resources.requests.memoryMi - memory requested in mebibytes (value used in jvm memory calculation)
-      memoryMi: 3072
+      memoryMi: 4096
     limits:
-      cpu: 400m
+      cpu: 4000m
       # nifi.resources.limits.memoryMi - memory limit in mebibytes (value used in jvm memory calculation)
       memoryMi: 8192
   
