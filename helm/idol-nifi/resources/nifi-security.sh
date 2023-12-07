@@ -31,7 +31,7 @@ TRUSTSTORE_TYPE=jks
 
 if [[ ! -f "${NIFI_HOME}/keytool/keystore.p12" ]]
 then
-    echo "Creating keystore"
+    echo [$(date)] "Creating keystore"
     keytool -genkey -noprompt -alias nifi-keystore \
     -dname "CN=${POD_NAME},OU=${ORGANISATION_UNIT},O=${ORGANISATION},L=${CITY},S=${STATE},C=${COUNTRY_CODE}" \
     -keystore ${NIFI_HOME}/keytool/keystore.p12 \
@@ -44,7 +44,7 @@ fi
 
 if [[ ! -f "${NIFI_HOME}/keytool/truststore.jks" ]]
 then
-    echo "Creating truststore"
+    echo [$(date)] "Creating truststore"
     keytool -genkey -noprompt -alias nifi-truststore \
     -dname "CN=${POD_NAME},OU=${ORGANISATION_UNIT},O=${ORGANISATION},L=${CITY},S=${STATE},C=${COUNTRY_CODE}" \
     -keystore ${NIFI_HOME}/keytool/truststore.jks \

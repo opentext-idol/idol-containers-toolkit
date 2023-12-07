@@ -18,7 +18,7 @@ logfile=/opt/nifi/nifi-current/logs/post-start.log
     grep nifi-0. /etc/hostname
     notprimary=$?
     if [ 1 == ${notprimary} ]; then
-        echo Skipping post-start checks as non-primary instance
+        echo [$(date)] Skipping post-start checks as non-primary instance
         exit 0
     fi
 
