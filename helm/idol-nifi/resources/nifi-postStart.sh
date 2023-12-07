@@ -15,7 +15,8 @@ logfile=/opt/nifi/nifi-current/logs/post-start.log
 (
     /scripts/security.sh
 
-    grep nifi-0. /etc/hostname
+    statefulsetname=${POD_NAME%-*}
+    grep "${statefulsetname}-0." /etc/hostname
     notprimary=$?
     if [ 1 == ${notprimary} ]; then
         echo [$(date)] Skipping post-start checks as non-primary instance
