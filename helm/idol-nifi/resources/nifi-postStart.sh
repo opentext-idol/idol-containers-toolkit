@@ -12,8 +12,19 @@
 # END COPYRIGHT NOTICE
 
 logfile=/opt/nifi/nifi-current/logs/post-start.log
-/scripts/security.sh | tee -a ${logfile}
-/scripts/wait.sh | tee -a ${logfile}
-/scripts/connect-registry.sh | tee -a ${logfile}
-/scripts/import-flow.sh | tee -a ${logfile}
-echo [$(date)] postStart completed | tee -a ${logfile}
+(
+    /scripts/security.sh
+
+    grep nifi-0. /etc/hostname
+    notprimary=$?
+    if [ 1 == ${notprimary} ]; then
+        echo Skipping post-start checks as non-primary instance
+        exit 0
+    fi
+
+    /scripts/wait.sh
+    /scripts/connect-registry.sh
+    /scripts/import-flow.sh
+
+    echo [$(date)] postStart completed
+) | tee -a ${logfile}

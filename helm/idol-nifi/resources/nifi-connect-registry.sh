@@ -12,12 +12,6 @@
 # END COPYRIGHT NOTICE
 
 set -x -o allexport
-grep nifi-0. /etc/hostname
-notprimary=$?
-if [ 1 == ${notprimary} ]; then
-    echo Skipping registry check as non-primary instance
-    exit 0
-fi
 for i in ${NIFI_REGISTRY_HOSTS//,/ }
 do
     echo [$(date)] Checking/registering registry ${i} 

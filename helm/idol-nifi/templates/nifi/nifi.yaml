@@ -101,13 +101,13 @@ spec:
           - name: NIFI_UI_BANNER_TEXT
             value: $(POD_NAME) # Use pod name for banner
           - name: NIFI_WEB_HTTP_HOST
-            value: $(POD_IP) # Use pod ip as web host
+            value: $(POD_NAME).nifi.$(POD_NAMESPACE).svc.cluster.local # Use pod fqdn as web host
           - name: NIFI_CLUSTER_NODE_ADDRESS
-            value: $(POD_IP) # Use pod ip as node address
+            value: $(POD_NAME).nifi.$(POD_NAMESPACE).svc.cluster.local # Use pod fqdn as node address
           - name: NIFI_REMOTE_INPUT_SOCKET_HOST
-            value: $(POD_IP) # Use pod ip as input socket address
+            value: $(POD_NAME).nifi.$(POD_NAMESPACE).svc.cluster.local # Use pod fqdn as input socket address
           - name: NIFI_REMOTE_INPUT_HOST
-            value: $(POD_IP) # Use pod ip as input host address
+            value: $(POD_NAME).nifi.$(POD_NAMESPACE).svc.cluster.local # Use pod fqdn as input host address
           - name: HOSTNAME
             value: $(POD_IP) # Use pod ip as hostname
           - name: NODE_IDENTITY
