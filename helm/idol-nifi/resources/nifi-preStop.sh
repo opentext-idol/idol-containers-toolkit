@@ -11,7 +11,7 @@
 #
 # END COPYRIGHT NOTICE
 
-host=nifi-0.${NIFI_WEB_HTTP_HOST#*.}
+host=`curl -s http://$NIFI_WEB_HTTP_HOST:$NIFI_WEB_HTTP_PORT/nifi-api/controller/cluster | jq -r ".cluster.nodes[] | select(any(.roles[]; . == \"Primary Node\")) | .address "`
 port=$NIFI_WEB_HTTP_PORT
 cluster_node_id=`curl -s http://$NIFI_WEB_HTTP_HOST:$NIFI_WEB_HTTP_PORT/nifi-api/controller/cluster | jq -r ".cluster.nodes[] | select(.address==\"$NIFI_WEB_HTTP_HOST\") | .nodeId "`
 
