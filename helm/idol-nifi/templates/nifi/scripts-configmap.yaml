@@ -17,6 +17,8 @@ metadata:
 data:
   security.sh: |
 {{ tpl (.Files.Get "resources/nifi-security.sh") . | indent 4 }}
+  nifiProperties.sh: |
+{{ tpl (.Files.Get "resources/nifi-properties.sh") . | indent 4 }}
   wait.sh: |
 {{ tpl (.Files.Get "resources/nifi-wait.sh") . | indent 4 }}
   connect-registry.sh: |
