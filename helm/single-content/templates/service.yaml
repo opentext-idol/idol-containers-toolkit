@@ -47,10 +47,10 @@ spec:
   - port: {{  $component.indexserviceACIPort | int }}
     targetPort: aci-port
     name: aci-port
-    - port: {{ $component.servicePort | int }}
+  - port: {{ $component.servicePort | int }}
     targetPort: service-port
     name: service-port
-- port: {{ $component.indexPort | int }}
+  - port: {{ $component.indexPort | int }}
     targetPort: index-port
     name: index-port
 {{- end }}
