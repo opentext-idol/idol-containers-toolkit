@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 
 # BEGIN COPYRIGHT NOTICE
 # Copyright 2023 Open Text.
@@ -11,22 +11,7 @@
 #
 # END COPYRIGHT NOTICE
 
-logfile=/opt/nifi/nifi-current/logs/post-start.log
-(
-    /scripts/nifiProperties.sh
-    /scripts/security.sh
+scripts_dir="/opt/nifi/scripts"
+[ -f "${scripts_dir}/common.sh" ] && . "${scripts_dir}/common.sh"
 
-    statefulsetname=${POD_NAME%-*}
-    grep "${statefulsetname}-0." /etc/hostname
-    notprimary=$?
-    if [ 1 == ${notprimary} ]; then
-        echo [$(date)] Skipping post-start checks as non-primary instance
-        exit 0
-    fi
-
-    /scripts/wait.sh
-    /scripts/connect-registry.sh
-    /scripts/import-flow.sh
-
-    echo [$(date)] postStart completed
-) | tee -a ${logfile}
+prop_replace "nifi.content.repository.archive.enabled" "${NIFI_CONTENT_REPOSITORY_ARCHIVE_ENABLED:-false}"
