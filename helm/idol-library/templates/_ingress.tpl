@@ -24,7 +24,7 @@ metadata:
 {{- if eq $ingress.type "nginx" }}
     nginx.ingress.kubernetes.io/rewrite-target: /$1
   {{- if $ingress.proxyBodySize }}
-    nginx.ingress.kubernetes.io/proxy-body-size: {{ $ingress.ProxyBodySize }}
+    nginx.ingress.kubernetes.io/proxy-body-size: {{ $ingress.proxyBodySize }}
   {{- end -}}
 {{- else if eq $ingress.type "haproxy" }}
     haproxy.router.openshift.io/rewrite-target: / 
