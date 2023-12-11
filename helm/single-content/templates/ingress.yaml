@@ -1,46 +1,38 @@
 # BEGIN COPYRIGHT NOTICE
-# (c) Copyright 2022 Micro Focus or one of its affiliates.
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
 # END COPYRIGHT NOTICE
-
-{{- /*
- nginx ingress needs path capture to achieve prefix type routing
-*/}}
-{{- $pathSuffix := "" }}
-{{- if eq .Values.ingressType "nginx" }}
-{{- $pathSuffix = "(.*)"}}
-{{- end }}
-
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: {{ .Values.idolingressName }}
-  labels: {{- include "singlecontent.labels" . | nindent 4 }}
-  annotations:
-{{- if eq .Values.ingressType "nginx" }}
-    nginx.ingress.kubernetes.io/rewrite-target: /$1
-    nginx.ingress.kubernetes.io/proxy-body-size: {{ .Values.ingressProxyBodySize }}
-{{- else if eq .Values.ingressType "haproxy" }}
-    haproxy.router.openshift.io/rewrite-target: / 
-    haproxy.router.openshift.io/proxy-body-size: {{ .Values.ingressProxyBodySize }}
-{{- end }}
+{{ include "idol-library.ingress" (dict 
+    "root" .
+    "component" .Values
+    "ingress" .Values.ingress
+    "destination" "single-content.ingress")  -}}
+{{- define "single-content.ingress" -}}
+{{/* Any View specific merges to base template go here */}}
+{{- $root := get . "root" | required "missing root" -}}
+{{- $component := get . "component" | required "missing component" -}}
 spec:
   rules:
   - http:
       paths:
-      - path: {{ print "/content/" $pathSuffix }}
-        pathType: Prefix
+      - path: {{ include "idol-library.ingress.path" (dict "ingress" $component.ingress "path" "/content/") }}
+        pathType: {{ include "idol-library.ingress.pathtype" $component }}
         backend:
           service:
-            name: {{ .Values.contentName }}
+            name:  {{ $component.name | quote }}
             port:
-              name: {{ (index .Values.contentPorts 0).name }}
-      - path: {{ print "/index/" $pathSuffix }}
-        pathType: Prefix
+              name: aci-port
+      - path: {{ include "idol-library.ingress.path" (dict "ingress" $component.ingress "path" "/index/") }}
+        pathType: {{ include "idol-library.ingress.pathtype" $component }}
         backend:
           service:
-            name: {{ .Values.contentName }}
-            port: 
-              name: {{ (index .Values.contentPorts 1).name }}
-{{- if .Values.ingressHost }}
-    host: {{ .Values.ingressHost }}
-{{- end }}
+            name:  {{ $component.name | quote }}
+            port:
+              name: index-port
+{{- end -}}

@@ -1,0 +1,64 @@
+# BEGIN COPYRIGHT NOTICE
+# (c) Copyright 2022 Micro Focus or one of its affiliates.
+# END COPYRIGHT NOTICE
+
+# Use this service for generic IDOL query port functionality
+# Could point to e.g. a DAH or Content instance
+# Note that non-ACI port numbers must in practice match those
+# configured in the underlying IDOL server, as clients will
+# read these from the action=GetStatus response.
+{{ include "idol-library.aciserver.service" (dict 
+    "root" .
+    "component" .Values
+    "destination" "idol-content.queryservice") }}
+{{- define "idol-content.queryservice" -}}
+{{/* Any specific merges to base template go here */}}
+{{- $root := get . "root" | required "missing root" -}}
+{{- $component := get . "component" | required "missing component" -}}
+metadata:
+  name: {{ $component.queryserviceName }}
+spec:
+  ports:
+  - port: {{  $component.queryserviceACIPort | int }}
+    targetPort: aci-port
+    name: aci-port
+  - port: {{ $component.servicePort | int }}
+    targetPort: service-port
+    name: service-port
+{{- end }}
+---
+# Use this service for generic IDOL index port functionality
+# Could point to e.g. a DIH or Content instance
+# Note that non-ACI port numbers must in practice match those
+# configured in the underlying IDOL server, as clients will
+# read these from the action=GetStatus response.
+{{ include "idol-library.aciserver.service" (dict 
+    "root" .
+    "component" .Values
+    "destination" "idol-content.indexservice") }}
+{{- define "idol-content.indexservice" -}}
+{{/* Any specific merges to base template go here */}}
+{{- $root := get . "root" | required "missing root" -}}
+{{- $component := get . "component" | required "missing component" -}}
+metadata:
+  name: {{ $component.indexserviceName }}
+spec:
+  ports:
+  - port: {{  $component.indexserviceACIPort | int }}
+    targetPort: aci-port
+    name: aci-port
+  - port: {{ $component.servicePort | int }}
+    targetPort: service-port
+    name: service-port
+  - port: {{ $component.indexPort | int }}
+    targetPort: index-port
+    name: index-port
+{{- end }}
+---
+{{ include "idol-library.aciserver.service" (dict 
+    "root" .
+    "component" .Values
+    "destination" "idol-content.service") }}
+{{- define "idol-content.service" -}}
+{{/* Any specific merges to base template go here */}}
+{{- end }}

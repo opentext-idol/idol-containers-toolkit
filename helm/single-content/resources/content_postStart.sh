@@ -5,7 +5,7 @@
 function getHostname() {
   host=$(cat /etc/hostname)
   domain=$(cat /etc/resolv.conf | grep search | awk '{print $2}')
-  hostname=${host}.{{ .Values.contentName }}.${domain}
+  hostname=${host}.{{ .Values.name }}.${domain}
 }
 
 function waitForAci() {
@@ -22,7 +22,7 @@ function waitForAci() {
 logfile=/opt/idol/content/index/poststart.log
 getHostname
 
-IDOL_CONTENT_ACI_PORT=${IDOL_CONTENT_SERVICE_PORT_ACI_PORT:-{{ (index .Values.contentPorts 0).container | int }}}
+IDOL_CONTENT_ACI_PORT=${IDOL_CONTENT_SERVICE_PORT_ACI_PORT:-{{ .Values.aciPort | int }}}
 echo "[$(date)] hostname: ${hostname}" | tee -a $logfile
 
 # Final check that this Content is available
