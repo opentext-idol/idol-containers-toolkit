@@ -36,9 +36,7 @@ spec:
         {{- end }}
       containers:
       - name: {{ $component.name | quote }}
-        image: {{ print (default $component.idolImage.registry (dig "global" "idolImageRegistry" "" ($root.Values | merge dict )))
-                      "/"  $component.idolImage.repo  ":" 
-                      (default $component.idolImage.version (dig "global" "idolVersion" "" ($root.Values | merge dict ))) }}
+        image: {{ include "idol-library.idolImage" (dict "root" $root "idolImage" $component.idolImage) }}
         imagePullPolicy: IfNotPresent
         livenessProbe:
           httpGet:
@@ -61,6 +59,10 @@ spec:
         env:
         - name: IDOL_COMPONENT_CFG
           value: {{ printf "/etc/config/idol/%s.cfg" (trimPrefix "idol-" $component.name) }}
+        {{- if $component.envConfigMap }}
+        envFrom:
+        - configMapRef: {{ $component.envConfigMap | quote }}
+        {{ end }}
       volumes:
       - name: config-map
         configMap:
