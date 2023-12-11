@@ -58,6 +58,9 @@ additionalVolumes: []
 # -- Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1)
 additionalVolumeMounts: []
 
+# -- Optional configMap name holding extra environnment variables for content container
+envConfigMap: ""
+
 ##### NETWORKING CONFIGURATION #####
 # This section contains parameters to configure various network-related
 # properties in this chart.

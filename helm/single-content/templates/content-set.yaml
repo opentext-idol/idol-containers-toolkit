@@ -24,9 +24,7 @@ spec:
       terminationGracePeriodSeconds: 300
       containers:
       - name: {{ .Values.name }}
-        image: {{ print (default .Values.idolImage.registry (dig "global" "idolImageRegistry" "" (.Values | merge dict )))
-                      "/"  .Values.idolImage.repo  ":" 
-                      (default .Values.idolImage.version (dig "global" "idolVersion" "" (.Values | merge dict ))) }}
+        image: {{ include "idol-library.idolImage" (dict "root" . "idolImage" .Values.idolImage) }}
         imagePullPolicy: IfNotPresent
         command:
         - "/bin/bash"
@@ -48,6 +46,10 @@ spec:
           value: {{ .Values.aciPort | quote }}
         - name: IDOL_COMMAND_PARAMS
           value: "-idolcluster"
+        {{- if .Values.envConfigMap }}
+        envFrom:
+        - configMapRef: {{ .Values.envConfigMap | quote }}
+        {{ end }}
         lifecycle:
           postStart:
             exec:

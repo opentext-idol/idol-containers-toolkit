@@ -59,6 +59,9 @@
         },
         "additionalVolumeMounts":{
             "type": "array"
+        },
+        "envConfigMap":{
+            "type": "string"
         }
     },
     "required": [

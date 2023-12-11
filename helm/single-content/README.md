@@ -15,7 +15,7 @@ of these endpoints to exist in the cluster.
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.3.1 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.4.0 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | 0.1.0 |
 
 ## Values
@@ -27,6 +27,7 @@ of these endpoints to exist in the cluster.
 | additionalVolumes | list | `[]` | Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes) |
 | contentStorageClass | string | `"idol-content-storage-class"` | Name of the storage class used to provision a PersistentVolume for each Content instance. The associated PVCs are named index-{name}-{pod number} |
 | contentVolumeSize | string | `"16Gi"` | Size of the PersistentVolumeClaim that is created for each Content instance. The Kubernetes cluster will need to provide enough PersistentVolumes to satisify the claims made for the desired number of Content instances. The size chosen here provides a hard limit on the size of the Content index in each Content instance. |
+| envConfigMap | string | `""` | Optional configMap name holding extra environnment variables for content container |
 | existingConfigMap | string | `""` | if specified, mounted at /etc/config/idol and expected to provide content.cfg |
 | global.idolImageRegistry | string | `""` | Global override value for idolImage.registry |
 | global.idolVersion | string | `""` | Global override value for idolImage.version |
