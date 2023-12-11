@@ -32,3 +32,16 @@ helm.sh/chart: {{ printf "%s-%s" $root.Chart.Name $root.Chart.Version | replace 
 {{- define "idol-library.namespace" -}}
 {{- default .Release.Namespace .Values.namespaceOverride -}}
 {{- end -}}
+
+
+{{/* Combines values to form container image name
+@param .root The root context (for accessing global overrides)
+@param .idolImage The idolImage values
+*/}}
+{{- define "idol-library.idolImage" -}}
+{{- $root := get . "root" | required "missing root" -}}
+{{- $idolImage := get . "idolImage" | required "missing idolImage" -}}
+{{ print (default $idolImage.registry (dig "global" "idolImageRegistry" "" ($root.Values | merge dict )))
+                      "/"  $idolImage.repo  ":" 
+                      (default $idolImage.version (dig "global" "idolVersion" "" ($root.Values | merge dict ))) }}
+{{- end -}}
