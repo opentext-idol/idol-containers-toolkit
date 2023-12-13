@@ -15,7 +15,7 @@ from prometheus_client.core import GaugeMetricFamily, REGISTRY
 from threading import Lock, Thread
 from typing import Tuple, Optional, Iterator
 
-no_proxies = {'http': None, 'https': None }
+no_proxies = {'http': '', 'https': '' }
 
 DIHStatus = collections.namedtuple('DIHStatus', ['full_ratio', 'children'])
 DIHChild = collections.namedtuple('DIHChild', ['group','host','port','status'])
