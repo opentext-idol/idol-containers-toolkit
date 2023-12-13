@@ -109,7 +109,7 @@ spec:
 {{- if and (.Values.autoscaling.enabled) (not .Values.setupMirrored) }}
       - name: prometheus-exporter
         image: python:3.11
-{{- if .Values.httpProxy }}
+{{- if (coalesce .Values.global.http_proxy .Values.global.https_proxy) }}
         envFrom:
           - configMapRef:
               name: http-proxy-config

@@ -6,7 +6,7 @@ entries:
   distributed-idol:
   - apiVersion: v2
     appVersion: 23.4.0
-    created: "2023-12-13T10:58:42.388750227Z"
+    created: "2023-12-13T13:55:41.70173244Z"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
@@ -20,7 +20,7 @@ entries:
       repository: https://kubernetes-sigs.github.io/metrics-server
       version: 3.8.2
     description: A configurable distributed IDOL setup
-    digest: a4ea29543b66a30f2c8735662bc0fbabd6ee1eddc01f36e20277f79d53ce8b76
+    digest: fb55719265ca562b21203494fe4031ffd75bb445ccd479b6ac7307b3351d89c3
     name: distributed-idol
     urls:
     - release/distributed-idol-0.7.0.tgz
@@ -338,4 +338,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2023-12-13T10:58:42.383780685Z"
+generated: "2023-12-13T13:55:41.696826283Z"

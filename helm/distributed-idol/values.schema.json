@@ -162,6 +162,15 @@
                     "items": {
                         "$ref": "#/$defs/required_string"
                     }
+                },
+                "http_proxy":{
+                    "type": "string"
+                },
+                "https_proxy":{
+                    "type": "string"
+                },
+                "no_proxy":{
+                    "type": "string"
                 }
             },
             "required":[

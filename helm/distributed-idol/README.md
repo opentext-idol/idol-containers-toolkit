@@ -58,8 +58,7 @@ Some important values are described in more detail below, and a [full reference]
 There are some values that are required but do not have defaults. The user of this Helm chart must provide these values via either the
 `--set`/`--set-file`/`--set-string` or `--values` flags in helm commands:
 
-- `licenseServerIp`: the IP address of the LicenseServer containing the license key required to run the IDOL components in this chart.
-- `licenseServerPort`: the port of the LicenseServer containing the license key required to run the IDOL components in this chart.
+- `idol-licenseserver.licenseServerIp`: the IP address of the LicenseServer containing the license key required to run the IDOL components in this chart.
 
 ### Required Secrets
 
@@ -78,15 +77,15 @@ kubectl create secret docker-registry dockerhub-secret
 In practice (at present), access to the IDOL images on dockerhub is restricted to the user `microfocusidolreadonly`, so this will be the
 value of `${DOCKERHUB_USER}` in the example.
 
-If a different name is required for this Kubernetes secret, override the `imagePullSecrets` list value.
+If a different name is required for this Kubernetes secret, override the `global.imagePullSecrets` list value.
 
 ### Optional Values
 
 There are some values that are optional or sometimes overriden:
 
-- `httpProxy`: the URL of a HTTP proxy that the installation will have to use to access the external internet. If not set, no http proxying
+- `global.http_proxy`/`global.https_proxy`: the URL of a proxy that the installation will have to use to access the external internet. If not set, no http proxying
   is configured.
-- If a private repository is specified for pulling the IDOL images (i.e. by overriding `idolImageRegistry`) then `imagePullSecrets` will also
+- If a private repository is specified for pulling the IDOL images (e.g. by overriding `global.idolImageRegistry`) then `global.imagePullSecrets` will also
   require the name of a Kubernetes secret holding the credentials for pulling from this private repository.
 
 ## Cluster requirements
@@ -97,8 +96,8 @@ The cluster must provide an [IngressController](https://kubernetes.io/docs/conce
 a [minikube](https://minikube.sigs.k8s.io/docs/) cluster, you can [enable an NGINX controller](https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/)
 and see the exposed address using `kubectl get ingress`.
 
-By default the chart is setup ingress for `nginx`. If you are deploying on OpenShift/OKD then you should set `ingressType=haproxy` and specify
-your `ingressHost`.
+By default the chart is setup ingress for `nginx`. If you are deploying on OpenShift/OKD then you should set `ingress.type=haproxy` and specify
+your `ingress.host`.
 
 ### Storage Classes and Persistent Volumes
 
@@ -107,11 +106,11 @@ This system uses [Storage Classes](https://kubernetes.io/docs/concepts/storage/s
 
 > Note: uninstalling does not delete the PersistentVolumeClaims. If you redeploy the helm chart, it reuses any existing PV or PVCs.
 
-| [values.yaml](values.yaml)               | default value              | purpose
-| ---                       | ---                        | --- |
-| contentStorageClass       | idol-content-storage-class | Content component index and configuration |
-| dihStorageClass           | idol-dih-storage-class     | DIH component data and configuration |
-| backupArchiveStorageClass | idol-backup-archive-sc     | mirror-mode Content backups. See [backupArchiveStorageClass](#backuparchivestorageclass) |
+| [values.yaml](values.yaml)        | default value              | purpose
+| ---                               | ---                        | --- |
+| content.contentStorageClass       | idol-content-storage-class | Content component index and configuration |
+| dih.dihStorageClass               | idol-dih-storage-class     | DIH component data and configuration |
+| content.backupArchiveStorageClass | idol-backup-archive-sc     | mirror-mode Content backups. See [backupArchiveStorageClass](#backuparchivestorageclass) |
 
 #### backupArchiveStorageClass
 
@@ -134,8 +133,8 @@ Then you can install the chart by using 'helm install'. For example, from this d
 
 ```sh
 helm install -f values.yaml
-    --set licenseServerIp=<license server ip>
-    --set-string licenseServerPort=<license server port> idolrelease .
+    --set-string idol-licenseserver.licenseServerIp=<license server ip>
+    idolrelease .
 ```
 
 ## Endpoints
@@ -146,7 +145,7 @@ After you have deployed the helm chart, you can access the following endpoints t
 - `http://<ingress address>/dih/` - The DIH ACI port
 - `http://<ingress address>/index/` - The DIH index port
  
-You can optionally expose individual Content engine ACI ports at `http://<ingress address>/content-N/` - see `exposedContents` in
+You can optionally expose individual Content engine ACI ports at `http://<ingress address>/content-N/` - see `content.ingress.exposedContents` in
 [values.yaml](values.yaml)
 
 ## Upgrading IDOL version
@@ -156,9 +155,9 @@ deployed. For example:
 
 ```sh
 helm upgrade --reuse-values
-    --set-string idolVersion=<new_version>
-    --set-string initialContentEngineCount=<current engine count>
-    --set-string autoscalingMinReplicas=<current engine count>
+    --set-string content.idolImage.version=<new_version>
+    --set-string content.initialEngineCount=<current engine count>
+    --set-string autoscaling.minReplicas=<current engine count>
     <release name> <dir containing helm chart>
 ```
 
@@ -253,9 +252,12 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | dih.ingress.type | string | `"nginx"` | Ingress controller type to setup for. Valid values are nginx or haproxy (used by OpenShift) |
 | dih.name | string | `"idol-dih"` | used to name statefulset, service, ingress |
 | dih.servicePort | string | `"9072"` | port service will serve service connections on |
+| global.http_proxy | string | `""` | Any required http_proxy settings relating to external network access |
+| global.https_proxy | string | `""` | Any required https_proxy settings relating to external network access |
 | global.idolImageRegistry | string | `""` | Global override value for idolImage.registry |
 | global.idolVersion | string | `""` | Global override value for idolImage.version |
 | global.imagePullSecrets | list | `["dockerhub-secret"]` | Global secrets used to pull container images |
+| global.no_proxy | string | `""` | Any required no_proxy settings relating to external network access |
 | idol-licenseserver.enabled | bool | `true` | create a cluster service proxying to a LicenseServer instance |
 | idol-licenseserver.licenseServerIp | string | `"this must be set to a valid IP address"` | IP address of LicenseServer instance |
 | indexserviceName | string | `"idol-index-service"` | internal parameter to specify the index service name. |

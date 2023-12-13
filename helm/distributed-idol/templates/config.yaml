@@ -1,13 +1,21 @@
 # BEGIN COPYRIGHT NOTICE
 # (c) Copyright 2022 Micro Focus or one of its affiliates.
 # END COPYRIGHT NOTICE
-{{- if .Values.httpProxy }}
+{{- if (coalesce .Values.global.http_proxy .Values.global.https_proxy) }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: http-proxy-config
   labels: {{- include "distributedidol.labels" . | nindent 4 }}
 data:
-  https_proxy: {{ .Values.httpProxy }}
+{{- if .Values.global.http_proxy }}
+  http_proxy: {{ .Values.global.http_proxy }}
+{{- end -}}
+{{- if .Values.global.https_proxy }}
+  https_proxy: {{ .Values.global.https_proxy }}
+{{- end -}}
+{{- if .Values.global.no_proxy }}
+  no_proxy: {{ .Values.global.no_proxy }}
+{{- end -}}
 {{- end }}
 

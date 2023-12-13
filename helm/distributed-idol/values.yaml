@@ -66,6 +66,12 @@ global:
   # -- Global secrets used to pull container images
   imagePullSecrets:
   - "dockerhub-secret"
+  # -- Any required http_proxy settings relating to external network access
+  http_proxy: ""
+  # -- Any required https_proxy settings relating to external network access
+  https_proxy: ""
+  # -- Any required no_proxy settings relating to external network access
+  no_proxy: ""
 
 content:
   idolImage:
