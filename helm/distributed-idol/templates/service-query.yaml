@@ -22,7 +22,7 @@ spec:
     targetPort: aci-port
     name: aci-port
   - port: {{ .Values.dah.servicePort | int }}
-    targetPort: aci-port
-    name: aci-port
+    targetPort: service-port
+    name: service-port
   selector:
     app: {{ .Values.dah.name }}
