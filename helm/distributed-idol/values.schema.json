@@ -325,9 +325,6 @@
                 "enabled":{
                     "type":"boolean"
                 },
-                "name":{
-                    "$ref": "#/$defs/required_string"
-                },
                 "minReplicas":{
                     "$ref": "#/$defs/non_zero_number"
                 },
@@ -344,7 +341,6 @@
             },
             "required":[
                 "enabled",
-                "name",
                 "minReplicas",
                 "maxReplicas",
                 "maxDocumentCount",

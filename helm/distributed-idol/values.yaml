@@ -53,8 +53,6 @@ autoscaling:
   # Used in mirror mode
   targetAverageCpuUse: 500m
 
-  # @ignore -- Internal name used for Content autoscaler
-  name: "content-autoscaler"
 
 #############################################
 

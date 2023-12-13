@@ -86,8 +86,10 @@ spec:
         - name: IDOL_COMPONENT_CFG
           # Override default in newer IDOL containers
           value: "/dih/dih.cfg"
+        {{- if $component.envConfigMap }}
         envFrom:
         - configMapRef: {{ $component.envConfigMap | quote }}
+        {{ end }}
         livenessProbe:
           httpGet:
             path: /a=getpid

@@ -5,7 +5,7 @@
 kind: HorizontalPodAutoscaler
 apiVersion: autoscaling/v2
 metadata:
-  name: {{ .Values.autoscaling.name }}
+  name: {{ .Values.content.name }}
   labels: {{- include "distributedidol.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:

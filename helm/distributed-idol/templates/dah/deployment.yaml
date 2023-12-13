@@ -33,8 +33,10 @@ spec:
         - name: IDOL_CONTENT_SERVICE_PORT_ACI_PORT
           # This doesn't seem to be set by our headless service
           value: {{ .Values.content.aciPort | quote }}
+        {{- if $component.envConfigMap }}
         envFrom:
         - configMapRef: {{ $component.envConfigMap | quote }}
+        {{ end }}
         command:
         - sh
         - "-c"

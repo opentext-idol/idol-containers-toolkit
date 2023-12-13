@@ -155,7 +155,7 @@ deployed. For example:
 
 ```sh
 helm upgrade --reuse-values
-    --set-string content.idolImage.version=<new_version>
+    --set-string global.idolVersion=<new_version>
     --set-string content.initialEngineCount=<current engine count>
     --set-string autoscaling.minReplicas=<current engine count>
     <release name> <dir containing helm chart>
