@@ -12,6 +12,6 @@
 
 {{/* Standard labels */}}
 {{- define "distributedidol.labels" }}
-{{- include "idol-library.labels" . }}
+{{- include "idol-library.labels" (dict "root" . "component" .Values ) }}
 {{- end }}
 

@@ -1,0 +1,43 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+
+# Headless service for statefulset
+{{ include "idol-library.aciserver.service" (dict 
+    "root" .
+    "component" .Values.content
+    "destination" "distributedidol.content.service") }}
+{{- define "distributedidol.content.service" -}}
+spec:
+  clusterIP: None
+{{- end -}}
+{{- range $i := untilStep 0 ( .Values.content.ingress.exposedContents | int ) 1 }}
+---
+# Pod-specific service for ingress exposure
+{{ include "idol-library.aciserver.service" (dict 
+    "root" $
+    "component" $.Values.content
+    "destination" "distributedidol.content.service.n"
+    "serviceIndex" $i
+    ) }}
+{{- end }}
+{{- define "distributedidol.content.service.n" -}}
+{{- $root := get . "root" | required "missing root" -}}
+{{- $component := get . "component" | required "missing component" -}}
+{{- $serviceIndex := get . "serviceIndex" | required "serviceIndex" -}}
+metadata:
+  name: {{ $component.name }}-{{ $serviceIndex }}
+  labels:
+    app: {{ $component.name }}-{{ $serviceIndex }}
+spec:
+  clusterIP: None
+  selector:
+    statefulset.kubernetes.io/pod-name: {{ $component.name }}-{{ $serviceIndex }}
+{{- end }}

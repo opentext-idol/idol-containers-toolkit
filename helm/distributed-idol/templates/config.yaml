@@ -1,26 +1,7 @@
 # BEGIN COPYRIGHT NOTICE
 # (c) Copyright 2022 Micro Focus or one of its affiliates.
 # END COPYRIGHT NOTICE
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: idol-config
-  labels: {{- include "distributedidol.labels" . | nindent 4 }}
-data:
-  content.cfg: |
-{{ tpl (.Files.Get "resources/content.cfg") . | indent 4 }}
-
-  content_primary.cfg: |
-{{ tpl (.Files.Get "resources/content_primary.cfg") . | indent 4 }}
-
-  dih.cfg: |
-{{ tpl (.Files.Get "resources/dih.cfg") . | indent 4 }}
-
-  dah.cfg: |
-{{ tpl (.Files.Get "resources/dah.cfg") . | indent 4 }}
-
 {{- if .Values.httpProxy }}
----
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -29,21 +10,4 @@ metadata:
 data:
   https_proxy: {{ .Values.httpProxy }}
 {{- end }}
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: prometheus-config
-  labels: {{- include "distributedidol.labels" . | nindent 4 }}
-data:
-  prometheus.yml: |
-    global:
-      scrape_interval: 15s
-      evaluation_interval: 15s
-    
-    rule_files:
 
-    scrape_configs:
-      - job_name: dih
-        static_configs:
-        - targets: [ '{{ .Values.dihName }}:9118' ]

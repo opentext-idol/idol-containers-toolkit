@@ -19,8 +19,8 @@ then
   exit 0;
 fi
 
-name={{ .Values.contentName }}
-# find the highest id of any detectable pod from {{ .Values.contentName }} statefulset
+name={{ .Values.content.name }}
+# find the highest id of any detectable pod from {{ .Values.content.name }} statefulset
 pods=$(nslookup $name | grep -o -E $name-[0-9]+ | sort -t - -k 4 -g)
 maxid=0
 if [ -z "$pods" ]
@@ -38,8 +38,8 @@ else
   done
   echo "[$(date)] Max detected pod id: $maxid" | tee -a $logfile
 fi
-# this is the max id according to .Values.initialContentEngineCount
-setupmaxid={{ (sub (.Values.initialContentEngineCount | int ) 1 | int) }}
+# this is the max id according to .Values.content.initialEngineCount
+setupmaxid={{ (sub (.Values.content.initialEngineCount | int ) 1 | int) }}
 
 if [ $setupmaxid -gt $maxid ] 
 then
@@ -47,12 +47,12 @@ then
 fi
 
 
-port=${IDOL_CONTENT_SERVICE_PORT_ACI_PORT:-{{ (index .Values.contentPorts 0).container | int }}}
+port=${IDOL_CONTENT_SERVICE_PORT_ACI_PORT:-{{ .Values.content.aciPort | int }}}
 distribution_idol_servers="Number=$((maxid+1))\n"
 domain=$(cat /etc/resolv.conf | grep search | awk '{print $2}')
 for i in `seq 0 $maxid`
 do
-  h={{ .Values.contentName }}-$i.{{ .Values.contentName }}.$domain
+  h={{ .Values.content.name }}-$i.{{ .Values.content.name }}.$domain
   echo "[$(date)] Adding $h:$port to config" | tee -a $logfile
   distribution_idol_servers="${distribution_idol_servers}\n[IDOLServer$i]\nHost=$h\nPort=$port\n"
 done

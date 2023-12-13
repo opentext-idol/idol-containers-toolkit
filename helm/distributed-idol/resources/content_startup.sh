@@ -4,14 +4,14 @@
 function getHostname() {
   host=$(cat /etc/hostname)
   domain=$(cat /etc/resolv.conf | grep search | awk '{print $2}')
-  hostname=${host}.{{ .Values.contentName }}.${domain}
+  hostname=${host}.{{ .Values.content.name }}.${domain}
 }
 
 function getIsPrimary() {
   is_primary=0
 {{- if .Values.setupMirrored }}
   getHostname
-  serviceName="{{ .Values.contentName }}-0."
+  serviceName="{{ .Values.content.name }}-0."
   if [[ ${hostname::${#serviceName}} == ${serviceName} ]]
   then
     is_primary=1

@@ -1,41 +1,41 @@
 # BEGIN COPYRIGHT NOTICE
 # (c) Copyright 2022 Micro Focus or one of its affiliates.
 # END COPYRIGHT NOTICE
-{{- if and (.Values.autoscalingEnabled) (not .Values.setupMirrored) }}
+{{- if and (.Values.autoscaling.enabled) (not .Values.setupMirrored) }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.prometheusService }}
+  name: {{ .Values.prometheus.name }}
   labels: {{- include "distributedidol.labels" . | nindent 4 }}
 spec:
   ports:
-  - port: {{ (index .Values.prometheusPorts 0).service | int }}
-    targetPort: {{ (index .Values.prometheusPorts 0).name }}
-    name: {{ (index .Values.prometheusPorts 0).name }}
+  - port: {{ .Values.prometheus.port | int }}
+    targetPort: prometheus-port
+    name: prometheus-port
   selector:
-    app: {{ .Values.prometheusDeployment }}
+    app: {{ .Values.prometheus.name }}
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.prometheusDeployment }}
+  name: {{ .Values.prometheus.name }}
   labels: {{- include "distributedidol.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ .Values.prometheusDeployment }}
+      app: {{ .Values.prometheus.name }}
   template:
     metadata:
       labels: {{- include "distributedidol.labels" . | nindent 8 }}
-        app: {{ .Values.prometheusDeployment }}
+        app: {{ .Values.prometheus.name }}
     spec:
       imagePullSecrets:
-        {{- range .Values.imagePullSecrets }}
+        {{- range .Values.global.imagePullSecrets }}
         - name: {{ . }}
         {{- end }}
       containers:
-      - name: {{ .Values.prometheusName }}
+      - name: {{ .Values.prometheus.name }}
         image: prom/prometheus:v2.14.0
         imagePullPolicy: IfNotPresent
         volumeMounts:
@@ -44,8 +44,8 @@ spec:
         - name: prometheus-data
           mountPath: /prometheus
         ports:
-        - containerPort: {{ (index .Values.prometheusPorts 0).container | int }}
-          name: {{ (index .Values.prometheusPorts 0).name }}
+        - containerPort: {{ .Values.prometheus.port | int }}
+          name: prometheus-port
           protocol: TCP
         args:
         - '--config.file=/etc/prometheus/prometheus.yml'

@@ -1,81 +1,29 @@
 # BEGIN COPYRIGHT NOTICE
-# (c) Copyright 2022 Micro Focus or one of its affiliates.
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
 # END COPYRIGHT NOTICE
-{{- if and (.Values.autoscalingEnabled) (not .Values.setupMirrored) }}
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: dih-prometheus-exporter-python
-  labels: {{- include "distributedidol.labels" . | nindent 4 }}
-data:
-  dih_prometheus_exporter.py: |
-{{ tpl (.Files.Get "resources/dih_prometheus_exporter.py") . | indent 4 }}
-  requirements.txt: |
-    requests==2.22.0
-    prometheus_client==0.7.1
----
-{{- end }}
-apiVersion: v1
-kind: Service
-metadata:
-  # Use this service for generic IDOL index port functionality
-  # Could point to e.g. a DIH or Content instance
-  name: {{ .Values.indexserviceName }}
-  labels: {{- include "distributedidol.labels" . | nindent 4 }}
-spec:
-  ports:
-  - port: {{ (index .Values.dihPorts 0).service | int }}
-    targetPort: {{ (index .Values.dihPorts 0).name }}
-    name: {{ (index .Values.dihPorts 0).name }}
-  - port: {{ (index .Values.dihPorts 1).service | int }}
-    targetPort: {{ (index .Values.dihPorts 1).name }}
-    name: {{ (index .Values.dihPorts 1).name }}
-  - port: {{ (index .Values.dihPorts 2).service | int }}
-    targetPort: {{ (index .Values.dihPorts 2).name }}
-    name: {{ (index .Values.dihPorts 2).name }}
-  selector:
-    app: {{ .Values.dihDeployment }}
----
-apiVersion: v1
-kind: Service
-metadata:
-  # Use this service for DIH-specific functionality, e.g. enginemanagement
-  # Also expose the metrics port of the prometheus-exporter container
-  name: {{ .Values.dihName }}
-  labels: {{- include "distributedidol.labels" . | nindent 4 }}
-    app: {{ .Values.dihName }}
-spec:
-  ports:
-  - port: {{ (index .Values.dihPorts 0).service | int }}
-    targetPort: {{ (index .Values.dihPorts 0).name }}
-    name: {{ (index .Values.dihPorts 0).name }}
-  - port: {{ (index .Values.dihPorts 1).service | int }}
-    targetPort: {{ (index .Values.dihPorts 1).name }}
-    name: {{ (index .Values.dihPorts 1).name }}
-  - port: {{ (index .Values.dihPorts 2).service | int }}
-    targetPort: {{ (index .Values.dihPorts 2).name }}
-    name: {{ (index .Values.dihPorts 2).name }}
-  - port: {{ .Values.dihPrometheusPort | int }}
-    targetPort: {{ .Values.dihPrometheusPortName }}
-    name: {{ .Values.dihPrometheusPortName }}
-  selector:
-    app: {{ .Values.dihDeployment }}
----
+{{ $component := .Values.dih }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ .Values.dihDeployment }}
+  name: {{ $component.name }}
   labels: {{- include "distributedidol.labels" . | nindent 4 }}
 spec:
-  serviceName: {{ .Values.dihName | quote }}
+  serviceName: {{ $component.name | quote }}
   replicas: 1
   selector:
     matchLabels:
-      app: {{ .Values.dihDeployment }}
+      app: {{ $component.name }}
   template:
     metadata:
       labels: {{- include "distributedidol.labels" . | nindent 8 }}
-        app: {{ .Values.dihDeployment }}
+        app: {{ $component.name }}
     spec:
       setHostnameAsFQDN: true
       initContainers:
@@ -86,7 +34,7 @@ spec:
         env:
         - name: IDOL_CONTENT_SERVICE_PORT_ACI_PORT
           # This doesn't seem to be set by our headless service
-          value: {{ (index .Values.contentPorts 0).container | quote }}
+          value: {{ .Values.content.aciPort | quote }}
         command:
         - sh
         - "-c"
@@ -98,12 +46,12 @@ spec:
         - name: dih-persistent-storage
           mountPath: /mnt/store/dih
       imagePullSecrets:
-        {{- range .Values.imagePullSecrets }}
+        {{- range .Values.global.imagePullSecrets }}
         - name: {{ . }}
         {{- end }}
       containers:
-      - name: {{ .Values.dihName }}
-        image: {{ .Values.idolImageRegistry }}/{{ .Values.dihImage }}:{{ .Values.idolVersion }}
+      - name: {{ $component.name }}
+        image: {{ include "idol-library.idolImage" (dict "root" . "idolImage" $component.idolImage )}}
         imagePullPolicy: IfNotPresent
         command: ["/bin/sh"]
         args: 
@@ -131,29 +79,34 @@ spec:
         volumeMounts:
         - name: dih-persistent-storage
           mountPath: /opt/idol/dih/data
+        {{- range $component.additionalVolumeMounts }}
+        - {{ . | toYaml | nindent 10 }}
+        {{- end }}
         env:
         - name: IDOL_COMPONENT_CFG
           # Override default in newer IDOL containers
           value: "/dih/dih.cfg"
+        envFrom:
+        - configMapRef: {{ $component.envConfigMap | quote }}
         livenessProbe:
           httpGet:
-            path: {{ .Values.livenessProbePath }}
-            port: {{ (index .Values.dihPorts 0).container | int }}
-{{- template "distributedidol.deployment.standardLivenessProbe" }}
+            path: /a=getpid
+            port: {{ $component.aciPort | int }}
+{{- template "idol-library.standardLivenessProbe" $component.livenessProbe }}
         ports:
-        - containerPort: {{ (index .Values.dihPorts 0).container | int }}
-          name: {{ (index .Values.dihPorts 0).name }}
+        - containerPort: {{ $component.aciPort | int }}
+          name: aci-port
           protocol: TCP
-        - containerPort: {{ (index .Values.dihPorts 1).container | int }}
-          name: {{ (index .Values.dihPorts 1).name }}
+        - containerPort: {{ $component.servicePort | int }}
+          name: service-port
           protocol: TCP
-        - containerPort: {{ (index .Values.dihPorts 2).container | int }}
-          name: {{ (index .Values.dihPorts 2).name }}
+        - containerPort: {{ $component.indexPort | int }}
+          name: index-port
           protocol: TCP
 {{- /*
  Exporter monitors child fullness - unused in mirrored setup 
 */}}
-{{- if and (.Values.autoscalingEnabled) (not .Values.setupMirrored) }}
+{{- if and (.Values.autoscaling.enabled) (not .Values.setupMirrored) }}
       - name: prometheus-exporter
         image: python:3.11
 {{- if .Values.httpProxy }}
@@ -180,15 +133,15 @@ spec:
         - name: python-local
           mountPath: /.local
         ports:
-        - containerPort: {{ .Values.dihPrometheusPort | int }}
-          name: {{ .Values.dihPrometheusPortName }}
+        - containerPort: {{ $component.prometheusPort| int }}
+          name: metrics-port
           protocol: TCP
 {{- end }}
       volumes:
       - name: config-map
         configMap:
-          name: idol-config
-{{- if and (.Values.autoscalingEnabled) (not .Values.setupMirrored) }}
+          name: {{ default (printf "%s-default-cfg" $component.name) $component.existingConfigMap }}
+{{- if and (.Values.autoscaling.enabled) (not .Values.setupMirrored) }}
       - name: dih-prometheus-exporter-python
         configMap:
           name: dih-prometheus-exporter-python
@@ -197,13 +150,16 @@ spec:
       - name: python-local  # for pip downloads
         emptyDir: {}
 {{- end }}
+      {{- range $component.additionalVolumes }}
+      - {{ . | toYaml | nindent 8 }}
+      {{- end }}
   volumeClaimTemplates:
   - metadata:
       name: dih-persistent-storage
       labels: {{- include "distributedidol.labels" . | nindent 8 }}
     spec:
       accessModes: [ "ReadWriteOnce" ]
-      storageClassName: {{ .Values.dihStorageClass }}
+      storageClassName: {{ $component.dihStorageClass }}
       resources:
         requests:
           storage: 1Gi

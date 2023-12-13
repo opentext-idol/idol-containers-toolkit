@@ -11,7 +11,7 @@
 # This section contains parameters that are most likely to be overridden for
 # the basic choices and constraints around how this chart will be used.
 
-# setupMirrored is a boolean parameter - when `true` this will configure the 
+# -- When `true` this will configure the 
 # DAH and DIH in mirror-mode, meaning the Contents will all be mirrors of each
 # other. When `false`, the DAH and DIH will be configured in non-mirror mode,
 # meaning that documents will be distributed between the content engines.
@@ -21,247 +21,347 @@
 # and https://www.microfocus.com/documentation/idol/IDOL_12_12/DIH_12.12_Documentation/Help/#Configuration/Server/MirrorMode.htm?TocPath=Configuration%2520Parameters%257CServer%257C_____38
 setupMirrored: false
 
-# contentVolumeSize is the size of the PersistentVolumeClaim that is created
-# for each Content instance. The Kubernetes cluster will need to provide
-# enough PersistentVolumes to satisify the claims made for the desired number
-# of Content instances. The size chosen here provides a hard limit on the size
-# of the Content index in each Content instance.
-contentVolumeSize: 16Gi
-
-# contentStorageClass is the name of the storage class used to provision a PersistentVolume
-# for each Content instance.
-# The associated PVCs are named index-<contentName>-<pod number>
-contentStorageClass: "idol-content-storage-class"
-
-# dihStorageClass is the name of the storage class used to provision the persistent volume for the
-# dih configuration and data
-# The associated PVC is named dih-persistent-storage-<dihDeployment>-0
-dihStorageClass: "idol-dih-storage-class"
-
-# backupArchiveStorageClass is the name of the storage class used to provision the persistent volume for the 
-# the mirror-mode Content engine backups and index command archive. It is available to all Content engines.
-# It must support the ReadWriteMany AccessMode: https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes
-backupArchiveStorageClass: "idol-backup-archive-sc"
-
-# initialContentEngineCount is the number of Content engines created on startup.
-# After startup the Content engine autoscaling kicks in and controls the number of Content engines. 
-# The minimum valid value of initialContentEngineCount is 1.
-# For an upgrade, you must specify the number of Content engines that were present.
-initialContentEngineCount: "1"
 #############################################
-
-
-##### IMAGE CONFIGURATION #####
-# Parameters to specify the IDOL images pulled for this chart are
-# configured here
-
-# idolImageRegistry is the registry from which the IDOL images being run
-# in this chart are pulled from. Override this if IDOL images are to be
-# pulled from a different private registry.
-idolImageRegistry: "microfocusidolserver"
-
-# idolVersion is the image tag that will be used when pulling images, and
-# corresponds to the IDOL version of the components being used.
-idolVersion: "23.4"
-
-# imagePullSecrets is a list of names of Kubernetes secrets containing the
-# credentials for pulling images from repositories. Most likely requires
-# a secret for Dockerhub credentials and a secret per private repository used.
-imagePullSecrets:
-  - "dockerhub-secret"
-################################
 
 ##### CONTENT AUTOSCALING CONFIGURATION #####
 # This section contains parameters to configure autoscaling of the
 # Content instances.
 
-# autoscalingEnabled controls automatic scaling of the number of Content instances.
-# See maxDocumentCount for non-mirror mode or autoscalingTargetAverageCpuUse for mirror
-# With autoscalingEnabled=false, you can scale using:
-#  kubectl scale statefuleset <contentName> --replicas=<N>
-# In a non-mirrored setup, you should redistribute the data before scaling down
-# - see the DREREDISTRIBUTE documentation
-autoscalingEnabled: true
+autoscaling:
+  # -- Enable automatic scaling of the number of Content instances.
+  # See maxDocumentCount for non-mirror mode or autoscalingTargetAverageCpuUse for mirror
+  # With autoscalingEnabled=false, you can scale using:
+  #  kubectl scale statefuleset <contentName> --replicas=<N>
+  # In a non-mirrored setup, you should redistribute the data before scaling down
+  # - see the DREREDISTRIBUTE documentation
+  enabled: true
 
-# autoscalingMinReplicas is the minimum number of Content instances.
-# Ignored in non-mirror-mode
-autoscalingMinReplicas: "2"
+  # -- Minimum number of Content instances.
+  # Ignored in non-mirror-mode
+  minReplicas: "2"
 
-# autoscalingMaxReplicas is the maximum number of Content instances.
-autoscalingMaxReplicas: "6"
+  # -- Maximum number of Content instances.
+  maxReplicas: "6"
 
-# maxDocumentCount corresponds to [Server]::MaxDocumentCount Content configuration parameter
-# Used in non-mirror mode
-maxDocumentCount: "5000"
+  # -- corresponds to [Server]::MaxDocumentCount Content configuration parameter
+  # Used in non-mirror mode
+  maxDocumentCount: "5000"
 
-# autoscalingTargetAverageCpuUse is the target CPU use of the Content
-# instances. See metrics.containerResource.target.averageValue in
-# https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/horizontal-pod-autoscaler-v2beta2/#HorizontalPodAutoscalerSpec
-# Used in mirror mode
-autoscalingTargetAverageCpuUse: 500m
+  # -- Target CPU use of the Content
+  # instances. See metrics.containerResource.target.averageValue in
+  # https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/horizontal-pod-autoscaler-v2beta2/#HorizontalPodAutoscalerSpec
+  # Used in mirror mode
+  targetAverageCpuUse: 500m
+
+  # @ignore -- Internal name used for Content autoscaler
+  name: "content-autoscaler"
+
 #############################################
 
-##### PRIMARY CONTENT CONFIGURATION #####
-# The "primary" Content is the one configured to make backups and index command archives to the backup archive volume.
-# The `contentPrimary*` parameters specified below configure this behaviour.
+global:
+  # -- Global override value for idolImage.registry
+  idolImageRegistry: ""
+  # -- Global override value for idolImage.version
+  idolVersion: ""
+  # -- Global secrets used to pull container images
+  imagePullSecrets:
+  - "dockerhub-secret"
 
-# contentPrimaryBackupInterval corresponds to the [Schedule]::BackupInterval Content configuration parameter.
-# https://www.microfocus.com/documentation/idol/IDOL_12_12/Content_12.12_Documentation/Help/#Configuration/Schedule/BackupInterval.htm%3FTocPath%3DConfiguration%2520Parameters%7CSchedule%7C_____7
-contentPrimaryBackupInterval: "0"
+content:
+  idolImage:
+    # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
+    registry: "microfocusidolserver"
+    # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
+    version: "23.4"
+    # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
+    repo: "content"
 
-# contentPrimaryBackupTime corresponds to the [Schedule]::BackupTime Content configuration parameter.
-# https://www.microfocus.com/documentation/idol/IDOL_12_12/Content_12.12_Documentation/Help/#Configuration/Schedule/BackupTime.htm%3FTocPath%3DConfiguration%2520Parameters%7CSchedule%7C_____11
-contentPrimaryBackupTime: "02:00"
-#########################################
 
-##### NETWORKING CONFIGURATION #####
-# This section contains parameters to configure various network-related
-# properties in this chart.
+  # -- Size of the PersistentVolumeClaim that is created
+  # for each Content instance. The Kubernetes cluster will need to provide
+  # enough PersistentVolumes to satisify the claims made for the desired number
+  # of Content instances. The size chosen here provides a hard limit on the size
+  # of the Content index in each Content instance.
+  contentVolumeSize: 16Gi
 
-# ingressProxyBodySize is the maximum allowed size of the client request body, defining
-# the maximum size of requests that can be made to IDOL components within the installation, e.g.
-# the amount of data sent in DREADDDATA index commands.
-# The value should be an nginx "size" value.
-# See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the
-# corresponding nginx configuration parameter.
-ingressProxyBodySize: 2048m
+  # -- Name of the storage class used to provision a PersistentVolume
+  # for each Content instance.
+  # The associated PVCs are named index-{name}-{pod number}
+  contentStorageClass: "idol-content-storage-class"
 
-# ingressType controls ingress setup for that controller type.
-# Valid values are nginx or haproxy (used by OpenShift)
-ingressType: nginx
+  # -- Name of the storage class used to provision the persistent volume for
+  # the mirror-mode Content engine backups and index command archive. It is available to all Content engines.
+  # It must support the ReadWriteMany AccessMode: https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes
+  backupArchiveStorageClass: "idol-backup-archive-sc"
 
-# ingressHost is an optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules)
-# For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration)
-ingressHost: ""
+  # -- corresponds to the [Schedule]::BackupInterval Content configuration parameter.
+  # https://www.microfocus.com/documentation/idol/IDOL_12_12/Content_12.12_Documentation/Help/#Configuration/Schedule/BackupInterval.htm%3FTocPath%3DConfiguration%2520Parameters%7CSchedule%7C_____7
+  primaryBackupInterval: "0"
 
-#####################################
+  # -- corresponds to the [Schedule]::BackupTime Content configuration parameter.
+  # https://www.microfocus.com/documentation/idol/IDOL_12_12/Content_12.12_Documentation/Help/#Configuration/Schedule/BackupTime.htm%3FTocPath%3DConfiguration%2520Parameters%7CSchedule%7C_____11
+  primaryBackupTime: "02:00"
 
+  # -- Number of Content engines created on startup.
+  # After startup the Content engine autoscaling kicks in and controls the number of Content engines. 
+  # The minimum valid value of initialContentEngineCount is 1.
+  # For an upgrade, you must specify the number of Content engines that were present.
+  initialEngineCount: "1"
+
+  #############################################
+
+  # -- port service will serve ACI connections on
+  aciPort: "9100"
+  # -- port service will serve service connections on
+  servicePort: "9102"
+  # -- port service will serve index connections on
+  indexPort: "9101"
+
+  # -- Optional configMap mounted at /etc/config/idol and expected to provide content.cfg and content_primary.cfg
+  existingConfigMap: ""
+
+  # -- Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
+  additionalVolumes: []
+
+  # -- Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1)
+  additionalVolumeMounts: []
+
+  # -- Optional configMap name holding extra environnment variables for content container
+  envConfigMap: ""
+
+  ##### NETWORKING CONFIGURATION #####
+  # This section contains parameters to configure various network-related
+  # properties in this chart.
+
+  ingress:
+    # -- Create ingress resource
+    enabled: true
+
+    # -- Ingress controller type to setup for.
+    # Valid values are nginx or haproxy (used by OpenShift)
+    type: nginx
+
+    # -- Optional parameter to override the default ingress class
+    className: ""
+
+    # -- Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules).
+    # For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration)
+    host: ""
+
+    # -- Maximum allowed size of the client request body, defining
+    # the maximum size of requests that can be made to IDOL components within the installation, e.g.
+    # the amount of data sent in DREADDDATA index commands.
+    # The value should be an nginx "size" value.
+    # See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the
+    # corresponding nginx configuration parameter.
+    proxyBodySize: 2048m
+    
+    # -- Allows ingress access to individual content engines. Set to max number of engines to expose
+    exposedContents: 0
+
+  #####################################
+
+  ##### INTERNAL VARIABLES #####
+  # Values specified below this point in the file should not need to be overriden.
+  # They are generally here in values.yaml so that DRY principles and a consistent
+  # scheme for specifying these values in the templates can be followed.
+
+  # -- used to name statefulset, service, ingress
+  name: "idol-content"
+
+dah:
+  idolImage:
+    # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
+    registry: "microfocusidolserver"
+    # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
+    version: "23.4"
+    # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
+    repo: "dah"
+
+  # -- port service will serve ACI connections on
+  aciPort: "9060"
+  # -- port service will serve service connections on
+  servicePort: "9062"
+
+  # -- Optional configMap expected to provide dah.cfg
+  existingConfigMap: ""
+
+  # -- Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
+  additionalVolumes: []
+
+  # -- Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1)
+  additionalVolumeMounts: []
+
+  # -- Optional configMap name holding extra environnment variables for dah container
+  envConfigMap: ""
+
+  ##### NETWORKING CONFIGURATION #####
+  # This section contains parameters to configure various network-related
+  # properties in this chart.
+
+  ingress:
+    # -- Create ingress resource
+    enabled: true
+
+    # -- Ingress controller type to setup for.
+    # Valid values are nginx or haproxy (used by OpenShift)
+    type: nginx
+
+    # -- Optional parameter to override the default ingress class
+    className: ""
+
+    # -- Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules).
+    # For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration)
+    host: ""
+
+    # -- Maximum allowed size of the client request body, defining
+    # the maximum size of requests that can be made to IDOL components within the installation, e.g.
+    # the amount of data sent in DREADDDATA index commands.
+    # The value should be an nginx "size" value.
+    # See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the
+    # corresponding nginx configuration parameter.
+    proxyBodySize: 2048m
+    
+
+  #####################################
+
+  ##### INTERNAL VARIABLES #####
+  # Values specified below this point in the file should not need to be overriden.
+  # They are generally here in values.yaml so that DRY principles and a consistent
+  # scheme for specifying these values in the templates can be followed.
+
+  # -- used to name statefulset, service, ingress
+  name: "idol-dah"
+
+dih:
+  idolImage:
+    # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
+    registry: "microfocusidolserver"
+    # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
+    version: "23.4"
+    # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
+    repo: "dih"
+
+  # -- port service will serve ACI connections on
+  aciPort: "9070"
+  # -- port service will serve service connections on
+  servicePort: "9072"
+  # -- port service will serve index connections on
+  indexPort: "9071"
+
+  # -- Optional configMap expected to provide dih.cfg
+  existingConfigMap: ""
+
+  # -- Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
+  additionalVolumes: []
+
+  # -- Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1)
+  additionalVolumeMounts: []
+
+  # -- Optional configMap name holding extra environnment variables for dah container
+  envConfigMap: ""
+
+  # -- Name of the storage class used to provision the persistent volume for the
+  # dih configuration and data
+  # The associated PVC is named dih-persistent-storage-<name>-0
+  dihStorageClass: "idol-dih-storage-class"
+
+  ##### NETWORKING CONFIGURATION #####
+  # This section contains parameters to configure various network-related
+  # properties in this chart.
+
+  ingress:
+    # -- Create ingress resource
+    enabled: true
+
+    # -- Ingress controller type to setup for.
+    # Valid values are nginx or haproxy (used by OpenShift)
+    type: nginx
+
+    # -- Optional parameter to override the default ingress class
+    className: ""
+
+    # -- Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules).
+    # For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration)
+    host: ""
+
+    # -- Maximum allowed size of the client request body, defining
+    # the maximum size of requests that can be made to IDOL components within the installation, e.g.
+    # the amount of data sent in DREADDDATA index commands.
+    # The value should be an nginx "size" value.
+    # See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the
+    # corresponding nginx configuration parameter.
+    proxyBodySize: 2048m
+    
+
+  #####################################
+
+  ##### INTERNAL VARIABLES #####
+  # Values specified below this point in the file should not need to be overriden.
+  # They are generally here in values.yaml so that DRY principles and a consistent
+  # scheme for specifying these values in the templates can be followed.
+
+  # -- used to name statefulset, service, ingress
+  name: "idol-dih"
+
+  # @ignore
+  prometheusPort: "9118"
+
+# @ignore
+custommetrics:
+  # internal parameter specifying the name of the custom metrics service.
+  name: "custom-metrics-apiserver"
+  # internal port numbers
+  servicePort: "443"
+  containerPort: "6443"
+
+# @ignore
+prometheus:
+  # Used to name prometheus related objects
+  name: "prometheus"
+  port: "9090"
+  ingress:
+    # -- Create ingress resource
+    enabled: true
+
+    # -- Ingress controller type to setup for.
+    # Valid values are nginx or haproxy (used by OpenShift)
+    type: nginx
+
+    # -- Optional parameter to override the default ingress class
+    className: ""
+
+    # -- Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules).
+    # For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration)
+    host: ""
+
+    # -- Maximum allowed size of the client request body, defining
+    # the maximum size of requests that can be made to IDOL components within the installation, e.g.
+    # the amount of data sent in DREADDDATA index commands.
+    # The value should be an nginx "size" value.
+    # See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the
+    # corresponding nginx configuration parameter.
+    proxyBodySize: 2048m
 
 ##### INTERNAL VARIABLES #####
 # Values specified below this point in the file should not need to be overriden.
 # They are generally here in values.yaml so that DRY principles and a consistent
 # scheme for specifying these values in the templates can be followed.
 
-# licenseServerHostname maps to [License] LicenseServerHost in the IDOL cfg files
+# -- maps to [License] LicenseServerHost in the IDOL cfg files
 # Should point to a resolvable IDOL LicenseServer (or Kubernetes service abstraction - see the idol-licenseserver chart)
 licenseServerHostname: "idol-licenseserver"
-# licenseServerPort is the ACI port of the LicenseServer instance
+# -- ACI port of the LicenseServer instance
 licenseServerPort: "20000"
 
-# livenessProbePath is an internal parameter to specify the IDOL path used
-# as part of liveness checks.
-livenessProbePath: "/a=getpid"
-# queryserviceName is an internal parameter to specify the query service name.
+# -- internal parameter to specify the query service name.
 queryserviceName: "idol-query-service"
-# indexserviceName is an internal parameter to specify the index service name.
+# -- internal parameter to specify the index service name.
 indexserviceName: "idol-index-service"
-# idolingressName is an internal parameter to specify the IDOL ingress name.
-idolingressName: "idol-ingress"
-# prometheusingressName is an internal parameter to specify the Prometheus ingress name.
-prometheusingressName: "prometheus-ingress"
-# autoscalingName is an internal parameter to specify the Content autoscaler name.
-autoscalingName: "child-content-autoscaler"
-
-# These `x-content-port<n>` internal parameters are for DRY purposes.
-x-content-port0: &content-port0 "9100"
-x-content-port1: &content-port1 "9101"
-x-content-port2: &content-port2 "9102"
-# contentName is an internal parameter to specify the name of the various Content objects in the charts.
-contentName: "idol-child-content"
-# contentDeployment is an internal parameter to specify the name of the Content deployment.
-contentDeployment: "idol-content-deployment"
-# contentImage is an internal parameter to specify the name of the Content image pulled for the Content containers.
-contentImage: "content"
-# contentPorts is an internal list of ports for Content.
-# They have a name - the name of the port, and the service/container specification of that port.
-contentPorts:
-  - name: "aci-port"
-    service: *content-port0
-    container: *content-port0
-  - name: "index-port"
-    service: *content-port1
-    container: *content-port1
-  - name: "service-port"
-    service: *content-port2
-    container: *content-port2
-
-# These `x-dah-port<n>` internal parameters are for DRY purposes.
-x-dah-port0: &dah-port0 "9060"
-x-dah-port1: &dah-port1 "9062"
-# dahName is an internal parameter specifying the name used in various Kubernetes objects relating to the DAH in this chart.
-dahName: "idol-dah"
-# dahDeployment is an internal parameter specifying the name of the DAH deployment.
-dahDeployment: "idol-dah-deployment"
-# dahImage is an internal parameter specifying the name of the DAH image pulled for the DAH containers.
-dahImage: "dah"
-# dahPorts is an internal list of ports for DAH.
-# They have a name - the name of the port, and the service/container/host specification of that port.
-dahPorts:
-  - name: "aci-port"
-    service: *dah-port0
-    container: *dah-port0
-  - name: "service-port"
-    service: *dah-port1
-    container: *dah-port1
-
-# These `x-dih-port<n>` internal parameters are for DRY purposes.
-x-dih-port0: &dih-port0 "9070"
-x-dih-port1: &dih-port1 "9071"
-x-dih-port2: &dih-port2 "9072"
-# dihName is an internal parameter specifying the name used in various Kubernetes objects relating to the DIH in this chart.
-dihName: "idol-dih"
-# dihDeployment is an internal parameter specifying the name of the DIH deployment.
-dihDeployment: "idol-dih-deployment"
-# dihImage is an internal parameter specifying the name of the DIH image pulled for the DAH containers.
-dihImage: "dih"
-# dihPorts is an internal list of ports for DIH.
-# They have a name - the name of the port, and the service/container/host specification of that port.
-dihPorts:
-  - name: "aci-port"
-    service: *dih-port0
-    container: *dih-port0
-  - name: "index-port"
-    service: *dih-port1
-    container: *dih-port1
-  - name: "service-port"
-    service: *dih-port2
-    container: *dih-port2
-# dihPrometheusPort is an internal parameter specifying the port for accessing the DIH's Prometheus service.
-dihPrometheusPort: "9118"
-# dihPrometheusPortName is an internal parameter for specifying a name for the DIH's Prometheus service's port.
-dihPrometheusPortName: "metrics-port"
-
-# x-prometheus-port0 is an internal parameter for DRY purposes.
-x-prometheus-port0: &prometheus-port0 "9090"
-# prometheusName is an internal parameter specifying the name of the Prometheus container.
-prometheusName: "prometheus"
-# prometheusDeployment is an internal parameter specifying the name of the Prometheus deployment.
-prometheusDeployment: "prometheus-deployment"
-# prometheusService is an internal parameter specifying the name of the Prometheus service.
-prometheusService: "prometheus-service"
-# prometheusPorts is a list of ports pertaining to Prometheus.
-# They each have a name and specify the container and host ports.
-prometheusPorts:
-  - name: "prometheus-port"
-    service: *prometheus-port0
-    container: *prometheus-port0
-
-# These `x-custommetrics-port<n>` are internal parameters for DRY purposes.
-x-custommetrics-port0: &custommetrics-port0 "443"
-x-custommetrics-port1: &custommetrics-port1 "6443"
-# custommetricsService is an internal parameter specifying the name of the custom metrics service.
-custommetricsService: "custom-metrics-apiserver"
-# custommetricsPorts is a list of ports pertaining to the custom metrics service.
-# They each specify the service and host ports.
-custommetricsPorts:
-  - service: *custommetrics-port0
-    container: *custommetrics-port1
-
-# exposedContents Allows ingress access to individual content engines. Set to max number of engines to expose
-exposedContents: 0
 
 # subchart values
 idol-licenseserver:
-# create a cluster service proxying to a LicenseServer instance
+  # -- create a cluster service proxying to a LicenseServer instance
   enabled: true
+  # -- IP address of LicenseServer instance
   licenseServerIp: this must be set to a valid IP address

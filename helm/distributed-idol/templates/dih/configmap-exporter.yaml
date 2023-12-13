@@ -1,0 +1,24 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+{{- if and (.Values.autoscaling.enabled) (not .Values.setupMirrored) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dih-prometheus-exporter-python
+  labels: {{- include "distributedidol.labels" . | nindent 4 }}
+data:
+  dih_prometheus_exporter.py: |
+{{ tpl (.Files.Get "resources/dih_prometheus_exporter.py") . | indent 4 }}
+  requirements.txt: |
+    requests==2.22.0
+    prometheus_client==0.7.1
+---
+{{- end }}
