@@ -9,11 +9,7 @@ metadata:
   labels: {{- include "distributedidol.labels" . | nindent 4 }}
 spec:
   serviceName: {{ $component.name | quote }}
-{{- if .Values.setupMirrored }}
   replicas: {{ int .Values.content.initialEngineCount }}
-{{- else }}
-  replicas: {{ int .Values.content.initialEngineCount }}
-{{- end }}
   selector:
     matchLabels:
       app: {{ $component.name }}
