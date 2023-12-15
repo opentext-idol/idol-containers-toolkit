@@ -1,18 +1,18 @@
 # BEGIN COPYRIGHT NOTICE
 # (c) Copyright 2022 Micro Focus or one of its affiliates.
 # END COPYRIGHT NOTICE
-{{- if .Values.autoscalingEnabled }}
+{{- if .Values.autoscaling.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.custommetricsService }}
+  name: {{ .Values.custommetrics.name }}
   labels: {{- include "distributedidol.labels" . | nindent 4 }}
 spec:
   ports:
-  - port: {{ (index .Values.custommetricsPorts 0).service | int }}
-    targetPort: {{ (index .Values.custommetricsPorts 0).container | int }}
+  - port: {{ .Values.custommetrics.servicePort | int }}
+    targetPort: {{ .Values.custommetrics.containerPort | int }}
   selector:
-    app: {{ .Values.custommetricsService }}
+    app: {{ .Values.custommetrics.name }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -25,7 +25,7 @@ roleRef:
   name: system:auth-delegator
 subjects:
 - kind: ServiceAccount
-  name: {{ .Values.custommetricsService }}
+  name: {{ .Values.custommetrics.name }}
   namespace: {{ include "idol-library.namespace" . | quote }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -40,44 +40,44 @@ roleRef:
   name: extension-apiserver-authentication-reader
 subjects:
 - kind: ServiceAccount
-  name: {{ .Values.custommetricsService }}
+  name: {{ .Values.custommetrics.name }}
   namespace: {{ include "idol-library.namespace" . | quote }}
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels: {{- include "distributedidol.labels" . | nindent 4 }}
-    app: {{ .Values.custommetricsService }}
-  name: {{ .Values.custommetricsService }}
+    app: {{ .Values.custommetrics.name }}
+  name: {{ .Values.custommetrics.name }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ .Values.custommetricsService }}
+      app: {{ .Values.custommetrics.name }}
   template:
     metadata:
       labels: {{- include "distributedidol.labels" . | nindent 8 }}
-        app: {{ .Values.custommetricsService }}
-      name: {{ .Values.custommetricsService }}
+        app: {{ .Values.custommetrics.name }}
+      name: {{ .Values.custommetrics.name }}
     spec:
-      serviceAccountName: {{ .Values.custommetricsService }}
+      serviceAccountName: {{ .Values.custommetrics.name }}
       imagePullSecrets:
-        {{- range .Values.imagePullSecrets }}
+        {{- range .Values.global.imagePullSecrets }}
         - name: {{ . }}
         {{- end }}
       containers:
-      - name: {{ .Values.custommetricsService }}
+      - name: {{ .Values.custommetrics.name }}
         image: registry.k8s.io/prometheus-adapter/prometheus-adapter:v0.11.1
         args:
         - /adapter
-        - --secure-port={{ (index .Values.custommetricsPorts 0).container | int }}
+        - --secure-port={{ .Values.custommetrics.containerPort | int }}
         - --cert-dir=/tmp/cert
-        - --prometheus-url=http://{{ .Values.prometheusService }}:9090/
+        - --prometheus-url=http://{{ .Values.prometheus.name }}:9090/
         - --metrics-relist-interval=1m
         - --v=4
         - --config=/etc/adapter/config.yaml
         ports:
-        - containerPort: {{ (index .Values.custommetricsPorts 0).container | int }}
+        - containerPort: {{ .Values.custommetrics.containerPort | int }}
         volumeMounts:
         - mountPath: /etc/adapter/
           name: config
@@ -102,13 +102,13 @@ roleRef:
   name: custom-metrics-resource-reader
 subjects:
 - kind: ServiceAccount
-  name: {{ .Values.custommetricsService }}
+  name: {{ .Values.custommetrics.name }}
   namespace: {{ include "idol-library.namespace" . | quote }}
 ---
 kind: ServiceAccount
 apiVersion: v1
 metadata:
-  name: {{ .Values.custommetricsService }}
+  name: {{ .Values.custommetrics.name }}
   labels: {{- include "distributedidol.labels" . | nindent 4 }}
 ---
 apiVersion: apiregistration.k8s.io/v1
@@ -118,7 +118,7 @@ metadata:
   labels: {{- include "distributedidol.labels" . | nindent 4 }}
 spec:
   service:
-    name: {{ .Values.custommetricsService }}
+    name: {{ .Values.custommetrics.name }}
     namespace: {{ include "idol-library.namespace" . | quote }}
   group: custom.metrics.k8s.io
   version: v1beta1

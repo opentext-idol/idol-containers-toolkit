@@ -19,7 +19,7 @@ function waitForAci() {
   done
 }
 
-dahaciport=${IDOL_DAH_SERVICE_PORT_ACI_PORT:-{{ (index .Values.dahPorts 0).container | int }}}
+dahaciport=${IDOL_DAH_SERVICE_PORT_ACI_PORT:-{{ .Values.dah.aciPort | int }}}
 
 function waitForLastEngine() {
     engines=2

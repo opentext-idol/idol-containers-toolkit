@@ -8,6 +8,8 @@ to tell the difference between scaledown and undeploy).
 In non-mirror mode this is a no-op
 */}}
 {{- if .Values.setupMirrored }}
+IDOL_DIH_ACI_PORT=${IDOL_DIH_SERVICE_PORT_ACI_PORT:-{{ .Values.dih.aciPort | int }}}
+
 function waitForAci() {
   exit_code=1
   while [ $exit_code -ne 0 ]; do
@@ -19,14 +21,12 @@ function waitForAci() {
   done
 }
 
-dihaciport=${IDOL_DIH_SERVICE_PORT_ACI_PORT:-{{ (index .Values.dihPorts 0).container | int }}}
-
 function waitForLastEngine() {
     engines=2
     wait=30
     for i in $(seq $wait)
     do
-      engines=$(curl -o - "http://localhost:$dihaciport/a=getstatus" | sed "s@<host>@\n<host>@g" | grep -c "<host>")
+      engines=$(curl -o - "http://localhost:${IDOL_DIH_ACI_PORT}/a=getstatus" | sed "s@<host>@\n<host>@g" | grep -c "<host>")
       if [ "$engines" -eq 1 ]; then
         break
       fi
@@ -37,7 +37,7 @@ function waitForLastEngine() {
 logfile=/opt/idol/dih/data/prestop.log
 
 echo "[$(date)] DIH waiting for child engines before shutdown." | tee -a $logfile
-waitForAci localhost $dihaciport
+waitForAci localhost ${IDOL_DIH_ACI_PORT}
 waitForLastEngine
 echo "[$(date)] DIH is shutting down." | tee -a $logfile
 

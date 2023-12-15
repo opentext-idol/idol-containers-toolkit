@@ -1,0 +1,25 @@
+# BEGIN COPYRIGHT NOTICE
+# (c) Copyright 2022 Micro Focus or one of its affiliates.
+# END COPYRIGHT NOTICE
+
+{{ include "idol-library.ingress" (dict 
+    "root" .
+    "component" .Values.prometheus
+    "ingress" .Values.prometheus.ingress
+    "destination" "distributedidol.prometheus.ingress")  -}}
+{{- define "distributedidol.prometheus.ingress" -}}
+{{- $root := get . "root" | required "missing root" -}}
+{{- $component := get . "component" | required "missing component" -}}
+{{- $pathType := (include "idol-library.ingress.pathtype" $component) -}}
+spec:
+  rules:
+  - http:
+      paths:
+      - path: {{ include "idol-library.ingress.path" (dict "ingress" $component.ingress "path" "/prometheus/") }}
+        pathType: {{ $pathType }}
+        backend:
+          service:
+            name: {{ $component.name }}
+            port:
+              name: prometheus-port
+{{- end -}}

@@ -3,12 +3,12 @@
 # END COPYRIGHT NOTICE
 apiVersion: v2
 name: distributed-idol
-version: 0.6.0
+version: 0.7.0
 appVersion: "23.4.0"
 description: A configurable distributed IDOL setup
 dependencies:
 - name: idol-library
-  version: "0.1.0"
+  version: "0.4.0"
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 - name: idol-licenseserver
   condition: idol-licenseserver.enabled

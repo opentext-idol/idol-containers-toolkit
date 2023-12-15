@@ -1,0 +1,28 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+
+apiVersion: v1
+kind: Service
+metadata:
+  # Use this service for generic IDOL index port functionality
+  # Could point to e.g. a DAH or Content instance
+  name: {{ .Values.queryserviceName }}
+  labels: {{- include "distributedidol.labels" . | nindent 4 }}
+spec:
+  ports:
+  - port: {{ .Values.dah.aciPort | int }}
+    targetPort: aci-port
+    name: aci-port
+  - port: {{ .Values.dah.servicePort | int }}
+    targetPort: service-port
+    name: service-port
+  selector:
+    app: {{ .Values.dah.name }}

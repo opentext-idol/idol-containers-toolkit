@@ -1,49 +1,21 @@
 # BEGIN COPYRIGHT NOTICE
 # (c) Copyright 2022 Micro Focus or one of its affiliates.
 # END COPYRIGHT NOTICE
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: idol-config
-  labels: {{- include "distributedidol.labels" . | nindent 4 }}
-data:
-  content.cfg: |
-{{ tpl (.Files.Get "resources/content.cfg") . | indent 4 }}
-
-  content_primary.cfg: |
-{{ tpl (.Files.Get "resources/content_primary.cfg") . | indent 4 }}
-
-  dih.cfg: |
-{{ tpl (.Files.Get "resources/dih.cfg") . | indent 4 }}
-
-  dah.cfg: |
-{{ tpl (.Files.Get "resources/dah.cfg") . | indent 4 }}
-
-{{- if .Values.httpProxy }}
----
+{{- if (coalesce .Values.global.http_proxy .Values.global.https_proxy) }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: http-proxy-config
   labels: {{- include "distributedidol.labels" . | nindent 4 }}
 data:
-  https_proxy: {{ .Values.httpProxy }}
+{{- if .Values.global.http_proxy }}
+  http_proxy: {{ .Values.global.http_proxy }}
+{{- end -}}
+{{- if .Values.global.https_proxy }}
+  https_proxy: {{ .Values.global.https_proxy }}
+{{- end -}}
+{{- if .Values.global.no_proxy }}
+  no_proxy: {{ .Values.global.no_proxy }}
+{{- end -}}
 {{- end }}
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: prometheus-config
-  labels: {{- include "distributedidol.labels" . | nindent 4 }}
-data:
-  prometheus.yml: |
-    global:
-      scrape_interval: 15s
-      evaluation_interval: 15s
-    
-    rule_files:
 
-    scrape_configs:
-      - job_name: dih
-        static_configs:
-        - targets: [ '{{ .Values.dihName }}:9118' ]

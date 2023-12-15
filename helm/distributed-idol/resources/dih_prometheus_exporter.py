@@ -15,7 +15,7 @@ from prometheus_client.core import GaugeMetricFamily, REGISTRY
 from threading import Lock, Thread
 from typing import Tuple, Optional, Iterator
 
-no_proxies = {'http': None, 'https': None }
+no_proxies = {'http': '', 'https': '' }
 
 DIHStatus = collections.namedtuple('DIHStatus', ['full_ratio', 'children'])
 DIHChild = collections.namedtuple('DIHChild', ['group','host','port','status'])
@@ -59,7 +59,7 @@ def full_ratio_metric(value: Optional[float]) -> GaugeMetricFamily:
         'Combined full-ratio of the child engines of the DIH',
         labels=["pod", "deployment"])
     if value is not None:
-        m.add_metric([os.environ['HOSTNAME'], {{ .Values.dihDeployment | quote }}], value)
+        m.add_metric([os.environ['HOSTNAME'], {{ .Values.dih.name | quote }}], value)
     return m
 
 def latch_metric(value: Optional[float]) -> GaugeMetricFamily:
@@ -68,12 +68,12 @@ def latch_metric(value: Optional[float]) -> GaugeMetricFamily:
         'Metric to control scale down (1.0 if OK, lower if scale down required)',
         labels=["pod", "deployment"])
     if value is not None:
-        m.add_metric([os.environ['HOSTNAME'], {{ .Values.dihDeployment | quote }}], value)
+        m.add_metric([os.environ['HOSTNAME'], {{ .Values.dih.name | quote }}], value)
     return m
 
 class Worker(object):
     def __init__(self):
-        self.host = '{{ .Values.dihName }}'
+        self.host = '{{ .Values.dih.name }}'
         self.aci_port = int(os.environ['IDOL_DIH_SERVICE_PORT_ACI_PORT'])
         self.index_port = self.aci_port + 1
         self.redist_count = 0 # counter for tracking DREREDISTRIBUTE commmands
