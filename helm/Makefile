@@ -9,6 +9,7 @@ SUBCHARTS:=idol-library \
 	idol-nifi \
 	idol-omnigroupserver \
 	idol-stack \
+	idol-qms \
 	distributed-idol \
 	single-content
 
