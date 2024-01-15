@@ -9,7 +9,8 @@
 #
 # END COPYRIGHT NOTICE
 
-# TODO: COMMENT
+# Set componentName to be "agentstore" if we specified to use an agentstore docker image, otherwise
+# take .Values.name (possibly with 'idol-' trimmed off the start).
 {{- $componentName := .Values.componentName | default (trimPrefix "idol-" .Values.name) -}}
 {{- if eq .Values.idolImage.repo "agentstore" -}}
 {{- $componentName = "agentstore" -}}
