@@ -117,6 +117,12 @@
                 "host": {
                     "type": "string"
                 },
+                "path": {
+                    "type": "string"
+                },
+                "indexPath": {
+                    "type": "string"
+                },
                 "proxyBodySize": {
                     "type": "string",
                     "pattern": "^\\d+(?:\\.\\d+)?(?:Ki|Mi|Gi|Ti|Pi|Ei|m|k|M|G|T|P|E)?$"

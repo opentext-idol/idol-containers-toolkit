@@ -21,14 +21,14 @@ spec:
   rules:
   - http:
       paths:
-      - path: {{ include "idol-library.ingress.path" (dict "ingress" $component.ingress "path" "/content/") }}
+      - path: {{ include "idol-library.ingress.path" (dict "ingress" $component.ingress "path" $component.ingress.path) }}
         pathType: {{ include "idol-library.ingress.pathtype" $component }}
         backend:
           service:
             name:  {{ $component.name | quote }}
             port:
               name: aci-port
-      - path: {{ include "idol-library.ingress.path" (dict "ingress" $component.ingress "path" "/index/") }}
+      - path: {{ include "idol-library.ingress.path" (dict "ingress" $component.ingress "path" $component.ingress.indexPath) }}
         pathType: {{ include "idol-library.ingress.pathtype" $component }}
         backend:
           service:

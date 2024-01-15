@@ -8,8 +8,15 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
+
+# TODO: COMMENT
+{{- $componentName := .Values.componentName | default (trimPrefix "idol-" .Values.name) -}}
+{{- if eq .Values.idolImage.repo "agentstore" -}}
+{{- $componentName = "agentstore" -}}
+{{- end -}}
+
 {{- include "idol-library.aciserver.defaultcfg" (dict 
     "root" .
     "component" .Values
-    "componentName" (trimPrefix "idol-" .Values.name)
+    "componentName" $componentName
 ) -}}

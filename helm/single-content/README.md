@@ -1,15 +1,24 @@
 # single-content
 
-![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![AppVersion: 23.4.0](https://img.shields.io/badge/AppVersion-23.4.0-informational?style=flat-square)
+![Version: 0.4.0](https://img.shields.io/badge/Version-0.4.0-informational?style=flat-square) 
+![AppVersion: 23.4.0](https://img.shields.io/badge/AppVersion-23.4.0-informational?style=flat-square) 
 
 Provides an IDOL Content statefulset.
 
 Provides `idol-query-service` and `idol-index-service` Service objects, backed by
 a single IDOL Content instance. Intended as a much lighter-weight alternative to
 the `distributed-idol` chart, for use in testing charts that expect one or both
-of these endpoints to exist in the cluster.
+of these endpoints to exist in the cluster. If "agentstore" is specified as
+idolImage.repo then resources/agentstore.cfg will be used as the content engine's
+configuration file instead of resources/content.cfg.
 
 > Full documentation for Content available from https://www.microfocus.com/documentation/idol/IDOL_23_4/Content_23.4_Documentation/Help/
+
+
+
+
+
+
 
 ## Requirements
 
@@ -34,7 +43,7 @@ of these endpoints to exist in the cluster.
 | global.imagePullSecrets | list | `["dockerhub-secret"]` | Global secrets used to pull container images |
 | idol-licenseserver.enabled | bool | `true` | whether to deploy the idol-licenseserver sub-chart |
 | idolImage.registry | string | `"microfocusidolserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
-| idolImage.repo | string | `"content"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
+| idolImage.repo | string | `"content"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}.    If "agentstore" is specified then resources/agentstore.cfg will be used as the content engine's    configuration file. |
 | idolImage.version | string | `"23.4"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | indexPort | string | `"9101"` | port service will serve index connections on |
 | indexserviceACIPort | string | `"9070"` | the port idol-index-service will serve ACI connections on. |
@@ -42,6 +51,8 @@ of these endpoints to exist in the cluster.
 | ingress.className | string | `""` | Optional parameter to override the default ingress class |
 | ingress.enabled | bool | `true` | Create ingress resource |
 | ingress.host | string | `""` | Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules). For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration) |
+| ingress.indexPath | string | `"/index/"` | Ingress controller path for index connections. |
+| ingress.path | string | `"/content/"` | Ingress controller path for ACI connections. |
 | ingress.proxyBodySize | string | `"2048m"` | Maximum allowed size of the client request body, defining the maximum size of requests that can be made to IDOL components within the installation, e.g. the amount of data sent in DREADDDATA index commands. The value should be an nginx "size" value. See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the corresponding nginx configuration parameter. |
 | ingress.type | string | `"nginx"` | Ingress controller type to setup for. Valid values are nginx or haproxy (used by OpenShift) |
 | licenseServerHostname | string | `"idol-licenseserver"` | maps to [License] LicenseServerHost in the IDOL cfg files Should point to a resolvable IDOL LicenseServer (or Kubernetes service abstraction - see the idol-licenseserver chart) |
