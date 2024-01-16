@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2023 Open Text.
+# Copyright 2024 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -8,8 +8,15 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-{{- include "idol-library.aciserver.defaultcfg" (dict 
-    "root" .
-    "component" .Values
-    "componentName" (trimPrefix "idol-" .Values.name)
-) -}}
+
+{{- if .Values.singleAgentstore.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: qms-agentstore-cfg
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.singleAgentstore ) | nindent 4 }}
+
+data:
+  qms-agentstore.cfg: |
+{{ tpl (print "resources/qms-agentstore.cfg" | .Files.Get) . | indent 4 }}
+{{- end }}

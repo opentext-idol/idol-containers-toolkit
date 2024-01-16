@@ -27,9 +27,9 @@ This chart may be used to provide query & result modification and promotion mana
 
 | Repository | Name | Version |
 |------------|------|---------|
+| file://../single-content | singleAgentstore(single-content) | 0.4.0 |
+| file://../single-content | single-content | 0.4.0 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.4.0 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | single-agentstore(single-content) | 0.4.0 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | single-content | 0.4.0 |
 
 ## Values
 
@@ -39,7 +39,7 @@ This chart may be used to provide query & result modification and promotion mana
 | additionalVolumeMounts | list | `[]` | Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1) |
 | additionalVolumes | list | `[]` | Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes) |
 | agentStoreACIPort | string | `"9150"` | Default configuration for [PromotionAgentStore]::Port |
-| agentStoreName | string | `"idol-agentstore-query-service"` | Default configuration for [PromotionAgentStore]::Host |
+| agentStoreName | string | `"qms-agentstore-query-service"` | Default configuration for [PromotionAgentStore]::Host |
 | existingConfigMap | string | `""` | if specified, mounted at /etc/config/idol and expected to provide community.cfg |
 | global.idolImageRegistry | string | `""` | Global override value for idolImage.registry |
 | global.idolVersion | string | `""` | Global override value for idolImage.version |
@@ -58,20 +58,18 @@ This chart may be used to provide query & result modification and promotion mana
 | queryserviceACIPort | string | `"9100"` | Default configuration for [IDOL]::Port |
 | queryserviceName | string | `"idol-query-service"` | Default configuration for [IDOL]::Host |
 | servicePort | string | `"16002"` | port service will serve service connections on |
-| single-agentstore.aciPort | string | `"9150"` | agentstore port service will serve ACI connections on |
-| single-agentstore.enabled | bool | `true` | whether to deploy the single-content sub-chart that uses an IDOL Agentstore    configuration file and docker image. |
-| single-agentstore.idolImage.repo | string | `"agentstore"` | overrides the default value for single-content.idolImage.repo ("content")    to guarantee that we use an IDOL Agentstore docker image and configuration    file. |
-| single-agentstore.indexserviceName | string | `"idol-agentstore-index-service"` | the agentstore engine's index service name |
-| single-agentstore.ingress.indexPath | string | `"/agentstore-index/"` | the ingress controller path to access the agentstore index service with |
-| single-agentstore.ingress.path | string | `"/agentstore/"` | the ingress controller path to access the agentstore query service with |
-| single-agentstore.name | string | `"idol-agentstore"` | used to name deployment, service, ingress |
-| single-agentstore.queryserviceACIPort | string | `"9150"` | the agentstore engine's query service ACI port |
-| single-agentstore.queryserviceName | string | `"idol-agentstore-query-service"` | the agentstore engine's query service name |
 | single-content.aciPort | string | `"9100"` | content port service will serve ACI connections on |
 | single-content.enabled | bool | `true` | whether to deploy the single-content sub-chart. |
 | single-content.queryserviceACIPort | string | `"9100"` | the content engine's query service ACI port |
 | single-content.queryserviceName | string | `"idol-query-service"` | the content engine's query service name |
+| singleAgentstore.aciPort | string | `"9150"` | agentstore port service will serve ACI connections on |
+| singleAgentstore.enabled | bool | `true` | whether to deploy the single-content sub-chart that uses an IDOL Agentstore    configuration file and docker image. |
+| singleAgentstore.existingConfigMap | string | `"qms-agentstore-cfg"` | the config map to use for providing a qms-agentstore configuration. |
+| singleAgentstore.idolImage.repo | string | `"qms-agentstore"` | overrides the default value for single-content.idolImage.repo ("content")    to guarantee that we use an IDOL Agentstore docker image. |
+| singleAgentstore.indexserviceName | string | `"idol-agentstore-index-service"` | the agentstore engine's index service name |
+| singleAgentstore.ingress.indexPath | string | `"/agentstore-index/"` | the ingress controller path to access the agentstore index service with |
+| singleAgentstore.ingress.path | string | `"/agentstore/"` | the ingress controller path to access the agentstore query service with |
+| singleAgentstore.name | string | `"qms-agentstore"` | used to name deployment, service, ingress |
+| singleAgentstore.queryserviceACIPort | string | `"9150"` | the agentstore engine's query service ACI port |
+| singleAgentstore.queryserviceName | string | `"qms-agentstore-query-service"` | the agentstore engine's query service name |
 
-
-----------------------------------------------
-Autogenerated from chart metadata using [helm-docs v1.12.0](https://github.com/norwoodj/helm-docs/releases/v1.12.0)

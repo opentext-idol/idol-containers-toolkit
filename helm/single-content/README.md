@@ -9,9 +9,7 @@ Provides an IDOL Content statefulset.
 Provides `idol-query-service` and `idol-index-service` Service objects, backed by
 a single IDOL Content instance. Intended as a much lighter-weight alternative to
 the `distributed-idol` chart, for use in testing charts that expect one or both
-of these endpoints to exist in the cluster. If "agentstore" is specified as
-idolImage.repo then resources/qms-agentstore.cfg will be used as the content engine's
-configuration file instead of resources/content.cfg.
+of these endpoints to exist in the cluster.
 
 > Full documentation for Content available from https://www.microfocus.com/documentation/idol/IDOL_23_4/Content_23.4_Documentation/Help/
 
@@ -44,7 +42,7 @@ configuration file instead of resources/content.cfg.
 | global.imagePullSecrets | list | `["dockerhub-secret"]` | Global secrets used to pull container images |
 | idol-licenseserver.enabled | bool | `true` | whether to deploy the idol-licenseserver sub-chart |
 | idolImage.registry | string | `"microfocusidolserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
-| idolImage.repo | string | `"content"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}.    If "agentstore" is specified then resources/qms-agentstore.cfg will be used as the content engine's    configuration file. |
+| idolImage.repo | string | `"content"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}. |
 | idolImage.version | string | `"23.4"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | indexPort | string | `"9101"` | port service will serve index connections on |
 | indexserviceACIPort | string | `"9070"` | the port idol-index-service will serve ACI connections on. |

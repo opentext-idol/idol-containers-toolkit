@@ -46,7 +46,7 @@ additionalVolumes: []
 additionalVolumeMounts: []
 
 # -- Default configuration for [PromotionAgentStore]::Host
-agentStoreName: &agentStoreName "idol-agentstore-query-service"
+agentStoreName: &agentStoreName "qms-agentstore-query-service"
 # -- Default configuration for [PromotionAgentStore]::Port
 agentStoreACIPort: &agentstoreACIPort "9150"
 
@@ -83,17 +83,19 @@ servicePort: "16002"
 livenessProbe:
   initialDelaySeconds: 120
 
+singleAgentstore:
 
-single-agentstore:
   # -- whether to deploy the single-content sub-chart that uses an IDOL Agentstore
   #    configuration file and docker image.
   enabled: true
 
+  # -- the config map to use for providing a qms-agentstore configuration.
+  existingConfigMap: "qms-agentstore-cfg"
+
   idolImage:
     # -- overrides the default value for single-content.idolImage.repo ("content")
-    #    to guarantee that we use an IDOL Agentstore docker image and configuration
-    #    file.
-    repo: "agentstore"
+    #    to guarantee that we use an IDOL Agentstore docker image.
+    repo: "qms-agentstore"
 
   # -- agentstore port service will serve ACI connections on
   aciPort: *agentstoreACIPort
@@ -114,7 +116,7 @@ single-agentstore:
   indexserviceName: "idol-agentstore-index-service"
 
   # -- used to name deployment, service, ingress
-  name: "idol-agentstore"
+  name: "qms-agentstore"
 
 single-content:
   # -- whether to deploy the single-content sub-chart.

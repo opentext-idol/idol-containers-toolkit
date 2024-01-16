@@ -6,15 +6,8 @@ cd /content
 ln -sf /opt/idol/content/index ./index
 
 # Use the content.cfg configuration file for our content engine, unless
-# we're using the IDOL agentstore docker image - in which case use the
-# qms-agentstore.cfg file.
-config_file="content.cfg"
-
-if [ "{{ .Values.idolImage.repo }}" == "agentstore" ]; then
-    config_file="qms-agentstore.cfg"
-fi
-
-config_file_path="/etc/config/idol/${config_file}"
-export IDOL_COMPONENT_CFG="$config_file_path"
+# we've provided an existingConfigMap - in which case assume
+# that the file name has the form {existingConfigMap}.cfg.
+export IDOL_COMPONENT_CFG="/etc/config/idol/${IDOL_COMPONENT:-content}.cfg"
 
 ./run_idol.sh
