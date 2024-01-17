@@ -51,7 +51,7 @@ agentStoreName: &agentStoreName "qms-agentstore"
 agentStoreACIPort: &agentstoreACIPort "9150"
 
 # -- Default configuration for [IDOL]::Host
-queryserviceName: &queryServiceName "idol-content"
+queryserviceName: &queryServiceName "idol-query-service"
 # -- Default configuration for [IDOL]::Port
 queryserviceACIPort: &queryServiceACIPort "9100"
 
