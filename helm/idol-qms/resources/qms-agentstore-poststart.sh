@@ -1,3 +1,5 @@
+#! /usr/bin/bash
+
 # BEGIN COPYRIGHT NOTICE
 # Copyright 2024 Open Text.
 # 
@@ -9,17 +11,14 @@
 #
 # END COPYRIGHT NOTICE
 
-{{- if .Values.singleAgentstore.enabled }}
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: qms-agentstore-cfg
-  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.singleAgentstore ) | nindent 4 }}
+# Creates required databases for QMS AgentStore
 
-data:
-  qms-agentstore.cfg: |
-{{ tpl (print "resources/qms-agentstore.cfg" | .Files.Get) . | indent 4 }}
+source /content/startup_utils.sh
 
-  qms-agentstore-poststart.sh: |
-{{ tpl (print "resources/qms-agentstore-poststart.sh" | .Files.Get) . | indent 4 }}
-{{- end }}
+waitForAci "localhost:{{ .Values.singleAgentstore.aciPort | int }}"
+DBS="agent profile activated deactivated DataAdminDeleted"
+
+for DB in ${DBS};
+do
+    curl "http://localhost:{{ .Values.singleAgentstore.indexPort | int }}/DRECREATEDBASE?&DREDBNAME=${DB}"
+done
