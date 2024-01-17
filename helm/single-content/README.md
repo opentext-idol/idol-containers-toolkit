@@ -36,7 +36,7 @@ of these endpoints to exist in the cluster.
 | contentStorageClass | string | `"idol-content-storage-class"` | Name of the storage class used to provision a PersistentVolume for each Content instance. The associated PVCs are named index-{name}-{pod number} |
 | contentVolumeSize | string | `"16Gi"` | Size of the PersistentVolumeClaim that is created for each Content instance. The Kubernetes cluster will need to provide enough PersistentVolumes to satisify the claims made for the desired number of Content instances. The size chosen here provides a hard limit on the size of the Content index in each Content instance. |
 | envConfigMap | string | `""` | Optional configMap name holding extra environnment variables for content container |
-| existingConfigMap | string | `""` | if specified, mounted at /etc/config/idol and expected to provide content.cfg |
+| existingConfigMap | string | `""` | if specified, mounted at /etc/config/idol and expected to provide $IDOL_COMPONENT.cfg                      or content.cfg if $IDOL_COMPONENT is unavailable. |
 | global.idolImageRegistry | string | `""` | Global override value for idolImage.registry |
 | global.idolVersion | string | `""` | Global override value for idolImage.version |
 | global.imagePullSecrets | list | `["dockerhub-secret"]` | Global secrets used to pull container images |
@@ -58,6 +58,6 @@ of these endpoints to exist in the cluster.
 | licenseServerPort | string | `"20000"` | the ACI port of the IDOL LicenseServer (or abstraction) |
 | name | string | `"idol-content"` | used to name statefulset, service, ingress |
 | queryserviceACIPort | string | `"9060"` | port idol-query-service will serve ACI connections on. |
-| queryserviceName | string | `"idol-query-service"` | internal parameter to specify the query service name. |
+| queryserviceName | string | `"idol-query-service"` | internal parameter to specify the query service name, if this is empty then a service will                     be provided using .Values.name. |
 | servicePort | string | `"9102"` | port service will serve service connections on |
 

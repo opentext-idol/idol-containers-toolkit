@@ -19,8 +19,7 @@
             "minLength": 1
         },
         "queryserviceName": {
-            "type": "string",
-            "minLength": 1
+            "type": "string"
         },
         "queryserviceACIPort": {
             "$ref": "#/$defs/port_number"

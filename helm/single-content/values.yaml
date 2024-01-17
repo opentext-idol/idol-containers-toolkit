@@ -49,7 +49,8 @@ servicePort: "9102"
 # -- port service will serve index connections on
 indexPort: "9101"
 
-# existingConfigMap -- if specified, mounted at /etc/config/idol and expected to provide content.cfg
+# existingConfigMap -- if specified, mounted at /etc/config/idol and expected to provide $IDOL_COMPONENT.cfg
+#                      or content.cfg if $IDOL_COMPONENT is unavailable.
 existingConfigMap: ""
 
 # -- Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
@@ -108,7 +109,8 @@ licenseServerHostname: "idol-licenseserver"
 # licenseServerPort -- the ACI port of the IDOL LicenseServer (or abstraction)
 licenseServerPort: "20000"
 
-# queryserviceName -- internal parameter to specify the query service name.
+# queryserviceName -- internal parameter to specify the query service name, if this is empty then a service will
+#                     be provided using .Values.name.
 queryserviceName: "idol-query-service"
 # queryserviceACIPort -- port idol-query-service will serve ACI connections on.
 queryserviceACIPort: "9060"
