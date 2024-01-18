@@ -46,7 +46,7 @@ additionalVolumes: []
 additionalVolumeMounts: []
 
 # -- Default configuration for [PromotionAgentStore]::Host
-agentStoreName: &agentStoreName "qms-agentstore"
+agentStoreName: &agentStoreName "idol-qms-agentstore"
 # -- Default configuration for [PromotionAgentStore]::Port
 agentStoreACIPort: &agentstoreACIPort "9150"
 
