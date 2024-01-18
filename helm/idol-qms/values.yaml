@@ -83,6 +83,7 @@ servicePort: "16002"
 livenessProbe:
   initialDelaySeconds: 120
 
+
 singleAgentstore:
 
   # -- whether to deploy the single-content sub-chart that uses an IDOL Agentstore
@@ -121,12 +122,17 @@ singleAgentstore:
   idol-licenseserver:
     # -- whether to deploy the idol-licenseserver sub-chart
     enabled: false
+
+
 single-content:
   # -- whether to deploy the single-content sub-chart.
   enabled: true
 
   # -- content port service will serve ACI connections on
   aciPort: *queryServiceACIPort
+
+  # -- the content engine's query service name
+  queryserviceName: *queryServiceName
 
   # -- the content engine's query service ACI port
   queryserviceACIPort: *queryServiceACIPort
