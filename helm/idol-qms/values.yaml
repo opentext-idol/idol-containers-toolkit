@@ -1,0 +1,149 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2024 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+
+# As per https://helm.sh/docs/topics/charts/#the-chart-file-structure
+# this values.yaml file contains the default configuration values for this chart.
+# These default values can be overridden by using the --values or --set flags on the `helm install`
+# command: see https://helm.sh/docs/helm/helm_install/
+
+global:
+  # -- Global override value for idolImage.registry
+  idolImageRegistry: ""
+  # -- Global override value for idolImage.version
+  idolVersion: ""
+  # -- Global secrets used to pull container images
+  imagePullSecrets:
+  - "dockerhub-secret"
+
+idolImage:
+  # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
+  registry: "microfocusidolserver"
+  # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
+  version: "24.1"
+  # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
+  repo: "qms"
+
+# licenseServerHostname -- the hostname of the IDOL LicenseServer (or abstraction)
+licenseServerHostname: "idol-licenseserver"
+# licenseServerPort -- the ACI port of the IDOL LicenseServer (or abstraction)
+licenseServerPort: "20000"
+
+# existingConfigMap -- if specified, mounted at /etc/config/idol and expected to provide community.cfg
+existingConfigMap: ""
+
+# -- Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
+additionalVolumes: []
+
+# -- Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1)
+additionalVolumeMounts: []
+
+# -- Default configuration for [PromotionAgentStore]::Host
+agentStoreName: &agentStoreName "idol-qms-agentstore"
+# -- Default configuration for [PromotionAgentStore]::Port
+agentStoreACIPort: &agentstoreACIPort "9150"
+
+# -- Default configuration for [IDOL]::Host
+queryserviceName: &queryServiceName "idol-query-service"
+# -- Default configuration for [IDOL]::Port
+queryserviceACIPort: &queryServiceACIPort "9100"
+
+##### INGRESS VARIABLES #####
+
+ingress:
+  # -- Create ingress resource
+  enabled: true
+
+  # -- Ingress controller type to setup for.
+  # Valid values are nginx or haproxy (used by OpenShift)
+  type: nginx
+
+  # -- Optional parameter to override the default ingress class
+  className: ""
+
+  # -- Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules).
+  # For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration)
+  host: ""
+
+##### INTERNAL VARIABLES #####
+# name -- used to name deployment, service, ingress
+name: "idol-qms"
+# aciPort -- port service will serve ACI connections on
+aciPort: "16000"
+# servicePort -- port service will serve service connections on
+servicePort: "16002"
+# livenessProbe -- container livenessProbe settings
+livenessProbe:
+  initialDelaySeconds: 120
+
+
+singleAgentstore:
+
+  # -- whether to deploy the single-content sub-chart that uses an IDOL Agentstore
+  #    configuration file and docker image.
+  enabled: true
+
+  # -- the config map to use for providing a qms-agentstore configuration.
+  existingConfigMap: "idol-qms-agentstore-cfg"
+
+  # -- Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
+  # N.B. QMS AgentStore creates required databases on startup via poststart script mount
+  additionalVolumeMounts:
+  - name: config-map
+    mountPath: /qms-agentstore/poststart_scripts/qms-agentstore-poststart.sh
+    subPath: qms-agentstore-poststart.sh
+    
+  idolImage:
+    # -- overrides the default value for single-content.idolImage.repo ("content")
+    #    to guarantee that we use an IDOL Agentstore docker image.
+    repo: "qms-agentstore"
+
+  # -- agentstore port service will serve ACI connections on
+  aciPort: *agentstoreACIPort
+
+  ingress:
+    # -- the ingress controller path to access the agentstore query service with
+    path: "/qms-agentstore/"
+    # -- the ingress controller path to access the agentstore index service with
+    indexPath: "/qms-agentstore-index/"
+
+  # -- the agentstore engine's query service name
+  queryserviceName: ""
+
+  # -- the agentstore engine's query service ACI port
+  queryserviceACIPort: *agentstoreACIPort
+
+  # -- the agentstore engine's index service name
+  indexserviceName: ""
+
+  # -- used to name deployment, service, ingress
+  name: *agentStoreName
+
+  idol-licenseserver:
+    # -- whether to deploy the idol-licenseserver sub-chart
+    enabled: false
+
+
+single-content:
+  # -- whether to deploy the single-content sub-chart.
+  enabled: true
+
+  # -- content port service will serve ACI connections on
+  aciPort: *queryServiceACIPort
+
+  # -- the content engine's query service name
+  queryserviceName: *queryServiceName
+
+  # -- the content engine's query service ACI port
+  queryserviceACIPort: *queryServiceACIPort
+
+  idol-licenseserver:
+    # -- whether to deploy the idol-licenseserver sub-chart
+    enabled: false

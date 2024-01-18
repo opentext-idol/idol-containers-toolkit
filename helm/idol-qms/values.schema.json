@@ -3,32 +3,38 @@
     "title": "Values",
     "type": "object",
     "properties": {
-        "contentVolumeSize": {
-            "type": "string",
-            "pattern": "^\\d+(?:\\.\\d+)?(?:Ki|Mi|Gi|Ti|Pi|Ei|m|k|M|G|T|P|E)?$"
+        "global":{
+            "$ref": "#/$defs/global"
         },
-        "contentStorageClass": {
+        "idolImage": {
+            "$ref": "#/$defs/idolImage"
+        },
+        "licenseServerHostname": {
             "type": "string",
-            "minLength": 1
+            "format": "hostname"
         },
         "licenseServerPort": {
             "$ref": "#/$defs/port_number"
         },
-        "licenseServerHostname": {
+        "existingConfigMap": {
+            "type": "string"
+        },
+        "agentStoreName": {
             "type": "string",
-            "minLength": 1
+            "format": "hostname"
+        },
+        "agentStoreACIPort":{
+            "$ref": "#/$defs/port_number"
         },
         "queryserviceName": {
-            "type": "string"
+            "type": "string",
+            "format": "hostname"
         },
-        "queryserviceACIPort": {
+        "queryserviceACIPort":{
             "$ref": "#/$defs/port_number"
         },
-        "indexserviceName": {
-            "type": "string"
-        },
-        "indexserviceACIPort": {
-            "$ref": "#/$defs/port_number"
+        "ingress": {
+            "$ref": "#/$defs/ingress"
         },
         "name": {
             "type": "string",
@@ -40,15 +46,6 @@
         "servicePort": {
             "$ref": "#/$defs/port_number"
         },
-        "indexPort": {
-            "$ref": "#/$defs/port_number"
-        },
-        "global": {
-            "$ref": "#/$defs/global"
-        },
-        "idolImage": { 
-            "$ref": "#/$defs/idolImage"
-        },
         "livenessProbe": {
             "$ref": "#/$defs/liveness_probe"
         },
@@ -57,24 +54,22 @@
         },
         "additionalVolumeMounts":{
             "type": "array"
-        },
-        "envConfigMap":{
-            "type": "string"
         }
     },
     "required": [
-        "contentVolumeSize",
-        "licenseServerPort",
+        "global",
+        "idolImage",
         "licenseServerHostname",
+        "licenseServerPort",
+        "ingress",
+        "agentStoreName",
+        "agentStoreACIPort",
         "queryserviceName",
         "queryserviceACIPort",
-        "indexserviceName",
-        "indexserviceACIPort",
         "name",
         "aciPort",
         "servicePort",
-        "indexPort",
-        "ingress"
+        "livenessProbe"
     ],
 
     "$defs": {
@@ -114,16 +109,6 @@
                 },
                 "host": {
                     "type": "string"
-                },
-                "path": {
-                    "type": "string"
-                },
-                "indexPath": {
-                    "type": "string"
-                },
-                "proxyBodySize": {
-                    "type": "string",
-                    "pattern": "^\\d+(?:\\.\\d+)?(?:Ki|Mi|Gi|Ti|Pi|Ei|m|k|M|G|T|P|E)?$"
                 }
             },
             "required":[
