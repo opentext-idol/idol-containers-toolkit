@@ -24,7 +24,7 @@ idolImage:
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
   registry: "microfocusidolserver"
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
-  version: "23.4"
+  version: "24.1"
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}.
   repo: "content"
 
