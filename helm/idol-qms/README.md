@@ -56,18 +56,22 @@ This chart may be used to provide query & result modification and promotion mana
 | livenessProbe | object | `{"initialDelaySeconds":120}` | container livenessProbe settings |
 | name | string | `"idol-qms"` | used to name deployment, service, ingress |
 | queryserviceACIPort | string | `"9100"` | Default configuration for [IDOL]::Port |
-| queryserviceName | string | `"idol-content"` | Default configuration for [IDOL]::Host |
+| queryserviceName | string | `"idol-query-service"` | Default configuration for [IDOL]::Host |
 | servicePort | string | `"16002"` | port service will serve service connections on |
 | single-content.aciPort | string | `"9100"` | content port service will serve ACI connections on |
 | single-content.enabled | bool | `true` | whether to deploy the single-content sub-chart. |
+| single-content.idol-licenseserver.enabled | bool | `false` | whether to deploy the idol-licenseserver sub-chart |
 | single-content.queryserviceACIPort | string | `"9100"` | the content engine's query service ACI port |
+| single-content.queryserviceName | string | `"idol-query-service"` | the content engine's query service name |
 | singleAgentstore.aciPort | string | `"9150"` | agentstore port service will serve ACI connections on |
 | singleAgentstore.enabled | bool | `true` | whether to deploy the single-content sub-chart that uses an IDOL Agentstore    configuration file and docker image. |
 | singleAgentstore.existingConfigMap | string | `"qms-agentstore-cfg"` | the config map to use for providing a qms-agentstore configuration. |
+| singleAgentstore.idol-licenseserver.enabled | bool | `false` | whether to deploy the idol-licenseserver sub-chart |
 | singleAgentstore.idolImage.repo | string | `"qms-agentstore"` | overrides the default value for single-content.idolImage.repo ("content")    to guarantee that we use an IDOL Agentstore docker image. |
-| singleAgentstore.indexserviceName | string | `"idol-agentstore-index-service"` | the agentstore engine's index service name |
+| singleAgentstore.indexserviceName | string | `""` | the agentstore engine's index service name |
 | singleAgentstore.ingress.indexPath | string | `"/agentstore-index/"` | the ingress controller path to access the agentstore index service with |
 | singleAgentstore.ingress.path | string | `"/agentstore/"` | the ingress controller path to access the agentstore query service with |
 | singleAgentstore.name | string | `"qms-agentstore"` | used to name deployment, service, ingress |
 | singleAgentstore.queryserviceACIPort | string | `"9150"` | the agentstore engine's query service ACI port |
+| singleAgentstore.queryserviceName | string | `""` | the agentstore engine's query service name |
 

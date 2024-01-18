@@ -46,7 +46,7 @@ of these endpoints to exist in the cluster.
 | idolImage.version | string | `"23.4"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | indexPort | string | `"9101"` | port service will serve index connections on |
 | indexserviceACIPort | string | `"9070"` | the port idol-index-service will serve ACI connections on. |
-| indexserviceName | string | `"idol-index-service"` | internal parameter to specify the index service name. |
+| indexserviceName | string | `"idol-index-service"` | internal parameter to specify the index service name, if this is empty then no                     additional service will be provisioned. |
 | ingress.className | string | `""` | Optional parameter to override the default ingress class |
 | ingress.enabled | bool | `true` | Create ingress resource |
 | ingress.host | string | `""` | Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules). For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration) |
@@ -58,6 +58,6 @@ of these endpoints to exist in the cluster.
 | licenseServerPort | string | `"20000"` | the ACI port of the IDOL LicenseServer (or abstraction) |
 | name | string | `"idol-content"` | used to name statefulset, service, ingress |
 | queryserviceACIPort | string | `"9060"` | port idol-query-service will serve ACI connections on. |
-| queryserviceName | string | `"idol-query-service"` | internal parameter to specify the query service name, if this is empty then a service will                     be provided using .Values.name. |
+| queryserviceName | string | `"idol-query-service"` | internal parameter to specify the query service name, if this is empty then no                     additional service will be provisioned. |
 | servicePort | string | `"9102"` | port service will serve service connections on |
 
