@@ -118,6 +118,9 @@ singleAgentstore:
   # -- used to name deployment, service, ingress
   name: *agentStoreName
 
+  idol-licenseserver:
+    # -- whether to deploy the idol-licenseserver sub-chart
+    enabled: false
 single-content:
   # -- whether to deploy the single-content sub-chart.
   enabled: true
@@ -127,3 +130,7 @@ single-content:
 
   # -- the content engine's query service ACI port
   queryserviceACIPort: *queryServiceACIPort
+
+  idol-licenseserver:
+    # -- whether to deploy the idol-licenseserver sub-chart
+    enabled: false
