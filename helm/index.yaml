@@ -257,14 +257,14 @@ entries:
     version: 0.1.0
   idol-qms:
   - apiVersion: v2
-    appVersion: "23.4"
-    created: "2024-01-15T16:18:50.650149486Z"
+    appVersion: "24.1"
+    created: "2024-01-18T12:54:35.807911549Z"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
       version: 0.4.0
-    - alias: single-agentstore
-      condition: single-agentstore.enabled
+    - alias: singleAgentstore
+      condition: singleAgentstore.enabled
       name: single-content
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
       version: 0.4.0
@@ -273,7 +273,7 @@ entries:
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
       version: 0.4.0
     description: Adds IDOL QMS
-    digest: d9fd4eca458236f6b60772d37104cdb21392de7a4750b3dd2c8b3f9b74bd3bef
+    digest: 42657feccbabd375477917504a293ffd49467f71997d894973dd4cf6cbc68a18
     name: idol-qms
     urls:
     - release/idol-qms-0.1.0.tgz
@@ -311,8 +311,8 @@ entries:
     version: 0.1.0
   single-content:
   - apiVersion: v2
-    appVersion: 23.4.0
-    created: "2024-01-16T09:09:54.961142989Z"
+    appVersion: "24.1"
+    created: "2024-01-18T12:54:35.828519343Z"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
@@ -322,7 +322,7 @@ entries:
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
       version: 0.1.0
     description: A configurable single-IDOL setup
-    digest: 562bfba99373e3439293eb44d287c23231e383c5c562bdd21932b1caf00bfca4
+    digest: 3263338316b242eb9ee5667f80277c7e142752e84c8a9cb10148bf3e98fb0a39
     name: single-content
     urls:
     - release/single-content-0.4.0.tgz
