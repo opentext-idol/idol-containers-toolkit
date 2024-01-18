@@ -7,12 +7,14 @@
 # Note that non-ACI port numbers must in practice match those
 # configured in the underlying IDOL server, as clients will
 # read these from the action=GetStatus response.
-{{- define "idol-content.queryservice" -}}
-{{- if not (empty .Values.queryserviceName)}}
+{{- if .Values.queryserviceName }}
 {{ include "idol-library.aciserver.service" (dict 
     "root" .
     "component" .Values
     "destination" "idol-content.queryservice") }}
+{{- end }}
+
+{{- define "idol-content.queryservice" -}}
 {{/* Any specific merges to base template go here */}}
 {{- $root := get . "root" | required "missing root" -}}
 {{- $component := get . "component" | required "missing component" -}}
@@ -27,18 +29,19 @@ spec:
     targetPort: service-port
     name: service-port
 {{- end }}
-{{- end }}
-
 ---
 # Use this service for generic IDOL index port functionality
 # Could point to e.g. a DIH or Content instance
 # Note that non-ACI port numbers must in practice match those
 # configured in the underlying IDOL server, as clients will
 # read these from the action=GetStatus response.
+{{- if .Values.indexServiceName }}
 {{ include "idol-library.aciserver.service" (dict 
     "root" .
     "component" .Values
     "destination" "idol-content.indexservice") }}
+{{- end }}
+
 {{- define "idol-content.indexservice" -}}
 {{/* Any specific merges to base template go here */}}
 {{- $root := get . "root" | required "missing root" -}}

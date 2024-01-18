@@ -114,7 +114,8 @@ licenseServerPort: "20000"
 queryserviceName: "idol-query-service"
 # queryserviceACIPort -- port idol-query-service will serve ACI connections on.
 queryserviceACIPort: "9060"
-# indexserviceName -- internal parameter to specify the index service name.
+# indexserviceName -- internal parameter to specify the index service name, if this is empty then no
+#                     additional service will be provisioned.
 indexserviceName: "idol-index-service"
 # indexserviceACIPort -- the port idol-index-service will serve ACI connections on.
 indexserviceACIPort: "9070"
