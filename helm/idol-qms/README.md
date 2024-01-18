@@ -2,7 +2,7 @@
 
 
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![AppVersion: 23.4](https://img.shields.io/badge/AppVersion-23.4-informational?style=flat-square) 
+![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![AppVersion: 24.1](https://img.shields.io/badge/AppVersion-24.1-informational?style=flat-square) 
 
 Provides an IDOL QMS deployment.
 
@@ -15,7 +15,7 @@ The config file can be overridden via `existingConfigMap`.
 
 This chart may be used to provide query & result modification and promotion management functionality.
 
-> Full documentation for QMS available from https://www.microfocus.com/documentation/idol/IDOL_23_4/QMS_23.4_Documentation/Help/
+> Full documentation for QMS available from https://www.microfocus.com/documentation/idol/IDOL_24.1/QMS_24.1_Documentation/Help/
 
 
 
@@ -39,14 +39,14 @@ This chart may be used to provide query & result modification and promotion mana
 | additionalVolumeMounts | list | `[]` | Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1) |
 | additionalVolumes | list | `[]` | Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes) |
 | agentStoreACIPort | string | `"9150"` | Default configuration for [PromotionAgentStore]::Port |
-| agentStoreName | string | `"qms-agentstore"` | Default configuration for [PromotionAgentStore]::Host |
+| agentStoreName | string | `"idol-qms-agentstore"` | Default configuration for [PromotionAgentStore]::Host |
 | existingConfigMap | string | `""` | if specified, mounted at /etc/config/idol and expected to provide community.cfg |
 | global.idolImageRegistry | string | `""` | Global override value for idolImage.registry |
 | global.idolVersion | string | `""` | Global override value for idolImage.version |
 | global.imagePullSecrets | list | `["dockerhub-secret"]` | Global secrets used to pull container images |
 | idolImage.registry | string | `"microfocusidolserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | idolImage.repo | string | `"qms"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
-| idolImage.version | string | `"23.4"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
+| idolImage.version | string | `"24.1"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | ingress.className | string | `""` | Optional parameter to override the default ingress class |
 | ingress.enabled | bool | `true` | Create ingress resource |
 | ingress.host | string | `""` | Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules). For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration) |
@@ -64,14 +64,15 @@ This chart may be used to provide query & result modification and promotion mana
 | single-content.queryserviceACIPort | string | `"9100"` | the content engine's query service ACI port |
 | single-content.queryserviceName | string | `"idol-query-service"` | the content engine's query service name |
 | singleAgentstore.aciPort | string | `"9150"` | agentstore port service will serve ACI connections on |
+| singleAgentstore.additionalVolumeMounts | list | `[{"mountPath":"/qms-agentstore/poststart_scripts/qms-agentstore-poststart.sh","name":"config-map","subPath":"qms-agentstore-poststart.sh"}]` | Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes) N.B. QMS AgentStore creates required databases on startup via poststart script mount |
 | singleAgentstore.enabled | bool | `true` | whether to deploy the single-content sub-chart that uses an IDOL Agentstore    configuration file and docker image. |
-| singleAgentstore.existingConfigMap | string | `"qms-agentstore-cfg"` | the config map to use for providing a qms-agentstore configuration. |
+| singleAgentstore.existingConfigMap | string | `"idol-qms-agentstore-cfg"` | the config map to use for providing a qms-agentstore configuration. |
 | singleAgentstore.idol-licenseserver.enabled | bool | `false` | whether to deploy the idol-licenseserver sub-chart |
 | singleAgentstore.idolImage.repo | string | `"qms-agentstore"` | overrides the default value for single-content.idolImage.repo ("content")    to guarantee that we use an IDOL Agentstore docker image. |
 | singleAgentstore.indexserviceName | string | `""` | the agentstore engine's index service name |
-| singleAgentstore.ingress.indexPath | string | `"/agentstore-index/"` | the ingress controller path to access the agentstore index service with |
-| singleAgentstore.ingress.path | string | `"/agentstore/"` | the ingress controller path to access the agentstore query service with |
-| singleAgentstore.name | string | `"qms-agentstore"` | used to name deployment, service, ingress |
+| singleAgentstore.ingress.indexPath | string | `"/qms-agentstore-index/"` | the ingress controller path to access the agentstore index service with |
+| singleAgentstore.ingress.path | string | `"/qms-agentstore/"` | the ingress controller path to access the agentstore query service with |
+| singleAgentstore.name | string | `"idol-qms-agentstore"` | used to name deployment, service, ingress |
 | singleAgentstore.queryserviceACIPort | string | `"9150"` | the agentstore engine's query service ACI port |
 | singleAgentstore.queryserviceName | string | `""` | the agentstore engine's query service name |
 

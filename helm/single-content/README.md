@@ -2,7 +2,7 @@
 
 
 
-![Version: 0.4.0](https://img.shields.io/badge/Version-0.4.0-informational?style=flat-square) ![AppVersion: 23.4.0](https://img.shields.io/badge/AppVersion-23.4.0-informational?style=flat-square) 
+![Version: 0.4.0](https://img.shields.io/badge/Version-0.4.0-informational?style=flat-square) ![AppVersion: 24.1](https://img.shields.io/badge/AppVersion-24.1-informational?style=flat-square) 
 
 Provides an IDOL Content statefulset.
 
@@ -11,7 +11,7 @@ a single IDOL Content instance. Intended as a much lighter-weight alternative to
 the `distributed-idol` chart, for use in testing charts that expect one or both
 of these endpoints to exist in the cluster.
 
-> Full documentation for Content available from https://www.microfocus.com/documentation/idol/IDOL_23_4/Content_23.4_Documentation/Help/
+> Full documentation for Content available from https://www.microfocus.com/documentation/idol/IDOL_24.1/Content_24.1_Documentation/Help/
 
 
 
@@ -43,7 +43,7 @@ of these endpoints to exist in the cluster.
 | idol-licenseserver.enabled | bool | `true` | whether to deploy the idol-licenseserver sub-chart |
 | idolImage.registry | string | `"microfocusidolserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | idolImage.repo | string | `"content"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}. |
-| idolImage.version | string | `"23.4"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
+| idolImage.version | string | `"24.1"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | indexPort | string | `"9101"` | port service will serve index connections on |
 | indexserviceACIPort | string | `"9070"` | the port idol-index-service will serve ACI connections on. |
 | indexserviceName | string | `"idol-index-service"` | internal parameter to specify the index service name, if this is empty then no                     additional service will be provisioned. |
