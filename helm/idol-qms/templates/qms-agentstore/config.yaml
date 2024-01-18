@@ -13,7 +13,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: qms-agentstore-cfg
+  name: idol-qms-agentstore-cfg
   labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.singleAgentstore ) | nindent 4 }}
 
 data:
