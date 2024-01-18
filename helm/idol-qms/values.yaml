@@ -93,6 +93,13 @@ singleAgentstore:
   # -- the config map to use for providing a qms-agentstore configuration.
   existingConfigMap: "qms-agentstore-cfg"
 
+  # -- Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
+  # N.B. QMS AgentStore creates required databases on startup via poststart script mount
+  additionalVolumeMounts:
+  - name: config-map
+    mountPath: /qms-agentstore/poststart_scripts/qms-agentstore-poststart.sh
+    subPath: qms-agentstore-poststart.sh
+    
   idolImage:
     # -- overrides the default value for single-content.idolImage.repo ("content")
     #    to guarantee that we use an IDOL Agentstore docker image.
