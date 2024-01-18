@@ -91,7 +91,7 @@ singleAgentstore:
   enabled: true
 
   # -- the config map to use for providing a qms-agentstore configuration.
-  existingConfigMap: "qms-agentstore-cfg"
+  existingConfigMap: "idol-qms-agentstore-cfg"
 
   # -- Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
   # N.B. QMS AgentStore creates required databases on startup via poststart script mount
