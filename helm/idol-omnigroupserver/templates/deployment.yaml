@@ -46,10 +46,26 @@ spec:
         volumeMounts:
         - name: config-map
           mountPath: /etc/config/idol
+  {{- if .Values.oauthToolConfigMap }}
+        - name: oauth-tool-config-map
+          mountPath: /etc/config/idol
+        - name: oauth-startup-config-map
+          mountPath: /omnigroupserver/prestart_scripts
+  {{- end -}}
         env:
         - name: IDOL_COMPONENT_CFG
           value: "/etc/config/idol/omnigroupserver.cfg"
+        - name: OAUTH_TOOL_CONFIG
+          value: "/etc/config/idol/oauth_tool.cfg"
       volumes:
       - name: config-map
         configMap:
           name: {{ default (printf "%s-default-cfg" .Values.name) .Values.existingConfigMap }}
+{{- if .Values.oauthToolConfigMap }}
+      - name: oauth-tool-config-map
+        configMap:
+          name: {{ .Values.oauthToolConfigMap }}
+      - name: oauth-startup-config-map
+        configMap:
+          name: {{ .Values.name }}-oauth-startup-scripts
+{{- end -}}

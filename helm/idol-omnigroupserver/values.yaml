@@ -34,6 +34,10 @@ licenseServerPort: "20000"
 # existingConfigMap -- if specified, mounted at /etc/config/idol and expected to provide omnigroupserver.cfg
 existingConfigMap: ""
 
+# oauthConfigMap -- if specified, is the name of a ConfigMap that is expected to provide oauth_tool.config.
+# It will be mounted at /etc/config/idol and oauth_tool.exe will be run across all of the config sections.
+oauthToolConfigMap: ""
+
 ##### INGRESS VARIABLES #####
 
 # enableIngress -- Create ingress resource

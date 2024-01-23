@@ -18,4 +18,16 @@ data:
   omnigroupserver.cfg: |
 {{ tpl (.Files.Get "resources/omnigroupserver.cfg") . | indent 4 }}
 {{- end -}}
-  
+{{- if .Values.oauthToolConfigMap }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.name }}-oauth-startup-scripts
+  labels: {{- include "idol-library.labels" . | nindent 4 }}
+data:
+  001_startup.sh: |
+{{ tpl (.Files.Get "resources/001_oauth_startup.sh") . | nindent 4 }}
+  utils/oauth_tool_setup.sh: |
+{{ tpl (.Files.Get "resources/oauth_tool_setup.sh") . | nindent 4 }}
+{{- end -}}
