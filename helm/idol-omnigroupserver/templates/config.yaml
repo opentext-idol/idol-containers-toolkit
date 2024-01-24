@@ -13,13 +13,14 @@
     "root" .
     "component" .Values
     "componentName" (trimPrefix "idol-" .Values.name)
-) -}}
+) }}
+
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: oauth-startup-scripts-cm
-  labels: {{- include "idol-library.labels" . | nindent 4 }}
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values ) | nindent 4 }}
 data:
   001_startup.sh: |
 {{ tpl (.Files.Get "resources/001_oauth_startup.sh") . | nindent 4 }}
