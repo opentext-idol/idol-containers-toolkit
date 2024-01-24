@@ -14,16 +14,14 @@
     "component" .Values
     "componentName" (trimPrefix "idol-" .Values.name)
 ) -}}
-{{- if .Values.oauthToolConfigMap }}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.name }}-oauth-startup-scripts
+  name: oauth-startup-scripts-cm
   labels: {{- include "idol-library.labels" . | nindent 4 }}
 data:
   001_startup.sh: |
 {{ tpl (.Files.Get "resources/001_oauth_startup.sh") . | nindent 4 }}
-  utils/oauth_tool_setup.sh: |
-{{ tpl (.Files.Get "resources/oauth_tool_setup.sh") . | nindent 4 }}
-{{- end -}}
+  oauth_tool_setup_functions: |
+{{ tpl (.Files.Get "resources/oauth_tool_setup_functions") . | nindent 4 }}
