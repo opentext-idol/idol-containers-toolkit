@@ -232,8 +232,7 @@
             ],
             "allOf":[
                 { "$ref": "#/$defs/aciCommon" }
-            ],
-            "unevaluatedProperties": false
+            ]
         },
         "idol_services":{
             "type":"object",
@@ -241,8 +240,14 @@
                 "queryserviceName":{
                     "type": "string"
                 },
+                "queryserviceACIPort":{
+                    "$ref": "#/$defs/port_number"
+                },
                 "indexserviceName":{
                     "type": "string"
+                },
+                "indexserviceACIPort":{
+                    "$ref": "#/$defs/port_number"
                 }
             }
         }
