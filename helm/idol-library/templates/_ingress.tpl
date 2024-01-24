@@ -21,16 +21,27 @@ metadata:
   name: {{ $component.name | quote }}
   labels: {{- include "idol-library.labels" . | nindent 4 }}
   annotations:
+{{- $annotations := dict -}}
 {{- if eq $ingress.type "nginx" }}
-    nginx.ingress.kubernetes.io/rewrite-target: /$1
+  {{- $_ := mergeOverwrite $annotations (dict
+      "nginx.ingress.kubernetes.io/rewrite-target" "/$1"
+      "nginx.ingress.kubernetes.io/backend-protocol" (ternary "HTTPS" "HTTP" $component.usingTLS)
+  ) -}}
   {{- if $ingress.proxyBodySize }}
-    nginx.ingress.kubernetes.io/proxy-body-size: {{ $ingress.proxyBodySize }}
+    {{- $_ := set $annotations "nginx.ingress.kubernetes.io/proxy-body-size" ($ingress.proxyBodySize) -}}
   {{- end -}}
 {{- else if eq $ingress.type "haproxy" }}
-    haproxy.router.openshift.io/rewrite-target: / 
+ {{- $_ := mergeOverwrite $annotations (dict
+      "haproxy.router.openshift.io/rewrite-target" "/"
+  ) -}}
   {{- if $ingress.proxyBodySize }}
-    haproxy.router.openshift.io/proxy-body-size: {{ $ingress.proxyBodySize }}
-  {{- end -}}
+    {{- $_ := set $annotations "haproxy.router.openshift.io/proxy-body-size" ($ingress.proxyBodySize) -}}
+  {{- end -}}  
+{{- end -}}
+{{/* ingress setup is very dependent on cluster ingress controller so allow user value annotations */ -}}
+{{  $_ := mergeOverwrite $annotations (default $ingress.annotations dict )}}
+{{ with $annotations }}
+{{- toYaml . | trim | indent 4 }}
 {{- end }}
 spec:
 {{- if $ingress.className }}
