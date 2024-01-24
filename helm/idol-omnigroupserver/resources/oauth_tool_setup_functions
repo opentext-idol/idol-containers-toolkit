@@ -12,6 +12,14 @@ function generate_missing_oauth_config() {
     OAUTH_TOOL_CFG_SECTION=$3
     REQUIRED_FILENAME=$4
 
+    touch ./oauth.cfg
+    if [[ ./oauth.cfg -ef ${REQUIRED_FILENAME} ]]
+    then
+        echo Error: ${REQUIRED_FILENAME} clashes with ./oauth.cfg. Bad news!
+        return 1
+    fi
+    rm ./oauth.cfg
+
     if [[ -e ${REQUIRED_FILENAME} ]]
     then
         echo Cowardly not overwriting existing file ${REQUIRED_FILENAME}

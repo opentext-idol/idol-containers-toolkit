@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2023 Open Text.
+# Copyright 2024 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -8,18 +8,10 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ .Values.name | quote }}
-  labels: {{- include "idol-library.labels" . | nindent 4 }}
-spec:
-  ports:
-  - port: {{ .Values.aciPort | int }}
-    targetPort: aci-port
-    name: aci-port
-  - port: {{ .Values.servicePort | int }}
-    targetPort: service-port
-    name: service-port
-  selector:
-    app: {{ .Values.name | quote }}
+{{ include "idol-library.aciserver.service" (dict 
+    "root" .
+    "component" .Values
+    "destination" "idol-omnigroupserver.service") }}
+{{- define "idol-omnigroupserver.service" -}}
+{{/* Any OGS specific merges to base template go here */}}
+{{- end -}}
