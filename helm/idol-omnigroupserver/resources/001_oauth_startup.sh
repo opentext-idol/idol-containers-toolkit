@@ -1,6 +1,6 @@
 #/bin/bash
 
-source ./oauth_tool_setup_functions
+source /${IDOL_COMPONENT}/prestart_scripts/oauth_tool_setup_functions
 
 if [[ ! -e ${OAUTH_TOOL_CFG} ]]
 then
