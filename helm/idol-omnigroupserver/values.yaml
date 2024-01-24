@@ -34,8 +34,8 @@ licenseServerPort: "20000"
 # existingConfigMap -- if specified, mounted at /etc/config/idol and expected to provide omnigroupserver.cfg
 existingConfigMap: ""
 
-# oauthConfigMap -- if specified, is the name of a ConfigMap that is expected to provide oauth_tool.config.
-# It will be mounted at /etc/config/idol and oauth_tool.exe will be run across all of the config sections.
+# oauthToolConfigMap -- if specified, is the name of a ConfigMap that is expected to provide oauth_tool.cfg.
+# It will be mounted at /etc/config/idol and used by oauth_tool.exe to generate necessary OAuth configuration.
 oauthToolConfigMap: ""
 
 ##### INGRESS VARIABLES #####
@@ -64,6 +64,16 @@ aciPort: "3057"
 servicePort: "3058"
 livenessProbe:
   initialDelaySeconds: 30
+
+additionalVolumes:
+- name: oauth-startup-scripts
+  configMap:
+    name: oauth-startup-scripts-cm
+
+additionalVolumeMounts:
+- name: oauth-startup-scripts
+  mountPath: /omnigroupserver/prestart_scripts
+
 
 ##### SUB-CHART VARIABLES #####
 idol-licenseserver:

@@ -14,26 +14,4 @@
     "destination" "idol-omnigroupserver.deployment")  }}
 {{- define "idol-omnigroupserver.deployment" -}}
 {{/* Any OGS specific merges to base template go here */}}
-{{- if .Values.oauthToolConfigMap }}
-spec:
-  template:
-    spec:
-      containers:
-      - name: {{ .Values.name | quote }}
-        volumeMounts:
-        - name: oauth-tool-config-map
-          mountPath: /etc/config/idol
-        - name: oauth-startup-config-map
-          mountPath: /omnigroupserver/prestart_scripts
-        env:
-        - name: OAUTH_TOOL_CONFIG
-          value: "/etc/config/idol/oauth_tool.cfg"
-      volumes:
-      - name: oauth-tool-config-map
-        configMap:
-          name: {{ .Values.oauthToolConfigMap }}
-      - name: oauth-startup-config-map
-        configMap:
-          name: {{ .Values.name }}-oauth-startup-scripts
-{{- end -}}
 {{- end -}}
