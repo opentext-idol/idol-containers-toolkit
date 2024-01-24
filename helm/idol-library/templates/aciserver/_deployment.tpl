@@ -59,6 +59,8 @@ spec:
         env:
         - name: IDOL_COMPONENT_CFG
           value: {{ printf "/etc/config/idol/%s.cfg" (trimPrefix "idol-" $component.name) }}
+        - name: OAUTH_TOOL_CFG
+          value: /etc/config/idol/oauth_tool.cfg
         {{- if $component.envConfigMap }}
         envFrom:
         - configMapRef: {{ $component.envConfigMap | quote }}
