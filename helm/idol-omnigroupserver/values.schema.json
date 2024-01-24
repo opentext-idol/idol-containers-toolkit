@@ -33,6 +33,9 @@
         "existingConfigMap": {
             "type": "string"
         },
+        "oauthToolConfigMap": {
+            "type": "string"
+        },
         "enableIngress": {
             "type": "boolean"
         },
@@ -58,6 +61,12 @@
         },
         "livenessProbe": {
             "$ref": "#/$defs/liveness_probe"
+        },
+        "additionalVolumes":{
+            "type": "array"
+        },
+        "additionalVolumeMounts":{
+            "type": "array"
         },
         "idol-licenseserver": {
             "$ref": "#/$defs/optional_subchart"
