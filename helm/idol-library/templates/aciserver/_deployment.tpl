@@ -42,6 +42,7 @@ spec:
           httpGet:
             path: /a=getpid
             port: {{ $component.aciPort | int }}
+            scheme: {{ $component.usingTLS | ternary "HTTPS" "HTTP" }}
 {{- template "idol-library.standardLivenessProbe" $component.livenessProbe }}
         ports:
         - containerPort: {{ $component.aciPort | int }}
