@@ -60,6 +60,10 @@ spec:
         env:
         - name: IDOL_COMPONENT_CFG
           value: {{ printf "/etc/config/idol/%s.cfg" (trimPrefix "idol-" $component.name) }}
+        {{- if $component.usingTLS -}}
+        - name: IDOL_SSL
+          value: "1"
+        {{- end -}}
         {{- if $component.envConfigMap }}
         envFrom:
         - configMapRef: 
