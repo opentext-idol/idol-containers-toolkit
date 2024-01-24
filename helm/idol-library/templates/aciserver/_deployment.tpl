@@ -61,7 +61,8 @@ spec:
           value: {{ printf "/etc/config/idol/%s.cfg" (trimPrefix "idol-" $component.name) }}
         {{- if $component.envConfigMap }}
         envFrom:
-        - configMapRef: {{ $component.envConfigMap | quote }}
+        - configMapRef: 
+            name: {{ $component.envConfigMap | quote }}
         {{ end }}
       volumes:
       - name: config-map
