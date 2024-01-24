@@ -53,6 +53,8 @@ spec:
         volumeMounts:
         - name: config-map
           mountPath: /etc/config/idol
+        - name: oauth-tool-cm
+          mountPath: /etc/config/oauth
         {{- range $component.additionalVolumeMounts }}
         - {{ . | toYaml | nindent 10 }}
         {{- end }}
@@ -60,7 +62,7 @@ spec:
         - name: IDOL_COMPONENT_CFG
           value: {{ printf "/etc/config/idol/%s.cfg" (trimPrefix "idol-" $component.name) }}
         - name: OAUTH_TOOL_CFG
-          value: /etc/config/idol/oauth_tool.cfg
+          value: /etc/config/oauth/oauth_tool.cfg
         {{- if $component.envConfigMap }}
         envFrom:
         - configMapRef: {{ $component.envConfigMap | quote }}
@@ -69,6 +71,9 @@ spec:
       - name: config-map
         configMap:
           name: {{ default (printf "%s-default-cfg" $component.name) $component.existingConfigMap }}
+      - name: oauth-tool-cm
+        configMap:
+          name: {{ default (printf "%s-default-oauth-tool-cfg" $component.name) $component.oauthToolConfigMap }}
       {{- range $component.additionalVolumes }}
       - {{ . | toYaml | nindent 8 }}
       {{- end }}
