@@ -48,7 +48,7 @@ function handle_oauth_setup() {
     OAUTH_TOOL_CFG=$3
 
     # /${COMPONENT_NAME}/oauth_tool.exe must exist as an executable for this to succeed
-    OAUTH_TOOL_PATH=${COMPONENT_NAME}/oauth_tool.exe
+    OAUTH_TOOL_PATH=/${COMPONENT_NAME}/oauth_tool.exe
     if [[ ! -x ${OAUTH_TOOL_PATH} ]]
     then
         echo Error: Could not find ${OAUTH_TOOL_PATH} for OAuth setup
