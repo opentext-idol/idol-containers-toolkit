@@ -15,7 +15,7 @@ of these endpoints to exist in the cluster.
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../idol-library | idol-library | 0.5.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.5.0 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | 0.1.0 |
 
 ## Values
