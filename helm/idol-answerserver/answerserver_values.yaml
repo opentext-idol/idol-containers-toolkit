@@ -1,0 +1,27 @@
+licenseServerHostname: &answerserverLicenseServerHostname "10.88.126.192"
+idolImage:
+  registry: &answerserverIdolImageRegistry idol-docker-images.svsartifactory.swinfra.net
+aciPort: "16000"
+#agentStoreACIPort: "9150"
+
+passageextractorSingleAgentstore:
+  registry: *answerserverIdolImageRegistry
+  licenseServerHostname: *answerserverLicenseServerHostname
+  aciPort: "9180"
+  contentStorageClass: "standard"
+  idol-licenseserver:
+    enabled: false
+answerbankSingleAgentstore:
+  registry: *answerserverIdolImageRegistry
+  licenseServerHostname: *answerserverLicenseServerHostname
+  aciPort: "9160"
+  contentStorageClass: "standard"
+  idol-licenseserver:
+    enabled: false
+single-content:
+  registry: *answerserverIdolImageRegistry
+  licenseServerHostname: *answerserverLicenseServerHostname
+  aciPort: "9170"
+  contentStorageClass: "standard"
+  idol-licenseserver:
+    enabled: false

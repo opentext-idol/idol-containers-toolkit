@@ -1,0 +1,35 @@
+{{ template "chart.header" . }}
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{- $component := "answerserver" }}
+{{- $appVersion := .AppVersion }}
+{{- $versionList := slice (splitList "." $appVersion) 0 2 }}
+
+{{- $docsLink := printf "https://www.microfocus.com/documentation/idol/IDOL_%s/%s_%s_Documentation/Help/" (join "." $versionList ) $component (join "." $versionList) }}
+
+Provides an IDOL {{ $component }} deployment.
+
+Depends on connections to:
+
+- IDOL LicenseServer (`licenseServerHostname`)
+- IDOL Content/Agentstore (`answerBankAgentstoreHostname`, `answerBankAgentstorePort`, `passageExtractorHostname`, `passageExtractorPort`, `passageExtractorAgentstoreHostname`, `passageExtractorAgentstorePort`)
+
+The config file can be overridden via `existingConfigMap`.
+
+This chart may be used to provide query & result modification and promotion management functionality.
+
+> Full documentation for answerserver available from {{ $docsLink }}
+
+{{ template "chart.homepageLine" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.requirementsSection" . }}
+
+{{ template "chart.valuesSection" . }}
+
+{{ template "helm-docs.versionFooter" . }}
