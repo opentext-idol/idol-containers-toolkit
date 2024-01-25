@@ -32,6 +32,8 @@ idolImage:
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
   repo: "omnigroupserver"
 
+usingTLS: false
+
 # licenseServerHostname -- the hostname of the IDOL LicenseServer (or abstraction)
 licenseServerHostname: "idol-licenseserver"
 # licenseServerPort -- the ACI port of the IDOL LicenseServer (or abstraction)

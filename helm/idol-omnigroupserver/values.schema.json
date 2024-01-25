@@ -38,6 +38,9 @@
         "servicePort": {
             "$ref": "#/$defs/port_number"
         },
+        "usingTLS": {
+            "type": "boolean"
+        },
         "livenessProbe": {
             "$ref": "#/$defs/liveness_probe"
         },
