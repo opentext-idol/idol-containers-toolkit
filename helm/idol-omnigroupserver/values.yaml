@@ -41,7 +41,10 @@ licenseServerPort: "20000"
 existingConfigMap: ""
 
 # oauthToolConfigMap -- if specified, is the name of a ConfigMap that is expected to provide oauth_tool.cfg.
-# It will be mounted at /etc/config/idol and used by oauth_tool.exe to generate necessary OAuth configuration.
+# It will be mounted at /etc/config/oauth and used by oauth_tool.exe to generate necessary OAuth configuration.
+# Be aware that this WILL NOT WORK if the OAuth workflow requires user interaction. If this is the case, the
+# OAuth workflow must be conducted elsewhere and the resulting files mounted into the Omnigroupserver
+# container at the expected places for your configuration.
 oauthToolConfigMap: ""
 
 ##### INGRESS VARIABLES #####
