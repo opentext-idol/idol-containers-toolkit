@@ -75,11 +75,12 @@ livenessProbe:
 additionalVolumes:
 - name: oauth-startup-scripts
   configMap:
-    name: oauth-startup-scripts-cm
+    name: omnigroupserver-oauth-startup-scripts-cm
 
 additionalVolumeMounts:
 - name: oauth-startup-scripts
   mountPath: /omnigroupserver/prestart_scripts
+  readOnly: true
 
 
 ##### SUB-CHART VARIABLES #####
