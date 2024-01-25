@@ -161,6 +161,15 @@ entries:
     version: 0.1.0
   idol-library:
   - apiVersion: v2
+    created: "2024-01-25T11:25:04.43282838Z"
+    description: An IDOL Helm library chart for Kubernetes
+    digest: 7d153c461776de7226ccc5d3d18e30d9ce5f39c589d27c7b46af7b1bce6cfce2
+    name: idol-library
+    type: library
+    urls:
+    - release/idol-library-0.5.0.tgz
+    version: 0.5.0
+  - apiVersion: v2
     created: "2023-12-11T10:54:15.756034856Z"
     description: An IDOL Helm library chart for Kubernetes
     digest: 1680d885a0b9521ac7ef1ad648477878afac3a001168e42b741645859decb1be
@@ -312,6 +321,23 @@ entries:
   single-content:
   - apiVersion: v2
     appVersion: "24.1"
+    created: "2024-01-25T12:25:29.288297975Z"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.5.0
+    - condition: idol-licenseserver.enabled
+      name: idol-licenseserver
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.1.0
+    description: A configurable single-IDOL setup
+    digest: ca079ff7b7af540c0df6d127422f2f073dd445990121196112907485ea90827b
+    name: single-content
+    urls:
+    - release/single-content-0.5.0.tgz
+    version: 0.5.0
+  - apiVersion: v2
+    appVersion: "24.1"
     created: "2024-01-18T12:54:35.828519343Z"
     dependencies:
     - name: idol-library
@@ -378,4 +404,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2023-12-14T16:56:45.463242564Z"
+generated: "2024-01-25T12:25:29.28597332Z"

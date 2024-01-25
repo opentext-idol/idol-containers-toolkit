@@ -46,9 +46,14 @@ spec:
           value: {{ .Values.aciPort | quote }}
         - name: IDOL_COMMAND_PARAMS
           value: "-idolcluster"
+        {{- if .Values.usingTLS }}
+        - name: IDOL_SSL
+          value: "1"
+        {{- end }}
         {{- if .Values.envConfigMap }}
         envFrom:
-        - configMapRef: {{ .Values.envConfigMap | quote }}
+        - configMapRef: 
+            name: {{ .Values.envConfigMap | quote }}
         {{ end }}
         lifecycle:
           postStart:
@@ -62,6 +67,7 @@ spec:
           httpGet:
             path: /a=getpid
             port: {{ .Values.aciPort | int }}
+            scheme: {{ .Values.usingTLS | ternary "HTTPS" "HTTP" }}
 {{- template "idol-library.standardLivenessProbe" .Values.livenessProbe }}
         ports:
         - containerPort: {{ .Values.aciPort | int }}

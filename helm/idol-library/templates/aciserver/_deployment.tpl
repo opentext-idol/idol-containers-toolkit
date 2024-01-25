@@ -42,6 +42,7 @@ spec:
           httpGet:
             path: /a=getpid
             port: {{ $component.aciPort | int }}
+            scheme: {{ $component.usingTLS | ternary "HTTPS" "HTTP" }}
 {{- template "idol-library.standardLivenessProbe" $component.livenessProbe }}
         ports:
         - containerPort: {{ $component.aciPort | int }}
@@ -68,9 +69,14 @@ spec:
         - name: OAUTH_TOOL_CFG
           value: /etc/config/oauth/oauth_tool.cfg
         {{- end }}
+        {{- if $component.usingTLS -}}
+        - name: IDOL_SSL
+          value: "1"
+        {{- end -}}
         {{- if $component.envConfigMap }}
         envFrom:
-        - configMapRef: {{ $component.envConfigMap | quote }}
+        - configMapRef: 
+            name: {{ $component.envConfigMap | quote }}
         {{ end }}
       volumes:
       - name: config-map
