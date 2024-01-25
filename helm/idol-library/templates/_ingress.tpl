@@ -33,6 +33,7 @@ metadata:
 {{- else if eq $ingress.type "haproxy" }}
  {{- $_ := mergeOverwrite $annotations (dict
       "haproxy.router.openshift.io/rewrite-target" "/"
+      "haproxy.router.openshift.io/backend-protocol" (ternary "https" "http" $component.usingTLS)
   ) -}}
   {{- if $ingress.proxyBodySize }}
     {{- $_ := set $annotations "haproxy.router.openshift.io/proxy-body-size" ($ingress.proxyBodySize) -}}
