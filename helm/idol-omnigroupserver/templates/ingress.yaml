@@ -14,7 +14,7 @@
     "ingress" .Values.ingress
     "destination" "idol-omnigroupserver.ingress")  -}}
 {{- define "idol-omnigroupserver.ingress" -}}
-{{/* Any QMS specific merges to base template go here */}}
+{{/* Any omnigroupserver specific merges to base template go here */}}
 {{- $root := get . "root" | required "missing root" -}}
 {{- $component := get . "component" | required "missing component" -}}
 spec:
