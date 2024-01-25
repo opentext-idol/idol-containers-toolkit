@@ -26,7 +26,7 @@ function generate_missing_oauth_config() {
         return 0
     fi
 
-    ${OAUTH_TOOL_PATH} ${OAUTH_TOOL_CFG} ${OAUTH_TOOL_CFG_SECTION}
+    ${OAUTH_TOOL_PATH} ${OAUTH_TOOL_CFG} ${OAUTH_TOOL_CFG_SECTION} > /dev/null 2>&1
     if [ $? -ne 0 ]
     then
         echo ${OAUTH_TOOL_PATH} ${OAUTH_TOOL_CFG} ${OAUTH_TOOL_CFG_SECTION} failed!
