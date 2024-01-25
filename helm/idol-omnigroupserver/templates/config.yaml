@@ -19,7 +19,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: omnigroupserver-oauth-startup-scripts-cm
+  name: {{ .Values.name }}-oauth-prestart-scripts-cm
   labels: {{- include "idol-library.labels" (dict "root" . "component" .Values ) | nindent 4 }}
 immutable: true
 data:

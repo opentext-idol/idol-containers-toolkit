@@ -15,6 +15,9 @@
 */}}
 {{ $root := get . "root" | required "missing root" }}
 {{ $component := get . "component" | required "missing component" }}
+{{ $env := get . "env" | default list }}
+{{ $volumes := get . "volumes" | default list }}
+{{ $volumeMounts := get . "volumeMounts" | default list }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -54,10 +57,8 @@ spec:
         volumeMounts:
         - name: config-map
           mountPath: /etc/config/idol
-        {{- if $component.oauthToolConfigMap }}
-        - name: oauth-tool-cm
-          mountPath: /etc/config/oauth
-          readOnly: true
+        {{- range $volumeMounts }}
+        - {{ . | toYaml | nindent 10 }}
         {{- end }}
         {{- range $component.additionalVolumeMounts }}
         - {{ . | toYaml | nindent 10 }}
@@ -65,9 +66,8 @@ spec:
         env:
         - name: IDOL_COMPONENT_CFG
           value: {{ printf "/etc/config/idol/%s.cfg" (trimPrefix "idol-" $component.name) }}
-        {{- if $component.oauthToolConfigMap }}
-        - name: OAUTH_TOOL_CFG
-          value: /etc/config/oauth/oauth_tool.cfg
+        {{- range $env }}
+        - {{ . | toYaml | nindent 10 }}
         {{- end }}
         {{- if $component.usingTLS -}}
         - name: IDOL_SSL
@@ -82,10 +82,8 @@ spec:
       - name: config-map
         configMap:
           name: {{ default (printf "%s-default-cfg" $component.name) $component.existingConfigMap }}
-      {{- if $component.oauthToolConfigMap }}
-      - name: oauth-tool-cm
-        configMap:
-          name: {{ $component.oauthToolConfigMap }}
+      {{- range $volumes }}
+      - {{ . | toYaml | nindent 8 }}
       {{- end }}
       {{- range $component.additionalVolumes }}
       - {{ . | toYaml | nindent 8 }}
