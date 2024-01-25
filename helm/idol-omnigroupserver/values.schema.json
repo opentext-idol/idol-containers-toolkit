@@ -3,25 +3,11 @@
     "title": "Values",
     "type": "object",
     "properties": {
-        "idolImageRegistry": {
-            "type": "string",
-            "format": "hostname"
+        "global":{
+            "$ref": "#/$defs/global"
         },
-        "idolVersion": {
-            "type": "string",
-            "minLength": 1
-        },
-        "imagePullSecrets": {
-            "type": "array",
-            "minItems": 1,
-            "items": {
-                "type": "string",
-                "minLength": 1
-            }
-        },
-        "image": {
-            "type": "string",
-            "minLength": 1
+        "idolImage": {
+            "$ref": "#/$defs/idolImage"
         },
         "licenseServerHostname": {
             "type": "string",
@@ -33,18 +19,14 @@
         "existingConfigMap": {
             "type": "string"
         },
+        "oauthToolConfigMap": {
+            "type": "string"
+        },
         "enableIngress": {
             "type": "boolean"
         },
-        "ingressType": {
-            "type": "string",
-            "enum": ["nginx","haproxy"]
-        },
-        "ingressClassName": {
-            "type": "string"
-        },
-        "ingressHost": {
-            "type": "string"
+        "ingress": {
+            "$ref": "#/$defs/ingress"
         },
         "name": {
             "type": "string",
@@ -56,8 +38,17 @@
         "servicePort": {
             "$ref": "#/$defs/port_number"
         },
+        "usingTLS": {
+            "type": "boolean"
+        },
         "livenessProbe": {
             "$ref": "#/$defs/liveness_probe"
+        },
+        "additionalVolumes":{
+            "type": "array"
+        },
+        "additionalVolumeMounts":{
+            "type": "array"
         },
         "idol-licenseserver": {
             "$ref": "#/$defs/optional_subchart"
@@ -65,13 +56,11 @@
 
     },
     "required": [
-        "idolImageRegistry",
-        "idolVersion",
-        "imagePullSecrets",
-        "image",
+        "global",
+        "idolImage",
         "licenseServerHostname",
         "licenseServerPort",
-        "enableIngress",
+        "ingress",
         "name",
         "aciPort",
         "servicePort",
@@ -83,6 +72,72 @@
         "port_number": {
             "type": "string",
             "pattern": "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$"
+        },
+        "ingress":{
+            "type": "object",
+            "properties":{
+                "enabled": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": ["nginx","haproxy"]
+                },
+                "className": {
+                    "type": "string"
+                },
+                "host": {
+                    "type": "string"
+                }
+            },
+            "required":[
+                "enabled",
+                "type"
+            ]
+        },
+        "idolImage":{
+            "type": "object",
+            "properties":{
+                "registry": {
+                    "type": "string",
+                    "format": "hostname"
+                },
+                "version": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "repo": {
+                    "type": "string",
+                    "minLength": 1
+                }
+            },
+            "required":[
+                "registry",
+                "version",
+                "repo"
+            ]
+        },
+        "global":{
+            "type": "object",
+            "properties":{
+                "idolImageRegistry": {
+                    "type": "string"
+                },
+                "idolVersion": {
+                    "type": "string"
+                },
+                "imagePullSecrets": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                }
+            },
+            "required":[
+                "imagePullSecrets"
+            ]
         },
         "liveness_probe": {
             "type": "object",

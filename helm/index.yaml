@@ -1,5 +1,12 @@
 # BEGIN COPYRIGHT NOTICE
-# (c) Copyright 2023 Micro Focus or one of its affiliates.
+# Copyright 2023-2024 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
 # END COPYRIGHT NOTICE
 apiVersion: v1
 entries:
@@ -161,6 +168,15 @@ entries:
     version: 0.1.0
   idol-library:
   - apiVersion: v2
+    created: "2024-01-25T16:58:43.7603201Z"
+    description: An IDOL Helm library chart for Kubernetes
+    digest: 40663044128c526f9d7d266a0bb5d6b74276521b14917c88753920654c59ed7e
+    name: idol-library
+    type: library
+    urls:
+    - release/idol-library-0.6.0.tgz
+    version: 0.6.0
+  - apiVersion: v2
     created: "2024-01-25T11:25:04.43282838Z"
     description: An IDOL Helm library chart for Kubernetes
     digest: 7d153c461776de7226ccc5d3d18e30d9ce5f39c589d27c7b46af7b1bce6cfce2
@@ -247,6 +263,23 @@ entries:
     - release/idol-nifi-0.1.0.tgz
     version: 0.1.0
   idol-omnigroupserver:
+  - apiVersion: v2
+    appVersion: "24.1"
+    created: "2024-01-25T17:03:32.2450541Z"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.6.0
+    - condition: idol-licenseserver.enabled
+      name: idol-licenseserver
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.1.0
+    description: Adds IDOL OmniGroupServer
+    digest: e8d792d063a9f140b4eb7ca5ee0ef52dd99587c33180235fc4e96df6258b49bb
+    name: idol-omnigroupserver
+    urls:
+    - release/idol-omnigroupserver-0.2.0.tgz
+    version: 0.2.0
   - apiVersion: v2
     appVersion: "23.4"
     created: "2023-11-15T12:33:26.668544361Z"
@@ -404,4 +437,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2024-01-25T12:25:29.28597332Z"
+generated: "2024-01-25T17:03:32.2388643Z"

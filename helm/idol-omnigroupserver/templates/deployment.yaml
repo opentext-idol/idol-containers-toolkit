@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2023 Open Text.
+# Copyright 2023-2024 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -8,48 +8,21 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: {{ .Values.name | quote }}
-  labels: {{- include "idol-library.labels" . | nindent 4 }}
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: {{ .Values.name | quote }}
-  template:
-    metadata:
-      labels: {{- include "idol-library.labels" . | nindent 8 }}
-        app: {{ .Values.name | quote }}
-    spec:
-      imagePullSecrets:
-        {{- range .Values.imagePullSecrets }}
-        - name: {{ . }}
-        {{- end }}
-      containers:
-      - name: {{ .Values.name | quote }}
-        image: {{ .Values.idolImageRegistry }}/{{ .Values.image }}:{{ .Values.idolVersion }}
-        imagePullPolicy: IfNotPresent
-        livenessProbe:
-          httpGet:
-            path: /a=getpid
-            port: aci-port
-{{- template "idol-library.standardLivenessProbe" .Values.livenessProbe }}
-        ports:
-        - containerPort: {{ .Values.aciPort | int }}
-          name: aci-port
-          protocol: TCP
-        - containerPort: {{ .Values.servicePort | int }}
-          name: service-port
-          protocol: TCP
-        volumeMounts:
-        - name: config-map
-          mountPath: /etc/config/idol
-        env:
-        - name: IDOL_COMPONENT_CFG
-          value: "/etc/config/idol/omnigroupserver.cfg"
-      volumes:
-      - name: config-map
-        configMap:
-          name: {{ default (printf "%s-default-cfg" .Values.name) .Values.existingConfigMap }}
+{{- $env := list }}
+{{- $volumes := list }}
+{{- $volumeMounts := list }}
+{{- if .Values.oauthToolConfigMap }}
+{{- $env = append $env (dict "name" "OAUTH_TOOL_CFG" "value" "/etc/config/oauth/oauth_tool.cfg")}}
+{{- $volumes = concat $volumes (list (dict "name" "oauth-tool-config-file" "configMap" (dict "name" .Values.oauthToolConfigMap)) (dict "name" "oauth-prestart-scripts" "configMap" (dict "name" (printf "%s-oauth-prestart-scripts-cm" .Values.name)))) }}
+{{- $volumeMounts = concat $volumeMounts (list (dict "name" "oauth-tool-config-file" "mountPath" "/etc/config/oauth" "readOnly" true) (dict "name" "oauth-prestart-scripts" "mountPath" "/omnigroupserver/prestart_scripts" "readOnly" true)) }}
+{{- end }}
+{{ include "idol-library.aciserver.deployment" (dict 
+    "root" .
+    "component" .Values
+    "env" $env
+    "volumes" $volumes
+    "volumeMounts" $volumeMounts
+    "destination" "idol-omnigroupserver.deployment")  }}
+{{- define "idol-omnigroupserver.deployment" -}}
+{{/* Any OGS specific merges to base template go here */}}
+{{- end -}}

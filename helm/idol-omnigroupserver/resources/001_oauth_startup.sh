@@ -1,3 +1,5 @@
+#/bin/bash
+
 # BEGIN COPYRIGHT NOTICE
 # Copyright 2023-2024 Open Text.
 # 
@@ -8,10 +10,13 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-{{ include "idol-library.aciserver.service" (dict 
-    "root" .
-    "component" .Values
-    "destination" "idol-omnigroupserver.service") }}
-{{- define "idol-omnigroupserver.service" -}}
-{{/* Any OGS specific merges to base template go here */}}
-{{- end -}}
+
+source /${IDOL_COMPONENT}/prestart_scripts/oauth_tool_setup_functions
+
+if [[ ! -e ${OAUTH_TOOL_CFG} ]]
+then
+    echo No oauth_tool.cfg provided at ${OAUTH_TOOL_CFG}: OAuth will not be automatically configured via oauth_tool
+else
+    echo Automatically configuring OAuth using oauth_tool and ${OAUTH_TOOL_CFG}
+    handle_oauth_setup ${IDOL_COMPONENT} ${IDOL_COMPONENT_CFG} ${OAUTH_TOOL_CFG}
+fi

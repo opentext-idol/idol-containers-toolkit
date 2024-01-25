@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2023 Open Text.
+# Copyright 2023-2024 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -15,6 +15,9 @@
 */}}
 {{ $root := get . "root" | required "missing root" }}
 {{ $component := get . "component" | required "missing component" }}
+{{ $env := get . "env" | default list }}
+{{ $volumes := get . "volumes" | default list }}
+{{ $volumeMounts := get . "volumeMounts" | default list }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -54,12 +57,18 @@ spec:
         volumeMounts:
         - name: config-map
           mountPath: /etc/config/idol
+        {{- range $volumeMounts }}
+        - {{ . | toYaml | nindent 10 }}
+        {{- end }}
         {{- range $component.additionalVolumeMounts }}
         - {{ . | toYaml | nindent 10 }}
         {{- end }}
         env:
         - name: IDOL_COMPONENT_CFG
           value: {{ printf "/etc/config/idol/%s.cfg" (trimPrefix "idol-" $component.name) }}
+        {{- range $env }}
+        - {{ . | toYaml | nindent 10 }}
+        {{- end }}
         {{- if $component.usingTLS -}}
         - name: IDOL_SSL
           value: "1"
@@ -73,6 +82,9 @@ spec:
       - name: config-map
         configMap:
           name: {{ default (printf "%s-default-cfg" $component.name) $component.existingConfigMap }}
+      {{- range $volumes }}
+      - {{ . | toYaml | nindent 8 }}
+      {{- end }}
       {{- range $component.additionalVolumes }}
       - {{ . | toYaml | nindent 8 }}
       {{- end }}
