@@ -27,9 +27,9 @@ This chart may be used to provide query & result modification and promotion mana
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../single-content | singleAgentstore(single-content) | 0.4.0 |
-| file://../single-content | single-content | 0.4.0 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.4.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | singleAgentstore(single-content) | 0.4.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | single-content | 0.4.0 |
 
 ## Values
 

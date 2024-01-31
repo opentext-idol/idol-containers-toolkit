@@ -11,6 +11,7 @@ SUBCHARTS:=idol-library \
 	idol-stack \
 	idol-qms \
 	idol-answerserver \
+	idol-view \
 	distributed-idol \
 	single-content
 
@@ -35,7 +36,11 @@ index.yaml: $(wildcard staging/release/*)
 
 # packages releases to staging directory
 ${PACKAGE_SUBCHARTS}: package-% : %/README.md
-	helm package ${UPDATE_DEPENDENCIES} -d staging/release $*/
+	if [ -z `git ls-files --other --exclude-standard $*` ]; then \
+		helm package ${UPDATE_DEPENDENCIES} -d staging/release $*/ ; \
+	else \
+		echo "Untracked files exist in $*" ; \
+	fi
 
 ${README_SUBCHARTS}: %/README.md: %/values.yaml %/Chart.yaml %/README.md.gotmpl
 	docker run --rm -v `pwd`/$*:/helm-docs -u `id -u` jnorwood/helm-docs:latest
