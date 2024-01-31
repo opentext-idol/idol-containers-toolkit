@@ -1,5 +1,7 @@
+#!/bin/bash
+
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2023 Open Text.
+# Copyright 2024 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -8,13 +10,8 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: idol-factbank-postgres-init
-data:
-  {{- $ctx := . }}
-  {{- range tuple "factbank_unified.sql" "01-codings.sql" "02-facts.sql"}}
-  {{ . }}: |-
-{{ tpl (. | print "resources/postgres/" | $ctx.Files.Get) $ctx | indent 4 }}
-  {{- end }}
+
+# Creates a copy of the config file to avoid read-only issue
+
+cp /etc/config/idol/answerserver.cfg /answerserver/answerserver.cfg
+export IDOL_COMPONENT_CFG="/answerserver/answerserver.cfg"

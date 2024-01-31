@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2023 Open Text.
+# Copyright 2024 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -8,13 +8,17 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
+
 apiVersion: v1
 kind: ConfigMap
+
 metadata:
-  name: idol-factbank-postgres-init
+  name: idol-answerserver-cfg
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values ) | nindent 4 }}
+
 data:
-  {{- $ctx := . }}
-  {{- range tuple "factbank_unified.sql" "01-codings.sql" "02-facts.sql"}}
-  {{ . }}: |-
-{{ tpl (. | print "resources/postgres/" | $ctx.Files.Get) $ctx | indent 4 }}
-  {{- end }}
+  answerserver.cfg: |
+{{ tpl (print "resources/answerserver.cfg" | .Files.Get) . | indent 4 }}
+
+  config.sh: |
+{{ tpl (print "resources/config.sh" | .Files.Get) . | indent 4 }}

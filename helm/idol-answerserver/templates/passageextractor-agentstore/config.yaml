@@ -23,6 +23,6 @@ data:
   passageextractor-agentstore-poststart.sh: |
 {{ tpl (print "resources/passageextractor-agentstore-poststart.sh" | .Files.Get) . | indent 4 }}
 
-  passageextractor-agentstore-startup.sh: |
-{{ tpl (print "resources/passageextractor-agentstore-startup.sh" | .Files.Get) . | indent 4 }}
+  passageextractor-agentstore-poststart_2.sh: |
+{{ tpl (print "resources/passageextractor-agentstore-poststart_2.sh" | .Files.Get) . | indent 4 }}
 {{- end }}

@@ -11,10 +11,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: idol-factbank-postgres
+  name: {{ .Values.postgresqlHostname }}
 spec:
   ports:
-  - port: 5432
+  - port: {{ .Values.postgresqlACIPort | int }}
     targetPort: tcp-postgresql
     name: tcp-postgresql
   selector:

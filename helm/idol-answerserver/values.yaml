@@ -36,8 +36,8 @@ licenseServerHostname: "idol-licenseserver"
 # licenseServerPort -- the ACI port of the IDOL LicenseServer (or abstraction)
 licenseServerPort: "20000"
 
-# existingConfigMap -- if specified, mounted at /etc/config/idol and expected to provide community.cfg
-existingConfigMap: ""
+# existingConfigMap -- if specified, mounted at /etc/config/idol and expected to provide answerserver.cfg
+existingConfigMap: "idol-answerserver-cfg"
 
 # -- Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
 additionalVolumes: []
@@ -46,23 +46,23 @@ additionalVolumes: []
 additionalVolumeMounts: []
 
 # -- Default configuration for [PostgreSQL]::IdolHost
-postgresqlHostname: &postgresqlHostname "idol-factbank-postgres"
+postgresqlHostname: "idol-factbank-postgres"
 # -- Default configuration for [PostgreSQL]::IdolAciPort
-postgresqlACIPort: &postgresqlACIPort "9150"
+postgresqlACIPort: "5432"
 
 # -- Default configuration for [AnswerBank]::AgentstoreHost
 answerBankAgentstoreHostname: &answerBankAgentstoreHostname "idol-answerbank-agentstore"
 # -- Default configuration for [AnswerBank]::AgentstoreAciPort
-answerBankAgentstorePort: &answerBankAgentstorePort "9160"
+answerBankAgentstorePort: &answerBankAgentstorePort "12200"
 
 # -- Default configuration for [PassageExtractor]::IdolHost
 passageExtractorHostname: &passageExtractorHostname "idol-passageextractor"
 # -- Default configuration for [PassageExtractor]::IdolAciPort
-passageExtractorPort: &passageExtractorPort "9170"
+passageExtractorPort: &passageExtractorPort "9100"
 # -- Default configuration for [PassageExtractor]::AgentstoreHost
 passageExtractorAgentstoreHostname: &passageExtractorAgentstoreHostname "idol-passageextractor-agentstore"
 # -- Default configuration for [PassageExtractor]::AgentstoreAciPort
-passageExtractorAgentstorePort: &passageExtractorAgentstorePort "9180"
+passageExtractorAgentstorePort: &passageExtractorAgentstorePort "12300"
 
 ##### INGRESS VARIABLES #####
 
@@ -85,9 +85,9 @@ ingress:
 # name -- used to name deployment, service, ingress
 name: "idol-answerserver"
 # aciPort -- port service will serve ACI connections on
-aciPort: "16000"
+aciPort: "12000"
 # servicePort -- port service will serve service connections on
-servicePort: "16002"
+servicePort: "12002"
 # livenessProbe -- container livenessProbe settings
 livenessProbe:
   initialDelaySeconds: 120
@@ -110,7 +110,7 @@ passageextractorSingleAgentstore:
     subPath: passageextractor-agentstore-poststart.sh
   - name: config-map
     mountPath: /passageextractor-agentstore/poststart_scripts/002_startup_tasks.sh
-    subPath: passageextractor-agentstore-startup.sh
+    subPath: passageextractor-agentstore-poststart_2.sh
     
   idolImage:
     # -- overrides the default value for single-content.idolImage.repo ("content")
@@ -201,6 +201,9 @@ single-content:
   # -- the content engine's query service ACI port
   queryserviceACIPort: *passageExtractorPort
 
+  indexserviceName: "idol-index-service"
+  indexserviceACIPort: "9070"
+
   idol-licenseserver:
     # -- whether to deploy the idol-licenseserver sub-chart
     enabled: false
@@ -210,9 +213,9 @@ postgresql:
   enabled: true
   
   auth:
-    database: "factbank-data"
-    username: "postgres"
-    password: "password"
+    database: factbank-data
+    username: postgres
+    password: password
   
   primary:
     persistence:
