@@ -12,7 +12,7 @@ apiVersion: v2
 name: idol-answerserver
 version: "0.1.0"
 appVersion: "24.1"
-description: Adds IDOL ANSWERSERVER
+description: Adds IDOL AnswerServer
 dependencies:
 - name: idol-library
   version: "0.4.0"
