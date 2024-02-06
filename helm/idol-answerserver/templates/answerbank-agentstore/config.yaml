@@ -9,12 +9,12 @@
 #
 # END COPYRIGHT NOTICE
 
-{{- if .Values.answerbankSingleAgentstore.enabled }}
+{{- if .Values.answerbankAgentstore.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: idol-answerbank-agentstore-cfg
-  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.answerbankSingleAgentstore ) | nindent 4 }}
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.answerbankAgentstore ) | nindent 4 }}
 
 data:
   answerbank-agentstore.cfg: |

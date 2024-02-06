@@ -11,14 +11,14 @@
 #
 # END COPYRIGHT NOTICE
 
-# Creates required databases for QMS AgentStore
+# Creates required databases for PassageExtractor AgentStore
 
 source /content/startup_utils.sh
 
-waitForAci "localhost:{{ .Values.passageextractorSingleAgentstore.aciPort | int }}"
+waitForAci "localhost:{{ .Values.passageextractorAgentstore.aciPort | int }}"
 DBS="agent profile activated deactivated DataAdminDeleted"
 
 for DB in ${DBS};
 do
-    curl "http://localhost:{{ .Values.passageextractorSingleAgentstore.indexPort | int }}/DRECREATEDBASE?&DREDBNAME=${DB}"
+    curl "http://localhost:{{ .Values.passageextractorAgentstore.indexPort | int }}/DRECREATEDBASE?&DREDBNAME=${DB}"
 done

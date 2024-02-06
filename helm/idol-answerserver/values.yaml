@@ -93,7 +93,7 @@ livenessProbe:
   initialDelaySeconds: 120
 
 
-passageextractorSingleAgentstore:
+passageextractorAgentstore:
 
   # -- whether to deploy the single-content sub-chart that uses an IDOL Agentstore
   #    configuration file and docker image.
@@ -142,7 +142,7 @@ passageextractorSingleAgentstore:
     # -- whether to deploy the idol-licenseserver sub-chart
     enabled: false
 
-answerbankSingleAgentstore:
+answerbankAgentstore:
 
   # -- whether to deploy the single-content sub-chart that uses an IDOL Agentstore
   #    configuration file and docker image.

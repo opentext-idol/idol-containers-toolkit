@@ -20,9 +20,9 @@ This chart may be used to provide query & result modification and promotion mana
 | Repository | Name | Version |
 |------------|------|---------|
 | https://charts.bitnami.com/bitnami | postgresql | 13.2.3 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.4.0 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | passageextractorSingleAgentstore(single-content) | 0.4.0 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | answerbankSingleAgentstore(single-content) | 0.4.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.6.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | passageextractorAgentstore(single-content) | 0.4.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | answerbankAgentstore(single-content) | 0.5.1 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | single-content | 0.4.0 |
 
 ## Values
@@ -34,19 +34,21 @@ This chart may be used to provide query & result modification and promotion mana
 | additionalVolumes | list | `[]` | Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes) |
 | answerBankAgentstoreHostname | string | `"idol-answerbank-agentstore"` | Default configuration for [AnswerBank]::AgentstoreHost |
 | answerBankAgentstorePort | string | `"12200"` | Default configuration for [AnswerBank]::AgentstoreAciPort |
-| answerbankSingleAgentstore.aciPort | string | `"12200"` | agentstore port service will serve ACI connections on |
-| answerbankSingleAgentstore.additionalVolumeMounts | list | `[{"mountPath":"/answerbank-agentstore/poststart_scripts/answerbank-agentstore-poststart.sh","name":"config-map","subPath":"answerbank-agentstore-poststart.sh"}]` | Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes) N.B. QMS AgentStore creates required databases on startup via poststart script mount |
-| answerbankSingleAgentstore.enabled | bool | `true` | whether to deploy the single-content sub-chart that uses an IDOL Agentstore    configuration file and docker image. |
-| answerbankSingleAgentstore.existingConfigMap | string | `"idol-answerbank-agentstore-cfg"` | the config map to use for providing a qms-agentstore configuration. |
-| answerbankSingleAgentstore.idol-licenseserver.enabled | bool | `false` | whether to deploy the idol-licenseserver sub-chart |
-| answerbankSingleAgentstore.idolImage.repo | string | `"answerbank-agentstore"` | overrides the default value for single-content.idolImage.repo ("content")    to guarantee that we use an IDOL Agentstore docker image. |
-| answerbankSingleAgentstore.indexserviceName | string | `""` | the agentstore engine's index service name |
-| answerbankSingleAgentstore.ingress.indexPath | string | `"/answerbank-agentstore-index/"` | the ingress controller path to access the agentstore index service with |
-| answerbankSingleAgentstore.ingress.path | string | `"/answerbank-agentstore/"` | the ingress controller path to access the agentstore query service with |
-| answerbankSingleAgentstore.name | string | `"idol-answerbank-agentstore"` | used to name deployment, service, ingress |
-| answerbankSingleAgentstore.queryserviceACIPort | string | `"12200"` | the agentstore engine's query service ACI port |
-| answerbankSingleAgentstore.queryserviceName | string | `""` | the agentstore engine's query service name |
+| answerbankAgentstore.aciPort | string | `"12200"` | agentstore port service will serve ACI connections on |
+| answerbankAgentstore.additionalVolumeMounts | list | `[{"mountPath":"/answerbank-agentstore/poststart_scripts/answerbank-agentstore-poststart.sh","name":"config-map","subPath":"answerbank-agentstore-poststart.sh"}]` | Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes) N.B. QMS AgentStore creates required databases on startup via poststart script mount |
+| answerbankAgentstore.enabled | bool | `true` | whether to deploy the single-content sub-chart that uses an IDOL Agentstore    configuration file and docker image. |
+| answerbankAgentstore.existingConfigMap | string | `"idol-answerbank-agentstore-cfg"` | the config map to use for providing a qms-agentstore configuration. |
+| answerbankAgentstore.idol-licenseserver.enabled | bool | `false` | whether to deploy the idol-licenseserver sub-chart |
+| answerbankAgentstore.idolImage.repo | string | `"answerbank-agentstore"` | overrides the default value for single-content.idolImage.repo ("content")    to guarantee that we use an IDOL Agentstore docker image. |
+| answerbankAgentstore.indexserviceName | string | `""` | the agentstore engine's index service name |
+| answerbankAgentstore.ingress.indexPath | string | `"/answerbank-agentstore-index/"` | the ingress controller path to access the agentstore index service with |
+| answerbankAgentstore.ingress.path | string | `"/answerbank-agentstore/"` | the ingress controller path to access the agentstore query service with |
+| answerbankAgentstore.name | string | `"idol-answerbank-agentstore"` | used to name deployment, service, ingress |
+| answerbankAgentstore.queryserviceACIPort | string | `"12200"` | the agentstore engine's query service ACI port |
+| answerbankAgentstore.queryserviceName | string | `""` | the agentstore engine's query service name |
 | existingConfigMap | string | `"idol-answerserver-cfg"` | if specified, mounted at /etc/config/idol and expected to provide answerserver.cfg |
+| factbankPostgresqlPort | string | `"5432"` | FactBank Postgresql Port configuration |
+| factbankPostgresqlServer | string | `"idol-factbank-postgres"` | FactBank Postgresql Server configuration |
 | global.idolImageRegistry | string | `""` | Global override value for idolImage.registry |
 | global.idolVersion | string | `""` | Global override value for idolImage.version |
 | global.imagePullSecrets | list | `["dockerhub-secret"]` | Global secrets used to pull container images |
@@ -63,20 +65,20 @@ This chart may be used to provide query & result modification and promotion mana
 | name | string | `"idol-answerserver"` | used to name deployment, service, ingress |
 | passageExtractorAgentstoreHostname | string | `"idol-passageextractor-agentstore"` | Default configuration for [PassageExtractor]::AgentstoreHost |
 | passageExtractorAgentstorePort | string | `"12300"` | Default configuration for [PassageExtractor]::AgentstoreAciPort |
-| passageExtractorHostname | string | `"idol-passageextractor"` | Default configuration for [PassageExtractor]::IdolHost |
+| passageExtractorHostname | string | `"idol-query-service"` | Default configuration for [PassageExtractor]::IdolHost |
 | passageExtractorPort | string | `"9100"` | Default configuration for [PassageExtractor]::IdolAciPort |
-| passageextractorSingleAgentstore.aciPort | string | `"12300"` | agentstore port service will serve ACI connections on |
-| passageextractorSingleAgentstore.additionalVolumeMounts | list | `[{"mountPath":"/passageextractor-agentstore/poststart_scripts/passageextractor-agentstore-poststart.sh","name":"config-map","subPath":"passageextractor-agentstore-poststart.sh"},{"mountPath":"/passageextractor-agentstore/poststart_scripts/002_startup_tasks.sh","name":"config-map","subPath":"passageextractor-agentstore-poststart_2.sh"}]` | Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes) N.B. QMS AgentStore creates required databases on startup via poststart script mount |
-| passageextractorSingleAgentstore.enabled | bool | `true` | whether to deploy the single-content sub-chart that uses an IDOL Agentstore    configuration file and docker image. |
-| passageextractorSingleAgentstore.existingConfigMap | string | `"idol-passageextractor-agentstore-cfg"` | the config map to use for providing a qms-agentstore configuration. |
-| passageextractorSingleAgentstore.idol-licenseserver.enabled | bool | `false` | whether to deploy the idol-licenseserver sub-chart |
-| passageextractorSingleAgentstore.idolImage.repo | string | `"passageextractor-agentstore"` | overrides the default value for single-content.idolImage.repo ("content")    to guarantee that we use an IDOL Agentstore docker image. |
-| passageextractorSingleAgentstore.indexserviceName | string | `""` | the agentstore engine's index service name |
-| passageextractorSingleAgentstore.ingress.indexPath | string | `"/passageextractor-agentstore-index/"` | the ingress controller path to access the agentstore index service with |
-| passageextractorSingleAgentstore.ingress.path | string | `"/passageextractor-agentstore/"` | the ingress controller path to access the agentstore query service with |
-| passageextractorSingleAgentstore.name | string | `"idol-passageextractor-agentstore"` | used to name deployment, service, ingress |
-| passageextractorSingleAgentstore.queryserviceACIPort | string | `"12300"` | the agentstore engine's query service ACI port |
-| passageextractorSingleAgentstore.queryserviceName | string | `""` | the agentstore engine's query service name |
+| passageextractorAgentstore.aciPort | string | `"12300"` | agentstore port service will serve ACI connections on |
+| passageextractorAgentstore.additionalVolumeMounts | list | `[{"mountPath":"/passageextractor-agentstore/poststart_scripts/passageextractor-agentstore-poststart.sh","name":"config-map","subPath":"passageextractor-agentstore-poststart.sh"},{"mountPath":"/passageextractor-agentstore/poststart_scripts/002_startup_tasks.sh","name":"config-map","subPath":"passageextractor-agentstore-poststart_2.sh"}]` | Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes) N.B. QMS AgentStore creates required databases on startup via poststart script mount |
+| passageextractorAgentstore.enabled | bool | `true` | whether to deploy the single-content sub-chart that uses an IDOL Agentstore    configuration file and docker image. |
+| passageextractorAgentstore.existingConfigMap | string | `"idol-passageextractor-agentstore-cfg"` | the config map to use for providing a qms-agentstore configuration. |
+| passageextractorAgentstore.idol-licenseserver.enabled | bool | `false` | whether to deploy the idol-licenseserver sub-chart |
+| passageextractorAgentstore.idolImage.repo | string | `"passageextractor-agentstore"` | overrides the default value for single-content.idolImage.repo ("content")    to guarantee that we use an IDOL Agentstore docker image. |
+| passageextractorAgentstore.indexserviceName | string | `""` | the agentstore engine's index service name |
+| passageextractorAgentstore.ingress.indexPath | string | `"/passageextractor-agentstore-index/"` | the ingress controller path to access the agentstore index service with |
+| passageextractorAgentstore.ingress.path | string | `"/passageextractor-agentstore/"` | the ingress controller path to access the agentstore query service with |
+| passageextractorAgentstore.name | string | `"idol-passageextractor-agentstore"` | used to name deployment, service, ingress |
+| passageextractorAgentstore.queryserviceACIPort | string | `"12300"` | the agentstore engine's query service ACI port |
+| passageextractorAgentstore.queryserviceName | string | `""` | the agentstore engine's query service name |
 | postgresql.auth.database | string | `"factbank-data"` |  |
 | postgresql.auth.password | string | `"password"` |  |
 | postgresql.auth.username | string | `"postgres"` |  |
@@ -85,8 +87,6 @@ This chart may be used to provide query & result modification and promotion mana
 | postgresql.primary.initdb.scriptsConfigMap | string | `"idol-factbank-postgres-init"` |  |
 | postgresql.primary.persistence.storageClass | string | `"standard"` |  |
 | postgresql.primary.podSecurityContext.enabled | bool | `true` |  |
-| postgresqlACIPort | string | `"5432"` | Default configuration for [PostgreSQL]::IdolAciPort |
-| postgresqlHostname | string | `"idol-factbank-postgres"` | Default configuration for [PostgreSQL]::IdolHost |
 | servicePort | string | `"12002"` | port service will serve service connections on |
 | single-content.aciPort | string | `"9100"` | content port service will serve ACI connections on |
 | single-content.enabled | bool | `true` | whether to deploy the single-content sub-chart. |
@@ -94,7 +94,7 @@ This chart may be used to provide query & result modification and promotion mana
 | single-content.indexserviceACIPort | string | `"9070"` |  |
 | single-content.indexserviceName | string | `"idol-index-service"` |  |
 | single-content.queryserviceACIPort | string | `"9100"` | the content engine's query service ACI port |
-| single-content.queryserviceName | string | `"idol-passageextractor"` | the content engine's query service name |
+| single-content.queryserviceName | string | `"idol-query-service"` | the content engine's query service name |
 
 ----------------------------------------------
 Autogenerated from chart metadata using [helm-docs v1.12.0](https://github.com/norwoodj/helm-docs/releases/v1.12.0)

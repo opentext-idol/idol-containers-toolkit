@@ -19,11 +19,11 @@
         "existingConfigMap": {
             "type": "string"
         },
-        "postgresqlHostname": {
+        "factbankPostgresqlServer": {
             "type": "string",
             "format": "hostname"
         },
-        "postgresqlACIPort":{
+        "factbankPostgresqlPort":{
             "$ref": "#/$defs/port_number"
         },
         "answerBankAgentstoreHostname": {
@@ -76,8 +76,8 @@
         "licenseServerHostname",
         "licenseServerPort",
         "ingress",
-        "postgresqlHostname",
-        "postgresqlACIPort",
+        "factbankPostgresqlServer",
+        "factbankPostgresqlPort",
         "answerBankAgentstoreHostname",
         "answerBankAgentstorePort",
         "passageExtractorHostname",

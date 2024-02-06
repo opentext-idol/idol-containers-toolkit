@@ -15,10 +15,10 @@
 
 source /content/startup_utils.sh
 
-waitForAci "localhost:{{ .Values.answerbankSingleAgentstore.aciPort | int }}"
+waitForAci "localhost:{{ .Values.answerbankAgentstore.aciPort | int }}"
 DBS="agent profile activated deactivated DataAdminDeleted"
 
 for DB in ${DBS};
 do
-    curl "http://localhost:{{ .Values.answerbankSingleAgentstore.indexPort | int }}/DRECREATEDBASE?&DREDBNAME=${DB}"
+    curl "http://localhost:{{ .Values.answerbankAgentstore.indexPort | int }}/DRECREATEDBASE?&DREDBNAME=${DB}"
 done
