@@ -56,7 +56,7 @@ answerBankAgentstoreHostname: &answerBankAgentstoreHostname "idol-answerbank-age
 answerBankAgentstorePort: &answerBankAgentstorePort "12200"
 
 # -- Default configuration for [PassageExtractor]::IdolHost
-passageExtractorHostname: &passageExtractorHostname "idol-passageextractor"
+passageExtractorHostname: &passageExtractorHostname "idol-query-service"
 # -- Default configuration for [PassageExtractor]::IdolAciPort
 passageExtractorPort: &passageExtractorPort "9100"
 # -- Default configuration for [PassageExtractor]::AgentstoreHost
