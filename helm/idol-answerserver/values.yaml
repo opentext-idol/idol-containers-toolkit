@@ -45,10 +45,10 @@ additionalVolumes: []
 # -- Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1)
 additionalVolumeMounts: []
 
-# -- Default configuration for [PostgreSQL]::IdolHost
-postgresqlHostname: "idol-factbank-postgres"
-# -- Default configuration for [PostgreSQL]::IdolAciPort
-postgresqlACIPort: "5432"
+# -- FactBank Postgresql Server configuration
+factbankPostgresqlServer: "idol-factbank-postgres"
+# -- FactBank Postgresql Port configuration
+factbankPostgresqlPort: "5432"
 
 # -- Default configuration for [AnswerBank]::AgentstoreHost
 answerBankAgentstoreHostname: &answerBankAgentstoreHostname "idol-answerbank-agentstore"
