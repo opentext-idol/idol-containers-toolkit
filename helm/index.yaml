@@ -116,17 +116,17 @@ entries:
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
-      version: 0.4.0
-    - alias: passageextractorSingleAgentstore
-      condition: passageextractorSingleAgentstore.enabled
+      version: 0.6.0
+    - alias: passageextractorAgentstore
+      condition: passageextractorAgentstore.enabled
       name: single-content
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
       version: 0.4.0
-    - alias: answerbankSingleAgentstore
-      condition: answerbankSingleAgentstore.enabled
+    - alias: answerbankAgentstore
+      condition: answerbankAgentstore.enabled
       name: single-content
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
-      version: 0.4.0
+      version: 0.5.1
     - condition: single-content.enabled
       name: single-content
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
@@ -135,7 +135,7 @@ entries:
       name: postgresql
       repository: https://charts.bitnami.com/bitnami
       version: 13.2.3
-    description: Adds IDOL ANSWERSERVER
+    description: Adds IDOL AnswerServer
     digest: 1a1135b6b060e2d093473e48cf0a1e6be56d70b20056bc4aedbec3e71cbab299
     name: idol-answerserver
     urls:
