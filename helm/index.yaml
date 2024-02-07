@@ -1,6 +1,6 @@
 # BEGIN COPYRIGHT NOTICE
 # Copyright 2023-2024 Open Text.
-# 
+#
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
 # products and services. Nothing herein should be construed as constituting an additional warranty.
@@ -265,6 +265,23 @@ entries:
   idol-omnigroupserver:
   - apiVersion: v2
     appVersion: "24.1"
+    created: "2024-02-07T14:31:33.1455356Z"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.6.0
+    - condition: idol-licenseserver.enabled
+      name: idol-licenseserver
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.1.0
+    description: Adds IDOL OmniGroupServer
+    digest: b0fe0d211e62b9b02c3931faeff687deadc042f8249176198269051f9ae0b273
+    name: idol-omnigroupserver
+    urls:
+    - release/idol-omnigroupserver-0.2.1.tgz
+    version: 0.2.1
+  - apiVersion: v2
+    appVersion: "24.1"
     created: "2024-01-25T17:03:32.2450541Z"
     dependencies:
     - name: idol-library
@@ -468,4 +485,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2024-02-05T16:23:34.212137316Z"
+generated: "2024-02-07T14:31:33.1398454Z"
