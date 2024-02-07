@@ -28,6 +28,27 @@ additional config-map with the OGS config file - see `.Values.existingConfigMap`
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.6.0 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | 0.1.0 |
 
+## Automated OAuth Configuration Generation at Prestart
+
+If `oauthToolConfigMap` is set to a non-empty string, then the OmniGroupServer pod will
+attempt to automatically generate any missing OAuth configuration at Prestart.
+1. The Prestart script will detect any [External Configuration File Includes](https://www.microfocus.com/documentation/idol/IDOL_24_1/OmniGroupServer_24.1_Documentation/Help/Content/Configuration/_ACI_Config_Intro.htm#Include-an-Exter)
+   of the "Merge a section of an external configuration file into a specified section with a different name" form,
+   where the `SharedSection` is "OAUTH".
+2. For each matching external configuration section include in the OmniGroupServer configuration, if the
+   required file path (referred to as `ConfigurationFile.cfg` in the linked documentation) is missing,
+   an attempt to generate it via `oauth_tool` will be made. `oauth_tool` will be invoked with the
+   `oauth_tool.cfg` supplied in the ConfigMap referred to by `oauthToolConfigMap`, and the section name
+   specified by `SectionName` in the external configuration section include.
+
+### Constraints
+1. The required file path (referred to as `ConfigurationFile.cfg` in the linked documentation) MUST NOT
+   be `/omnigroupserver/oauth.cfg`.
+2. The oauth_tool workflow MUST NOT require user interaction. Some OAuth providers require user interaction in
+   their workflow. For any OAuth configuration where this is the case, the OAuth workflow must be conducted elsewhere
+   and the resulting files mounted into the Omnigroupserver container at the expected places for your configuration -
+   the presence of the files will prevent automated generation attempts.
+
 ## Values
 
 | Key | Type | Default | Description |
