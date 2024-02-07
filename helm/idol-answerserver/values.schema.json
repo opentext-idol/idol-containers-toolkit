@@ -127,6 +127,13 @@
                 },
                 "host": {
                     "type": "string"
+                },
+                "proxyBodySize":{
+                    "type":"string",
+                    "pattern": "^\\d+(?:\\.\\d+)?(?:Ki|Mi|Gi|Ti|Pi|Ei|m|k|M|G|T|P|E)?$"
+                },
+                "annotations": {
+                    "type": "object"
                 }
             },
             "required":[
