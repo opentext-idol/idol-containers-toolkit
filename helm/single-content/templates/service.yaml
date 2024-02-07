@@ -35,7 +35,7 @@ spec:
 # Note that non-ACI port numbers must in practice match those
 # configured in the underlying IDOL server, as clients will
 # read these from the action=GetStatus response.
-{{- if .Values.indexServiceName }}
+{{- if .Values.indexserviceName }}
 {{ include "idol-library.aciserver.service" (dict 
     "root" .
     "component" .Values

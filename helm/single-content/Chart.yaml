@@ -3,7 +3,7 @@
 # END COPYRIGHT NOTICE
 apiVersion: v2
 name: single-content
-version: 0.5.0
+version: 0.5.1
 appVersion: "24.1"
 description: A configurable single-IDOL setup
 dependencies:
