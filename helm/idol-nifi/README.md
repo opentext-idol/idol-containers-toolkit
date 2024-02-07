@@ -27,7 +27,7 @@ Provides a scaleable IDOL NiFi cluster instance (NiFi, NiFi Registry and ZooKeep
 | idol-licenseserver.licenseServerPort | string | `"20000"` | the ACI port of the IDOL LicenseServer (or abstraction) |
 | idol-licenseserver.licenseServerService | string | `"idol-licenseserver"` | the hostname of the IDOL LicenseServer (or abstraction) |
 | idolImageRegistry | string | `"microfocusidolserver"` | used to construct container image name: {idolImageRegistry}/{nifi.imageName}:{idolVersion} |
-| idolVersion | string | `"23.4"` | used to construct container image name: {idolImageRegistry}/{nifi.imageName}:{idolVersion} |
+| idolVersion | string | `"24.1"` | used to construct container image name: {idolImageRegistry}/{nifi.imageName}:{idolVersion} |
 | imagePullSecrets | list | `["dockerhub-secret"]` | secrets used to pull container images |
 | indexserviceACIPort | string | `"9070"` | the ACI port of the indexing IDOL component |
 | indexserviceName | string | `"idol-index-service"` | the hostname of the indexing IDOL component |

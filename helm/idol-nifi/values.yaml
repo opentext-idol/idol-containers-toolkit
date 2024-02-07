@@ -12,7 +12,7 @@
 # idolImageRegistry -- used to construct container image name: {idolImageRegistry}/{nifi.imageName}:{idolVersion}
 idolImageRegistry: microfocusidolserver
 # idolVersion -- used to construct container image name: {idolImageRegistry}/{nifi.imageName}:{idolVersion}
-idolVersion: "23.4"
+idolVersion: "24.1"
 
 # imagePullSecrets -- secrets used to pull container images
 imagePullSecrets:
