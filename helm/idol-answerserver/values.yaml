@@ -42,13 +42,19 @@ licenseServerHostname: "idol-licenseserver"
 licenseServerPort: "20000"
 
 # existingConfigMap -- if specified, mounted at /etc/config/idol and expected to provide answerserver.cfg
-existingConfigMap: "idol-answerserver-cfg"
+existingConfigMap: ""
 
 # -- Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
-additionalVolumes: []
+additionalVolumes:
+- name: idol-answerserver-cfg
+  configMap:
+    name: idol-answerserver-cfg
 
 # -- Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1)
-additionalVolumeMounts: []
+additionalVolumeMounts:
+- name: idol-answerserver-cfg
+  mountPath: /answerserver/prestart_scripts/00_config.sh
+  subPath: config.sh
 
 # -- FactBank Postgresql Server configuration
 factbankPostgresqlServer: "idol-factbank-postgres"

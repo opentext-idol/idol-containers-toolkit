@@ -11,14 +11,10 @@
 
 apiVersion: v1
 kind: ConfigMap
-
 metadata:
   name: idol-answerserver-cfg
   labels: {{- include "idol-library.labels" (dict "root" . "component" .Values ) | nindent 4 }}
 
 data:
-  answerserver.cfg: |
-{{ tpl (print "resources/answerserver.cfg" | .Files.Get) . | indent 4 }}
-
   config.sh: |
 {{ tpl (print "resources/config.sh" | .Files.Get) . | indent 4 }}
