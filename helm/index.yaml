@@ -232,6 +232,19 @@ entries:
     version: 0.1.0
   idol-licenseserver:
   - apiVersion: v2
+    created: "2024-02-07T14:47:18.622106918Z"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.6.0
+    description: Creates an IDOL LicenseServer proxy service accessible to other elements
+      of the cluster
+    digest: 4e2038d5b40f6c9d837149e66fffdc49f74f17e2e3379301cbc3027e0be95c85
+    name: idol-licenseserver
+    urls:
+    - release/idol-licenseserver-0.2.0.tgz
+    version: 0.2.0
+  - apiVersion: v2
     created: "2023-10-18T17:09:11.455319006+01:00"
     dependencies:
     - name: idol-library
@@ -485,4 +498,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2024-02-07T14:31:33.1398454Z"
+generated: "2024-02-07T14:47:18.62122272Z"
