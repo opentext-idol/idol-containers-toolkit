@@ -204,7 +204,7 @@ answerbankAgentstore:
   queryserviceACIPort: *answerBankAgentstorePort
 
   # -- the agentstore engine's index service name
-  indexserviceName: ""
+  indexserviceName: "idol-answerbank-agentstore-index"
 
   # -- used to name deployment, service, ingress
   name: *answerBankAgentstoreHostname
