@@ -12,7 +12,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: zookeeper-cm
-  labels: {{- include "idol-nifi.labels" . | nindent 4 -}}
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.zookeeper) | nindent 4 -}}
     app: zookeeper
 data:
   ALLOW_ANONYMOUS_LOGIN: "yes"
