@@ -18,7 +18,12 @@ Depends on connections to:
 
 The config file can be overridden via `existingConfigMap`.
 
-This chart may be used to provide query & result modification and promotion management functionality.
+This chart provides an `idol-answerserver` system along with answerbank, factbank and passagegextractor systems. 
+These systems are empty initially, and data can be indexed into them via the provided index services. 
+For example, the passageextractor system accesses documents stored in the content engine with `idol-index-service`
+and `idol-query-service` services. These systems are all optional and can be disabled as desired. 
+To use a passageextractorLLM system, you must first set up a persistent volume and index the appropriate model
+files, then redeploy the chart with LLM configuration information in your answerserver configuration file. 
 
 > Full documentation for answerserver available from {{ $docsLink }}
 
