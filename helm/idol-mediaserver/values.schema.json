@@ -43,6 +43,24 @@
         },
         "usingTLS":{
             "type": "boolean"
+        },
+        "processMaximumThreads": {
+            "type": "integer"
+        },
+        "audioChannels": {
+            "type": "integer"
+        },
+        "surveillanceChannels": {
+            "type": "integer"
+        },
+        "videoManagementChannels": {
+            "type": "integer"
+        },
+        "visualChannels": {
+            "type": "integer"
+        },
+        "modules": {
+            "$ref": "#/$defs/server_modules"
         }
     },
     "required": [
@@ -55,7 +73,13 @@
         "aciPort",
         "servicePort",
         "livenessProbe",
-        "usingTLS"
+        "usingTLS",
+        "processMaximumThreads",
+        "audioChannels",
+        "surveillanceChannels",
+        "videoManagementChannels",
+        "visualChannels",
+        "modules"
     ],
 
     "$defs": {
@@ -78,6 +102,17 @@
                 "failureThreshold": {
                     "type": "integer"
                 }
+            }
+        },
+        "server_modules": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "string",
+                "enum": ["audiocategorize", "audiomatch", "barcode", "clusterspeech", "demographics", "facedetect", "facerecognize",
+                         "facestate", "imageclassification", "imagecomparison", "imagehash", "languageid", "numberplate",
+                         "objectclassrecognition", "objectrecognition", "ocr", "personanalysis", "speakerid", "speechtotext", "vehiclemodel",
+                         "videomatch", "visualclustering"]
             }
         },
         "ingress":{

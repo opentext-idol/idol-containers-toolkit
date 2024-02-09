@@ -50,6 +50,24 @@ additionalVolumeMounts: []
 # to provide required TLS certificates
 usingTLS: false
 
+# -- The maximum number of Process actions that can be run simultaneously
+# Increase this value to match available Channels, if you increase the Channels values
+# See MediaServer documentation for more information about Process actions
+processMaximumThreads: 1
+
+# -- Set the following values to specify exact quantities of license channels to reserve
+# Your license must be able to cover the number of channels you specify here
+audioChannels: 1
+surveillanceChannels: 1
+videoManagementChannels: 1
+visualChannels: 1
+
+# -- Which modules to enable
+# Enable only the modules you want to use, to reduce memory usage and improve startup speed
+modules:
+- "ocr"
+- "speechtotext"
+
 ##### INGRESS VARIABLES #####
 
 ingress:
