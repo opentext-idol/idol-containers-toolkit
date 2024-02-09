@@ -21,17 +21,17 @@ This chart may be used to provide query & result modification and promotion mana
 |------------|------|---------|
 | https://charts.bitnami.com/bitnami | postgresql | 13.2.3 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.6.0 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | passageextractorAgentstore(single-content) | 0.4.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | passageextractorAgentstore(single-content) | 0.5.1 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | answerbankAgentstore(single-content) | 0.5.1 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | single-content | 0.4.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | single-content | 0.5.1 |
 
 ## Values
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | aciPort | string | `"12000"` | port service will serve ACI connections on |
-| additionalVolumeMounts | list | `[]` | Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1) |
-| additionalVolumes | list | `[]` | Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes) |
+| additionalVolumeMounts | list | `[{"mountPath":"/answerserver/prestart_scripts/00_config.sh","name":"idol-answerserver-scripts","subPath":"config.sh"}]` | Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1) |
+| additionalVolumes | list | `[{"configMap":{"name":"idol-answerserver-scripts"},"name":"idol-answerserver-scripts"}]` | Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes) |
 | answerBankAgentstoreHostname | string | `"idol-answerbank-agentstore"` | Default configuration for [AnswerBank]::AgentstoreHost |
 | answerBankAgentstorePort | string | `"12200"` | Default configuration for [AnswerBank]::AgentstoreAciPort |
 | answerbankAgentstore.aciPort | string | `"12200"` | agentstore port service will serve ACI connections on |
@@ -46,7 +46,7 @@ This chart may be used to provide query & result modification and promotion mana
 | answerbankAgentstore.name | string | `"idol-answerbank-agentstore"` | used to name deployment, service, ingress |
 | answerbankAgentstore.queryserviceACIPort | string | `"12200"` | the agentstore engine's query service ACI port |
 | answerbankAgentstore.queryserviceName | string | `""` | the agentstore engine's query service name |
-| existingConfigMap | string | `"idol-answerserver-cfg"` | if specified, mounted at /etc/config/idol and expected to provide answerserver.cfg |
+| existingConfigMap | string | `""` | if specified, mounted at /etc/config/idol and expected to provide answerserver.cfg |
 | factbankPostgresqlPort | string | `"5432"` | FactBank Postgresql Port configuration |
 | factbankPostgresqlServer | string | `"idol-factbank-postgres"` | FactBank Postgresql Server configuration |
 | global.idolImageRegistry | string | `""` | Global override value for idolImage.registry |
@@ -55,9 +55,11 @@ This chart may be used to provide query & result modification and promotion mana
 | idolImage.registry | string | `"microfocusidolserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | idolImage.repo | string | `"answerserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | idolImage.version | string | `"24.1"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
+| ingress.annotations | object | `{}` | Ingress controller specific annotations Some annotations are added automatically based on ingress.type and other values, but can  be overriden/augmented here e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations |
 | ingress.className | string | `""` | Optional parameter to override the default ingress class |
 | ingress.enabled | bool | `true` | Create ingress resource |
 | ingress.host | string | `""` | Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules). For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration) |
+| ingress.proxyBodySize | string | `"2048m"` | Maximum allowed size of the client request body, defining the maximum size of requests that can be made to IDOL components within the installation, e.g. the amount of data sent in DREADDDATA index commands. The value should be an nginx "size" value. See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the corresponding nginx configuration parameter. |
 | ingress.type | string | `"nginx"` | Ingress controller type to setup for. Valid values are nginx or haproxy (used by OpenShift) |
 | licenseServerHostname | string | `"idol-licenseserver"` | the hostname of the IDOL LicenseServer (or abstraction) |
 | licenseServerPort | string | `"20000"` | the ACI port of the IDOL LicenseServer (or abstraction) |
@@ -95,6 +97,7 @@ This chart may be used to provide query & result modification and promotion mana
 | single-content.indexserviceName | string | `"idol-index-service"` |  |
 | single-content.queryserviceACIPort | string | `"9100"` | the content engine's query service ACI port |
 | single-content.queryserviceName | string | `"idol-query-service"` | the content engine's query service name |
+| usingTLS | bool | `false` | whether aci/service/index ports are configured to use TLS (https). If configuring for TLS, then consider setting IDOL_SSL_COMPONENT_CERT_PATH and IDOL_SSL_COMPONENT_KEY_PATH in envConfigMap to provide required TLS certificates |
 
 ----------------------------------------------
 Autogenerated from chart metadata using [helm-docs v1.12.0](https://github.com/norwoodj/helm-docs/releases/v1.12.0)
