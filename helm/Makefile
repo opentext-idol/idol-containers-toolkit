@@ -10,6 +10,7 @@ SUBCHARTS:=idol-library \
 	idol-omnigroupserver \
 	idol-stack \
 	idol-qms \
+	idol-answerserver \
 	idol-view \
 	distributed-idol \
 	single-content
