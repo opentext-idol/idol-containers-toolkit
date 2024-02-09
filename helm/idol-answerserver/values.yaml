@@ -46,13 +46,13 @@ existingConfigMap: ""
 
 # -- Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
 additionalVolumes:
-- name: idol-answerserver-cfg
+- name: idol-answerserver-scripts
   configMap:
     name: idol-answerserver-scripts
 
 # -- Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1)
 additionalVolumeMounts:
-- name: idol-answerserver-cfg
+- name: idol-answerserver-scripts
   mountPath: /answerserver/prestart_scripts/00_config.sh
   subPath: config.sh
 
