@@ -12,7 +12,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: idol-answerserver-cfg
+  name: idol-answerserver-scripts
   labels: {{- include "idol-library.labels" (dict "root" . "component" .Values ) | nindent 4 }}
 
 data:
