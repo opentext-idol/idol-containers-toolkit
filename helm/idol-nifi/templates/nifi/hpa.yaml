@@ -13,7 +13,7 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: idol-nifi
-  labels: {{- include "idol-nifi.labels" . | nindent 4 -}}
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifi) | nindent 4 -}}
     app.kubernetes.io/name: nifi
 spec:
   scaleTargetRef:

@@ -22,7 +22,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: idol-nifi-aci
-  labels: {{- include "idol-nifi.labels" . | nindent 4 }}
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifi) | nindent 4 -}}
   annotations:
 {{- if eq .Values.ingressType "nginx" }}
     nginx.ingress.kubernetes.io/rewrite-target: /$1

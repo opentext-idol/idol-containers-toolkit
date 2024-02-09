@@ -11,6 +11,7 @@ SUBCHARTS:=idol-library \
 	idol-omnigroupserver \
 	idol-stack \
 	idol-qms \
+	idol-answerserver \
 	idol-view \
 	distributed-idol \
 	single-content
@@ -19,6 +20,7 @@ PACKAGE_SUBCHARTS:=$(addprefix package-,${SUBCHARTS})
 CLEAN_SUBCHARTS:=$(addprefix clean-,${SUBCHARTS})
 # subcharts for which we use helm-docs to generate the README.md from README.md.gotmpl
 README_SUBCHARTS:=$(basename $(wildcard */README.md.gotmpl))
+THIS_YEAR?=$(shell date +%Y)
 
 UPDATE_DEPENDENCIES?=-u
 
@@ -29,10 +31,13 @@ default: package-all index.yaml
 # This moves any staged packages to release and updates the index.yaml
 # Uses staging to avoid trampling existing timestamps
 # See https://github.com/helm/helm/issues/7363 
-index.yaml: $(wildcard staging/release/*)
+index.yaml: $(wildcard staging/release/*) ot_copyright_notice.stl
 	cd staging && helm repo index . --merge ../index.yaml && cd ..
 	mv staging/release/* release/.
-	mv staging/index.yaml index.yaml
+	sed "s/XX_YEAR_XX/${THIS_YEAR}/" ot_copyright_notice.stl > index.yaml.nxt
+	cat staging/index.yaml >> index.yaml.nxt
+	rm staging/index.yaml
+	mv index.yaml.nxt index.yaml
 
 # packages releases to staging directory
 ${PACKAGE_SUBCHARTS}: package-% : %/README.md

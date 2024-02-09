@@ -13,7 +13,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: nifi-registry
-  labels: {{- include "idol-nifi.labels" . | nindent 4 -}}
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifiRegistry) | nindent 4 -}}
     app: nifi-registry
   annotations:
     app.kubernetes.io/name: nifi-registry

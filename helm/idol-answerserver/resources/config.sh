@@ -1,5 +1,7 @@
+#!/bin/bash
+
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2023-2024 Open Text.
+# Copyright 2024 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -8,17 +10,8 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-apiVersion: v2
-name: idol-omnigroupserver
-version: "0.2.1"
-appVersion: "24.1"
-description: Adds IDOL OmniGroupServer
-dependencies:
-- name: idol-library
-  version: "0.6.0"
-  repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
-- name: idol-licenseserver
-  condition: idol-licenseserver.enabled
-  version: "0.1.0"
-  repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 
+# Creates a copy of the config file to avoid read-only issue
+
+cp /etc/config/idol/answerserver.cfg /answerserver/answerserver.cfg
+export IDOL_COMPONENT_CFG="/answerserver/answerserver.cfg"
