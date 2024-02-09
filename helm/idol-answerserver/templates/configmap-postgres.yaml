@@ -14,7 +14,7 @@ metadata:
   name: idol-factbank-postgres-init
 data:
   {{- $ctx := . }}
-  {{- range tuple "factbank_unified.sql" "01-codings.sql" "02-facts.sql"}}
+  {{- range tuple "factbank_unified.sql"}}
   {{ . }}: |-
 {{ tpl (. | print "resources/postgres/" | $ctx.Files.Get) $ctx | indent 4 }}
   {{- end }}
