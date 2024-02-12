@@ -40,6 +40,10 @@
         },
         "additionalVolumeMounts":{
             "type": "array"
+        },
+        "grammarPackage": {
+            "type": "string",
+            "enum": ["pci", "phi", "pii", "psi"]
         }
     },
     "required": [
@@ -51,7 +55,8 @@
         "name",
         "aciPort",
         "servicePort",
-        "livenessProbe"
+        "livenessProbe",
+        "grammarPackage"
     ],
 
     "$defs": {

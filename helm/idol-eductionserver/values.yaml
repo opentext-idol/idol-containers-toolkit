@@ -40,10 +40,15 @@ licenseServerPort: "20000"
 existingConfigMap: ""
 
 # -- Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
-additionalVolumes: []
+additionalVolumes:
+  - name: grammar-config
+    configMap:
+      name: pxi-config
 
 # -- Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1)
-additionalVolumeMounts: []
+additionalVolumeMounts:
+  - name: grammar-config
+    mountPath: /eductionserver/cfg
 
 ##### INGRESS VARIABLES #####
 
@@ -72,3 +77,6 @@ servicePort: "13002"
 # livenessProbe -- container livenessProbe settings
 livenessProbe:
   initialDelaySeconds: 120
+
+# grammarPackage -- the grammar package configuration file to use, must be one of 'pci', 'phi', 'pii' or 'psi'.
+grammarPackage: "psi"
