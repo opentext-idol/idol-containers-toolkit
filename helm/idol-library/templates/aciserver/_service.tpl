@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2023 Open Text.
+# Copyright 2023-2024 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -12,8 +12,9 @@
 {{/*
     Common template for a generic ACI server service
 */}}
-{{- $root := get . "root" | required "missing root" -}}
-{{- $component := get . "component" | required "missing component" -}}
+{{- $root := get . "root" | required "idol-library.aciserver.service.base: missing root" -}}
+{{- $component := get . "component" | required "idol-library.aciserver.service.base: missing component" -}}
+{{- $ports := get . "ports" | default list -}} 
 apiVersion: v1
 kind: Service
 metadata:
@@ -32,6 +33,9 @@ spec:
     targetPort: index-port
     name: index-port
   {{ end }}
+  {{- range $ports }}
+  - {{ . | toYaml | nindent 4 }}
+  {{- end }}
   selector:
     app: {{ $component.name | quote }}
 {{- end -}}

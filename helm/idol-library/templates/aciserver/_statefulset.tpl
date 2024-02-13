@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2023-2024 Open Text.
+# Copyright 2024 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -9,30 +9,29 @@
 #
 # END COPYRIGHT NOTICE
 
-{{- define "idol-library.aciserver.deployment.base.v1" -}}
+{{- define "idol-library.aciserver.statefulset.base.v1" -}}
 {{/*
-    Common template for a generic ACI server deployment
+    Common template for a generic ACI server statefulset
 */}}
 {{ $ctx := . }}
-{{ $root := get . "root" | required "missing root" }}
-{{ $component := get . "component" | required "missing component" }}
-{{ $env := get . "env" | default list }}
+{{ $root := get . "root" | required "idol-library.aciserver.statefulset.base.v1: missing root" }}
+{{ $component := get . "component" | required "idol-library.aciserver.statefulset.base.v1: missing component" }}
 {{ $volumes := get . "volumes" | default list }}
-{{ $volumeMounts := get . "volumeMounts" | default list }}
 {{ $containers := get . "containers" | default (list "idol-library.aciserver.container.base.v1") }}
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: {{ $component.name | quote }}
-  labels: {{- include "idol-library.labels" . | nindent 4 }}
+  labels: {{- include "idol-library.labels" $ctx | nindent 4 }}
 spec:
+  serviceName: {{ $component.name | quote }}
   replicas: 1
   selector:
     matchLabels:
       app: {{ $component.name | quote }}
   template:
     metadata:
-      labels: {{- include "idol-library.labels" . | nindent 8 }}
+      labels: {{- include "idol-library.labels" $ctx | nindent 8 }}
         app: {{ $component.name | quote }}
     spec:
       imagePullSecrets:
@@ -56,18 +55,5 @@ spec:
       {{- if $component.podSecurityContext.enabled }}
       securityContext: {{- omit $component.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
-{{- end -}}
 
-{{/*
-Generates deployment for an ACI Server
-@param .root The root context
-@param .component The component values
-@param .destination Template to merge onto
-See also "idol-library.aciserver.defaultcfg"
-*/}}
-{{- define "idol-library.aciserver.deployment" -}}
-{{- $root := get . "root" | required "missing root" -}}
-{{- $component := get . "component" | required "missing component" -}}
-{{- $_ := set . "source" "idol-library.aciserver.deployment.base.v1" -}}
-{{- include "idol-library.util.merge" $_ -}}
 {{- end -}}

@@ -1,0 +1,25 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2024 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+{{ define "idolacitest.statefulset.base" -}}
+{{/* specific merges to statefulset specification */}}
+{{- $component := get . "component" | required "idolacitest.statefulset.base: missing component" -}}
+spec:
+  replicas: 2
+{{- end -}}
+
+{{- include "idol-library.util.merge" (dict
+  "root" .
+  "component" .Values
+  "source" "idol-library.aciserver.statefulset.base.v1"
+  "destination" "idolacitest.statefulset.base" 
+  "containers" (list "idolacitest.container")
+) -}}
+
