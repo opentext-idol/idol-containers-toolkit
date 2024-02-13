@@ -55,12 +55,50 @@ usingTLS: false
 # See MediaServer documentation for more information about Process actions
 processMaximumThreads: 1
 
-# -- Set the following values to specify exact quantities of license channels to reserve
+# -- Set the following four values to specify exact quantities of license channels to reserve
 # Your license must be able to cover the number of channels you specify here
+# See MediaServer documentation for more information about channels
+
+# -- Allocate one channel for each concurrent process action that includes audio processing
+# Audio channels are used for each of the following processes:
+#   Audio categorization
+#   Audio matching
+#   Language identification
+#   Speaker identification
+#   Speech-to-text
+#   All video management features
 audioChannels: 1
+
+# -- Allocate one channel for each analysis task, multiplied by the number of concurrent process actions
+# Surveillance channels are used for each of the following processes:
+#  Face detection
+#  Number plate recognition (ANPR)
+#  Object class recognition (but only with certain pre-trained recognizers).
+#  Scene analysis
+#  Text detection
+#  All video management features
 surveillanceChannels: 1
-videoManagementChannels: 1
+
+# -- Allocate one channel for each concurrent process action that includes any visual analytics.
+# Visual channels are used for each of the following processes:
+#  Ingesting records from another Media Server for further processing
+#  All analysis operations except audio processing
+#  Face recognition on large databases (maximum 250,000 faces, every additional 250,000 faces requires an additional visual channel)
+#  All surveillance and video management features
 visualChannels: 1
+
+# -- Allocate one video management channel for each concurrent process action that does not require an audio, surveillance, or visual channel
+# These channels will be used for the following:
+#  Ingest (apart from the Receive ingest engine, which requires a visual channel)
+#  Analysis:
+#   Keyframe
+#   News segmentation
+#   Text segmentation
+#  Encoding
+#  Event stream processing
+#  Transformation
+#  Output
+videoManagementChannels: 1
 
 # -- Which modules to enable
 # Enable only the modules you want to use, to reduce memory usage and improve startup speed
