@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2023 Open Text.
+# Copyright 2024 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -8,12 +8,18 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
+
+{{- if .Values.answerbankAgentstore.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: nifi-registry-scripts-cm
-  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifiRegistry) | nindent 4 -}}
-    app: nifi-registry
+  name: idol-answerbank-agentstore-cfg
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.answerbankAgentstore ) | nindent 4 }}
+
 data:
-  postStart.sh: |
-{{ tpl (.Files.Get "resources/nifi-registry-postStart.sh") . | indent 4 }}
+  answerbank-agentstore.cfg: |
+{{ tpl (print "resources/answerbank-agentstore.cfg" | .Files.Get) . | indent 4 }}
+
+  answerbank-agentstore-poststart.sh: |
+{{ tpl (print "resources/answerbank-agentstore-poststart.sh" | .Files.Get) . | indent 4 }}
+{{- end }}

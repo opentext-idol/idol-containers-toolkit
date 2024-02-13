@@ -1,0 +1,28 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2024 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+
+{{- if .Values.passageextractorAgentstore.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: idol-passageextractor-agentstore-cfg
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.passageextractorAgentstore ) | nindent 4 }}
+
+data:
+  passageextractor-agentstore.cfg: |
+{{ tpl (print "resources/passageextractor-agentstore.cfg" | .Files.Get) . | indent 4 }}
+
+  passageextractor-agentstore-poststart.sh: |
+{{ tpl (print "resources/passageextractor-agentstore-poststart.sh" | .Files.Get) . | indent 4 }}
+
+  passageextractor-agentstore-poststart_2.sh: |
+{{ tpl (print "resources/passageextractor-agentstore-poststart_2.sh" | .Files.Get) . | indent 4 }}
+{{- end }}

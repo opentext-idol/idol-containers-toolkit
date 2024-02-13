@@ -3,9 +3,9 @@
 # END COPYRIGHT NOTICE
 apiVersion: v2
 name: idol-licenseserver
-version: 0.1.0
+version: 0.2.0
 description: Creates an IDOL LicenseServer proxy service accessible to other elements of the cluster
 dependencies:
 - name: idol-library
-  version: "0.1.0"
+  version: "0.6.0"
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
