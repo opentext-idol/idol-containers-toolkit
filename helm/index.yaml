@@ -289,6 +289,20 @@ entries:
     urls:
     - release/idol-licenseserver-0.1.0.tgz
     version: 0.1.0
+  idol-mediaserver:
+  - apiVersion: v2
+    appVersion: "24.1"
+    created: "2024-02-13T12:40:36.5779552Z"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.6.0
+    description: Adds IDOL MediaServer
+    digest: e0fc70d4a8f0070ffd3f021efa3983b91ceae50f3cd43bfb0d6d23e811225b65
+    name: idol-mediaserver
+    urls:
+    - release/idol-mediaserver-0.1.0.tgz
+    version: 0.1.0
   idol-nifi:
   - apiVersion: v2
     appVersion: 24.1.0
