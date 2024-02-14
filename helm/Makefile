@@ -6,10 +6,12 @@ SUBCHARTS:=idol-library \
 	idol-licenseserver \
 	idol-community \
 	idol-find \
+	idol-mediaserver \
 	idol-nifi \
 	idol-omnigroupserver \
 	idol-stack \
 	idol-qms \
+	idol-answerserver \
 	idol-view \
 	distributed-idol \
 	single-content

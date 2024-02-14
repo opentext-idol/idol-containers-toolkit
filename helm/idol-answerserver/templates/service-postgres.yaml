@@ -8,8 +8,15 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-
-{{/* Standard labels */}}
-{{- define "idol-nifi.labels" }}
-{{- include "idol-library.labels" . }}
-{{- end }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.factbankPostgresqlServer }}
+spec:
+  ports:
+  - port: {{ .Values.factbankPostgresqlPort | int }}
+    targetPort: tcp-postgresql
+    name: tcp-postgresql
+  selector:
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/component: primary
