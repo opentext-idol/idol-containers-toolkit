@@ -1,98 +1,38 @@
 # BEGIN COPYRIGHT NOTICE
-# (c) Copyright 2022 Micro Focus or one of its affiliates.
+# Copyright 2022-2024 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
 # END COPYRIGHT NOTICE
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: {{ .Values.name }}
-  labels: {{- include "singlecontent.labels" . | nindent 4 }}
+
+{{ define "singlecontent.statefulset.base" -}}
+{{/* specific merges to statefulset specification */}}
+{{- $component := get . "component" | required "singlecontent.statefulset.base: missing component" -}}
 spec:
-  serviceName: {{ .Values.name | quote }}
-  replicas: 1
-  selector:
-    matchLabels:
-      app: {{ .Values.name }}
   template:
-    metadata:
-      labels: {{- include "singlecontent.labels" . | nindent 8 }}
-        app: {{ .Values.name }}
     spec:
-      imagePullSecrets:
-          {{- range .Values.global.imagePullSecrets }}
-        - name: {{ . }}
-        {{- end }}
       terminationGracePeriodSeconds: 300
-      containers:
-      - name: {{ .Values.name }}
-        image: {{ include "idol-library.idolImage" (dict "root" . "idolImage" .Values.idolImage) }}
-        imagePullPolicy: IfNotPresent
-        command:
-        - "/bin/bash"
-        args: 
-        - "-c"
-        - |
-{{ tpl (.Files.Get "resources/content_startup.sh") . | indent 10 }}
-        volumeMounts:
-        - name: config-map
-          mountPath: /etc/config/idol
-        - name: index
-          mountPath: /opt/idol/content/index
-        {{- range .Values.additionalVolumeMounts }}
-        - {{ . | toYaml | nindent 10 }}
-        {{- end }}
-        env:
-        - name: IDOL_CONTENT_SERVICE_PORT_ACI_PORT
-          # This doesn't seem to be set by our headless service
-          value: {{ .Values.aciPort | quote }}
-        - name: IDOL_COMMAND_PARAMS
-          value: "-idolcluster"
-        {{- if .Values.usingTLS }}
-        - name: IDOL_SSL
-          value: "1"
-        {{- end }}
-        {{- if .Values.envConfigMap }}
-        envFrom:
-        - configMapRef: 
-            name: {{ .Values.envConfigMap | quote }}
-        {{ end }}
-        lifecycle:
-          postStart:
-            exec:
-              command:
-              - /bin/bash
-              - "-c"
-              - |
-{{ tpl (.Files.Get "resources/content_postStart.sh") . | indent 16 }}
-        livenessProbe:
-          httpGet:
-            path: /a=getpid
-            port: {{ .Values.aciPort | int }}
-            scheme: {{ .Values.usingTLS | ternary "HTTPS" "HTTP" }}
-{{- template "idol-library.standardLivenessProbe" .Values.livenessProbe }}
-        ports:
-        - containerPort: {{ .Values.aciPort | int }}
-          name: aci-port
-          protocol: TCP
-        - containerPort: {{ .Values.servicePort | int }}
-          name: service-port
-          protocol: TCP
-        - containerPort: {{ .Values.indexPort | int }}
-          name: index-port
-          protocol: TCP
-      volumes:
-      - name: config-map
-        configMap:
-          name: {{ default (printf "%s-default-cfg" .Values.name) .Values.existingConfigMap }}
-      {{- range .Values.additionalVolumes }}
-      - {{ . | toYaml | nindent 8 }}
-      {{- end }}
   volumeClaimTemplates:
   - metadata:
       name: index
-      labels: {{- include "singlecontent.labels" . | nindent 8 }}
+      labels: {{- include "idol-library.labels" . | nindent 8 }}
     spec:
       accessModes: [ "ReadWriteOnce" ]
-      storageClassName: {{ .Values.contentStorageClass }}
+      storageClassName: {{ $component.contentStorageClass }}
       resources:
         requests:
-          storage: {{ .Values.contentVolumeSize }}
+          storage: {{ $component.contentVolumeSize }}
+{{- end -}}
+
+{{- include "idol-library.util.merge" (dict
+  "root" .
+  "component" .Values
+  "source" "idol-library.aciserver.statefulset.base.v1"
+  "destination" "singlecontent.statefulset.base" 
+  "containers" (list "singlecontent.container")
+) -}}
+
