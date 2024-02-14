@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2023 Open Text.
+# Copyright 2023-2024 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -19,10 +19,10 @@ See https://helm.sh/docs/chart_template_guide/function_list/#merge-mustmerge
 
 */ -}}
 {{- define "idol-library.util.merge" -}}
-{{- $root := get . "root" | required "missing root" -}}
-{{- $component := get . "component" | required "missing component" -}}
-{{- $dest := get . "destination" | required "destination" -}}
-{{- $src := get . "source" | required "source" -}}
+{{- $root := get . "root" | required "idol-library.util.merge: missing root" -}}
+{{- $component := get . "component" | required "idol-library.util.merge: missing component" -}}
+{{- $dest := get . "destination" | required "idol-library.util.merge: missing destination" -}}
+{{- $src := get . "source" | required "idol-library.util.merge: missing source" -}}
 {{- $overrides := fromYaml (include $dest .) | default (dict ) -}}
 {{- $tpl := fromYaml (include $src .) | default (dict ) -}}
 {{- toYaml (merge $overrides $tpl) -}}
