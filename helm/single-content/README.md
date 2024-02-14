@@ -1,6 +1,6 @@
 # single-content
 
-![Version: 0.5.1](https://img.shields.io/badge/Version-0.5.1-informational?style=flat-square) ![AppVersion: 24.1](https://img.shields.io/badge/AppVersion-24.1-informational?style=flat-square)
+![Version: 0.6.0](https://img.shields.io/badge/Version-0.6.0-informational?style=flat-square) ![AppVersion: 24.1](https://img.shields.io/badge/AppVersion-24.1-informational?style=flat-square)
 
 Provides an IDOL Content statefulset.
 
@@ -15,7 +15,7 @@ of these endpoints to exist in the cluster.
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.5.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.7.0 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | 0.1.0 |
 
 ## Values
@@ -25,6 +25,8 @@ of these endpoints to exist in the cluster.
 | aciPort | string | `"9100"` | port service will serve ACI connections on |
 | additionalVolumeMounts | list | `[]` | Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1) |
 | additionalVolumes | list | `[]` | Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes) |
+| containerSecurityContext | object | `{"enabled":false}` | Optional SecurityContext for container (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#securitycontext-v1-core) |
+| containerSecurityContext.enabled | bool | `false` | enable SecurityContext for container. Setting to false omits. |
 | contentStorageClass | string | `"idol-content-storage-class"` | Name of the storage class used to provision a PersistentVolume for each Content instance. The associated PVCs are named index-{name}-{pod number} |
 | contentVolumeSize | string | `"16Gi"` | Size of the PersistentVolumeClaim that is created for each Content instance. The Kubernetes cluster will need to provide enough PersistentVolumes to satisify the claims made for the desired number of Content instances. The size chosen here provides a hard limit on the size of the Content index in each Content instance. |
 | envConfigMap | string | `""` | Optional configMap name holding extra environnment variables for content container |
@@ -50,6 +52,8 @@ of these endpoints to exist in the cluster.
 | licenseServerHostname | string | `"idol-licenseserver"` | maps to [License] LicenseServerHost in the IDOL cfg files Should point to a resolvable IDOL LicenseServer (or Kubernetes service abstraction - see the idol-licenseserver chart) |
 | licenseServerPort | string | `"20000"` | the ACI port of the IDOL LicenseServer (or abstraction) |
 | name | string | `"idol-content"` | used to name statefulset, service, ingress |
+| podSecurityContext | object | `{"enabled":false,"fsGroup":0,"runAsGroup":0,"runAsUser":1000}` | Optional PodSecurityContext (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podsecuritycontext-v1-core) |
+| podSecurityContext.enabled | bool | `false` | enable PodSecurityContext. Setting to false omits. |
 | queryserviceACIPort | string | `"9060"` | port idol-query-service will serve ACI connections on. |
 | queryserviceName | string | `"idol-query-service"` | internal parameter to specify the query service name, if this is empty then no                     additional service will be provisioned. |
 | servicePort | string | `"9102"` | port service will serve service connections on |
