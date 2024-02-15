@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2023 Open Text.
+# Copyright 2023-2024 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -8,58 +8,14 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
+{{ define "idolcommunity.deployment.base" }}
+{{- end -}}
 
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: {{ .Values.name | quote }}
-  labels: {{- include "idol-library.labels" . | nindent 4 }}
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: {{ .Values.name | quote }}
-  template:
-    metadata:
-      labels: {{- include "idol-library.labels" . | nindent 8 }}
-        app: {{ .Values.name | quote }}
-    spec:
-      imagePullSecrets:
-        {{- range .Values.imagePullSecrets }}
-        - name: {{ . }}
-        {{- end }}
-      containers:
-      - name: {{ .Values.name | quote }}
-        image: {{ .Values.idolImageRegistry }}/{{ .Values.image }}:{{ .Values.idolVersion }}
-        imagePullPolicy: IfNotPresent
-        livenessProbe:
-          httpGet:
-            path: /a=getpid
-            port: {{ .Values.aciPort | int }}
-{{- template "idol-library.standardLivenessProbe" .Values.livenessProbe }}
-        ports:
-        - containerPort: {{ .Values.aciPort | int }}
-          name: aci-port
-          protocol: TCP
-        - containerPort: {{ .Values.servicePort | int }}
-          name: service-port
-          protocol: TCP
-        volumeMounts:
-        - name: config-map
-          mountPath: /etc/config/idol
-        env:
-        - name: IDOL_COMPONENT_CFG
-          value: "/etc/config/idol/community.cfg"
-        - name: IDOL_CONTENT_HOST
-          value: {{ .Values.queryserviceName | quote }}
-        - name: IDOL_CONTENT_ACI_PORT
-          value: {{ .Values.queryserviceACIPort | quote }}
-        - name: IDOL_AGENTSTORE_HOST
-          value: {{ .Values.agentStoreName | quote }}
-        - name: IDOL_AGENTSTORE_ACI_PORT
-          value: {{ .Values.agentStoreACIPort | quote }}
-      volumes:
-      - name: config-map
-        configMap:
-          name: {{ default (printf "%s-default-cfg" .Values.name) .Values.existingConfigMap }}
+{{ include "idol-library.util.merge" (dict
+  "root" .
+  "component" .Values
+  "source" "idol-library.aciserver.deployment.base.v1"
+  "destination" "idolcommunity.deployment.base" 
+  "containers" (list "idolcommunity.container")
+) }}
+
