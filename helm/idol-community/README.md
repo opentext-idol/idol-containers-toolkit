@@ -1,6 +1,6 @@
 # idol-community
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![AppVersion: 23.4](https://img.shields.io/badge/AppVersion-23.4-informational?style=flat-square)
+![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![AppVersion: 24.1](https://img.shields.io/badge/AppVersion-24.1-informational?style=flat-square)
 
 Provides an IDOL Community deployment. By default this will provide basic user
 setup suitable to be used to login to IDOL Find.
@@ -13,41 +13,53 @@ Depends on connections to:
 To setup document security you will need to provide your own configuration (see `existingConfigMap`)
 and may wish to deploy alongside the _idol-omnigroupserver_ chart.
 
-> Full documentation for Community available from https://www.microfocus.com/documentation/idol/IDOL_23_4/Community_23.4_Documentation/Help/
+> Full documentation for Community available from https://www.microfocus.com/documentation/idol/IDOL_24_1/Community_24.1_Documentation/Help/
 
 ## Requirements
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.2.0 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | 0.1.0 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | single-content | 0.2.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.7.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | 0.2.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | single-content | 0.6.0 |
 
 ## Values
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | aciPort | string | `"9030"` | port service will serve ACI connections on |
+| additionalVolumeMounts | list | `[]` | Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1) |
+| additionalVolumes | list | `[]` | Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes) |
 | agentStoreACIPort | string | `"9050"` | agentstore service aci port (maps to Community AgentDRE configuration). |
 | agentStoreName | string | `"idol-agentstore"` | agentstore service/hostname (maps to Community AgentDRE configuration). |
-| enableIngress | bool | `true` | Create ingress resource |
+| containerSecurityContext | object | `{"enabled":false}` | Optional SecurityContext for container (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#securitycontext-v1-core) |
+| containerSecurityContext.enabled | bool | `false` | enable SecurityContext for container. Setting to false omits. |
+| envConfigMap | string | `""` | Optional configMap name holding extra environnment variables for container |
 | existingConfigMap | string | `""` | if specified, mounted at /etc/config/idol and expected to provide community.cfg |
+| global.idolImageRegistry | string | `""` | Global override value for idolImage.registry |
+| global.idolVersion | string | `""` | Global override value for idolImage.version |
+| global.imagePullSecrets | list | `["dockerhub-secret"]` | Global secrets used to pull container images |
 | idol-licenseserver.enabled | bool | `false` | whether to deploy the idol-licenseserver sub-chart |
-| idolImageRegistry | string | `"microfocusidolserver"` | used to construct container image name: {idolImageRegistry}/{image}:{idolVersion} |
-| idolVersion | string | `"23.4"` | used to construct container image name: {idolImageRegistry}/{image}:{idolVersion} |
-| image | string | `"community"` | used to construct container image name: {idolImageRegistry}/{image}:{idolVersion} |
-| imagePullSecrets | list | `["dockerhub-secret"]` | secrets used to pull container images |
-| ingressClassName | string | `""` | Optional parameter to override the default ingress class |
-| ingressHost | string | `""` | Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules). For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration) |
-| ingressType | string | `"nginx"` | Ingress controller type to setup for. Valid values are nginx or haproxy (used by OpenShift) |
-| licenseServerHostname | string | `"idol-licenseserver"` | the hostname of the IDOL LicenseServer (or abstraction) |
+| idolImage.registry | string | `"microfocusidolserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
+| idolImage.repo | string | `"community"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}. |
+| idolImage.version | string | `"24.1"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
+| ingress.annotations | object | `{}` | Ingress controller specific annotations Some annotations are added automatically based on ingress.type and other values, but can  be overriden/augmented here e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations |
+| ingress.className | string | `""` | Optional parameter to override the default ingress class |
+| ingress.enabled | bool | `true` | Create ingress resource |
+| ingress.host | string | `""` | Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules). For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration) |
+| ingress.proxyBodySize | string | `"2048m"` | Maximum allowed size of the client request body, defining the maximum size of requests that can be made to IDOL components within the installation, e.g. the amount of data sent in DREADDDATA index commands. The value should be an nginx "size" value. See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the corresponding nginx configuration parameter. |
+| ingress.type | string | `"nginx"` | Ingress controller type to setup for. Valid values are nginx or haproxy (used by OpenShift) |
+| licenseServerHostname | string | `"idol-licenseserver"` | maps to [License] LicenseServerHost in the IDOL cfg files Should point to a resolvable IDOL LicenseServer (or Kubernetes service abstraction - see the idol-licenseserver chart) |
 | licenseServerPort | string | `"20000"` | the ACI port of the IDOL LicenseServer (or abstraction) |
 | livenessProbe | object | `{"initialDelaySeconds":30}` | container livenessProbe settings |
 | name | string | `"idol-community"` | used to name deployment, service, ingress |
+| podSecurityContext | object | `{"enabled":false,"fsGroup":0,"runAsGroup":0,"runAsUser":1000}` | Optional PodSecurityContext (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podsecuritycontext-v1-core) |
+| podSecurityContext.enabled | bool | `false` | enable PodSecurityContext. Setting to false omits. |
 | queryserviceACIPort | string | `"9060"` | query service aci port (maps to Community DataDRE configuration). |
 | queryserviceName | string | `"idol-query-service"` | query service/hostname (maps to Community DataDRE configuration). |
 | servicePort | string | `"9032"` | port service will serve service connections on |
 | single-content.enabled | bool | `false` | whether to deploy the single-content sub-chart.  You may use this to get a basic Community running by setting the agentStoreName/agentStoreACIPort to the queryserviceName/queryserviceACIPort values. |
+| usingTLS | bool | `false` | whether aci/service/index ports are configured to use TLS (https). If configuring for TLS, then consider setting IDOL_SSL_COMPONENT_CERT_PATH and IDOL_SSL_COMPONENT_KEY_PATH in envConfigMap to provide required TLS certificates |
 
 ----------------------------------------------
-Autogenerated from chart metadata using [helm-docs v1.11.3](https://github.com/norwoodj/helm-docs/releases/v1.11.3)
+Autogenerated from chart metadata using [helm-docs v1.12.0](https://github.com/norwoodj/helm-docs/releases/v1.12.0)

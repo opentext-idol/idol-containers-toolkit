@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2023 Open Text.
+# Copyright 2023-2024 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -9,29 +9,60 @@
 #
 # END COPYRIGHT NOTICE
 
-# As per https://helm.sh/docs/topics/charts/#the-chart-file-structure
-# this values.yaml file contains the default configuration values for this chart.
-# These default values can be overridden by using the --values or --set flags on the `helm install`
-# command: see https://helm.sh/docs/helm/helm_install/
+global:
+  # -- Global override value for idolImage.registry
+  idolImageRegistry: ""
+  # -- Global override value for idolImage.version
+  idolVersion: ""
+  # -- Global secrets used to pull container images
+  imagePullSecrets:
+  - "dockerhub-secret"
 
-# idolImageRegistry -- used to construct container image name: {idolImageRegistry}/{image}:{idolVersion}
-idolImageRegistry: "microfocusidolserver"
-# idolVersion -- used to construct container image name: {idolImageRegistry}/{image}:{idolVersion}
-idolVersion: "23.4"
-# imagePullSecrets -- secrets used to pull container images
-imagePullSecrets:
-- "dockerhub-secret"
+idolImage:
+  # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
+  registry: "microfocusidolserver"
+  # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
+  version: "24.1"
+  # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}.
+  repo: "community"
 
-# image -- used to construct container image name: {idolImageRegistry}/{image}:{idolVersion}
-image: "community"
+# -- port service will serve ACI connections on
+aciPort: "9030"
+# -- port service will serve service connections on
+servicePort: "9032"
+# livenessProbe -- container livenessProbe settings
+livenessProbe:
+  initialDelaySeconds: 30
+  
+# -- whether aci/service/index ports are configured to use TLS (https).
+# If configuring for TLS, then consider setting IDOL_SSL_COMPONENT_CERT_PATH and IDOL_SSL_COMPONENT_KEY_PATH in envConfigMap
+# to provide required TLS certificates
+usingTLS: false
 
-# licenseServerHostname -- the hostname of the IDOL LicenseServer (or abstraction)
-licenseServerHostname: "idol-licenseserver"
-# licenseServerPort -- the ACI port of the IDOL LicenseServer (or abstraction)
-licenseServerPort: "20000"
-
-# existingConfigMap -- if specified, mounted at /etc/config/idol and expected to provide community.cfg
+# -- if specified, mounted at /etc/config/idol and expected to provide community.cfg
 existingConfigMap: ""
+
+# -- Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
+additionalVolumes: []
+
+# -- Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1)
+additionalVolumeMounts: []
+
+# -- Optional configMap name holding extra environnment variables for container
+envConfigMap: ""
+
+# -- Optional PodSecurityContext (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podsecuritycontext-v1-core)
+podSecurityContext:
+  # -- enable PodSecurityContext. Setting to false omits.
+  enabled: false
+  fsGroup: 0
+  runAsUser: 1000
+  runAsGroup: 0
+
+# -- Optional SecurityContext for container (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#securitycontext-v1-core)
+containerSecurityContext:
+  # -- enable SecurityContext for container. Setting to false omits.
+  enabled: false
 
 # queryserviceName -- query service/hostname (maps to Community DataDRE configuration).
 queryserviceName: "idol-query-service"
@@ -42,33 +73,55 @@ agentStoreName: "idol-agentstore"
 # agentStoreACIPort -- agentstore service aci port (maps to Community AgentDRE configuration).
 agentStoreACIPort: "9050"
 
-##### INGRESS VARIABLES #####
+##### NETWORKING CONFIGURATION #####
+# This section contains parameters to configure various network-related
+# properties in this chart.
 
-# enableIngress -- Create ingress resource
-enableIngress: true
+ingress:
+  # -- Create ingress resource
+  enabled: true
 
-# ingressType -- Ingress controller type to setup for.
-# Valid values are nginx or haproxy (used by OpenShift)
-ingressType: nginx
+  # -- Ingress controller type to setup for.
+  # Valid values are nginx or haproxy (used by OpenShift)
+  type: nginx
 
-# ingressClassName -- Optional parameter to override the default ingress class
-ingressClassName: ""
+  # -- Optional parameter to override the default ingress class
+  className: ""
 
-# ingressHost -- Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules).
-# For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration)
-ingressHost: ""
+  # -- Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules).
+  # For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration)
+  host: ""
+
+  # -- Maximum allowed size of the client request body, defining
+  # the maximum size of requests that can be made to IDOL components within the installation, e.g.
+  # the amount of data sent in DREADDDATA index commands.
+  # The value should be an nginx "size" value.
+  # See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the
+  # corresponding nginx configuration parameter.
+  proxyBodySize: 2048m
+  
+  # -- Ingress controller specific annotations
+  # Some annotations are added automatically based on ingress.type and other values, but can 
+  # be overriden/augmented here
+  # e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations
+  annotations: {}
+
+#####################################
+
 
 ##### INTERNAL VARIABLES #####
+# Values specified below this point in the file should not need to be overriden.
+# They are generally here in values.yaml so that DRY principles and a consistent
+# scheme for specifying these values in the templates can be followed.
+
+# licenseServerHostname -- maps to [License] LicenseServerHost in the IDOL cfg files
+# Should point to a resolvable IDOL LicenseServer (or Kubernetes service abstraction - see the idol-licenseserver chart)
+licenseServerHostname: "idol-licenseserver"
+# licenseServerPort -- the ACI port of the IDOL LicenseServer (or abstraction)
+licenseServerPort: "20000"
+
 # name -- used to name deployment, service, ingress
 name: "idol-community"
-# aciPort -- port service will serve ACI connections on
-aciPort: "9030"
-# servicePort -- port service will serve service connections on
-servicePort: "9032"
-# livenessProbe -- container livenessProbe settings
-livenessProbe:
-  initialDelaySeconds: 30
-
 
 ##### SUB-CHART VARIABLES #####
 idol-licenseserver:
