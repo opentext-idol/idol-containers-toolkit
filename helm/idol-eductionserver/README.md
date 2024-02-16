@@ -33,12 +33,13 @@ This chart may be used to provide entity extraction, entity redaction and sentim
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | aciPort | string | `"13000"` | port service will serve ACI connections on |
-| additionalVolumeMounts | list | `[]` | Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1) |
-| additionalVolumes | list | `[]` | Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes) |
+| additionalVolumeMounts | list | `[{"mountPath":"/eductionserver/cfg","name":"grammar-config"}]` | Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1) |
+| additionalVolumes | list | `[{"configMap":{"name":"pxi-config"},"name":"grammar-config"}]` | Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes) |
 | existingConfigMap | string | `""` | if specified, mounted at /etc/config/idol and expected to provide community.cfg |
 | global.idolImageRegistry | string | `""` | Global override value for idolImage.registry |
 | global.idolVersion | string | `""` | Global override value for idolImage.version |
 | global.imagePullSecrets | list | `["dockerhub-secret"]` | Global secrets used to pull container images |
+| grammarPackage | string | `"pii"` | the grammar package configuration file to use, must be one of:                -- 'pci', 'phi', 'phi_internet', 'phi_telephone', 'pii', 'pii_internet' or 'psi'. |
 | idolImage.registry | string | `"microfocusidolserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | idolImage.repo | string | `"eductionserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | idolImage.version | string | `"24.1"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
