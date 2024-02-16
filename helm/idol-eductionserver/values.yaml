@@ -78,5 +78,6 @@ servicePort: "13002"
 livenessProbe:
   initialDelaySeconds: 120
 
-# grammarPackage -- the grammar package configuration file to use, must be one of 'pci', 'phi', 'pii' or 'psi'.
-grammarPackage: "psi"
+# grammarPackage -- the grammar package configuration file to use, must be one of:
+#                -- 'pci', 'phi', 'phi_internet', 'phi_telephone', 'pii', 'pii_internet' or 'psi'.
+grammarPackage: "pii"

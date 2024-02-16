@@ -16,8 +16,14 @@ metadata:
 data:
   pii.cfg: |-
 {{ tpl (print "resources/pii.cfg" | .Files.Get) . | indent 4 }}
+  pii_telephone.cfg: |-
+{{ tpl (print "resources/pii_telephone.cfg" | .Files.Get) . | indent 4 }}
   phi.cfg: |-
 {{ tpl (print "resources/phi.cfg" | .Files.Get) . | indent 4 }}
+  phi_internet.cfg: |-
+{{ tpl (print "resources/phi_internet.cfg" | .Files.Get) . | indent 4 }}
+  phi_telephone.cfg: |-
+{{ tpl (print "resources/phi_telephone.cfg" | .Files.Get) . | indent 4 }}
   pci.cfg: |-
 {{ tpl (print "resources/pci.cfg" | .Files.Get) . | indent 4 }}
   psi.cfg: |-
