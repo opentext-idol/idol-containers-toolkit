@@ -184,6 +184,20 @@ entries:
     urls:
     - release/idol-community-0.1.0.tgz
     version: 0.1.0
+  idol-eductionserver:
+  - apiVersion: v2
+    appVersion: "24.1"
+    created: "2024-02-19T11:08:00.19272448Z"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.4.0
+    description: Adds IDOL Eduction Server
+    digest: 19ef4feb164dc9eba85465be005d2417eb17a4935ff5f61ec1e02fcccadec5c8
+    name: idol-eductionserver
+    urls:
+    - release/idol-eductionserver-0.1.0.tgz
+    version: 0.1.0
   idol-find:
   - apiVersion: v2
     appVersion: 23.4.0

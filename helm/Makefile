@@ -5,6 +5,7 @@
 SUBCHARTS:=idol-library \
 	idol-licenseserver \
 	idol-community \
+	idol-eductionserver \
 	idol-find \
 	idol-mediaserver \
 	idol-nifi \
