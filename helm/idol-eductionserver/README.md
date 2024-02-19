@@ -39,7 +39,7 @@ This chart may be used to provide entity extraction, entity redaction and sentim
 | global.idolImageRegistry | string | `""` | Global override value for idolImage.registry |
 | global.idolVersion | string | `""` | Global override value for idolImage.version |
 | global.imagePullSecrets | list | `["dockerhub-secret"]` | Global secrets used to pull container images |
-| grammarPackage | string | `"pii"` | the grammar package configuration file to use, must be one of:                -- 'pci', 'phi', 'phi_internet', 'phi_telephone', 'pii', 'pii_internet' or 'psi'. |
+| grammarPackage | string | `"pii"` | the grammar package configuration file to use, must be one of:                -- 'pci', 'phi', 'phi_telephone', 'phi_internet', 'pii', 'pii_telephone' or 'psi'. |
 | idolImage.registry | string | `"microfocusidolserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | idolImage.repo | string | `"eductionserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | idolImage.version | string | `"24.1"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
