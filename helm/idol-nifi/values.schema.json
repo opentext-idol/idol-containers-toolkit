@@ -112,6 +112,9 @@
                 "resources": {
                     "$ref": "#/definitions/Resources"
                 },
+                "dataVolume": {
+                    "$ref": "#/definitions/DataVolume"
+                },
                 "jvmMemoryRatio": {
                     "type": "number",
                     "minimum": 0.01,
@@ -135,7 +138,8 @@
                 "imageName",
                 "ingress",
                 "jvmMemoryRatio",
-                "resources"
+                "resources",
+                "dataVolume"
             ],
             "title": "Nifi"
         },
@@ -212,6 +216,20 @@
                 "requests"
             ],
             "title": "Resources"
+        },
+        "DataVolume": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "storageClass": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "volumeSize": {
+                    "type": "string",
+                    "pattern": "^\\d+(?:\\.\\d+)?(?:Ki|Mi|Gi|Ti|Pi|Ei|m|k|M|G|T|P|E)?$"
+                }
+            }
         },
         "Limits": {
             "type": "object",

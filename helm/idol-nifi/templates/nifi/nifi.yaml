@@ -117,13 +117,33 @@ spec:
               name: idol-nifi-env
               optional: false
         volumeMounts:
-          - name: data
+          - name: statedata
             mountPath: /opt/nifi/nifi-current/data
             subPath: data
             readOnly: false
-          - name: data
+          - name: statedata
             mountPath: /opt/nifi/nifi-current/keytool
             subPath: keytool
+            readOnly: false
+          - name: statedata
+            mountPath: /opt/nifi/nifi-current/content_repository
+            subPath: content_repository
+            readOnly: false
+          - name: statedata
+            mountPath: /opt/nifi/nifi-current/database_repository
+            subPath: database_repository
+            readOnly: false
+          - name: statedata
+            mountPath: /opt/nifi/nifi-current/flowfile_repository
+            subPath: flowfile_repository
+            readOnly: false
+          - name: statedata
+            mountPath: /opt/nifi/nifi-current/idol_repository
+            subPath: idol_repository
+            readOnly: false
+          - name: statedata
+            mountPath: /opt/nifi/nifi-current/provenance_repository
+            subPath: provenance_repository
             readOnly: false
           - name: data
             mountPath: /idol-ingest
@@ -180,3 +200,13 @@ spec:
             name: idol-nifi-scripts
             optional: false
             defaultMode: 0755
+  volumeClaimTemplates:
+  - metadata:
+      name: statedata
+      labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifi) | nindent 8 }}
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: {{ .Values.nifi.dataVolume.storageClass }}
+      resources:
+        requests:
+          storage: {{ .Values.nifi.dataVolume.volumeSize }}

@@ -96,6 +96,18 @@ nifi:
       # -- memory limit in mebibytes (value used in jvm memory calculation)
       memoryMi: 8192
   
+  dataVolume:
+    # storageClass -- Name of the storage class used to provision a PersistentVolume
+    # for each NiFi instance.
+    # The associated PVCs are named statedata-{name}-{pod number}
+    storageClass: "idol-nifi-storage-class"
+    # volumeSize -- Size of the PersistentVolumeClaim that is created
+    # for each NiFi instance. The Kubernetes cluster will need to provide
+    # enough PersistentVolumes to satisify the claims made for the desired number
+    # of NiFi instances. The size chosen here provides a hard limit on the size
+    # of the NiFi data storage in each NiFi instance.
+    volumeSize: 16Gi
+  
   # -- What proportion of the pod memory to allocate for JVM usage
   jvmMemoryRatio: 0.5
 
