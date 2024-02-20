@@ -20,7 +20,14 @@
 {{- $ports := get . "ports" | default list -}}
 name: {{ $component.name | quote }}
 image: {{ include "idol-library.idolImage" (dict "root" $root "idolImage" $component.idolImage) }}
-imagePullPolicy: IfNotPresent
+imagePullPolicy:
+{{- if and $component.global.imagePullPolicy (ne $component.global.imagePullPolicy "") }}
+  {{- $component.global.imagePullPolicy | quote | nindent 2 -}}
+{{- else if $component.idolImage.imagePullPolicy }}
+  {{- $component.idolImage.imagePullPolicy | quote | nindent 2 -}}
+{{- else }}
+  {{- "IfNotPresent" | nindent 2 -}}
+{{- end }}
 livenessProbe:
   httpGet:
     path: /a=getpid
