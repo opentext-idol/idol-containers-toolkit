@@ -13,7 +13,8 @@
 {{/* specific merges to container specification */}}
 {{- $root := get . "root" | required "idolacitest.container.base: missing root" -}}
 {{- $component := get . "component" | required "idolacitest.container.base: missing component" -}}
-imagePullPolicy: always
+os:
+  name: linux
 {{- /* END of idolacitest.container.base */ -}}
 {{- end -}}
 

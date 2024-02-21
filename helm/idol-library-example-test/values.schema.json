@@ -102,6 +102,10 @@
                 },
                 "repo": {
                     "$ref": "#/$defs/required_string"
+                },
+                "imagePullPolicy": {
+                    "type": "string",
+                    "enum": ["Always", "IfNotPresent", "Never"]
                 }
             },
             "required":[
@@ -126,6 +130,10 @@
                     "items": {
                         "$ref": "#/$defs/required_string"
                     }
+                },
+                "imagePullPolicy": {
+                    "type": "string",
+                    "enum": ["", "Always", "IfNotPresent", "Never"]
                 }
             },
             "required":[

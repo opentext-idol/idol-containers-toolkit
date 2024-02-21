@@ -18,5 +18,5 @@ description: |
   not intended to be used for any other purpose
 dependencies:
 - name: idol-library
-  version: "0.7.0"
+  version: "0.8.0"
   repository: file://../idol-library

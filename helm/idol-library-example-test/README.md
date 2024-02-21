@@ -16,7 +16,7 @@ The Values shown below are 'common' ACI server parameters.
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../idol-library | idol-library | 0.7.0 |
+| file://../idol-library | idol-library | 0.8.0 |
 
 ## Values
 
@@ -31,7 +31,9 @@ The Values shown below are 'common' ACI server parameters.
 | existingConfigMap | string | `""` | if specified, mounted at /etc/config/idol and expected to provide $IDOL_COMPONENT.cfg                      or content.cfg if $IDOL_COMPONENT is unavailable. |
 | global.idolImageRegistry | string | `""` | Global override value for idolImage.registry |
 | global.idolVersion | string | `""` | Global override value for idolImage.version |
+| global.imagePullPolicy | string | `""` | Global override value for idolImage.imagePullPolicy, has no effect if it is empty or is removed |
 | global.imagePullSecrets | list | `["dockerhub-secret"]` | Global secrets used to pull container images |
+| idolImage.imagePullPolicy | string | `"IfNotPresent"` | used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) |
 | idolImage.registry | string | `"microfocusidolserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | idolImage.repo | string | `"content"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}. |
 | idolImage.version | string | `"24.1"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
