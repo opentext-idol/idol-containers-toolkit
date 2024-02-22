@@ -5,13 +5,6 @@
         "Values": {
             "type": "object",
             "properties": {
-                "imagePullSecrets": {
-                    "type": "array",
-                    "items": {
-                        "type": "string",
-                        "minLength": 1
-                    }
-                },
                 "ingressClassName": {
                     "type": "string"
                 },
@@ -33,6 +26,9 @@
                 "name": {
                     "type": "string",
                     "minLength": 1
+                },
+                "global": {
+                    "#ref": "#/definitions/Global"
                 },
                 "indexserviceName": {
                     "type": "string",
@@ -74,7 +70,6 @@
             },
             "required": [
                 "idol-licenseserver",
-                "imagePullSecrets",
                 "ingressBasicAuthData",
                 "ingressProxyBodySize",
                 "ingressType",
@@ -85,7 +80,8 @@
                 "nifi",
                 "nifiRegistry",
                 "usingTLS",
-                "name"
+                "name",
+                "global"
             ],
             "title": "Values"
         },
@@ -130,7 +126,7 @@
         },
         "Nifi": {
             "type": "object",
-            "additionalProperties": true,
+            "additionalProperties": false,
             "properties": {
                 "autoScaling": {
                     "$ref": "#/definitions/AutoScaling"
@@ -163,6 +159,32 @@
                 "dataVolume"
             ],
             "title": "Nifi"
+        },
+        "Global":{
+            "type": "object",
+            "properties":{
+                "idolImageRegistry": {
+                    "type": "string"
+                },
+                "idolVersion": {
+                    "type": "string"
+                },
+                "imagePullSecrets": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type":"string",
+                        "minLength": 1
+                    }
+                },
+                "imagePullPolicy": {
+                    "type": "string",
+                    "enum": ["", "Always", "IfNotPresent", "Never"]
+                }
+            },
+            "required":[
+                "imagePullSecrets"
+            ]
         },
         "AutoScaling": {
             "type": "object",

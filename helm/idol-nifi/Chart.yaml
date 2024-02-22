@@ -21,3 +21,7 @@ dependencies:
   condition: idol-licenseserver.enabled
   version: "0.2.0"
   repository: file://../idol-licenseserver
+- name: metrics-server
+  condition: nifi.autoScaling.enabled
+  version: "3.8.2"
+  repository: "https://kubernetes-sigs.github.io/metrics-server"
