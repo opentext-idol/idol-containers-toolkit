@@ -5,14 +5,6 @@
         "Values": {
             "type": "object",
             "properties": {
-                "idolImageRegistry": {
-                    "type": "string",
-                    "minLength": 1
-                },
-                "idolVersion": {
-                    "type": "string",
-                    "minLength": 1
-                },
                 "imagePullSecrets": {
                     "type": "array",
                     "items": {
@@ -34,6 +26,13 @@
                 "ingressType": {
                     "type": "string",
                     "enum": ["nginx","haproxy"]
+                },
+                "usingTLS":{
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 1
                 },
                 "indexserviceName": {
                     "type": "string",
@@ -75,8 +74,6 @@
             },
             "required": [
                 "idol-licenseserver",
-                "idolImageRegistry",
-                "idolVersion",
                 "imagePullSecrets",
                 "ingressBasicAuthData",
                 "ingressProxyBodySize",
@@ -86,9 +83,38 @@
                 "podSecurityContext",
                 "containerSecurityContext",
                 "nifi",
-                "nifiRegistry"
+                "nifiRegistry",
+                "usingTLS",
+                "name"
             ],
             "title": "Values"
+        },
+        "idolImage":{
+            "type": "object",
+            "properties":{
+                "registry": {
+                    "type": "string",
+                    "format": "hostname"
+                },
+                "version": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "repo": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "imagePullPolicy": {
+                    "type": "string",
+                    "enum": ["Always", "IfNotPresent", "Never"]
+                }
+            },
+            "required":[
+                "registry",
+                "version",
+                "repo"
+            ],
+            "unevaluatedProperties": false
         },
         "IdolLicenseserver": {
             "type": "object",
@@ -104,7 +130,7 @@
         },
         "Nifi": {
             "type": "object",
-            "additionalProperties": false,
+            "additionalProperties": true,
             "properties": {
                 "autoScaling": {
                     "$ref": "#/definitions/AutoScaling"
@@ -120,10 +146,6 @@
                     "minimum": 0.01,
                     "maximum": 0.99
                 },
-                "imageName": {
-                    "type": "string",
-                    "minLength": 1
-                },
                 "flowfile": {
                     "type":"string",
                     "minLength": 1
@@ -135,7 +157,6 @@
             "required": [
                 "autoScaling",
                 "flowfile",
-                "imageName",
                 "ingress",
                 "jvmMemoryRatio",
                 "resources",

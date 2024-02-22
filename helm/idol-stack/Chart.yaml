@@ -11,27 +11,23 @@
 
 apiVersion: v2
 name: idol-stack
-version: 0.1.0
-appVersion: "23.4.0"
+version: 0.2.0
+appVersion: "24.1.0"
 description: An IDOL setup
 dependencies:
 - name: idol-licenseserver
   condition: idol-licenseserver.enabled
-  version: "0.1.0"
-  repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+  version: "0.2.0"
+  repository: file://../idol-licenseserver
 - name: single-content
   condition: single-content.enabled
-  version: "0.2.0"
-  repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm  
+  version: "0.7.0"
+  repository: file://../single-content
 - name: distributed-idol
   condition: distributed-idol.enabled
-  version: "0.6.0"
-  repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
-- name: idol-find
-  condition: idol-find.enabled
-  version: "0.2.0"
-  repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+  version: "0.7.0"
+  repository: file://../distributed-idol
 - name: idol-nifi
   condition: idol-nifi.enabled
-  version: "0.1.0"
-  repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+  version: "0.3.0"
+  repository: file://../idol-nifi

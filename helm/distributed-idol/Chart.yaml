@@ -8,12 +8,12 @@ appVersion: "23.4.0"
 description: A configurable distributed IDOL setup
 dependencies:
 - name: idol-library
-  version: "0.4.0"
-  repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+  version: "0.9.0"
+  repository: file://../idol-library
 - name: idol-licenseserver
   condition: idol-licenseserver.enabled
-  version: "0.1.0"
-  repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+  version: "0.2.0"
+  repository: file://../idol-licenseserver
 - name: metrics-server
   condition: setupMirrored
   version: "3.8.2"
