@@ -79,5 +79,5 @@ livenessProbe:
   initialDelaySeconds: 120
 
 # grammarPackage -- the grammar package configuration file to use, must be one of:
-#                -- 'pci', 'phi', 'phi_telephone', 'phi_internet', 'pii', 'pii_telephone' or 'psi'.
+#                -- 'gov', 'pci', 'phi', 'phi_telephone', 'phi_internet', 'pii', 'pii_telephone' or 'psi'.
 grammarPackage: "pii"

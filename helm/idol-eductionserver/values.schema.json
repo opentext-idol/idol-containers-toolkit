@@ -43,7 +43,7 @@
         },
         "grammarPackage": {
             "type": "string",
-            "enum": ["pci", "phi", "phi_internet", "phi_telephone", "pii", "pii_telephone", "psi"]
+            "enum": ["gov", "pci", "phi", "phi_internet", "phi_telephone", "pii", "pii_telephone", "psi"]
         }
     },
     "required": [
