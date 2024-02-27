@@ -115,8 +115,6 @@ securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml
                        (dict "name" "statedata" "mountPath" "/opt/nifi/nifi-current/provenance_repository" "subPath" "provenance_repository" "readOnly" false)
                        (dict "name" "data" "mountPath" "/idol-ingest" "subPath" "idol-ingest" "readOnly" false)
                        (dict "name" "scripts" "mountPath" "/scripts" "readOnly" false))
-  "useDefaultProbe" false
-  "setACIPorts" false
   "mountConfigMap" false
 ) -}}
 {{- /* END of idolnifi.container */ -}}

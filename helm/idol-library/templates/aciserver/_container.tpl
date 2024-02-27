@@ -18,21 +18,17 @@
 {{- $env := get . "env" | default list -}}
 {{- $volumeMounts := get . "volumeMounts" | default list -}}
 {{- $ports := get . "ports" | default list -}}
-{{- $useDefaultProbe := dig "useDefaultProbe" true . -}}
-{{- $setACIPorts := dig "setACIPorts" true . -}}
 {{- $mountConfigMap := dig "mountConfigMap" true . -}}
 name: {{ $component.name | quote }}
 image: {{ include "idol-library.idolImage" (dict "root" $root "idolImage" $component.idolImage) }}
 imagePullPolicy: {{ default (default "IfNotPresent" $component.idolImage.imagePullPolicy) $component.global.imagePullPolicy | quote }}
-{{- if $useDefaultProbe }}
+{{- if $component.aciPort }}
 livenessProbe:
   httpGet:
     path: /a=getpid
     port: {{ $component.aciPort | int }}
     scheme: {{ $component.usingTLS | ternary "HTTPS" "HTTP" }}
 {{- include "idol-library.standardLivenessProbe" $component.livenessProbe | fromYaml | toYaml | nindent 2}}
-{{- end }}
-{{- if $setACIPorts }}
 ports:
 - containerPort: {{ $component.aciPort | int }}
   name: aci-port

@@ -18,7 +18,6 @@
 {{ $component := get . "component" | required "idol-library.aciserver.statefulset.base.v1: missing component" }}
 {{ $volumes := get . "volumes" | default list }}
 {{ $containers := get . "containers" | default (list "idol-library.aciserver.container.base.v1") }}
-{{ $initContainers := get . "initContainers" | default list }}
 {{ $addConfigMap := dig "addConfigMap" true . }}
 apiVersion: apps/v1
 kind: StatefulSet
@@ -39,12 +38,6 @@ spec:
       imagePullSecrets:
       {{- range $root.Values.global.imagePullSecrets }}
       - name: {{ . }}
-      {{- end }}
-      {{- if gt (len $initContainers) 0 }}
-      initContainers:
-      {{- end }}
-      {{- range $initContainers }}
-      - {{ include . $ctx | nindent 8 }}
       {{- end }}
       containers:
       {{- range $containers }}

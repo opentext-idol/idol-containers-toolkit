@@ -21,6 +21,33 @@ spec:
       setHostnameAsFQDN: true
       dnsPolicy: ClusterFirstWithHostNet
       restartPolicy: Always
+      initContainers:
+      - name: wait-for-zookeeper
+        image: docker.io/busybox:1.36
+        command:
+        - sh
+        - -c
+        - |
+          echo "Connecting to Zookeeper ${NIFI_ZK_CONNECT_STRING}"
+          until nc -vzw 1 zookeeper 2181 ; do
+            echo "Waiting for zookeeper to start"
+            sleep 3
+          done
+        envFrom:
+        - configMapRef:
+            name: idol-nifi-env
+            optional: false
+        resources:
+          requests:
+            cpu: 20m
+            memory: 10Mi
+          limits:
+            cpu: 20m
+            memory: 10Mi
+        {{- if $component.containerSecurityContext.enabled }}
+        securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+          readOnlyRootFilesystem: true
+        {{- end }}
       {{- if $component.podSecurityContext.enabled }}
       securityContext: {{- omit $component.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
@@ -42,7 +69,6 @@ spec:
   "source" "idol-library.aciserver.statefulset.base.v1"
   "destination" "idolnifi.statefulset.base" 
   "containers" (list "idolnifi.container")
-  "initContainers" (list "idolnifi.initcontainer")
   "volumes" (list (dict "name" "data" "emptyDir" (dict "sizeLimit" "3Gi"))
                   (dict "name" "scripts" "configMap" (dict "name" "idol-nifi-scripts" "optional" false "defaultMode" 0755)))
   "addConfigMap" false
