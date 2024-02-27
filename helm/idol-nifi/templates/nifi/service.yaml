@@ -20,7 +20,7 @@ metadata:
 spec:
   type: ClusterIP
   selector:
-    app: nifi
+    app: {{ .Values.name }}
   ports:
   - protocol: TCP
     port: 6342

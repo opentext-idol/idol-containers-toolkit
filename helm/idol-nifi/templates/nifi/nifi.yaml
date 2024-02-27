@@ -12,7 +12,12 @@
 {{ define "idolnifi.statefulset.base" -}}
 {{/* specific merges to statefulset specification */}}
 {{- $component := get . "component" | required "idolnifi.statefulset.base: missing component" -}}
+metadata:
+  labels:
+    app: nifi
+    name: nifi
 spec:
+  serviceName: nifi
   template:
     spec:
       terminationGracePeriodSeconds: 90
