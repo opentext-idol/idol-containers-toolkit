@@ -18,6 +18,7 @@
 {{ $component := get . "component" | required "idol-library.aciserver.statefulset.base.v1: missing component" }}
 {{ $volumes := get . "volumes" | default list }}
 {{ $containers := get . "containers" | default (list "idol-library.aciserver.container.base.v1") }}
+{{ $addConfigMap := dig "addConfigMap" true . }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -43,9 +44,11 @@ spec:
       - {{ include . $ctx | nindent 8 }}
       {{- end }}
       volumes:
+      {{- if $addConfigMap }}
       - name: config-map
         configMap:
           name: {{ default (printf "%s-default-cfg" $component.name) $component.existingConfigMap }}
+      {{- end }}
       {{- range $volumes }}
       - {{ . | toYaml | nindent 8 }}
       {{- end }}

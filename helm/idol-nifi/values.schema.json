@@ -5,21 +5,6 @@
         "Values": {
             "type": "object",
             "properties": {
-                "idolImageRegistry": {
-                    "type": "string",
-                    "minLength": 1
-                },
-                "idolVersion": {
-                    "type": "string",
-                    "minLength": 1
-                },
-                "imagePullSecrets": {
-                    "type": "array",
-                    "items": {
-                        "type": "string",
-                        "minLength": 1
-                    }
-                },
                 "ingressClassName": {
                     "type": "string"
                 },
@@ -34,6 +19,16 @@
                 "ingressType": {
                     "type": "string",
                     "enum": ["nginx","haproxy"]
+                },
+                "usingTLS":{
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "global": {
+                    "#ref": "#/definitions/Global"
                 },
                 "indexserviceName": {
                     "type": "string",
@@ -75,9 +70,6 @@
             },
             "required": [
                 "idol-licenseserver",
-                "idolImageRegistry",
-                "idolVersion",
-                "imagePullSecrets",
                 "ingressBasicAuthData",
                 "ingressProxyBodySize",
                 "ingressType",
@@ -86,9 +78,39 @@
                 "podSecurityContext",
                 "containerSecurityContext",
                 "nifi",
-                "nifiRegistry"
+                "nifiRegistry",
+                "usingTLS",
+                "name",
+                "global"
             ],
             "title": "Values"
+        },
+        "idolImage":{
+            "type": "object",
+            "properties":{
+                "registry": {
+                    "type": "string",
+                    "format": "hostname"
+                },
+                "version": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "repo": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "imagePullPolicy": {
+                    "type": "string",
+                    "enum": ["Always", "IfNotPresent", "Never"]
+                }
+            },
+            "required":[
+                "registry",
+                "version",
+                "repo"
+            ],
+            "unevaluatedProperties": false
         },
         "IdolLicenseserver": {
             "type": "object",
@@ -112,14 +134,13 @@
                 "resources": {
                     "$ref": "#/definitions/Resources"
                 },
+                "dataVolume": {
+                    "$ref": "#/definitions/DataVolume"
+                },
                 "jvmMemoryRatio": {
                     "type": "number",
                     "minimum": 0.01,
                     "maximum": 0.99
-                },
-                "imageName": {
-                    "type": "string",
-                    "minLength": 1
                 },
                 "flowfile": {
                     "type":"string",
@@ -132,12 +153,38 @@
             "required": [
                 "autoScaling",
                 "flowfile",
-                "imageName",
                 "ingress",
                 "jvmMemoryRatio",
-                "resources"
+                "resources",
+                "dataVolume"
             ],
             "title": "Nifi"
+        },
+        "Global":{
+            "type": "object",
+            "properties":{
+                "idolImageRegistry": {
+                    "type": "string"
+                },
+                "idolVersion": {
+                    "type": "string"
+                },
+                "imagePullSecrets": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type":"string",
+                        "minLength": 1
+                    }
+                },
+                "imagePullPolicy": {
+                    "type": "string",
+                    "enum": ["", "Always", "IfNotPresent", "Never"]
+                }
+            },
+            "required":[
+                "imagePullSecrets"
+            ]
         },
         "AutoScaling": {
             "type": "object",
@@ -212,6 +259,20 @@
                 "requests"
             ],
             "title": "Resources"
+        },
+        "DataVolume": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "storageClass": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "volumeSize": {
+                    "type": "string",
+                    "pattern": "^\\d+(?:\\.\\d+)?(?:Ki|Mi|Gi|Ti|Pi|Ei|m|k|M|G|T|P|E)?$"
+                }
+            }
         },
         "Limits": {
             "type": "object",

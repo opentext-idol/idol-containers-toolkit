@@ -26,7 +26,7 @@ spec:
       resources:
         requests:
           storage: {{ $component.contentVolumeSize }}
-{{- end -}}
+{{- end }}
 
 {{- include "idol-library.util.merge" (dict
   "root" .

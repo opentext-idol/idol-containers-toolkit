@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2023 Open Text.
+# Copyright 2022-2024 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -8,27 +8,17 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-apiVersion: apps/v1
-kind: StatefulSet
+
+{{ define "idolnifi.statefulset.base" -}}
+{{/* specific merges to statefulset specification */}}
+{{- $component := get . "component" | required "idolnifi.statefulset.base: missing component" -}}
 metadata:
-  name: idol-nifi
-  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifi) | nindent 4 -}}
-    name: nifi
+  labels:
     app: nifi
-  annotations:
-    app.kubernetes.io/name: nifi
-    app.kubernetes.io/part-of: nifi
+    name: nifi
 spec:
-  revisionHistoryLimit: 1
   serviceName: nifi
-  podManagementPolicy: OrderedReady
-  selector:
-    matchLabels:
-      app: nifi
   template:
-    metadata:
-      labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifi) | nindent 8 -}}
-        app: nifi
     spec:
       terminationGracePeriodSeconds: 90
       automountServiceAccountToken: false
@@ -36,9 +26,6 @@ spec:
       setHostnameAsFQDN: true
       dnsPolicy: ClusterFirstWithHostNet
       restartPolicy: Always
-      {{- if .Values.podSecurityContext.enabled }}
-      securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
-      {{- end }}
       initContainers:
       - name: wait-for-zookeeper
         image: docker.io/busybox:1.36
@@ -62,121 +49,34 @@ spec:
           limits:
             cpu: 20m
             memory: 10Mi
-        {{- if .Values.containerSecurityContext.enabled }}
-        securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+        {{- if $component.containerSecurityContext.enabled }}
+        securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml | nindent 10 }}
           readOnlyRootFilesystem: true
         {{- end }}
-      imagePullSecrets:
-        {{- range .Values.imagePullSecrets }}
-        - name: {{ . }}
-        {{- end }}
-      containers:
-      - name: nifi
-        image: {{ .Values.idolImageRegistry }}/{{ .Values.nifi.imageName }}:{{ .Values.idolVersion }}
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 8080
-          name: http
-        - containerPort: 11443
-          name: cluster
-        - containerPort: 8443
-          name: https
-        - containerPort: 6342
-          name: cluster-lb
-        - containerPort: 11000
-          name: connector-aci
-        env:
-          - name: POD_IP
-            valueFrom:
-              fieldRef:
-                fieldPath: status.podIP # Use pod ip
-          - name: POD_NAME
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.name # Use pod name
-          - name: POD_NAMESPACE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace # Use pod namespace
-          - name: NIFI_UI_BANNER_TEXT
-            value: $(POD_NAME) # Use pod name for banner
-          - name: NIFI_WEB_HTTP_HOST
-            value: $(POD_NAME).nifi.$(POD_NAMESPACE).svc.cluster.local # Use pod fqdn as web host
-          - name: NIFI_CLUSTER_NODE_ADDRESS
-            value: $(POD_NAME).nifi.$(POD_NAMESPACE).svc.cluster.local # Use pod fqdn as node address
-          - name: NIFI_REMOTE_INPUT_SOCKET_HOST
-            value: $(POD_NAME).nifi.$(POD_NAMESPACE).svc.cluster.local # Use pod fqdn as input socket address
-          - name: NIFI_REMOTE_INPUT_HOST
-            value: $(POD_NAME).nifi.$(POD_NAMESPACE).svc.cluster.local # Use pod fqdn as input host address
-          - name: HOSTNAME
-            value: $(POD_IP) # Use pod ip as hostname
-          - name: NODE_IDENTITY
-            value: $(POD_NAME) # Use pod name as identity
-        envFrom:
-          - configMapRef:
-              name: idol-nifi-env
-              optional: false
-        volumeMounts:
-          - name: data
-            mountPath: /opt/nifi/nifi-current/data
-            subPath: data
-            readOnly: false
-          - name: data
-            mountPath: /opt/nifi/nifi-current/keytool
-            subPath: keytool
-            readOnly: false
-          - name: data
-            mountPath: /idol-ingest
-            subPath: idol-ingest
-            readOnly: false
-          - name: scripts
-            mountPath: /scripts
-            readOnly: false
-        lifecycle:
-          postStart:
-            exec:
-              command:
-              - /bin/bash
-              - /scripts/postStart.sh
-          preStop:
-            exec:
-              command:
-              - /bin/bash
-              - /scripts/preStop.sh
-        livenessProbe:
-          exec:
-            command:
-              - pgrep
-              - java
-          initialDelaySeconds: 60
-          periodSeconds: 30
-          timeoutSeconds: 10
-          failureThreshold: 3
-          successThreshold: 1
-        readinessProbe:
-          tcpSocket:
-            port: cluster
-          initialDelaySeconds: 30
-          periodSeconds: 30
-          timeoutSeconds: 10
-          failureThreshold: 3
-          successThreshold: 1
-        resources:
-          requests:
-            cpu: {{ .Values.nifi.resources.requests.cpu }}
-            memory: {{ printf "%dMi" ( .Values.nifi.resources.requests.memoryMi | int) }}
-          limits:
-            cpu: {{ .Values.nifi.resources.limits.cpu }}
-            memory: {{ printf "%dMi" ( .Values.nifi.resources.limits.memoryMi | int) }}
-        {{- if .Values.containerSecurityContext.enabled }}
-        securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 10 }}
-        {{- end }}
-      volumes:
-        - name: data
-          emptyDir:
-            sizeLimit: 3Gi
-        - name: scripts
-          configMap:
-            name: idol-nifi-scripts
-            optional: false
-            defaultMode: 0755
+      {{- if $component.podSecurityContext.enabled }}
+      securityContext: {{- omit $component.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+  volumeClaimTemplates:
+  - metadata:
+      name: statedata
+      labels: {{- include "idol-library.labels" . | nindent 8 }}
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: {{ $component.nifi.dataVolume.storageClass }}
+      resources:
+        requests:
+          storage: {{ $component.nifi.dataVolume.volumeSize }}
+{{- end -}}
+
+{{- include "idol-library.util.merge" (dict
+  "root" .
+  "component" .Values
+  "source" "idol-library.aciserver.statefulset.base.v1"
+  "destination" "idolnifi.statefulset.base" 
+  "containers" (list "idolnifi.container")
+  "volumes" (list (dict "name" "data" "emptyDir" (dict "sizeLimit" "3Gi"))
+                  (dict "name" "scripts" "configMap" (dict "name" "idol-nifi-scripts" "optional" false "defaultMode" 0755)))
+  "addConfigMap" false
+) -}}
+
+

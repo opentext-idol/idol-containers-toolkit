@@ -9,14 +9,38 @@
 #
 # END COPYRIGHT NOTICE
 
-# idolImageRegistry -- used to construct container image name: {idolImageRegistry}/{nifi.imageName}:{idolVersion}
-idolImageRegistry: microfocusidolserver
-# idolVersion -- used to construct container image name: {idolImageRegistry}/{nifi.imageName}:{idolVersion}
-idolVersion: "24.1"
+global:
+  # -- Global override value for idolImage.registry
+  idolImageRegistry: ""
+  # -- Global override value for idolImage.version
+  idolVersion: ""
+  # -- Global secrets used to pull container images
+  imagePullSecrets:
+  - "dockerhub-secret"
+  # -- Global override value for idolImage.imagePullPolicy, has no effect if it is empty or is removed
+  imagePullPolicy: ""
 
-# imagePullSecrets -- secrets used to pull container images
-imagePullSecrets:
-- "dockerhub-secret"
+idolImage:
+  # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
+  registry: "microfocusidolserver"
+  # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
+  version: "24.1"
+  # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}.
+  repo: "nifi-full"
+  # -- used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy)
+  imagePullPolicy: "IfNotPresent"
+
+# -- whether ports are configured to use TLS (https).
+usingTLS: false
+
+# name -- used to name statefulset, service, ingress
+name: idol-nifi
+
+# existingConfigMap -- if specified, mounted at /etc/config/idol
+envConfigMap: ""
+
+# -- Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1)
+additionalVolumeMounts: []
 
 # ingressClassName -- Optional, https://kubernetes.io/docs/concepts/services-networking/ingress/#the-ingress-resource, applied to all ingress objects
 ingressClassName: ""
@@ -96,11 +120,20 @@ nifi:
       # -- memory limit in mebibytes (value used in jvm memory calculation)
       memoryMi: 8192
   
+  dataVolume:
+    # storageClass -- Name of the storage class used to provision a PersistentVolume
+    # for each NiFi instance.
+    # The associated PVCs are named statedata-{name}-{pod number}
+    storageClass: "idol-nifi-storage-class"
+    # volumeSize -- Size of the PersistentVolumeClaim that is created
+    # for each NiFi instance. The Kubernetes cluster will need to provide
+    # enough PersistentVolumes to satisify the claims made for the desired number
+    # of NiFi instances. The size chosen here provides a hard limit on the size
+    # of the NiFi data storage in each NiFi instance.
+    volumeSize: 16Gi
+  
   # -- What proportion of the pod memory to allocate for JVM usage
   jvmMemoryRatio: 0.5
-
-  # -- used to construct container image name: {idolImageRegistry}/{nifi.imageName}:{idolVersion}
-  imageName: nifi-full
 
   # -- the flowfile definition to import. 
   # Set this to any non-existing path to bypass flow import (start with a blank flow).
@@ -157,3 +190,7 @@ idol-licenseserver:
   licenseServerService: "idol-licenseserver"
   # idol-licenseserver.licenseServerPort -- the ACI port of the IDOL LicenseServer (or abstraction)
   licenseServerPort: "20000"
+
+metrics-server:
+  args:
+    - "--kubelet-insecure-tls"

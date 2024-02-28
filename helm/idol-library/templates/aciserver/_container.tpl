@@ -18,9 +18,11 @@
 {{- $env := get . "env" | default list -}}
 {{- $volumeMounts := get . "volumeMounts" | default list -}}
 {{- $ports := get . "ports" | default list -}}
+{{- $mountConfigMap := dig "mountConfigMap" true . -}}
 name: {{ $component.name | quote }}
 image: {{ include "idol-library.idolImage" (dict "root" $root "idolImage" $component.idolImage) }}
 imagePullPolicy: {{ default (default "IfNotPresent" $component.idolImage.imagePullPolicy) $component.global.imagePullPolicy | quote }}
+{{- if $component.aciPort }}
 livenessProbe:
   httpGet:
     path: /a=getpid
@@ -39,12 +41,15 @@ ports:
   name: index-port
   protocol: TCP
 {{- end }}
+{{- end }}
 {{- range $ports }}
 - {{ . | toYaml | nindent 10 }}
 {{- end }}
 volumeMounts:
+{{- if $mountConfigMap }}
 - name: config-map
   mountPath: /etc/config/idol
+{{- end }}
 {{- range $volumeMounts }}
 - {{ . | toYaml | nindent 10 }}
 {{- end }}
@@ -60,7 +65,7 @@ env:
 {{- if $component.usingTLS -}}
 - name: IDOL_SSL
   value: "1"
-{{- end -}}
+{{- end }}
 {{- if $component.envConfigMap }}
 envFrom:
 - configMapRef: 

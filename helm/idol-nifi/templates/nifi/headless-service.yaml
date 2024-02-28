@@ -19,4 +19,4 @@ metadata:
 spec:
   clusterIP: None
   selector:
-    app: nifi
+    app: {{ .Values.name }}
