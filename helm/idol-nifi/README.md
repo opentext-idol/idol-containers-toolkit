@@ -23,9 +23,9 @@ Provides a scaleable IDOL NiFi cluster instance (NiFi, NiFi Registry and ZooKeep
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../idol-library | idol-library | 0.9.0 |
-| file://../idol-licenseserver | idol-licenseserver | 0.2.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.9.0 |
 | https://kubernetes-sigs.github.io/metrics-server | metrics-server | 3.8.2 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | 0.2.0 |
 
 ## Values
 
@@ -52,7 +52,7 @@ Provides a scaleable IDOL NiFi cluster instance (NiFi, NiFi Registry and ZooKeep
 | ingressProxyBodySize | string | `"2048m"` | the maximum allowed size of the client request body, defining the maximum size of requests that can be made to IDOL components within the installation, e.g. the amount of data sent in DREADDDATA index commands. The value should be an nginx "size" value. See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the corresponding nginx configuration parameter. |
 | ingressType | string | `"nginx"` | setup ingress for that controller type. Valid values are nginx or haproxy (used by OpenShift) |
 | metrics-server.args[0] | string | `"--kubelet-insecure-tls"` |  |
-| name | string | `"nifi"` | used to name statefulset, service, ingress |
+| name | string | `"idol-nifi"` | used to name statefulset, service, ingress |
 | nifi.autoScaling.enabled | bool | `true` | deploy a horizontal pod autoscaler for the nifi statefulset |
 | nifi.autoScaling.maxReplicas | int | `8` | the maximum size of the nifi statefulset |
 | nifi.autoScaling.metrics | list | `[{"resource":{"name":"memory","target":{"averageUtilization":90,"type":"Utilization"}},"type":"Resource"},{"resource":{"name":"cpu","target":{"averageUtilization":90,"type":"Utilization"}},"type":"Resource"}]` | one or more metrics controlling the horizontal pod autoscaler (https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/horizontal-pod-autoscaler-v2/#HorizontalPodAutoscalerSpec) |

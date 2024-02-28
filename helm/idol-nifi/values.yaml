@@ -34,7 +34,7 @@ idolImage:
 usingTLS: false
 
 # name -- used to name statefulset, service, ingress
-name: nifi
+name: idol-nifi
 
 # existingConfigMap -- if specified, mounted at /etc/config/idol
 envConfigMap: ""
