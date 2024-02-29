@@ -381,6 +381,27 @@ entries:
   idol-nifi:
   - apiVersion: v2
     appVersion: 24.1.0
+    created: "2024-02-29T14:54:45.70991944Z"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.9.0
+    - condition: idol-licenseserver.enabled
+      name: idol-licenseserver
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.2.0
+    - condition: nifi.autoScaling.enabled
+      name: metrics-server
+      repository: https://kubernetes-sigs.github.io/metrics-server
+      version: 3.8.2
+    description: A configurable IDOL NiFi setup
+    digest: 4874b90b670abe9bf8a7dcc1bd6bcb247c77a6be45adf1ac3ca22f023ef15501
+    name: idol-nifi
+    urls:
+    - release/idol-nifi-0.3.1.tgz
+    version: 0.3.1
+  - apiVersion: v2
+    appVersion: 24.1.0
     created: "2024-02-28T12:29:56.5131604Z"
     dependencies:
     - name: idol-library
@@ -691,4 +712,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2024-02-28T12:29:56.5021094Z"
+generated: "2024-02-29T14:54:45.703060658Z"
