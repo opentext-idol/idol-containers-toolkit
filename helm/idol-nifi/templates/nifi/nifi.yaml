@@ -11,6 +11,7 @@
 
 {{ define "idolnifi.statefulset.base" -}}
 {{/* specific merges to statefulset specification */}}
+{{- $root := get . "root" | required "idolnifi.statefulset.base: missing root" -}}
 {{- $component := get . "component" | required "idolnifi.statefulset.base: missing component" -}}
 metadata:
   labels:
@@ -53,6 +54,37 @@ spec:
         securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml | nindent 10 }}
           readOnlyRootFilesystem: true
         {{- end }}
+      - name: ensure-conf
+        image: {{ include "idol-library.idolImage" (dict "root" $root "idolImage" $component.idolImage) }}
+        envFrom:
+        - configMapRef:
+            name: idol-nifi-env
+            optional: false
+        resources:
+          requests:
+            cpu: {{ $component.nifi.resources.requests.cpu }}
+            memory: {{ printf "%dMi" ( $component.nifi.resources.requests.memoryMi | int) }}
+          limits:
+            cpu: {{ $component.nifi.resources.limits.cpu }}
+            memory: {{ printf "%dMi" ( $component.nifi.resources.limits.memoryMi | int) }}
+        {{- if $component.containerSecurityContext.enabled }}
+        securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+          readOnlyRootFilesystem: true
+        {{- end }}
+        command:
+        - sh
+        - "-c"
+        - |
+          if [ -z "$(ls -A -- /mnt/store/nifi/conf)" ]; then
+            echo Copying files into conf directory
+            cp /opt/nifi/nifi-current/conf/* /mnt/store/nifi/conf/
+          fi
+
+        volumeMounts:
+        - name: statedata
+          mountPath: /mnt/store/nifi/conf
+          subPath: conf
+          readOnly: false
       {{- if $component.podSecurityContext.enabled }}
       securityContext: {{- omit $component.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
