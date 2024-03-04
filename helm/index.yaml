@@ -381,7 +381,7 @@ entries:
   idol-nifi:
   - apiVersion: v2
     appVersion: 24.1.0
-    created: "2024-03-04T12:52:53.2339015Z"
+    created: "2024-03-04T17:20:49.3910177Z"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
@@ -395,7 +395,7 @@ entries:
       repository: https://kubernetes-sigs.github.io/metrics-server
       version: 3.8.2
     description: A configurable IDOL NiFi setup
-    digest: 045ff0209abe7b71a79309e2f14d21a138740e148d494fead39a3acbb644bbbe
+    digest: 58cb7fc7d58cce884a5519ab9473f274cef0337952858513d55d0ab3e2592150
     name: idol-nifi
     urls:
     - release/idol-nifi-0.3.2.tgz
@@ -733,4 +733,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2024-03-04T12:52:53.2265986Z"
+generated: "2024-03-04T17:20:49.3844731Z"
