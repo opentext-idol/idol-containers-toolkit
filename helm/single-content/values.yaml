@@ -115,6 +115,9 @@ ingress:
   # -- Ingress controller path for index connections.
   indexPath: "/index/"
 
+ # -- Ingress controller path for service connections.
+  servicePath: "/content/service/"
+
   # -- Maximum allowed size of the client request body, defining
   # the maximum size of requests that can be made to IDOL components within the installation, e.g.
   # the amount of data sent in DREADDDATA index commands.

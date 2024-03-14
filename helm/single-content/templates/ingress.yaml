@@ -35,4 +35,11 @@ spec:
             name:  {{ $component.name | quote }}
             port:
               name: index-port
+      - path: {{ include "idol-library.ingress.path" (dict "ingress" $component.ingress "path" $component.ingress.servicePath) }}
+        pathType: {{ include "idol-library.ingress.pathtype" $component }}
+        backend:
+          service:
+            name:  {{ $component.name | quote }}
+            port:
+              name: service-port
 {{- end -}}
