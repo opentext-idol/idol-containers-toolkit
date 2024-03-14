@@ -227,11 +227,15 @@
                         },
                         "indexPath": {
                             "$ref": "#/$defs/required_string"
+                        },
+                        "servicePath": {
+                            "$ref": "#/$defs/required_string"
                         }
                     },
                     "required":[
                         "path",
-                        "indexPath"
+                        "indexPath",
+                        "servicePath"
                     ],
                     "allOf":[
                         {"$ref":"#/$defs/ingressCommon"}
