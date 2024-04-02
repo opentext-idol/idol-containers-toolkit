@@ -585,6 +585,19 @@ entries:
   idol-view:
   - apiVersion: v2
     appVersion: "24.1"
+    created: "2024-04-02T14:08:07.841257532+01:00"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.9.0
+    description: Adds IDOL View
+    digest: 5c8a3fa25939ebcc5bfc9141bcdb2f1375834eda8548ec66f50aceb7d59384fc
+    name: idol-view
+    urls:
+    - release/idol-view-0.2.0.tgz
+    version: 0.2.0
+  - apiVersion: v2
+    appVersion: "24.1"
     created: "2024-01-29T10:32:12.93695582Z"
     dependencies:
     - name: idol-library
@@ -733,4 +746,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2024-03-04T17:20:49.3844731Z"
+generated: "2024-04-02T14:08:07.834733002+01:00"

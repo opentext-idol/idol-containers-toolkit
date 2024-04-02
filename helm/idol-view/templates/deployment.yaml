@@ -8,10 +8,14 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-{{ include "idol-library.aciserver.deployment" (dict 
-    "root" .
-    "component" .Values
-    "destination" "idol-view.deployment")  }}
-{{- define "idol-view.deployment" -}}
-{{/* Any View specific merges to base template go here */}}
+{{ define "idolviewserver.deployment.base" }}
 {{- end -}}
+
+{{ include "idol-library.util.merge" (dict
+  "root" .
+  "component" .Values
+  "source" "idol-library.aciserver.deployment.base.v1"
+  "destination" "idolviewserver.deployment.base" 
+  "containers" (list "idolviewserver.container")
+) }}
+
