@@ -36,6 +36,11 @@ licenseServerHostname: "idol-licenseserver"
 # licenseServerPort -- the ACI port of the IDOL LicenseServer (or abstraction)
 licenseServerPort: "20000"
 
+# -- whether aci/service/index ports are configured to use TLS (https).
+# If configuring for TLS, then consider setting IDOL_SSL_COMPONENT_CERT_PATH and IDOL_SSL_COMPONENT_KEY_PATH in envConfigMap
+# to provide required TLS certificates
+usingTLS: false
+
 # existingConfigMap -- if specified, mounted at /etc/config/idol and expected to provide community.cfg
 existingConfigMap: ""
 
@@ -44,6 +49,22 @@ additionalVolumes: []
 
 # -- Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1)
 additionalVolumeMounts: []
+
+# -- Optional configMap name holding extra environnment variables for container
+envConfigMap: ""
+
+# -- Optional PodSecurityContext (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podsecuritycontext-v1-core)
+podSecurityContext:
+  # -- enable PodSecurityContext. Setting to false omits.
+  enabled: false
+  fsGroup: 0
+  runAsUser: 1000
+  runAsGroup: 0
+
+# -- Optional SecurityContext for container (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#securitycontext-v1-core)
+containerSecurityContext:
+  # -- enable SecurityContext for container. Setting to false omits.
+  enabled: false
 
 # -- Default configuration for [PromotionAgentStore]::Host
 agentStoreName: &agentStoreName "idol-qms-agentstore"

@@ -15,8 +15,8 @@
     "destination" "idol-qms.ingress")  -}}
 {{- define "idol-qms.ingress" -}}
 {{/* Any QMS specific merges to base template go here */}}
-{{- $root := get . "root" | required "missing root" -}}
-{{- $component := get . "component" | required "missing component" -}}
+{{- $root := get . "root" | required "idol-qms.ingress: missing root" -}}
+{{- $component := get . "component" | required "idol-qms.ingress: missing component" -}}
 spec:
   rules:
   - http:
