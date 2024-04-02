@@ -37,11 +37,6 @@ idolImage:
 # to provide required TLS certificates
 usingTLS: false
 
-# licenseServerHostname -- the hostname of the IDOL LicenseServer (or abstraction)
-licenseServerHostname: "idol-licenseserver"
-# licenseServerPort -- the ACI port of the IDOL LicenseServer (or abstraction)
-licenseServerPort: "20000"
-
 # existingConfigMap -- if specified, mounted at /etc/config/idol and expected to provide omnigroupserver.cfg
 existingConfigMap: ""
 
@@ -51,6 +46,28 @@ existingConfigMap: ""
 # OAuth workflow must be conducted elsewhere and the resulting files mounted into the Omnigroupserver
 # container at the expected places for your configuration.
 oauthToolConfigMap: ""
+
+# -- Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
+additionalVolumes: []
+
+# -- Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1)
+additionalVolumeMounts: []
+
+# -- Optional configMap name holding extra environnment variables for container
+envConfigMap: ""
+
+# -- Optional PodSecurityContext (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podsecuritycontext-v1-core)
+podSecurityContext:
+  # -- enable PodSecurityContext. Setting to false omits.
+  enabled: false
+  fsGroup: 0
+  runAsUser: 1000
+  runAsGroup: 0
+
+# -- Optional SecurityContext for container (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#securitycontext-v1-core)
+containerSecurityContext:
+  # -- enable SecurityContext for container. Setting to false omits.
+  enabled: false
 
 ##### INGRESS VARIABLES #####
 
@@ -70,6 +87,14 @@ ingress:
   host: ""
 
 ##### INTERNAL VARIABLES #####
+# Values specified below this point in the file should not need to be overriden.
+# They are generally here in values.yaml so that DRY principles and a consistent
+# scheme for specifying these values in the templates can be followed.
+
+# licenseServerHostname -- the hostname of the IDOL LicenseServer (or abstraction)
+licenseServerHostname: "idol-licenseserver"
+# licenseServerPort -- the ACI port of the IDOL LicenseServer (or abstraction)
+licenseServerPort: "20000"
 
 # name -- used to name deployment, service, ingress
 name: "idol-omnigroupserver"
