@@ -479,7 +479,7 @@ entries:
   idol-omnigroupserver:
   - apiVersion: v2
     appVersion: "24.1"
-    created: "2024-04-02T15:33:01.127822429+01:00"
+    created: "2024-04-03T13:55:48.380622164+01:00"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
@@ -489,7 +489,7 @@ entries:
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
       version: 0.2.0
     description: Adds IDOL OmniGroupServer
-    digest: 8dfe450ba5fede2d1af57c611cdee2b8eb13fc98935c1d0a0566da73e73b044f
+    digest: dcd49093b3bfaf61b9a558e4ba73f2713efad61cdf0a95b40d451caa4a591847
     name: idol-omnigroupserver
     urls:
     - release/idol-omnigroupserver-0.3.0.tgz
@@ -548,7 +548,7 @@ entries:
   idol-qms:
   - apiVersion: v2
     appVersion: "24.1"
-    created: "2024-04-02T16:42:06.296821673+01:00"
+    created: "2024-04-03T13:55:48.390239578+01:00"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
@@ -563,7 +563,7 @@ entries:
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
       version: 0.6.0
     description: Adds IDOL QMS
-    digest: 498a691000689b79165823eae046d799ee131e4d264ccaf2a8b374c62881adf2
+    digest: 8b1756b64afcacac86406dcf2913044f50cb39c6457d4ba7cecf030ec4dae8f1
     name: idol-qms
     urls:
     - release/idol-qms-0.2.0.tgz
@@ -785,4 +785,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2024-04-02T16:42:06.289720772+01:00"
+generated: "2024-04-03T13:55:48.374313355+01:00"
