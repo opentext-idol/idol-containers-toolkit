@@ -8,10 +8,13 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-{{ include "idol-library.aciserver.deployment" (dict 
-    "root" .
-    "component" .Values
-    "destination" "idol-qms.deployment")  }}
-{{- define "idol-qms.deployment" -}}
-{{/* Any QMS specific merges to base template go here */}}
+{{ define "idolqms.deployment.base" }}
 {{- end -}}
+
+{{ include "idol-library.util.merge" (dict
+  "root" .
+  "component" .Values
+  "source" "idol-library.aciserver.deployment.base.v1"
+  "destination" "idolqms.deployment.base"
+  "containers" (list "idolqms.container")
+) }}

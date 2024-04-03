@@ -34,7 +34,7 @@
             "type": "string",
             "pattern": "^[1-9]|\\d{2,}$"
         },
-        "optional_subchart":{
+        "optional_object":{
             "type": "object",
             "properties": {
                 "enabled": {
@@ -165,6 +165,12 @@
                 },
                 "usingTLS":{
                     "type": "boolean"
+                },
+                "containerSecurityContext":{
+                    "$ref": "#/$defs/optional_object"
+                },
+                "podSecurityContext":{
+                    "$ref": "#/$defs/optional_object"
                 },
                 "ingress": {
                     "$ref": "#/$defs/ingressCommon"
