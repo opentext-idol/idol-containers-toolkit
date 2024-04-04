@@ -27,7 +27,7 @@ function generate_missing_oauth_config() {
     touch ./oauth.cfg
     if [[ ./oauth.cfg -ef ${REQUIRED_FILENAME} ]]
     then
-        echo Error: Specified file to generate (${REQUIRED_FILENAME}) path-clashes with ./oauth.cfg. Please change this filename to any other value!
+        echo "Error: Specified file to generate (${REQUIRED_FILENAME}) path-clashes with ./oauth.cfg. Please change this filename to any other value!"
         rm ./oauth.cfg
         return 1
     fi
@@ -35,14 +35,14 @@ function generate_missing_oauth_config() {
 
     if [[ -e ${REQUIRED_FILENAME} ]]
     then
-        echo Info: Cowardly not overwriting existing file ${REQUIRED_FILENAME}
+        echo "Info: Cowardly not overwriting existing file ${REQUIRED_FILENAME}"
         return 0
     fi
 
     ${OAUTH_TOOL_PATH} ${OAUTH_TOOL_CFG} ${OAUTH_TOOL_CFG_SECTION} > /dev/null 2>&1
     if [ $? -ne 0 ]
     then
-        echo Error: ${OAUTH_TOOL_PATH} ${OAUTH_TOOL_CFG} ${OAUTH_TOOL_CFG_SECTION} failed!
+        echo "Error: ${OAUTH_TOOL_PATH} ${OAUTH_TOOL_CFG} ${OAUTH_TOOL_CFG_SECTION} failed!"
         return 1
     fi
 
@@ -51,11 +51,11 @@ function generate_missing_oauth_config() {
     mv ./oauth.cfg ${REQUIRED_FILENAME}
     if [ $? -ne 0 ]
     then
-        echo Error: Could not move ./oauth.cfg to ${REQUIRED_FILENAME}
+        echo "Error: Could not move ./oauth.cfg to ${REQUIRED_FILENAME}"
         return 1
     fi
 
-    echo Info: Generated ${REQUIRED_FILENAME} for ${OAUTH_TOOL_CFG_SECTION} OAuth setup.
+    echo "Info: Generated ${REQUIRED_FILENAME} for ${OAUTH_TOOL_CFG_SECTION} OAuth setup."
     return 0
 }
 
@@ -72,19 +72,19 @@ function handle_oauth_setup() {
     OAUTH_TOOL_PATH=/${COMPONENT_NAME}/oauth_tool.exe
     if [[ ! -x ${OAUTH_TOOL_PATH} ]]
     then
-        echo Error: Could not find ${OAUTH_TOOL_PATH} for OAuth setup
+        echo "Error: Could not find ${OAUTH_TOOL_PATH} for OAuth setup"
         return 1
     fi
 
     if [[ ! -e ${COMPONENT_CFG} ]];
     then
-        echo Error: Could not find ${COMPONENT_CFG} to derive OAuth sections for OAuth setup
+        echo "Error: Could not find ${COMPONENT_CFG} to derive OAuth sections for OAuth setup"
         return 1
     fi
 
     if [[ ! -e ${OAUTH_TOOL_CFG} ]]
     then
-        echo Error: Could not find ${OAUTH_TOOL_CFG} for configuring OAuth setup
+        echo "Error: Could not find ${OAUTH_TOOL_CFG} for configuring OAuth setup"
         return 1
     fi
 
@@ -92,7 +92,7 @@ function handle_oauth_setup() {
     if [[ -e ./oauth.cfg ]]
     then
         BACKUP_CONFIG="oauth.cfg.$(date +%s%N).bak"
-        echo Info: oauth.cfg is overwritten by oauth_tool.exe calls, but one already exists. Renaming to ${BACKUP_CONFIG}
+        echo "Info: oauth.cfg is overwritten by oauth_tool.exe calls, but one already exists. Renaming to ${BACKUP_CONFIG}"
         mv ./oauth.cfg ./${BACKUP_CONFIG}
     fi
 
@@ -106,7 +106,7 @@ function handle_oauth_setup() {
             generate_missing_oauth_config ${OAUTH_TOOL_PATH} ${OAUTH_TOOL_CFG} ${SECTION} ${CONFIGPATH}
             if [ $? -ne 0 ]
             then
-                echo Failed to generate ${CONFIGPATH} for ${SECTION}
+                echo "Failed to generate ${CONFIGPATH} for ${SECTION}"
                 return 1
             fi
         done
@@ -114,7 +114,7 @@ function handle_oauth_setup() {
 
     if [[ -v BACKUP_CONFIG ]]
     then
-        echo Info: Restoring original oauth.cfg from ${BACKUP_CONFIG}
+        echo "Info: Restoring original oauth.cfg from ${BACKUP_CONFIG}"
         mv ./${BACKUP_CONFIG} ./oauth.cfg
         unset BACKUP_CONFIG
     fi
