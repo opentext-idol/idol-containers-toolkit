@@ -55,6 +55,12 @@
                     },
                     "required": ["enabled"]
                 },
+                "additionalVolumes":{
+                    "type": "array"
+                },
+                "additionalVolumeMounts":{
+                    "type": "array"
+                },
                 "nifi": {
                     "$ref": "#/definitions/Nifi"
                 },
