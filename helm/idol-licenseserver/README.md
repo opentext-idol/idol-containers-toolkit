@@ -10,7 +10,12 @@ One of licenseServerIp or licenseServerExternalName should be specified e.g.
 
 ```
 helm install --set licenseServerIp=1.2.3.4 idol-licenseserver opentext-idol/idol-licenseserver
-helm install --set licenseServerIp=null --set licenseServerExternalName=my.license.server.instance idol-licenseserver opentext-idol/idol-licenseserver
+```
+
+```
+helm install --set licenseServerIp=null \
+    --set licenseServerExternalName=my.license.server.instance \
+    idol-licenseserver opentext-idol/idol-licenseserver
 ```
 
 ## Requirements
