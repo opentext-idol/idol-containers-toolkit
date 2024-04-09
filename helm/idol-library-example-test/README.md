@@ -16,7 +16,7 @@ The Values shown below are 'common' ACI server parameters.
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../idol-library | idol-library | 0.8.0 |
+| file://../idol-library | idol-library | 0.10.0 |
 
 ## Values
 
@@ -48,6 +48,8 @@ The Values shown below are 'common' ACI server parameters.
 | name | string | `"idol-aci-test"` | used to name statefulset, service, ingress |
 | podSecurityContext | object | `{"enabled":false,"fsGroup":0,"runAsGroup":0,"runAsUser":1000}` | Optional PodSecurityContext (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podsecuritycontext-v1-core) |
 | podSecurityContext.enabled | bool | `false` | enable PodSecurityContext. Setting to false omits. |
+| resources | object | `{"enabled":false,"limits":{"cpu":"1000m","memory":"1Gi"},"requests":{"cpu":"1000m","memory":"1Gi"}}` | Optional resources for container (see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers) |
+| resources.enabled | bool | `false` | enable resources for container. Setting to false omits. |
 | servicePort | string | `"10002"` | port service will serve service connections on |
 | usingTLS | bool | `false` | whether aci/service/index ports are configured to use TLS (https). If configuring for TLS, then consider setting IDOL_SSL_COMPONENT_CERT_PATH and IDOL_SSL_COMPONENT_KEY_PATH in envConfigMap to provide required TLS certificates |
 

@@ -69,6 +69,17 @@ containerSecurityContext:
   # -- enable SecurityContext for container. Setting to false omits.
   enabled: false
 
+# -- Optional resources for container (see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers)
+resources:
+  # -- enable resources for container. Setting to false omits.
+  enabled: false
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 1000m
+    memory: 1Gi
+
 ##### NETWORKING CONFIGURATION #####
 # This section contains parameters to configure various network-related
 # properties in this chart.
