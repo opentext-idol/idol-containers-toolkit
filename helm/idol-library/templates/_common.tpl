@@ -48,7 +48,7 @@ helm.sh/chart: {{ printf "%s-%s" $root.Chart.Name $root.Chart.Version | replace 
 {{- define "idol-library.idolImage" -}}
 {{- $root := get . "root" | required "idol-library.idolImage: missing root" -}}
 {{- $idolImage := get . "idolImage" | required "idol-library.idolImage: missing idolImage" -}}
-{{ print (default $idolImage.registry (dig "global" "idolImageRegistry" "" ($root.Values | merge dict )))
+{{ print (default $idolImage.registry (dig "global" "idolImageRegistry" "" $root.Values.AsMap))
                       "/"  $idolImage.repo  ":" 
-                      (default $idolImage.version (dig "global" "idolVersion" "" ($root.Values | merge dict ))) }}
+                      (default $idolImage.version (dig "global" "idolVersion" "" $root.Values.AsMap)) }}
 {{- end -}}

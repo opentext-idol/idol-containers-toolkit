@@ -71,7 +71,7 @@ envFrom:
 - configMapRef: 
     name: {{ $component.envConfigMap | quote }}
 {{ end }}
-{{- if $component.containerSecurityContext.enabled }}
+{{- if (dig "containerSecurityContext" "enabled" false $component.AsMap) }}
 securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml | nindent 10 }}
 {{- end }}
 {{- if (dig "resources" "enabled" false $component.AsMap) }}
