@@ -74,7 +74,7 @@ envFrom:
 {{- if $component.containerSecurityContext.enabled }}
 securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml | nindent 10 }}
 {{- end }}
-{{- if $component.resources.enabled }}
+{{- if (dig "resources" "enabled" false $component.AsMap) }}
 resources: {{- omit $component.resources "enabled" | toYaml | nindent 10 }}
 {{- end }}
 
