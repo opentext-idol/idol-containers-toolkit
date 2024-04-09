@@ -186,6 +186,9 @@
                 },
                 "podSecurityContext":{
                     "$ref": "#/$defs/optional_object"
+                },
+                "resources":{
+                    "$ref": "#/$defs/optional_object"
                 }
             },
             "required":[
