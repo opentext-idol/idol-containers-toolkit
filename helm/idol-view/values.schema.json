@@ -103,6 +103,10 @@
                 },
                 "repo": {
                     "$ref": "#/$defs/required_string"
+                },
+                "imagePullPolicy": {
+                    "type": "string",
+                    "enum": ["Always", "IfNotPresent", "Never"]
                 }
             },
             "required":[
@@ -127,6 +131,10 @@
                     "items": {
                         "$ref": "#/$defs/required_string"
                     }
+                },
+                "imagePullPolicy": {
+                    "type": "string",
+                    "enum": ["", "Always", "IfNotPresent", "Never"]
                 }
             },
             "required":[
@@ -170,6 +178,9 @@
                     "$ref": "#/$defs/optional_object"
                 },
                 "podSecurityContext":{
+                    "$ref": "#/$defs/optional_object"
+                },
+                "resources":{
                     "$ref": "#/$defs/optional_object"
                 },
                 "ingress": {
