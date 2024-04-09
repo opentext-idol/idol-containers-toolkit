@@ -55,6 +55,7 @@ package-all: ${PACKAGE_SUBCHARTS}
 
 ${CLEAN_SUBCHARTS}: clean-% : 
 	-${RM} $*/charts/*
+	-${RM} $*/Chart.lock
 
 clean-all: ${CLEAN_SUBCHARTS}
 
