@@ -12,12 +12,19 @@
         "licenseServerService": {
             "type": "string",
             "minLength": 1
+        },
+        "licenseServerExternalName":{
+            "type": "string",
+            "minLength": 1
         }
     },
     "required": [
-        "licenseServerIp",
         "licenseServerPort",
         "licenseServerService"
+    ],
+    "oneOf": [
+        {"required":[ "licenseServerIp"] },
+        {"required": ["licenseServerExternalName"]}
     ],
     "title": "Values",
     "type": "object"
