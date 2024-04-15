@@ -39,6 +39,9 @@ name: idol-nifi
 # existingConfigMap -- if specified, mounted at /etc/config/idol
 envConfigMap: ""
 
+# -- Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
+additionalVolumes: []
+
 # -- Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1)
 additionalVolumeMounts: []
 

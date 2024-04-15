@@ -1,6 +1,6 @@
 # single-content
 
-![Version: 0.7.0](https://img.shields.io/badge/Version-0.7.0-informational?style=flat-square) ![AppVersion: 24.1](https://img.shields.io/badge/AppVersion-24.1-informational?style=flat-square)
+![Version: 0.8.0](https://img.shields.io/badge/Version-0.8.0-informational?style=flat-square) ![AppVersion: 24.1](https://img.shields.io/badge/AppVersion-24.1-informational?style=flat-square)
 
 Provides an IDOL Content statefulset.
 
@@ -15,8 +15,8 @@ of these endpoints to exist in the cluster.
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.8.0 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | 0.1.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.10.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | 0.3.0 |
 
 ## Values
 
@@ -35,7 +35,7 @@ of these endpoints to exist in the cluster.
 | global.idolVersion | string | `""` | Global override value for idolImage.version |
 | global.imagePullPolicy | string | `""` | Global override value for idolImage.imagePullPolicy, has no effect if it is empty or is removed |
 | global.imagePullSecrets | list | `["dockerhub-secret"]` | Global secrets used to pull container images |
-| idol-licenseserver.enabled | bool | `true` | whether to deploy the idol-licenseserver sub-chart |
+| idol-licenseserver.enabled | bool | `false` | whether to deploy the idol-licenseserver sub-chart |
 | idolImage.imagePullPolicy | string | `"IfNotPresent"` | used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) |
 | idolImage.registry | string | `"microfocusidolserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | idolImage.repo | string | `"content"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}. |
@@ -58,6 +58,8 @@ of these endpoints to exist in the cluster.
 | podSecurityContext.enabled | bool | `false` | enable PodSecurityContext. Setting to false omits. |
 | queryserviceACIPort | string | `"9060"` | port idol-query-service will serve ACI connections on. |
 | queryserviceName | string | `"idol-query-service"` | internal parameter to specify the query service name, if this is empty then no                     additional service will be provisioned. |
+| resources | object | `{"enabled":false,"limits":{"cpu":"1000m","memory":"1Gi"},"requests":{"cpu":"1000m","memory":"1Gi"}}` | Optional resources for container (see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers) |
+| resources.enabled | bool | `false` | enable resources for container. Setting to false omits. |
 | servicePort | string | `"9102"` | port service will serve service connections on |
 | usingTLS | bool | `false` | whether aci/service/index ports are configured to use TLS (https). If configuring for TLS, then consider setting IDOL_SSL_COMPONENT_CERT_PATH and IDOL_SSL_COMPONENT_KEY_PATH in envConfigMap to provide required TLS certificates |
 

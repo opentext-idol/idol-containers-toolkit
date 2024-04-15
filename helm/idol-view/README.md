@@ -1,6 +1,6 @@
 # idol-view
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![AppVersion: 24.1](https://img.shields.io/badge/AppVersion-24.1-informational?style=flat-square)
+![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![AppVersion: 24.1](https://img.shields.io/badge/AppVersion-24.1-informational?style=flat-square)
 
 Provides an IDOL View deployment.
 
@@ -25,7 +25,7 @@ You may wish to deploy this chart alongside _idol-nifi_.
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.6.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.10.0 |
 
 ## Values
 
@@ -36,10 +36,15 @@ You may wish to deploy this chart alongside _idol-nifi_.
 | additionalVolumes | list | `[]` | Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes) |
 | agentStoreACIPort | string | `"9050"` | Default configuration for [Viewing]::IdolPort |
 | agentStoreName | string | `"idol-agentstore"` | Default configuration for [Viewing]::IdolHost |
+| containerSecurityContext | object | `{"enabled":false}` | Optional SecurityContext for container (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#securitycontext-v1-core) |
+| containerSecurityContext.enabled | bool | `false` | enable SecurityContext for container. Setting to false omits. |
+| envConfigMap | string | `""` | Optional configMap name holding extra environnment variables for container |
 | existingConfigMap | string | `""` | if specified, mounted at /etc/config/idol and expected to provide community.cfg |
 | global.idolImageRegistry | string | `""` | Global override value for idolImage.registry |
 | global.idolVersion | string | `""` | Global override value for idolImage.version |
+| global.imagePullPolicy | string | `""` | Global override value for idolImage.imagePullPolicy, has no effect if it is empty or is removed |
 | global.imagePullSecrets | list | `["dockerhub-secret"]` | Global secrets used to pull container images |
+| idolImage.imagePullPolicy | string | `"IfNotPresent"` | used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) |
 | idolImage.registry | string | `"microfocusidolserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | idolImage.repo | string | `"view"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | idolImage.version | string | `"24.1"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
@@ -55,8 +60,12 @@ You may wish to deploy this chart alongside _idol-nifi_.
 | name | string | `"idol-view"` | used to name deployment, service, ingress |
 | nifiserviceACIPort | string | `"11000"` | Optional default configuration for [Viewing]::DistributedConnectorPort |
 | nifiserviceName | string | `"idol-nifi"` | Optional default configuration for [Viewing]::DistributedConnectorHost |
+| podSecurityContext | object | `{"enabled":false,"fsGroup":0,"runAsGroup":0,"runAsUser":1000}` | Optional PodSecurityContext (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podsecuritycontext-v1-core) |
+| podSecurityContext.enabled | bool | `false` | enable PodSecurityContext. Setting to false omits. |
 | queryserviceACIPort | string | `"9060"` | Default configuration for [UniversalViewing]::DocumentStorePort |
 | queryserviceName | string | `"idol-query-service"` | Default configuration for [UniversalViewing]::DocumentStoreHost |
+| resources | object | `{"enabled":false,"limits":{"cpu":"1000m","memory":"1Gi"},"requests":{"cpu":"1000m","memory":"1Gi"}}` | Optional resources for container (see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers) |
+| resources.enabled | bool | `false` | enable resources for container. Setting to false omits. |
 | servicePort | string | `"9082"` | port service will serve service connections on |
 | usingTLS | bool | `false` | whether aci/service/index ports are configured to use TLS (https). If configuring for TLS, then consider setting IDOL_SSL_COMPONENT_CERT_PATH and IDOL_SSL_COMPONENT_KEY_PATH in envConfigMap to provide required TLS certificates |
 

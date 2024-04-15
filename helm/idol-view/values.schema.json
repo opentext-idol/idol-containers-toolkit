@@ -34,7 +34,7 @@
             "type": "string",
             "pattern": "^[1-9]|\\d{2,}$"
         },
-        "optional_subchart":{
+        "optional_object":{
             "type": "object",
             "properties": {
                 "enabled": {
@@ -103,6 +103,10 @@
                 },
                 "repo": {
                     "$ref": "#/$defs/required_string"
+                },
+                "imagePullPolicy": {
+                    "type": "string",
+                    "enum": ["Always", "IfNotPresent", "Never"]
                 }
             },
             "required":[
@@ -127,6 +131,10 @@
                     "items": {
                         "$ref": "#/$defs/required_string"
                     }
+                },
+                "imagePullPolicy": {
+                    "type": "string",
+                    "enum": ["", "Always", "IfNotPresent", "Never"]
                 }
             },
             "required":[
@@ -165,6 +173,15 @@
                 },
                 "usingTLS":{
                     "type": "boolean"
+                },
+                "containerSecurityContext":{
+                    "$ref": "#/$defs/optional_object"
+                },
+                "podSecurityContext":{
+                    "$ref": "#/$defs/optional_object"
+                },
+                "resources":{
+                    "$ref": "#/$defs/optional_object"
                 },
                 "ingress": {
                     "$ref": "#/$defs/ingressCommon"

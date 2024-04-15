@@ -8,21 +8,18 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-{{- $env := list }}
-{{- $volumes := list }}
-{{- $volumeMounts := list }}
-{{- if .Values.oauthToolConfigMap }}
-{{- $env = append $env (dict "name" "OAUTH_TOOL_CFG" "value" "/etc/config/oauth/oauth_tool.cfg")}}
-{{- $volumes = concat $volumes (list (dict "name" "oauth-tool-config-file" "configMap" (dict "name" .Values.oauthToolConfigMap)) (dict "name" "oauth-prestart-scripts" "configMap" (dict "name" (printf "%s-oauth-prestart-scripts-cm" .Values.name)))) }}
-{{- $volumeMounts = concat $volumeMounts (list (dict "name" "oauth-tool-config-file" "mountPath" "/etc/config/oauth" "readOnly" true) (dict "name" "oauth-prestart-scripts" "mountPath" "/omnigroupserver/prestart_scripts" "readOnly" true)) }}
-{{- end }}
-{{ include "idol-library.aciserver.deployment" (dict 
-    "root" .
-    "component" .Values
-    "env" $env
-    "volumes" $volumes
-    "volumeMounts" $volumeMounts
-    "destination" "idol-omnigroupserver.deployment")  }}
-{{- define "idol-omnigroupserver.deployment" -}}
-{{/* Any OGS specific merges to base template go here */}}
+{{ define "idolomnigroupserver.deployment.base" }}
 {{- end -}}
+
+{{- $volumes := list }}
+{{- if .Values.oauthToolConfigMap }}
+{{- $volumes = concat $volumes (list (dict "name" "oauth-tool-config-file" "configMap" (dict "name" .Values.oauthToolConfigMap)) (dict "name" "oauth-prestart-scripts" "configMap" (dict "name" (printf "%s-oauth-prestart-scripts-cm" .Values.name)))) }}
+{{- end }}
+{{ include "idol-library.util.merge" (dict
+  "root" .
+  "component" .Values
+  "source" "idol-library.aciserver.deployment.base.v1"
+  "destination" "idolomnigroupserver.deployment.base" 
+  "containers" (list "idolomnigroupserver.container")
+  "volumes" $volumes
+) }}

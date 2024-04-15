@@ -1,0 +1,32 @@
+{{ template "chart.header" . }}
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.badgesSection" . }}
+
+Provides an IDOL LicenseServer service abstraction for use within a Kubernetes cluster.
+
+Note this _does not_ install an instance of a LicenseServer container.
+
+One of licenseServerIp or licenseServerExternalName should be specified e.g.
+
+```
+helm install --set licenseServerIp=1.2.3.4 idol-licenseserver opentext-idol/idol-licenseserver
+```
+
+```
+helm install --set licenseServerIp=null \
+    --set licenseServerExternalName=my.license.server.instance \
+    idol-licenseserver opentext-idol/idol-licenseserver
+```
+
+{{ template "chart.homepageLine" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.requirementsSection" . }}
+
+{{ template "chart.valuesSection" . }}
+
+{{ template "helm-docs.versionFooter" . }}
