@@ -28,14 +28,18 @@ metadata:
       "nginx.ingress.kubernetes.io/backend-protocol" (ternary "HTTPS" "HTTP" $component.usingTLS)
       "nginx.ingress.kubernetes.io/configuration-snippet" `more_set_headers "AciPortPath: /content/";`
   ) -}}
-  {{- if $ingress.exposeIndexPort }}
-    {{- $_ := set $annotations "nginx.ingress.kubernetes.io/configuration-snippet" `more_set_headers "AciPortPath: /content/";
-more_set_headers "IndexPortPath: /index/";` -}}
-  {{- end -}}
-  {{- if $ingress.exposeServicePort }}
+  {{- if $ingress.exposeIndexPort && $ingress.exposeServicePort }}
     {{- $_ := set $annotations "nginx.ingress.kubernetes.io/configuration-snippet" `more_set_headers "AciPortPath: /content/";
 more_set_headers "IndexPortPath: /index/";
 more_set_headers "ServicePortPath: /content/service/";` -}}
+  {{- else if $ingress.exposeIndexPort }}
+    {{- $_ := set $annotations "nginx.ingress.kubernetes.io/configuration-snippet" `more_set_headers "AciPortPath: /content/";
+more_set_headers "IndexPortPath: /index/";` -}}
+  {{- else if $ingress.exposeServicePort }}
+    {{- $_ := set $annotations "nginx.ingress.kubernetes.io/configuration-snippet" `more_set_headers "AciPortPath: /content/";
+more_set_headers "ServicePortPath: /content/service/";` -}}
+  {{- else }}
+    {{- $_ := set $annotations "nginx.ingress.kubernetes.io/configuration-snippet" `more_set_headers "AciPortPath: /content/";` -}}
   {{- end -}}
   {{- if $ingress.proxyBodySize }}
     {{- $_ := set $annotations "nginx.ingress.kubernetes.io/proxy-body-size" ($ingress.proxyBodySize) -}}
