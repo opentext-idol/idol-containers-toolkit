@@ -26,9 +26,8 @@ metadata:
   {{- $_ := mergeOverwrite $annotations (dict
       "nginx.ingress.kubernetes.io/rewrite-target" "/$1"
       "nginx.ingress.kubernetes.io/backend-protocol" (ternary "HTTPS" "HTTP" $component.usingTLS)
-      "nginx.ingress.kubernetes.io/configuration-snippet" `more_set_headers "AciPortPath: /content/";`
   ) -}}
-  {{- if $ingress.exposeIndexPort && $ingress.exposeServicePort }}
+  {{- if and $ingress.exposeIndexPort $ingress.exposeServicePort }}
     {{- $_ := set $annotations "nginx.ingress.kubernetes.io/configuration-snippet" `more_set_headers "AciPortPath: /content/";
 more_set_headers "IndexPortPath: /index/";
 more_set_headers "ServicePortPath: /content/service/";` -}}
