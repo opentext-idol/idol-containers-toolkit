@@ -22,7 +22,7 @@ helm install --set licenseServerIp=null \
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.10.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.11.0 |
 
 ## Values
 

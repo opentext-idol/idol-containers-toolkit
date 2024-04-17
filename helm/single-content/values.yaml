@@ -124,15 +124,11 @@ ingress:
   # -- Ingress controller path for ACI connections.
   path: "/content/"
 
-  # -- Ingress controller path for index connections.
+  # -- Ingress controller path for index connections. Empty string to disable.
   indexPath: "/index/"
-  # -- Whether to expose the index connection through ingress
-  exposeIndexPort: true
 
- # -- Ingress controller path for service connections.
+ # -- Ingress controller path for service connections. Empty string to disable.
   servicePath: "/content/service/"
-  # -- Whether to expose the service connection through ingress
-  exposeServicePort: true
 
   # -- Maximum allowed size of the client request body, defining
   # the maximum size of requests that can be made to IDOL components within the installation, e.g.

@@ -19,9 +19,9 @@ and may wish to deploy alongside the _idol-omnigroupserver_ chart.
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.10.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.11.0 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | 0.3.0 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | single-content | 0.8.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | single-content | 0.9.0 |
 
 ## Values
 

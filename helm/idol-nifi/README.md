@@ -16,7 +16,7 @@ Provides a scaleable IDOL NiFi cluster instance (NiFi, NiFi Registry and ZooKeep
 | Repository | Name | Version |
 |------------|------|---------|
 | https://kubernetes-sigs.github.io/metrics-server | metrics-server | 3.8.2 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.10.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.11.0 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | 0.3.0 |
 
 ## Values

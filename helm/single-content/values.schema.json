@@ -233,20 +233,10 @@
                         },
                         "servicePath": {
                             "$ref": "#/$defs/required_string"
-                        },
-                        "exposeIndexPort": {
-                            "type": "boolean"
-                        },
-                        "exposeServicePort": {
-                            "type": "boolean"
                         }
                     },
                     "required":[
-                        "path",
-                        "indexPath",
-                        "servicePath",
-                        "exposeIndexPort",
-                        "exposeServicePort"
+                        "path"
                     ],
                     "allOf":[
                         {"$ref":"#/$defs/ingressCommon"}
