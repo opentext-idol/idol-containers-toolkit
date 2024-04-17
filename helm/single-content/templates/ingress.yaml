@@ -15,31 +15,4 @@
     "destination" "single-content.ingress")  -}}
 {{- define "single-content.ingress" -}}
 {{/* Any View specific merges to base template go here */}}
-{{- $root := get . "root" | required "missing root" -}}
-{{- $component := get . "component" | required "missing component" -}}
-spec:
-  rules:
-  - http:
-      paths:
-      - path: {{ include "idol-library.ingress.path" (dict "ingress" $component.ingress "path" $component.ingress.path) }}
-        pathType: {{ include "idol-library.ingress.pathtype" $component }}
-        backend:
-          service:
-            name:  {{ $component.name | quote }}
-            port:
-              name: aci-port
-      - path: {{ include "idol-library.ingress.path" (dict "ingress" $component.ingress "path" $component.ingress.indexPath) }}
-        pathType: {{ include "idol-library.ingress.pathtype" $component }}
-        backend:
-          service:
-            name:  {{ $component.name | quote }}
-            port:
-              name: index-port
-      - path: {{ include "idol-library.ingress.path" (dict "ingress" $component.ingress "path" $component.ingress.servicePath) }}
-        pathType: {{ include "idol-library.ingress.pathtype" $component }}
-        backend:
-          service:
-            name:  {{ $component.name | quote }}
-            port:
-              name: service-port
 {{- end -}}
