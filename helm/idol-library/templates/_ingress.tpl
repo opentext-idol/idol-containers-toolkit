@@ -56,6 +56,22 @@ spec:
 {{- end }}
   rules:
   - http:
+      paths:
+{{- range $portType, $pathKey := (dict 
+    "aci-port" $ingress.path
+    "service-port" $ingress.servicePath
+    "index-port" $ingress.indexPath
+    ) -}}
+{{- if $pathKey }}
+      - path: {{ include "idol-library.ingress.path" (dict "ingress" $ingress "path" $pathKey) }}
+        pathType: {{ include "idol-library.ingress.pathtype" $component }}
+        backend: 
+          service:
+            name: {{ $component.name | quote }}
+            port:
+              name: {{ $portType }}
+{{- end -}}
+{{- end -}}
 {{- if $ingress.host }}
     host: {{ $ingress.host }}
 {{- end }}
