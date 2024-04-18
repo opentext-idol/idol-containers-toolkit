@@ -322,7 +322,7 @@
                         "path": {
                             "$ref": "#/$defs/required_string"
                         },
-                        "metricsPaths": {
+                        "metricsPath": {
                             "$ref": "#/$defs/required_string"
                         }
                     },
