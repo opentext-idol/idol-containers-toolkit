@@ -108,6 +108,9 @@ ingress:
   # For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration)
   host: ""
 
+  # -- Ingress controller path for ACI connections.
+  path: "/qms/"
+
   # -- Maximum allowed size of the client request body, defining
   # the maximum size of requests that can be made to IDOL components within the installation, e.g.
   # the amount of data sent in DREADDDATA index commands.

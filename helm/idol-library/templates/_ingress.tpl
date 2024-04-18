@@ -61,6 +61,8 @@ spec:
     "aci-port" $ingress.path
     "service-port" $ingress.servicePath
     "index-port" $ingress.indexPath
+    "metrics-port" $ingress.metricsPath
+    "prometheus-port" $ingress.prometheusPath
     ) -}}
 {{- if $pathKey }}
       - path: {{ include "idol-library.ingress.path" (dict "ingress" $ingress "path" $pathKey) }}

@@ -21,13 +21,6 @@ spec:
   rules:
   - http:
       paths:
-      - path: {{ include "idol-library.ingress.path" (dict "ingress" $component.ingress "path" "/dih/") }}
-        pathType: {{ $pathType }}
-        backend:
-          service:
-            name: {{ $component.name }}
-            port:
-              name: aci-port
       - path: {{ include "idol-library.ingress.path" (dict "ingress" $component.ingress "path" "/index/") }}
         pathType: {{ $pathType }}
         backend:
@@ -35,12 +28,4 @@ spec:
             name: {{ $root.Values.indexserviceName }}
             port: 
               name: index-port
-      - path: {{ include "idol-library.ingress.path" (dict "ingress" $component.ingress "path" "/metrics/") }}
-        pathType: {{ $pathType }}
-        backend:
-          service:
-            name: {{ $component.name }}
-            port:
-              name: "metrics-port"
-      
 {{- end -}}

@@ -119,13 +119,6 @@
                 "type"
             ]
         },
-        "ingress":{
-            "type": "object",
-            "allOf":[
-                {"$ref":"#/$defs/ingressCommon"}
-            ],
-            "unevaluatedProperties": false
-        },
         "idolImage":{
             "type": "object",
             "properties":{
@@ -256,11 +249,17 @@
                 "ingress": {
                     "type":"object",
                     "properties":{
+                        "path": {
+                            "$ref": "#/$defs/required_string"
+                        },
                         "exposedContents":{
                             "type":"integer",
                             "minimum": 0
                         }
                     },
+                    "required":[
+                        "path"
+                    ],
                     "allOf":[
                         {"$ref":"#/$defs/ingressCommon"}
                     ],
@@ -285,7 +284,19 @@
             "type": "object",
             "properties":{
                 "ingress": {
-                    "$ref": "#/$defs/ingress"
+                    "type":"object",
+                    "properties":{
+                        "path": {
+                            "$ref": "#/$defs/required_string"
+                        }
+                    },
+                    "required":[
+                        "path"
+                    ],
+                    "allOf":[
+                        {"$ref":"#/$defs/ingressCommon"}
+                    ],
+                    "unevaluatedProperties": false
                 }
             },
             "required": [
@@ -306,7 +317,23 @@
                     "$ref": "#/$defs/port_number"
                 },
                 "ingress": {
-                    "$ref": "#/$defs/ingress"
+                    "type":"object",
+                    "properties":{
+                        "path": {
+                            "$ref": "#/$defs/required_string"
+                        },
+                        "metricsPaths": {
+                            "$ref": "#/$defs/required_string"
+                        }
+                    },
+                    "required":[
+                        "path",
+                        "metricsPaths"
+                    ],
+                    "allOf":[
+                        {"$ref":"#/$defs/ingressCommon"}
+                    ],
+                    "unevaluatedProperties": false
                 }
             },
             "required": [
@@ -392,7 +419,19 @@
                     "$ref": "#/$defs/port_number"
                 },
                 "ingress": {
-                    "$ref": "#/$defs/ingress"
+                    "type":"object",
+                    "properties":{
+                        "prometheusPath": {
+                            "$ref": "#/$defs/required_string"
+                        }
+                    },
+                    "required":[
+                        "prometheusPath"
+                    ],
+                    "allOf":[
+                        {"$ref":"#/$defs/ingressCommon"}
+                    ],
+                    "unevaluatedProperties": false
                 }
             },
             "required":[

@@ -5,9 +5,10 @@ Copyright 2022 - 2023 Open Text.
 The only warranties for products and services of Open Text and its affiliates and licensors (“Open Text”) are as may be set forth in the express warranty statements accompanying such products and services. Nothing herein should be construed as constituting an additional warranty. Open Text shall not be liable for technical or editorial errors or omissions contained herein. The information contained herein is subject to change without notice.
 END COPYRIGHT NOTICE
 -->
-# distributed-idol<!-- omit in toc -->
+# distributed-idol
+<!-- omit in toc -->
 
-![Version: 0.7.0](https://img.shields.io/badge/Version-0.7.0-informational?style=flat-square) ![AppVersion: 23.4.0](https://img.shields.io/badge/AppVersion-23.4.0-informational?style=flat-square)
+![Version: 0.8.0](https://img.shields.io/badge/Version-0.8.0-informational?style=flat-square) ![AppVersion: 23.4.0](https://img.shields.io/badge/AppVersion-23.4.0-informational?style=flat-square)
 
 - [Overview](#overview)
 - [Prerequisites](#prerequisites)
@@ -184,9 +185,9 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 
 | Repository | Name | Version |
 |------------|------|---------|
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.11.0 |
 | https://kubernetes-sigs.github.io/metrics-server | metrics-server | 3.8.2 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.4.0 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | 0.1.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | 0.2.0 |
 
 ## Values
 
@@ -213,6 +214,7 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | content.ingress.enabled | bool | `true` | Create ingress resource |
 | content.ingress.exposedContents | int | `0` | Allows ingress access to individual content engines. Set to max number of engines to expose |
 | content.ingress.host | string | `""` | Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules). For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration) |
+| content.ingress.path | string | `"/content/"` | Ingress controller path for ACI connections. |
 | content.ingress.proxyBodySize | string | `"2048m"` | Maximum allowed size of the client request body, defining the maximum size of requests that can be made to IDOL components within the installation, e.g. the amount of data sent in DREADDDATA index commands. The value should be an nginx "size" value. See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the corresponding nginx configuration parameter. |
 | content.ingress.type | string | `"nginx"` | Ingress controller type to setup for. Valid values are nginx or haproxy (used by OpenShift) |
 | content.initialEngineCount | string | `"1"` | Number of Content engines created on startup. After startup the Content engine autoscaling kicks in and controls the number of Content engines.  The minimum valid value of initialContentEngineCount is 1. For an upgrade, you must specify the number of Content engines that were present. |
@@ -231,6 +233,7 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | dah.ingress.className | string | `""` | Optional parameter to override the default ingress class |
 | dah.ingress.enabled | bool | `true` | Create ingress resource |
 | dah.ingress.host | string | `""` | Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules). For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration) |
+| dah.ingress.path | string | `"/dah/"` | Ingress controller path for ACI connections. |
 | dah.ingress.proxyBodySize | string | `"2048m"` | Maximum allowed size of the client request body, defining the maximum size of requests that can be made to IDOL components within the installation, e.g. the amount of data sent in DREADDDATA index commands. The value should be an nginx "size" value. See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the corresponding nginx configuration parameter. |
 | dah.ingress.type | string | `"nginx"` | Ingress controller type to setup for. Valid values are nginx or haproxy (used by OpenShift) |
 | dah.name | string | `"idol-dah"` | used to name statefulset, service, ingress |
@@ -248,6 +251,8 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | dih.ingress.className | string | `""` | Optional parameter to override the default ingress class |
 | dih.ingress.enabled | bool | `true` | Create ingress resource |
 | dih.ingress.host | string | `""` | Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules). For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration) |
+| dih.ingress.metricsPaths | string | `"/metrics/"` | Ingress controller path for metrics connections. |
+| dih.ingress.path | string | `"/dih/"` | Ingress controller path for ACI connections. |
 | dih.ingress.proxyBodySize | string | `"2048m"` | Maximum allowed size of the client request body, defining the maximum size of requests that can be made to IDOL components within the installation, e.g. the amount of data sent in DREADDDATA index commands. The value should be an nginx "size" value. See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the corresponding nginx configuration parameter. |
 | dih.ingress.type | string | `"nginx"` | Ingress controller type to setup for. Valid values are nginx or haproxy (used by OpenShift) |
 | dih.name | string | `"idol-dih"` | used to name statefulset, service, ingress |
@@ -267,4 +272,4 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | setupMirrored | bool | `false` | When `true` this will configure the  DAH and DIH in mirror-mode, meaning the Contents will all be mirrors of each other. When `false`, the DAH and DIH will be configured in non-mirror mode, meaning that documents will be distributed between the content engines. In mirror-mode, the Content engines will autoscale to fulfil query demand. In non-mirror-mode, Content engines will autoscale to fulfil index demand. See https://www.microfocus.com/documentation/idol/IDOL_12_12/DAH_12.12_Documentation/Help/#Configuration/Server/MirrorMode.htm?TocPath=Configuration%2520Parameters%257CServer%257C_____38 and https://www.microfocus.com/documentation/idol/IDOL_12_12/DIH_12.12_Documentation/Help/#Configuration/Server/MirrorMode.htm?TocPath=Configuration%2520Parameters%257CServer%257C_____38 |
 
 ----------------------------------------------
-Autogenerated from chart metadata using [helm-docs v1.11.3](https://github.com/norwoodj/helm-docs/releases/v1.11.3)
+Autogenerated from chart metadata using [helm-docs v1.12.0](https://github.com/norwoodj/helm-docs/releases/v1.12.0)

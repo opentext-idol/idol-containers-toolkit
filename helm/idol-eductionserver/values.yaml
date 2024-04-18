@@ -67,6 +67,9 @@ ingress:
   # For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration)
   host: ""
 
+  # -- Ingress controller path for ACI connections.
+  path: "/eductionserver/"
+
 ##### INTERNAL VARIABLES #####
 # name -- used to name deployment, service, ingress
 name: "idol-eductionserver"

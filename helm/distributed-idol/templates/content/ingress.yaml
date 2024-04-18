@@ -21,13 +21,6 @@ spec:
   rules:
   - http:
       paths:
-      - path: {{ include "idol-library.ingress.path" (dict "ingress" $component.ingress "path" "/content/") }}
-        pathType: {{ $pathType }}
-        backend:  
-          service:
-            name: {{ $component.name }}
-            port:
-              name: aci-port
 {{- range $i := untilStep 0 ( $component.ingress.exposedContents | int ) 1 }}
       - path: {{ include "idol-library.ingress.path" (dict "ingress" $component.ingress "path" (print "/content-" $i "/")) }}
         pathType: {{ $pathType }}

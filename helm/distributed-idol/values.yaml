@@ -152,6 +152,9 @@ content:
     # For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration)
     host: ""
 
+    # -- Ingress controller path for ACI connections.
+    path: "/content/"
+
     # -- Maximum allowed size of the client request body, defining
     # the maximum size of requests that can be made to IDOL components within the installation, e.g.
     # the amount of data sent in DREADDDATA index commands.
@@ -217,6 +220,9 @@ dah:
     # -- Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules).
     # For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration)
     host: ""
+
+    # -- Ingress controller path for ACI connections.
+    path: "/dah/"
 
     # -- Maximum allowed size of the client request body, defining
     # the maximum size of requests that can be made to IDOL components within the installation, e.g.
@@ -289,6 +295,12 @@ dih:
     # For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration)
     host: ""
 
+    # -- Ingress controller path for ACI connections.
+    path: "/dih/"
+
+    # -- Ingress controller path for metrics connections.
+    metricsPaths: "/metrics/"
+
     # -- Maximum allowed size of the client request body, defining
     # the maximum size of requests that can be made to IDOL components within the installation, e.g.
     # the amount of data sent in DREADDDATA index commands.
@@ -338,6 +350,9 @@ prometheus:
     # -- Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules).
     # For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration)
     host: ""
+
+    # -- Ingress controller path for prometheus connections.
+    prometheusPath: "/prometheus/"
 
     # -- Maximum allowed size of the client request body, defining
     # the maximum size of requests that can be made to IDOL components within the installation, e.g.

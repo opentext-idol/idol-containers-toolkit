@@ -184,7 +184,19 @@
                     "$ref": "#/$defs/optional_object"
                 },
                 "ingress": {
-                    "$ref": "#/$defs/ingressCommon"
+                    "type":"object",
+                    "properties":{
+                        "path": {
+                            "$ref": "#/$defs/required_string"
+                        }
+                    },
+                    "required":[
+                        "path"
+                    ],
+                    "allOf":[
+                        {"$ref":"#/$defs/ingressCommon"}
+                    ],
+                    "unevaluatedProperties": false
                 }
             },
             "required":[

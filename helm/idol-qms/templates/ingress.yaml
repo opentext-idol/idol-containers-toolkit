@@ -15,17 +15,4 @@
     "destination" "idol-qms.ingress")  -}}
 {{- define "idol-qms.ingress" -}}
 {{/* Any QMS specific merges to base template go here */}}
-{{- $root := get . "root" | required "idol-qms.ingress: missing root" -}}
-{{- $component := get . "component" | required "idol-qms.ingress: missing component" -}}
-spec:
-  rules:
-  - http:
-      paths:
-      - path: {{ include "idol-library.ingress.path" (dict "ingress" $component.ingress "path" "/qms/") }}
-        pathType: {{ include "idol-library.ingress.pathtype" $component }}
-        backend:
-          service:
-            name:  {{ $component.name | quote }}
-            port:
-              name: aci-port
 {{- end -}}

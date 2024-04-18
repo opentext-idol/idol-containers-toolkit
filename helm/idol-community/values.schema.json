@@ -230,8 +230,12 @@
                 "ingress": {
                     "type":"object",
                     "properties":{
+                        "path": {
+                            "$ref": "#/$defs/required_string"
+                        }
                     },
                     "required":[
+                        "path"
                     ],
                     "allOf":[
                         {"$ref":"#/$defs/ingressCommon"}

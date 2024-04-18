@@ -1,6 +1,6 @@
 # idol-answerserver
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![AppVersion: 24.1](https://img.shields.io/badge/AppVersion-24.1-informational?style=flat-square)
+![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![AppVersion: 24.1](https://img.shields.io/badge/AppVersion-24.1-informational?style=flat-square)
 
 Provides an IDOL answerserver deployment.
 
@@ -24,11 +24,11 @@ files, then redeploy the chart with LLM configuration information in your answer
 
 | Repository | Name | Version |
 |------------|------|---------|
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.11.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | passageextractorAgentstore(single-content) | 0.9.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | answerbankAgentstore(single-content) | 0.9.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | single-content | 0.9.0 |
 | https://charts.bitnami.com/bitnami | postgresql | 13.2.3 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.6.0 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | passageextractorAgentstore(single-content) | 0.5.1 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | answerbankAgentstore(single-content) | 0.5.1 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | single-content | 0.5.1 |
 
 ## Values
 
@@ -64,6 +64,7 @@ files, then redeploy the chart with LLM configuration information in your answer
 | ingress.className | string | `""` | Optional parameter to override the default ingress class |
 | ingress.enabled | bool | `true` | Create ingress resource |
 | ingress.host | string | `""` | Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules). For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration) |
+| ingress.path | string | `"/answerserver/"` | Ingress controller path for ACI connections. |
 | ingress.proxyBodySize | string | `"2048m"` | Maximum allowed size of the client request body, defining the maximum size of requests that can be made to IDOL components within the installation, e.g. the amount of data sent in DREADDDATA index commands. The value should be an nginx "size" value. See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the corresponding nginx configuration parameter. |
 | ingress.type | string | `"nginx"` | Ingress controller type to setup for. Valid values are nginx or haproxy (used by OpenShift) |
 | licenseServerHostname | string | `"idol-licenseserver"` | the hostname of the IDOL LicenseServer (or abstraction) |

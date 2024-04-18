@@ -87,6 +87,10 @@
             "type": "string",
             "pattern": "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$"
         },
+        "required_string":{
+            "type": "string",
+            "minLength": 1
+        },
         "liveness_probe": {
             "type": "object",
             "properties": {
@@ -131,6 +135,9 @@
                 "host": {
                     "type": "string"
                 },
+                "path": {
+                    "$ref": "#/$defs/required_string"
+                },
                 "proxyBodySize":{
                     "type":"string",
                     "pattern": "^\\d+(?:\\.\\d+)?(?:Ki|Mi|Gi|Ti|Pi|Ei|m|k|M|G|T|P|E)?$"
@@ -141,7 +148,8 @@
             },
             "required":[
                 "enabled",
-                "type"
+                "type",
+                "path"
             ]
         },
         "idolImage":{
