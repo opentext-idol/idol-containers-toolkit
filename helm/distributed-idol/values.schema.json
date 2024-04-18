@@ -328,7 +328,7 @@
                     },
                     "required":[
                         "path",
-                        "metricsPaths"
+                        "metricsPath"
                     ],
                     "allOf":[
                         {"$ref":"#/$defs/ingressCommon"}
