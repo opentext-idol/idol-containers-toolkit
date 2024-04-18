@@ -299,7 +299,7 @@ dih:
     path: "/dih/"
 
     # -- Ingress controller path for metrics connections.
-    metricsPaths: "/metrics/"
+    metricsPath: "/metrics/"
 
     # -- Maximum allowed size of the client request body, defining
     # the maximum size of requests that can be made to IDOL components within the installation, e.g.
