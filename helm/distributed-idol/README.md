@@ -187,7 +187,7 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 |------------|------|---------|
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.11.0 |
 | https://kubernetes-sigs.github.io/metrics-server | metrics-server | 3.8.2 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | 0.2.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | 0.3.0 |
 
 ## Values
 
@@ -210,6 +210,7 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | content.idolImage.repo | string | `"content"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | content.idolImage.version | string | `"23.4"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | content.indexPort | string | `"9101"` | port service will serve index connections on |
+| content.ingress.annotations | object | `{}` | Ingress controller specific annotations Some annotations are added automatically based on ingress.type and other values, but can  be overriden/augmented here e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations |
 | content.ingress.className | string | `""` | Optional parameter to override the default ingress class |
 | content.ingress.enabled | bool | `true` | Create ingress resource |
 | content.ingress.exposedContents | int | `0` | Allows ingress access to individual content engines. Set to max number of engines to expose |
@@ -222,6 +223,7 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | content.primaryBackupInterval | string | `"0"` | corresponds to the [Schedule]::BackupInterval Content configuration parameter. https://www.microfocus.com/documentation/idol/IDOL_12_12/Content_12.12_Documentation/Help/#Configuration/Schedule/BackupInterval.htm%3FTocPath%3DConfiguration%2520Parameters%7CSchedule%7C_____7 |
 | content.primaryBackupTime | string | `"02:00"` | corresponds to the [Schedule]::BackupTime Content configuration parameter. https://www.microfocus.com/documentation/idol/IDOL_12_12/Content_12.12_Documentation/Help/#Configuration/Schedule/BackupTime.htm%3FTocPath%3DConfiguration%2520Parameters%7CSchedule%7C_____11 |
 | content.servicePort | string | `"9102"` | port service will serve service connections on |
+| content.usingTLS | bool | `false` | whether aci/service/index ports are configured to use TLS (https). If configuring for TLS, then consider setting IDOL_SSL_COMPONENT_CERT_PATH and IDOL_SSL_COMPONENT_KEY_PATH in envConfigMap to provide required TLS certificates |
 | dah.aciPort | string | `"9060"` | port service will serve ACI connections on |
 | dah.additionalVolumeMounts | list | `[]` | Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1) |
 | dah.additionalVolumes | list | `[]` | Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes) |
@@ -238,6 +240,7 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | dah.ingress.type | string | `"nginx"` | Ingress controller type to setup for. Valid values are nginx or haproxy (used by OpenShift) |
 | dah.name | string | `"idol-dah"` | used to name statefulset, service, ingress |
 | dah.servicePort | string | `"9062"` | port service will serve service connections on |
+| dah.usingTLS | bool | `false` | whether aci/service/index ports are configured to use TLS (https). If configuring for TLS, then consider setting IDOL_SSL_COMPONENT_CERT_PATH and IDOL_SSL_COMPONENT_KEY_PATH in envConfigMap to provide required TLS certificates |
 | dih.aciPort | string | `"9070"` | port service will serve ACI connections on |
 | dih.additionalVolumeMounts | list | `[]` | Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1) |
 | dih.additionalVolumes | list | `[]` | Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes) |
@@ -251,19 +254,20 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | dih.ingress.className | string | `""` | Optional parameter to override the default ingress class |
 | dih.ingress.enabled | bool | `true` | Create ingress resource |
 | dih.ingress.host | string | `""` | Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules). For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration) |
-| dih.ingress.metricsPaths | string | `"/metrics/"` | Ingress controller path for metrics connections. |
+| dih.ingress.metricsPath | string | `"/metrics/"` | Ingress controller path for metrics connections. |
 | dih.ingress.path | string | `"/dih/"` | Ingress controller path for ACI connections. |
 | dih.ingress.proxyBodySize | string | `"2048m"` | Maximum allowed size of the client request body, defining the maximum size of requests that can be made to IDOL components within the installation, e.g. the amount of data sent in DREADDDATA index commands. The value should be an nginx "size" value. See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the corresponding nginx configuration parameter. |
 | dih.ingress.type | string | `"nginx"` | Ingress controller type to setup for. Valid values are nginx or haproxy (used by OpenShift) |
 | dih.name | string | `"idol-dih"` | used to name statefulset, service, ingress |
 | dih.servicePort | string | `"9072"` | port service will serve service connections on |
+| dih.usingTLS | bool | `false` | whether aci/service/index ports are configured to use TLS (https). If configuring for TLS, then consider setting IDOL_SSL_COMPONENT_CERT_PATH and IDOL_SSL_COMPONENT_KEY_PATH in envConfigMap to provide required TLS certificates |
 | global.http_proxy | string | `""` | Any required http_proxy settings relating to external network access |
 | global.https_proxy | string | `""` | Any required https_proxy settings relating to external network access |
 | global.idolImageRegistry | string | `""` | Global override value for idolImage.registry |
 | global.idolVersion | string | `""` | Global override value for idolImage.version |
 | global.imagePullSecrets | list | `["dockerhub-secret"]` | Global secrets used to pull container images |
 | global.no_proxy | string | `""` | Any required no_proxy settings relating to external network access |
-| idol-licenseserver.enabled | bool | `true` | create a cluster service proxying to a LicenseServer instance |
+| idol-licenseserver.enabled | bool | `false` | create a cluster service proxying to a LicenseServer instance |
 | idol-licenseserver.licenseServerIp | string | `"this must be set to a valid IP address"` | IP address of LicenseServer instance |
 | indexserviceName | string | `"idol-index-service"` | internal parameter to specify the index service name. |
 | licenseServerHostname | string | `"idol-licenseserver"` | maps to [License] LicenseServerHost in the IDOL cfg files Should point to a resolvable IDOL LicenseServer (or Kubernetes service abstraction - see the idol-licenseserver chart) |

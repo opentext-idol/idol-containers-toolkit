@@ -53,6 +53,7 @@ This chart may be used to provide entity extraction, entity redaction and sentim
 | livenessProbe | object | `{"initialDelaySeconds":120}` | container livenessProbe settings |
 | name | string | `"idol-eductionserver"` | used to name deployment, service, ingress |
 | servicePort | string | `"13002"` | port service will serve service connections on |
+| usingTLS | bool | `false` | whether aci/service/index ports are configured to use TLS (https). If configuring for TLS, then consider setting IDOL_SSL_COMPONENT_CERT_PATH and IDOL_SSL_COMPONENT_KEY_PATH in envConfigMap to provide required TLS certificates |
 
 
 ----------------------------------------------

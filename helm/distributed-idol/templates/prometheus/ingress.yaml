@@ -6,7 +6,9 @@
     "root" .
     "component" .Values.prometheus
     "ingress" .Values.prometheus.ingress
-    "destination" "distributedidol.prometheus.ingress")  -}}
+    "destination" "distributedidol.prometheus.ingress"
+    "paths" (list)
+    "portmapping" (dict "prometheus-port" .Values.prometheus.ingress.prometheusPath)) -}}
 {{- define "distributedidol.prometheus.ingress" -}}
 {{/* Any prometheus specific merges to base template go here */}}
 {{- end -}}

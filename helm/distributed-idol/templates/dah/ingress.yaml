@@ -12,7 +12,8 @@
     "root" .
     "component" .Values.dah
     "ingress" .Values.dah.ingress
-    "destination" "distributedidol.dah.ingress")  -}}
+    "destination" "distributedidol.dah.ingress"
+    "paths" (list))  -}}
 {{- define "distributedidol.dah.ingress" -}}
 {{/* Any DAH specific merges to base template go here */}}
 {{- end -}}

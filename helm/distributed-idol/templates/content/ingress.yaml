@@ -8,26 +8,22 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
+{{- define "distributedidol.content.ingress" -}}
+{{- end -}}
+{{- define "distributedidol.content.custompaths" -}}
+{{- range $i := untilStep 0 ( .Values.content.ingress.exposedContents | int ) 1 }}
+- path: {{ include "idol-library.ingress.path" (dict "ingress" .Values.content.ingress "path" (print "/content-" $i "/")) }}
+  pathType: {{ include "idol-library.ingress.pathtype" .Values.content }}
+  backend:
+    service:
+      name: {{ .Values.content.name }}-{{ $i }}
+      port:
+        name: aci-port
+{{- end }}
+{{- end -}}
 {{ include "idol-library.ingress" (dict 
     "root" .
     "component" .Values.content
     "ingress" .Values.content.ingress
-    "destination" "distributedidol.content.ingress")  -}}
-{{- define "distributedidol.content.ingress" -}}
-{{- $root := get . "root" | required "missing root" -}}
-{{- $component := get . "component" | required "missing component" -}}
-{{- $pathType := (include "idol-library.ingress.pathtype" $component) -}}
-spec:
-  rules:
-  - http:
-      paths:
-{{- range $i := untilStep 0 ( $component.ingress.exposedContents | int ) 1 }}
-      - path: {{ include "idol-library.ingress.path" (dict "ingress" $component.ingress "path" (print "/content-" $i "/")) }}
-        pathType: {{ $pathType }}
-        backend:
-          service:
-            name: {{ $component.name }}-{{ $i }}
-            port:
-              name: aci-port
-{{- end }}
-{{- end -}}
+    "destination" "distributedidol.content.ingress"
+    "paths" (fromYamlArray (include "distributedidol.content.custompaths" .)))  -}}

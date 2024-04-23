@@ -23,6 +23,11 @@ global:
   imagePullSecrets:
   - "dockerhub-secret"
 
+# -- whether aci/service/index ports are configured to use TLS (https).
+# If configuring for TLS, then consider setting IDOL_SSL_COMPONENT_CERT_PATH and IDOL_SSL_COMPONENT_KEY_PATH in envConfigMap
+# to provide required TLS certificates
+usingTLS: false
+
 idolImage:
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
   registry: "microfocusidolserver"

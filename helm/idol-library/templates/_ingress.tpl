@@ -15,6 +15,11 @@
 {{- $root := get . "root" | required "missing root" -}}
 {{- $component := get . "component" | required "missing component" -}}
 {{- $ingress := get . "ingress" | required "missing ingress" -}}
+{{- $paths := get . "paths" | default list -}}
+{{- $portmapping := get . "portmapping" | default (dict 
+    "aci-port" $ingress.path
+    "service-port" $ingress.servicePath
+    "index-port" $ingress.indexPath) -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -57,13 +62,7 @@ spec:
   rules:
   - http:
       paths:
-{{- range $portType, $pathKey := (dict 
-    "aci-port" $ingress.path
-    "service-port" $ingress.servicePath
-    "index-port" $ingress.indexPath
-    "metrics-port" $ingress.metricsPath
-    "prometheus-port" $ingress.prometheusPath
-    ) -}}
+{{- range $portType, $pathKey := $portmapping -}}
 {{- if $pathKey }}
       - path: {{ include "idol-library.ingress.path" (dict "ingress" $ingress "path" $pathKey) }}
         pathType: {{ include "idol-library.ingress.pathtype" $component }}
@@ -74,9 +73,12 @@ spec:
               name: {{ $portType }}
 {{- end -}}
 {{- end -}}
+{{- if $paths -}}
+{{ toYaml $paths | nindent 6 }}
+{{- end -}}
 {{- if $ingress.host }}
     host: {{ $ingress.host }}
-{{- end }}
+{{- end -}}
 {{- end }}
 
 
@@ -86,6 +88,8 @@ Generates ingress
 @param .component The component values
 @param .ingress The ingress specific values
 @param .destination Template to merge onto
+@param .paths Extra paths to be merged into template
+@param .portmapping Dictionary of port types and paths
 */}}
 {{- define "idol-library.ingress" -}}
 {{- $root := get . "root" | required "missing root" -}}

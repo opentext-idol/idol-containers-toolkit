@@ -8,24 +8,21 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
+{{- define "distributedidol.dih.ingress" -}}
+{{- end -}}
+{{- define "distributedidol.dih.custompaths" -}}
+- path: {{ include "idol-library.ingress.path" (dict "ingress" .Values.dih.ingress "path" "/index/") }}
+  pathType: {{ include "idol-library.ingress.pathtype" .Values.dih }}
+  backend:
+    service:
+      name: {{ .Values.indexserviceName }}
+      port:
+        name: index-port
+{{- end -}}
 {{ include "idol-library.ingress" (dict 
     "root" .
     "component" .Values.dih
     "ingress" .Values.dih.ingress
-    "destination" "distributedidol.dih.ingress")  -}}
-{{- define "distributedidol.dih.ingress" -}}
-{{- $root := get . "root" | required "missing root" -}}
-{{- $component := get . "component" | required "missing component" -}}
-{{- $pathType := (include "idol-library.ingress.pathtype" $component) -}}
-spec:
-  rules:
-  - http:
-      paths:
-      - path: {{ include "idol-library.ingress.path" (dict "ingress" $component.ingress "path" "/index/") }}
-        pathType: {{ $pathType }}
-        backend:
-          service:
-            name: {{ $root.Values.indexserviceName }}
-            port: 
-              name: index-port
-{{- end -}}
+    "destination" "distributedidol.dih.ingress"
+    "paths" (fromYamlArray (include "distributedidol.dih.custompaths" .))
+    "portmapping" (dict "metrics-port" .Values.dih.ingress.metricsPath "aci-port" .Values.dih.ingress.path))  -}}
