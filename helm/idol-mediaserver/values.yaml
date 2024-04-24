@@ -45,10 +45,37 @@ additionalVolumes: []
 # -- Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1)
 additionalVolumeMounts: []
 
+# -- Optional configMap name holding extra environnment variables for container
+envConfigMap: ""
+
 # -- whether aci/service/index ports are configured to use TLS (https).
 # If configuring for TLS, then consider setting IDOL_SSL_COMPONENT_CERT_PATH and IDOL_SSL_COMPONENT_KEY_PATH in envConfigMap
 # to provide required TLS certificates
 usingTLS: false
+
+# -- Optional PodSecurityContext (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podsecuritycontext-v1-core)
+podSecurityContext:
+  # -- enable PodSecurityContext. Setting to false omits.
+  enabled: false
+  fsGroup: 0
+  runAsUser: 1000
+  runAsGroup: 0
+
+# -- Optional SecurityContext for container (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#securitycontext-v1-core)
+containerSecurityContext:
+  # -- enable SecurityContext for container. Setting to false omits.
+  enabled: false
+
+# -- Optional resources for container (see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers)
+resources:
+  # -- enable resources for container. Setting to false omits.
+  enabled: false
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 1000m
+    memory: 1Gi
 
 # -- The maximum number of Process actions that can be run simultaneously
 # Increase this value to match available Channels, if you increase the Channels values
@@ -125,6 +152,9 @@ ingress:
 
   # -- Ingress controller path for ACI connections.
   path: "/mediaserver/"
+
+  # -- Ingress controller path for service connections.
+  servicePath: "/mediaserver/service/"
 
   # -- Maximum allowed size of the client request body, defining
   # the maximum size of requests that can be made to IDOL components within the installation, e.g.

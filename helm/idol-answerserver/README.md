@@ -48,9 +48,13 @@ files, then redeploy the chart with LLM configuration information in your answer
 | answerbankAgentstore.indexserviceName | string | `""` | the agentstore engine's index service name |
 | answerbankAgentstore.ingress.indexPath | string | `"/answerbank-agentstore-index/"` | the ingress controller path to access the agentstore index service with |
 | answerbankAgentstore.ingress.path | string | `"/answerbank-agentstore/"` | the ingress controller path to access the agentstore query service with |
+| answerbankAgentstore.ingress.servicePath | string | `"/answerbank-agentstore/service/"` | the ingress controller path for agentstore service connections |
 | answerbankAgentstore.name | string | `"idol-answerbank-agentstore"` | used to name deployment, service, ingress |
 | answerbankAgentstore.queryserviceACIPort | string | `"12200"` | the agentstore engine's query service ACI port |
 | answerbankAgentstore.queryserviceName | string | `""` | the agentstore engine's query service name |
+| containerSecurityContext | object | `{"enabled":false}` | Optional SecurityContext for container (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#securitycontext-v1-core) |
+| containerSecurityContext.enabled | bool | `false` | enable SecurityContext for container. Setting to false omits. |
+| envConfigMap | string | `""` | Optional configMap name holding extra environnment variables for content container |
 | existingConfigMap | string | `""` | if specified, mounted at /etc/config/idol and expected to provide answerserver.cfg |
 | factbankPostgresqlPort | string | `"5432"` | FactBank Postgresql Port configuration |
 | factbankPostgresqlServer | string | `"idol-factbank-postgres"` | FactBank Postgresql Server configuration |
@@ -66,6 +70,7 @@ files, then redeploy the chart with LLM configuration information in your answer
 | ingress.host | string | `""` | Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules). For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration) |
 | ingress.path | string | `"/answerserver/"` | Ingress controller path for ACI connections. |
 | ingress.proxyBodySize | string | `"2048m"` | Maximum allowed size of the client request body, defining the maximum size of requests that can be made to IDOL components within the installation, e.g. the amount of data sent in DREADDDATA index commands. The value should be an nginx "size" value. See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the corresponding nginx configuration parameter. |
+| ingress.servicePath | string | `"/answerserver/service/"` | Ingress controller path for service connections. |
 | ingress.type | string | `"nginx"` | Ingress controller type to setup for. Valid values are nginx or haproxy (used by OpenShift) |
 | licenseServerHostname | string | `"idol-licenseserver"` | the hostname of the IDOL LicenseServer (or abstraction) |
 | licenseServerPort | string | `"20000"` | the ACI port of the IDOL LicenseServer (or abstraction) |
@@ -84,9 +89,12 @@ files, then redeploy the chart with LLM configuration information in your answer
 | passageextractorAgentstore.indexserviceName | string | `""` | the agentstore engine's index service name |
 | passageextractorAgentstore.ingress.indexPath | string | `"/passageextractor-agentstore-index/"` | the ingress controller path to access the agentstore index service with |
 | passageextractorAgentstore.ingress.path | string | `"/passageextractor-agentstore/"` | the ingress controller path to access the agentstore query service with |
+| passageextractorAgentstore.ingress.servicePath | string | `"/passageextractor-agentstore/service/"` | the ingress controller path for agentstore service connections |
 | passageextractorAgentstore.name | string | `"idol-passageextractor-agentstore"` | used to name deployment, service, ingress |
 | passageextractorAgentstore.queryserviceACIPort | string | `"12300"` | the agentstore engine's query service ACI port |
 | passageextractorAgentstore.queryserviceName | string | `""` | the agentstore engine's query service name |
+| podSecurityContext | object | `{"enabled":false,"fsGroup":0,"runAsGroup":0,"runAsUser":1000}` | Optional PodSecurityContext (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podsecuritycontext-v1-core) |
+| podSecurityContext.enabled | bool | `false` | enable PodSecurityContext. Setting to false omits. |
 | postgresql.auth.database | string | `"factbank-data"` |  |
 | postgresql.auth.password | string | `"password"` |  |
 | postgresql.auth.username | string | `"postgres"` |  |
@@ -95,6 +103,8 @@ files, then redeploy the chart with LLM configuration information in your answer
 | postgresql.primary.initdb.scriptsConfigMap | string | `"idol-factbank-postgres-init"` |  |
 | postgresql.primary.persistence.storageClass | string | `"standard"` |  |
 | postgresql.primary.podSecurityContext.enabled | bool | `true` |  |
+| resources | object | `{"enabled":false,"limits":{"cpu":"1000m","memory":"1Gi"},"requests":{"cpu":"1000m","memory":"1Gi"}}` | Optional resources for container (see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers) |
+| resources.enabled | bool | `false` | enable resources for container. Setting to false omits. |
 | servicePort | string | `"12002"` | port service will serve service connections on |
 | single-content.aciPort | string | `"9100"` | content port service will serve ACI connections on |
 | single-content.enabled | bool | `true` | whether to deploy the single-content sub-chart. |

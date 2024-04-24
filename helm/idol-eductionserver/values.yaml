@@ -55,6 +55,33 @@ additionalVolumeMounts:
   - name: grammar-config
     mountPath: /eductionserver/cfg
 
+# -- Optional configMap name holding extra environnment variables for content container
+envConfigMap: ""
+
+# -- Optional PodSecurityContext (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podsecuritycontext-v1-core)
+podSecurityContext:
+  # -- enable PodSecurityContext. Setting to false omits.
+  enabled: false
+  fsGroup: 0
+  runAsUser: 1000
+  runAsGroup: 0
+
+# -- Optional SecurityContext for container (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#securitycontext-v1-core)
+containerSecurityContext:
+  # -- enable SecurityContext for container. Setting to false omits.
+  enabled: false
+
+# -- Optional resources for container (see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers)
+resources:
+  # -- enable resources for container. Setting to false omits.
+  enabled: false
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 1000m
+    memory: 1Gi
+
 ##### INGRESS VARIABLES #####
 
 ingress:
@@ -74,6 +101,9 @@ ingress:
 
   # -- Ingress controller path for ACI connections.
   path: "/eductionserver/"
+
+  # -- Ingress controller path for service connections.
+  servicePath: "/eductionserver/service/"
 
 ##### INTERNAL VARIABLES #####
 # name -- used to name deployment, service, ingress

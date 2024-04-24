@@ -1,6 +1,6 @@
 # idol-aci-test
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![AppVersion: 24.1](https://img.shields.io/badge/AppVersion-24.1-informational?style=flat-square)
+![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![AppVersion: 24.1](https://img.shields.io/badge/AppVersion-24.1-informational?style=flat-square)
 
 > This chart is for basic testing of templates from the idol-library library chart.
 > It may be useful in creating new helm charts, but is not intended to be deployed without modification.
@@ -41,7 +41,10 @@ The Values shown below are 'common' ACI server parameters.
 | ingress.className | string | `""` | Optional parameter to override the default ingress class |
 | ingress.enabled | bool | `true` | Create ingress resource |
 | ingress.host | string | `""` | Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules). For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration) |
+| ingress.indexPath | string | `"/indextest/"` | Ingress controller path for index connections. Empty string to disable. |
+| ingress.path | string | `"/acitest/"` | Ingress controller path for ACI connections. |
 | ingress.proxyBodySize | string | `"2048m"` | Maximum allowed size of the client request body, defining the maximum size of requests that can be made to IDOL components within the installation, e.g. the amount of data sent in DREADDDATA index commands. The value should be an nginx "size" value. See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the corresponding nginx configuration parameter. |
+| ingress.servicePath | string | `"/acitest/service/"` | Ingress controller path for service connections. Empty string to disable. |
 | ingress.type | string | `"nginx"` | Ingress controller type to setup for. Valid values are nginx or haproxy (used by OpenShift) |
 | licenseServerHostname | string | `"idol-licenseserver"` | maps to [License] LicenseServerHost in the IDOL cfg files Should point to a resolvable IDOL LicenseServer (or Kubernetes service abstraction - see the idol-licenseserver chart) |
 | licenseServerPort | string | `"20000"` | the ACI port of the IDOL LicenseServer (or abstraction) |

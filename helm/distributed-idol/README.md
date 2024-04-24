@@ -186,8 +186,8 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | Repository | Name | Version |
 |------------|------|---------|
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.11.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | 0.4.0 |
 | https://kubernetes-sigs.github.io/metrics-server | metrics-server | 3.8.2 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | 0.3.0 |
 
 ## Values
 
@@ -202,6 +202,8 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | content.additionalVolumeMounts | list | `[]` | Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1) |
 | content.additionalVolumes | list | `[]` | Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes) |
 | content.backupArchiveStorageClass | string | `"idol-backup-archive-sc"` | Name of the storage class used to provision the persistent volume for the mirror-mode Content engine backups and index command archive. It is available to all Content engines. It must support the ReadWriteMany AccessMode: https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes |
+| content.containerSecurityContext | object | `{"enabled":false}` | Optional SecurityContext for container (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#securitycontext-v1-core) |
+| content.containerSecurityContext.enabled | bool | `false` | enable SecurityContext for container. Setting to false omits. |
 | content.contentStorageClass | string | `"idol-content-storage-class"` | Name of the storage class used to provision a PersistentVolume for each Content instance. The associated PVCs are named index-{name}-{pod number} |
 | content.contentVolumeSize | string | `"16Gi"` | Size of the PersistentVolumeClaim that is created for each Content instance. The Kubernetes cluster will need to provide enough PersistentVolumes to satisify the claims made for the desired number of Content instances. The size chosen here provides a hard limit on the size of the Content index in each Content instance. |
 | content.envConfigMap | string | `""` | Optional configMap name holding extra environnment variables for content container |
@@ -215,35 +217,51 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | content.ingress.enabled | bool | `true` | Create ingress resource |
 | content.ingress.exposedContents | int | `0` | Allows ingress access to individual content engines. Set to max number of engines to expose |
 | content.ingress.host | string | `""` | Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules). For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration) |
+| content.ingress.indexPath | string | `"/index/"` | Ingress controller path for index connections. Empty string to disable. |
 | content.ingress.path | string | `"/content/"` | Ingress controller path for ACI connections. |
 | content.ingress.proxyBodySize | string | `"2048m"` | Maximum allowed size of the client request body, defining the maximum size of requests that can be made to IDOL components within the installation, e.g. the amount of data sent in DREADDDATA index commands. The value should be an nginx "size" value. See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the corresponding nginx configuration parameter. |
+| content.ingress.servicePath | string | `"/content/service/"` | Ingress controller path for service connections. Empty string to disable. |
 | content.ingress.type | string | `"nginx"` | Ingress controller type to setup for. Valid values are nginx or haproxy (used by OpenShift) |
 | content.initialEngineCount | string | `"1"` | Number of Content engines created on startup. After startup the Content engine autoscaling kicks in and controls the number of Content engines.  The minimum valid value of initialContentEngineCount is 1. For an upgrade, you must specify the number of Content engines that were present. |
 | content.name | string | `"idol-content"` | used to name statefulset, service, ingress |
+| content.podSecurityContext | object | `{"enabled":false,"fsGroup":0,"runAsGroup":0,"runAsUser":1000}` | Optional PodSecurityContext (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podsecuritycontext-v1-core) |
+| content.podSecurityContext.enabled | bool | `false` | enable PodSecurityContext. Setting to false omits. |
 | content.primaryBackupInterval | string | `"0"` | corresponds to the [Schedule]::BackupInterval Content configuration parameter. https://www.microfocus.com/documentation/idol/IDOL_12_12/Content_12.12_Documentation/Help/#Configuration/Schedule/BackupInterval.htm%3FTocPath%3DConfiguration%2520Parameters%7CSchedule%7C_____7 |
 | content.primaryBackupTime | string | `"02:00"` | corresponds to the [Schedule]::BackupTime Content configuration parameter. https://www.microfocus.com/documentation/idol/IDOL_12_12/Content_12.12_Documentation/Help/#Configuration/Schedule/BackupTime.htm%3FTocPath%3DConfiguration%2520Parameters%7CSchedule%7C_____11 |
+| content.resources | object | `{"enabled":false,"limits":{"cpu":"1000m","memory":"1Gi"},"requests":{"cpu":"1000m","memory":"1Gi"}}` | Optional resources for container (see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers) |
+| content.resources.enabled | bool | `false` | enable resources for container. Setting to false omits. |
 | content.servicePort | string | `"9102"` | port service will serve service connections on |
 | content.usingTLS | bool | `false` | whether aci/service/index ports are configured to use TLS (https). If configuring for TLS, then consider setting IDOL_SSL_COMPONENT_CERT_PATH and IDOL_SSL_COMPONENT_KEY_PATH in envConfigMap to provide required TLS certificates |
 | dah.aciPort | string | `"9060"` | port service will serve ACI connections on |
 | dah.additionalVolumeMounts | list | `[]` | Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1) |
 | dah.additionalVolumes | list | `[]` | Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes) |
+| dah.containerSecurityContext | object | `{"enabled":false}` | Optional SecurityContext for container (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#securitycontext-v1-core) |
+| dah.containerSecurityContext.enabled | bool | `false` | enable SecurityContext for container. Setting to false omits. |
 | dah.envConfigMap | string | `""` | Optional configMap name holding extra environnment variables for dah container |
 | dah.existingConfigMap | string | `""` | Optional configMap expected to provide dah.cfg |
 | dah.idolImage.registry | string | `"microfocusidolserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | dah.idolImage.repo | string | `"dah"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | dah.idolImage.version | string | `"23.4"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
+| dah.ingress.annotations | object | `{}` | Ingress controller specific annotations Some annotations are added automatically based on ingress.type and other values, but can  be overriden/augmented here e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations |
 | dah.ingress.className | string | `""` | Optional parameter to override the default ingress class |
 | dah.ingress.enabled | bool | `true` | Create ingress resource |
 | dah.ingress.host | string | `""` | Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules). For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration) |
 | dah.ingress.path | string | `"/dah/"` | Ingress controller path for ACI connections. |
 | dah.ingress.proxyBodySize | string | `"2048m"` | Maximum allowed size of the client request body, defining the maximum size of requests that can be made to IDOL components within the installation, e.g. the amount of data sent in DREADDDATA index commands. The value should be an nginx "size" value. See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the corresponding nginx configuration parameter. |
+| dah.ingress.servicePath | string | `"/dah/service/"` | Ingress controller path for service connections. Empty string to disable. |
 | dah.ingress.type | string | `"nginx"` | Ingress controller type to setup for. Valid values are nginx or haproxy (used by OpenShift) |
 | dah.name | string | `"idol-dah"` | used to name statefulset, service, ingress |
+| dah.podSecurityContext | object | `{"enabled":false,"fsGroup":0,"runAsGroup":0,"runAsUser":1000}` | Optional PodSecurityContext (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podsecuritycontext-v1-core) |
+| dah.podSecurityContext.enabled | bool | `false` | enable PodSecurityContext. Setting to false omits. |
+| dah.resources | object | `{"enabled":false,"limits":{"cpu":"1000m","memory":"1Gi"},"requests":{"cpu":"1000m","memory":"1Gi"}}` | Optional resources for container (see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers) |
+| dah.resources.enabled | bool | `false` | enable resources for container. Setting to false omits. |
 | dah.servicePort | string | `"9062"` | port service will serve service connections on |
 | dah.usingTLS | bool | `false` | whether aci/service/index ports are configured to use TLS (https). If configuring for TLS, then consider setting IDOL_SSL_COMPONENT_CERT_PATH and IDOL_SSL_COMPONENT_KEY_PATH in envConfigMap to provide required TLS certificates |
 | dih.aciPort | string | `"9070"` | port service will serve ACI connections on |
 | dih.additionalVolumeMounts | list | `[]` | Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1) |
 | dih.additionalVolumes | list | `[]` | Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes) |
+| dih.containerSecurityContext | object | `{"enabled":false}` | Optional SecurityContext for container (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#securitycontext-v1-core) |
+| dih.containerSecurityContext.enabled | bool | `false` | enable SecurityContext for container. Setting to false omits. |
 | dih.dihStorageClass | string | `"idol-dih-storage-class"` | Name of the storage class used to provision the persistent volume for the dih configuration and data The associated PVC is named dih-persistent-storage-<name>-0 |
 | dih.envConfigMap | string | `""` | Optional configMap name holding extra environnment variables for dah container |
 | dih.existingConfigMap | string | `""` | Optional configMap expected to provide dih.cfg |
@@ -251,14 +269,20 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | dih.idolImage.repo | string | `"dih"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | dih.idolImage.version | string | `"23.4"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | dih.indexPort | string | `"9071"` | port service will serve index connections on |
+| dih.ingress.annotations | object | `{}` | Ingress controller specific annotations Some annotations are added automatically based on ingress.type and other values, but can  be overriden/augmented here e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations |
 | dih.ingress.className | string | `""` | Optional parameter to override the default ingress class |
 | dih.ingress.enabled | bool | `true` | Create ingress resource |
 | dih.ingress.host | string | `""` | Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules). For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration) |
 | dih.ingress.metricsPath | string | `"/metrics/"` | Ingress controller path for metrics connections. |
 | dih.ingress.path | string | `"/dih/"` | Ingress controller path for ACI connections. |
 | dih.ingress.proxyBodySize | string | `"2048m"` | Maximum allowed size of the client request body, defining the maximum size of requests that can be made to IDOL components within the installation, e.g. the amount of data sent in DREADDDATA index commands. The value should be an nginx "size" value. See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the corresponding nginx configuration parameter. |
+| dih.ingress.servicePath | string | `"/dih/service/"` | Ingress controller path for service connections. Empty string to disable. |
 | dih.ingress.type | string | `"nginx"` | Ingress controller type to setup for. Valid values are nginx or haproxy (used by OpenShift) |
 | dih.name | string | `"idol-dih"` | used to name statefulset, service, ingress |
+| dih.podSecurityContext | object | `{"enabled":false,"fsGroup":0,"runAsGroup":0,"runAsUser":1000}` | Optional PodSecurityContext (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podsecuritycontext-v1-core) |
+| dih.podSecurityContext.enabled | bool | `false` | enable PodSecurityContext. Setting to false omits. |
+| dih.resources | object | `{"enabled":false,"limits":{"cpu":"1000m","memory":"1Gi"},"requests":{"cpu":"1000m","memory":"1Gi"}}` | Optional resources for container (see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers) |
+| dih.resources.enabled | bool | `false` | enable resources for container. Setting to false omits. |
 | dih.servicePort | string | `"9072"` | port service will serve service connections on |
 | dih.usingTLS | bool | `false` | whether aci/service/index ports are configured to use TLS (https). If configuring for TLS, then consider setting IDOL_SSL_COMPONENT_CERT_PATH and IDOL_SSL_COMPONENT_KEY_PATH in envConfigMap to provide required TLS certificates |
 | global.http_proxy | string | `""` | Any required http_proxy settings relating to external network access |

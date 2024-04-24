@@ -1,6 +1,6 @@
 # idol-view
 
-![Version: 0.4.0](https//img.shields.io/badge/Version-0.4.0-informational?style=flat-square) ![AppVersion: 24.1](https://img.shields.io/badge/AppVersion-24.1-informational?style=flat-square)
+![Version: 0.4.0](https://img.shields.io/badge/Version-0.4.0-informational?style=flat-square) ![AppVersion: 24.1](https://img.shields.io/badge/AppVersion-24.1-informational?style=flat-square)
 
 Provides an IDOL View deployment.
 
@@ -52,7 +52,9 @@ You may wish to deploy this chart alongside _idol-nifi_.
 | ingress.className | string | `""` | Optional parameter to override the default ingress class |
 | ingress.enabled | bool | `true` | Create ingress resource |
 | ingress.host | string | `""` | Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules). For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration) |
+| ingress.path | string | `"/view/"` | Ingress controller path for ACI connections. |
 | ingress.proxyBodySize | string | `"2048m"` | Maximum allowed size of the client request body, defining the maximum size of requests that can be made to IDOL components within the installation, e.g. the amount of data sent in DREADDDATA index commands. The value should be an nginx "size" value. See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the corresponding nginx configuration parameter. |
+| ingress.servicePath | string | `"/view/service/"` | Ingress controller path for service connections. |
 | ingress.type | string | `"nginx"` | Ingress controller type to setup for. Valid values are nginx or haproxy (used by OpenShift) |
 | licenseServerHostname | string | `"idol-licenseserver"` | the hostname of the IDOL LicenseServer (or abstraction) |
 | licenseServerPort | string | `"20000"` | the ACI port of the IDOL LicenseServer (or abstraction) |
