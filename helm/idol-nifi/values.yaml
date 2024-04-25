@@ -60,7 +60,7 @@ ingressBasicAuthData: YWRtaW46JGFwcjEkSDY1dnBkTU8kMXAxOGMxN3BuZVFUT2ZjVC9TZkZzMQ
 ingressProxyBodySize: 2048m
 
 # ingressType -- setup ingress for that controller type.
-# Valid values are nginx or haproxy (used by OpenShift)
+# Valid values are nginx, haproxy (used by OpenShift) or custom
 ingressType: nginx
 
 # indexserviceName -- the hostname of the indexing IDOL component
