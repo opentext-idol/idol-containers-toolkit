@@ -76,6 +76,17 @@
                 "enabled"
             ]
         },
+        "optional_object":{
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                }
+            },
+            "required":[
+                "enabled"
+            ]
+        },
         "liveness_probe": {
             "type": "object",
             "properties": {
@@ -93,7 +104,7 @@
                 }
             }
         },
-        "ingressCommon":{
+        "ingressBase":{
             "type": "object",
             "properties":{
                 "enabled": {
@@ -112,6 +123,9 @@
                 "proxyBodySize":{
                     "type":"string",
                     "pattern": "^\\d+(?:\\.\\d+)?(?:Ki|Mi|Gi|Ti|Pi|Ei|m|k|M|G|T|P|E)?$"
+                },
+                "annotations": {
+                    "type": "object"
                 }
             },
             "required":[
@@ -119,12 +133,22 @@
                 "type"
             ]
         },
-        "ingress":{
+        "ingressCommon":{
             "type": "object",
-            "allOf":[
-                {"$ref":"#/$defs/ingressCommon"}
+            "properties":{
+                "path": {
+                    "$ref": "#/$defs/required_string"
+                },
+                "servicePath": {
+                    "type": "string"
+                }
+            },
+            "required":[
+                "path"
             ],
-            "unevaluatedProperties": false
+            "allOf":[
+                {"$ref":"#/$defs/ingressBase"}
+            ]
         },
         "idolImage":{
             "type": "object",
@@ -209,6 +233,18 @@
                 },
                 "envConfigMap":{
                     "type": "string"
+                },
+                "usingTLS":{
+                    "type": "boolean"
+                },
+                "containerSecurityContext":{
+                    "$ref": "#/$defs/optional_object"
+                },
+                "podSecurityContext":{
+                    "$ref": "#/$defs/optional_object"
+                },
+                "resources":{
+                    "$ref": "#/$defs/optional_object"
                 }
             },
             "required":[
@@ -216,7 +252,8 @@
                 "ingress",
                 "name",
                 "aciPort",
-                "servicePort"
+                "servicePort",
+                "usingTLS"
             ]
         },
         "licensing":{
@@ -259,8 +296,13 @@
                         "exposedContents":{
                             "type":"integer",
                             "minimum": 0
+                        },
+                        "indexPath": {
+                            "type": "string"
                         }
                     },
+                    "required":[
+                    ],
                     "allOf":[
                         {"$ref":"#/$defs/ingressCommon"}
                     ],
@@ -285,7 +327,15 @@
             "type": "object",
             "properties":{
                 "ingress": {
-                    "$ref": "#/$defs/ingress"
+                    "type":"object",
+                    "properties":{
+                    },
+                    "required":[
+                    ],
+                    "allOf":[
+                        {"$ref":"#/$defs/ingressCommon"}
+                    ],
+                    "unevaluatedProperties": false
                 }
             },
             "required": [
@@ -306,7 +356,19 @@
                     "$ref": "#/$defs/port_number"
                 },
                 "ingress": {
-                    "$ref": "#/$defs/ingress"
+                    "type":"object",
+                    "properties":{
+                        "metricsPath": {
+                            "$ref": "#/$defs/required_string"
+                        }
+                    },
+                    "required":[
+                        "metricsPath"
+                    ],
+                    "allOf":[
+                        {"$ref":"#/$defs/ingressCommon"}
+                    ],
+                    "unevaluatedProperties": false
                 }
             },
             "required": [
@@ -391,13 +453,32 @@
                 "port":{
                     "$ref": "#/$defs/port_number"
                 },
+                "envConfigMap":{
+                    "type": "string"
+                },
+                "usingTLS":{
+                    "type": "boolean"
+                },
                 "ingress": {
-                    "$ref": "#/$defs/ingress"
+                    "type":"object",
+                    "properties":{
+                        "prometheusPath": {
+                            "$ref": "#/$defs/required_string"
+                        }
+                    },
+                    "required":[
+                        "prometheusPath"
+                    ],
+                    "allOf":[
+                        {"$ref":"#/$defs/ingressBase"}
+                    ],
+                    "unevaluatedProperties": false
                 }
             },
             "required":[
                 "name",
                 "port",
+                "usingTLS",
                 "ingress"
             ],
             "unevaluatedProperties": false

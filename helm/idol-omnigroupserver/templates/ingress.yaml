@@ -15,17 +15,4 @@
     "destination" "idol-omnigroupserver.ingress")  -}}
 {{- define "idol-omnigroupserver.ingress" -}}
 {{/* Any omnigroupserver specific merges to base template go here */}}
-{{- $root := get . "root" | required "missing root" -}}
-{{- $component := get . "component" | required "missing component" -}}
-spec:
-  rules:
-  - http:
-      paths:
-      - path: {{ include "idol-library.ingress.path" (dict "ingress" $component.ingress "path" "/omnigroupserver/") }}
-        pathType: {{ include "idol-library.ingress.pathtype" $component }}
-        backend:
-          service:
-            name:  {{ $component.name | quote }}
-            port:
-              name: aci-port
 {{- end -}}

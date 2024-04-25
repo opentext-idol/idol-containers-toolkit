@@ -50,6 +50,7 @@ contentVolumeSize: 16Gi
 # for each Content instance.
 # The associated PVCs are named index-{name}-{pod number}
 contentStorageClass: "idol-content-storage-class"
+
 #############################################
 
 # -- port service will serve ACI connections on
@@ -123,8 +124,11 @@ ingress:
   # -- Ingress controller path for ACI connections.
   path: "/content/"
 
-  # -- Ingress controller path for index connections.
+  # -- Ingress controller path for index connections. Empty string to disable.
   indexPath: "/index/"
+
+ # -- Ingress controller path for service connections. Empty string to disable.
+  servicePath: "/content/service/"
 
   # -- Maximum allowed size of the client request body, defining
   # the maximum size of requests that can be made to IDOL components within the installation, e.g.

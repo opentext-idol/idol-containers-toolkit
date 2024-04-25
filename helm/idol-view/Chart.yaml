@@ -10,10 +10,10 @@
 # END COPYRIGHT NOTICE
 apiVersion: v2
 name: idol-view
-version: "0.3.0"
+version: "0.4.0"
 appVersion: "24.1"
 description: Adds IDOL View
 dependencies:
 - name: idol-library
-  version: "0.10.0"
+  version: "0.11.0"
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm

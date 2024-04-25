@@ -83,11 +83,18 @@
                 },
                 "annotations": {
                     "type": "object"
+                },
+                "path": {
+                    "$ref": "#/$defs/required_string"
+                },
+                "servicePath": {
+                    "type": "string"
                 }
             },
             "required":[
                 "enabled",
-                "type"
+                "type",
+                "path"
             ]
         },
         "idolImage":{
@@ -211,6 +218,9 @@
                 "ingress": {
                     "type":"object",
                     "properties":{
+                        "indexPath": {
+                            "type": "string"
+                        }
                     },
                     "required":[
                     ],

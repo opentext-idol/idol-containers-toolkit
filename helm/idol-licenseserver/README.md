@@ -1,6 +1,6 @@
 # idol-licenseserver
 
-![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square)
+![Version: 0.4.0](https://img.shields.io/badge/Version-0.4.0-informational?style=flat-square)
 
 Provides an IDOL LicenseServer service abstraction for use within a Kubernetes cluster.
 
@@ -17,12 +17,6 @@ helm install --set licenseServerIp=null \
     --set licenseServerExternalName=my.license.server.instance \
     idol-licenseserver opentext-idol/idol-licenseserver
 ```
-
-## Requirements
-
-| Repository | Name | Version |
-|------------|------|---------|
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.10.0 |
 
 ## Values
 

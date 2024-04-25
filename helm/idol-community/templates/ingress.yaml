@@ -15,17 +15,4 @@
     "destination" "idolcommunity.ingress")  -}}
 {{- define "idolcommunity.ingress" -}}
 {{/* Any View specific merges to base template go here */}}
-{{- $root := get . "root" | required "idolcommunity.ingress: missing root" -}}
-{{- $component := get . "component" | required "idolcommunity.ingress: missing component" -}}
-spec:
-  rules:
-  - http:
-      paths:
-      - path: {{ include "idol-library.ingress.path" (dict "ingress" $component.ingress "path" "/community/") }}
-        pathType: {{ include "idol-library.ingress.pathtype" $component }}
-        backend:
-          service:
-            name:  {{ $component.name | quote }}
-            port:
-              name: aci-port
 {{- end -}}

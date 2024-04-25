@@ -6,20 +6,8 @@
     "root" .
     "component" .Values.prometheus
     "ingress" .Values.prometheus.ingress
-    "destination" "distributedidol.prometheus.ingress")  -}}
+    "destination" "distributedidol.prometheus.ingress"
+    "portmapping" (dict "prometheus-port" .Values.prometheus.ingress.prometheusPath)) -}}
 {{- define "distributedidol.prometheus.ingress" -}}
-{{- $root := get . "root" | required "missing root" -}}
-{{- $component := get . "component" | required "missing component" -}}
-{{- $pathType := (include "idol-library.ingress.pathtype" $component) -}}
-spec:
-  rules:
-  - http:
-      paths:
-      - path: {{ include "idol-library.ingress.path" (dict "ingress" $component.ingress "path" "/prometheus/") }}
-        pathType: {{ $pathType }}
-        backend:
-          service:
-            name: {{ $component.name }}
-            port:
-              name: prometheus-port
+{{/* Any prometheus specific merges to base template go here */}}
 {{- end -}}

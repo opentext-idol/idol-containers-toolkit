@@ -56,6 +56,33 @@ additionalVolumeMounts:
   mountPath: /answerserver/prestart_scripts/00_config.sh
   subPath: config.sh
 
+# -- Optional configMap name holding extra environnment variables for content container
+envConfigMap: ""
+
+# -- Optional PodSecurityContext (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podsecuritycontext-v1-core)
+podSecurityContext:
+  # -- enable PodSecurityContext. Setting to false omits.
+  enabled: false
+  fsGroup: 0
+  runAsUser: 1000
+  runAsGroup: 0
+
+# -- Optional SecurityContext for container (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#securitycontext-v1-core)
+containerSecurityContext:
+  # -- enable SecurityContext for container. Setting to false omits.
+  enabled: false
+
+# -- Optional resources for container (see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers)
+resources:
+  # -- enable resources for container. Setting to false omits.
+  enabled: false
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 1000m
+    memory: 1Gi
+
 # -- FactBank Postgresql Server configuration
 factbankPostgresqlServer: "idol-factbank-postgres"
 # -- FactBank Postgresql Port configuration
@@ -91,6 +118,12 @@ ingress:
   # -- Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules).
   # For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration)
   host: ""
+
+  # -- Ingress controller path for ACI connections.
+  path: "/answerserver/"
+
+  # -- Ingress controller path for service connections.
+  servicePath: "/answerserver/service/"
 
   # -- Maximum allowed size of the client request body, defining
   # the maximum size of requests that can be made to IDOL components within the installation, e.g.
@@ -150,6 +183,8 @@ passageextractorAgentstore:
     path: "/passageextractor-agentstore/"
     # -- the ingress controller path to access the agentstore index service with
     indexPath: "/passageextractor-agentstore-index/"
+    # -- the ingress controller path for agentstore service connections
+    servicePath: "/passageextractor-agentstore/service/"
 
   # -- the agentstore engine's query service name
   queryserviceName: ""
@@ -196,6 +231,8 @@ answerbankAgentstore:
     path: "/answerbank-agentstore/"
     # -- the ingress controller path to access the agentstore index service with
     indexPath: "/answerbank-agentstore-index/"
+    # -- the ingress controller path for agentstore service connections
+    servicePath: "/answerbank-agentstore/service/"
 
   # -- the agentstore engine's query service name
   queryserviceName: ""

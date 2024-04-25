@@ -13,7 +13,28 @@ entries:
   distributed-idol:
   - apiVersion: v2
     appVersion: 23.4.0
-    created: "2023-12-14T16:56:45.468442118Z"
+    created: "2024-04-25T11:59:29.308260869+01:00"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.11.0
+    - condition: idol-licenseserver.enabled
+      name: idol-licenseserver
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.4.0
+    - condition: setupMirrored
+      name: metrics-server
+      repository: https://kubernetes-sigs.github.io/metrics-server
+      version: 3.8.2
+    description: A configurable distributed IDOL setup
+    digest: a53e9e5a7c2b9ac67d13fa8faf9f753a1372de8a65f85a46236cb1142bb84b6e
+    name: distributed-idol
+    urls:
+    - release/distributed-idol-0.8.0.tgz
+    version: 0.8.0
+  - apiVersion: v2
+    appVersion: 23.4.0
+    created: "2024-04-25T11:59:29.305694445+01:00"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
@@ -27,7 +48,7 @@ entries:
       repository: https://kubernetes-sigs.github.io/metrics-server
       version: 3.8.2
     description: A configurable distributed IDOL setup
-    digest: abe3e48e54f4d74724a0acbd4b2d52bca14292f4301113aecba5432e6a46343e
+    digest: 80e8b871f53c230e974aaae436bdf4afeb45e84edf3b3864db788f44eeeae22d
     name: distributed-idol
     urls:
     - release/distributed-idol-0.7.0.tgz
@@ -109,7 +130,53 @@ entries:
     urls:
     - release/distributed-idol-0.2.0.tgz
     version: 0.2.0
+  idol-aci-test:
+  - apiVersion: v2
+    appVersion: "24.1"
+    created: "2024-04-25T11:59:29.308745283+01:00"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helmidol-library
+      version: 0.11.0
+    description: 'This chart is for basic testing of templates from the idol-library
+      library chart and is not intended to be used for any other purpose '
+    digest: 60aea48f58a9053486383f40ed4fa11954ed68456b582151a6abd8202e0cc590
+    name: idol-aci-test
+    urls:
+    - release/idol-aci-test-0.2.0.tgz
+    version: 0.2.0
   idol-answerserver:
+  - apiVersion: v2
+    appVersion: "24.1"
+    created: "2024-04-25T11:59:29.313492541+01:00"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helmidol-library
+      version: 0.11.0
+    - alias: passageextractorAgentstore
+      condition: passageextractorAgentstore.enabled
+      name: single-content
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helmsingle-content
+      version: 0.9.0
+    - alias: answerbankAgentstore
+      condition: answerbankAgentstore.enabled
+      name: single-content
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helmsingle-content
+      version: 0.9.0
+    - condition: single-content.enabled
+      name: single-content
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helmsingle-content
+      version: 0.9.0
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 13.2.3
+    description: Adds IDOL AnswerServer
+    digest: 621b49338558b240610f7c4dcc3cc057d268e65ace6f6ff01350f84d5172d3ed
+    name: idol-answerserver
+    urls:
+    - release/idol-answerserver-0.2.0.tgz
+    version: 0.2.0
   - apiVersion: v2
     appVersion: "24.1"
     created: "2024-01-31T19:21:54.295855752Z"
@@ -144,7 +211,28 @@ entries:
   idol-community:
   - apiVersion: v2
     appVersion: "24.1"
-    created: "2024-04-09T15:27:57.927941973+01:00"
+    created: "2024-04-25T11:59:29.32165216+01:00"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helmidol-library
+      version: 0.11.0
+    - condition: idol-licenseserver.enabled
+      name: idol-licenseserver
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helmidol-licenseserver
+      version: 0.4.0
+    - condition: single-content.enabled
+      name: single-content
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helmsingle-content
+      version: 0.9.0
+    description: Adds IDOL Community
+    digest: 4a60482c4e916b49251e8ee4623fb58f58b610c6f713080c29584fdf4a8064b7
+    name: idol-community
+    urls:
+    - release/idol-community-0.4.0.tgz
+    version: 0.4.0
+  - apiVersion: v2
+    appVersion: "24.1"
+    created: "2024-04-25T11:59:29.319989643+01:00"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
@@ -158,14 +246,14 @@ entries:
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
       version: 0.8.0
     description: Adds IDOL Community
-    digest: 9622205f168b65940450075ed3ef6c1dc332553b6505f72552acbd640fb50eb5
+    digest: d7f54450bed636b75ff0facd830bb2444eb5613728a3646be8a76818c441bee9
     name: idol-community
     urls:
     - release/idol-community-0.3.0.tgz
     version: 0.3.0
   - apiVersion: v2
     appVersion: "24.1"
-    created: "2024-02-15T15:59:55.255442641Z"
+    created: "2024-04-25T11:59:29.317463852+01:00"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
@@ -179,14 +267,14 @@ entries:
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
       version: 0.6.0
     description: Adds IDOL Community
-    digest: 6c13c2ab609fbfd9ff8b95a4d43653b022dfdd5e432e1ef28402fb6d86bad684
+    digest: 9b4425c39b30d855ab94dbe618b3403a3f83c55eafceb796e7a2b3d56c2d3ad9
     name: idol-community
     urls:
     - release/idol-community-0.2.0.tgz
     version: 0.2.0
   - apiVersion: v2
     appVersion: "23.4"
-    created: "2023-11-22T16:08:09.120648481Z"
+    created: "2024-04-25T11:59:29.315108733+01:00"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
@@ -200,7 +288,7 @@ entries:
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
       version: 0.2.0
     description: Adds IDOL Community
-    digest: a13e15048ed0a5da2384254bc93550283260017b39e26d94b9ca3891635cebf0
+    digest: 3a3d75095f3cd1149365314c21cf28b9dd55f510b8e0dffffaacbccba684ecca
     name: idol-community
     urls:
     - release/idol-community-0.1.0.tgz
@@ -208,13 +296,26 @@ entries:
   idol-eductionserver:
   - apiVersion: v2
     appVersion: "24.1"
-    created: "2024-02-22T14:42:42.085140765Z"
+    created: "2024-04-25T11:59:29.322680048+01:00"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helmidol-library
+      version: 0.11.0
+    description: Adds IDOL Eduction Server
+    digest: e227a8a427d49ac3ddb05be09d9971e4cfaa0ec75aa5cc1c8e300f5eea380ea7
+    name: idol-eductionserver
+    urls:
+    - release/idol-eductionserver-0.3.0.tgz
+    version: 0.3.0
+  - apiVersion: v2
+    appVersion: "24.1"
+    created: "2024-04-25T11:59:29.322113978+01:00"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
       version: 0.4.0
     description: Adds IDOL Eduction Server
-    digest: e81b3f94529b3db1bc1fa37dbbe2eebd3f126c91c91bffc0cb4b833a5afe8701
+    digest: f3a3ae73f171a3682b42c5867eda274fc828345e81e30b9d987907559f960bd2
     name: idol-eductionserver
     urls:
     - release/idol-eductionserver-0.2.0.tgz
@@ -235,7 +336,7 @@ entries:
   idol-find:
   - apiVersion: v2
     appVersion: 23.4.0
-    created: "2023-11-03T11:06:41.6202894Z"
+    created: "2024-04-25T11:59:29.323352649+01:00"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
@@ -245,7 +346,7 @@ entries:
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
       version: 0.1.0
     description: Adds ``Find`` UI and supporting servers (Community, View)
-    digest: 740ff8903d6176f864212972ed29fe1c3c2ae116571a311dbb0c5963dc0ffde1
+    digest: 1435cb05650cd6756ba336affbd4075a0ffdda7cec448b7f9ad9a928e80e9d45
     name: idol-find
     urls:
     - release/idol-find-0.2.0.tgz
@@ -269,18 +370,27 @@ entries:
     version: 0.1.0
   idol-library:
   - apiVersion: v2
-    created: "2024-04-09T11:48:54.191484529+01:00"
+    created: "2024-04-25T11:59:29.323711835+01:00"
     description: An IDOL Helm library chart for Kubernetes
-    digest: 1e0f1c7e87cebd78d0716720c9981434a7093f8e57da93a49379009490a5fadc
+    digest: c07a56ef708ff2293c8fe13fd3c0a1246341fc4b2a3b2280e75a025d0dc9d252
+    name: idol-library
+    type: library
+    urls:
+    - release/idol-library-0.11.0.tgz
+    version: 0.11.0
+  - apiVersion: v2
+    created: "2024-04-25T11:59:29.323532495+01:00"
+    description: An IDOL Helm library chart for Kubernetes
+    digest: c83ece8c5c194427dacaf71e13880ad4cbf9ae40e18d705cb0725eaebe459d20
     name: idol-library
     type: library
     urls:
     - release/idol-library-0.10.0.tgz
     version: 0.10.0
   - apiVersion: v2
-    created: "2024-02-28T12:21:30.8759202Z"
+    created: "2024-04-25T11:59:29.324039331+01:00"
     description: An IDOL Helm library chart for Kubernetes
-    digest: e8146d6b0be4c9e706b7e756d800a71bcc23536c18e8a478945c136d52677bae
+    digest: 4d79182b89d5872ee19d9c787800a6eb16812489351517dda6931d92c298b7a3
     name: idol-library
     type: library
     urls:
@@ -305,9 +415,9 @@ entries:
     - release/idol-library-0.7.0.tgz
     version: 0.7.0
   - apiVersion: v2
-    created: "2024-01-25T16:58:43.7603201Z"
+    created: "2024-04-25T11:59:29.323874493+01:00"
     description: An IDOL Helm library chart for Kubernetes
-    digest: 40663044128c526f9d7d266a0bb5d6b74276521b14917c88753920654c59ed7e
+    digest: ccdc397eecf5846a5e2fd2b6f333f0fc11fcb55634bfc1b81ac6a6bf6d1407fc
     name: idol-library
     type: library
     urls:
@@ -369,40 +479,49 @@ entries:
     version: 0.1.0
   idol-licenseserver:
   - apiVersion: v2
-    created: "2024-04-09T12:49:14.124392427+01:00"
+    created: "2024-04-25T11:59:29.325705719+01:00"
+    description: Creates an IDOL LicenseServer proxy service accessible to other elements
+      of the cluster
+    digest: c1a43cd5fe8d0a9705405b5d9dbffa49642e1ed60c5551c077ea119fc8d0432c
+    name: idol-licenseserver
+    urls:
+    - release/idol-licenseserver-0.4.0.tgz
+    version: 0.4.0
+  - apiVersion: v2
+    created: "2024-04-25T11:59:29.325468419+01:00"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
       version: 0.10.0
     description: Creates an IDOL LicenseServer proxy service accessible to other elements
       of the cluster
-    digest: 844d6a953987928db8cdf32d78901d221df14aeb41b924c51363a1432691e5c3
+    digest: bb0e17357ba1c40fa79b6c1c0d4b9079fd502a61d7978c4a3b5cb22960e031d8
     name: idol-licenseserver
     urls:
     - release/idol-licenseserver-0.3.0.tgz
     version: 0.3.0
   - apiVersion: v2
-    created: "2024-02-07T14:47:18.622106918Z"
+    created: "2024-04-25T11:59:29.324482889+01:00"
     dependencies:
     - name: idol-library
-      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
-      version: 0.6.0
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helmidol-library
+      version: 0.9.0
     description: Creates an IDOL LicenseServer proxy service accessible to other elements
       of the cluster
-    digest: 4e2038d5b40f6c9d837149e66fffdc49f74f17e2e3379301cbc3027e0be95c85
+    digest: a7f799aca49195d5627c469b3cd0d1f2462c7577e879ea52a335927e88f2daca
     name: idol-licenseserver
     urls:
     - release/idol-licenseserver-0.2.0.tgz
     version: 0.2.0
   - apiVersion: v2
-    created: "2023-10-18T17:09:11.455319006+01:00"
+    created: "2024-04-25T11:59:29.324206808+01:00"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
       version: 0.1.0
     description: Creates an IDOL LicenseServer proxy service accessible to other elements
       of the cluster
-    digest: 932d1a721c6be191e6b2c43d406eba1fe1d5e0721ca566689d6c8f0ebd4d9c7a
+    digest: 4794aad46564e25d819027ff8b1dfa093102d329791c827b7c1bef837d97fa08
     name: idol-licenseserver
     urls:
     - release/idol-licenseserver-0.1.0.tgz
@@ -410,13 +529,26 @@ entries:
   idol-mediaserver:
   - apiVersion: v2
     appVersion: "24.1"
-    created: "2024-02-13T12:40:36.5779552Z"
+    created: "2024-04-25T11:59:29.326888639+01:00"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helmidol-library
+      version: 0.11.0
+    description: Adds IDOL MediaServer
+    digest: 6ce23ca12dbbdb258838046d3789146a9982cb95fa543ddb7580ce109d63df7a
+    name: idol-mediaserver
+    urls:
+    - release/idol-mediaserver-0.2.0.tgz
+    version: 0.2.0
+  - apiVersion: v2
+    appVersion: "24.1"
+    created: "2024-04-25T11:59:29.326130976+01:00"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
       version: 0.6.0
     description: Adds IDOL MediaServer
-    digest: e0fc70d4a8f0070ffd3f021efa3983b91ceae50f3cd43bfb0d6d23e811225b65
+    digest: b24f9b15531c7370191435ee7459e8dcbd2c95f7949e932389eb8056ee7f0a7e
     name: idol-mediaserver
     urls:
     - release/idol-mediaserver-0.1.0.tgz
@@ -424,11 +556,32 @@ entries:
   idol-nifi:
   - apiVersion: v2
     appVersion: 24.1.0
-    created: "2024-04-09T15:27:57.933922995+01:00"
+    created: "2024-04-25T12:08:17.679072949+01:00"
     dependencies:
     - name: idol-library
-      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
-      version: 0.10.0
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helmidol-library
+      version: 0.11.0
+    - condition: idol-licenseserver.enabled
+      name: idol-licenseserver
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helmidol-licenseserver
+      version: 0.4.0
+    - condition: nifi.autoScaling.enabled
+      name: metrics-server
+      repository: https://kubernetes-sigs.github.io/metrics-server
+      version: 3.8.2
+    description: A configurable IDOL NiFi setup
+    digest: b8b7d65f091724ef77a09a8dc0045239ffb6522930d320d2d4adceac13ddcf9e
+    name: idol-nifi
+    urls:
+    - release/idol-nifi-0.5.0.tgz
+    version: 0.5.0
+  - apiVersion: v2
+    appVersion: 24.1.0
+    created: "2024-04-25T11:59:29.333577918+01:00"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helmidol-library
+      version: 0.11.0
     - condition: idol-licenseserver.enabled
       name: idol-licenseserver
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
@@ -438,14 +591,14 @@ entries:
       repository: https://kubernetes-sigs.github.io/metrics-server
       version: 3.8.2
     description: A configurable IDOL NiFi setup
-    digest: 968bb25cb43d7bc697bc607de0e924d66781124b5cf8e1684bd84520d937a6d6
+    digest: a9c97e79eb0a13c8ebef3954be5cfc8dc1303c3f1f35b94f73423a2de7326fe2
     name: idol-nifi
     urls:
     - release/idol-nifi-0.4.0.tgz
     version: 0.4.0
   - apiVersion: v2
     appVersion: 24.1.0
-    created: "2024-03-04T17:20:49.3910177Z"
+    created: "2024-04-25T11:59:29.331575119+01:00"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
@@ -459,7 +612,7 @@ entries:
       repository: https://kubernetes-sigs.github.io/metrics-server
       version: 3.8.2
     description: A configurable IDOL NiFi setup
-    digest: 58cb7fc7d58cce884a5519ab9473f274cef0337952858513d55d0ab3e2592150
+    digest: fc19464b2a729bd6e54b3d490c50b3cbbe0d2a14c6f721083869975a159acab0
     name: idol-nifi
     urls:
     - release/idol-nifi-0.3.2.tgz
@@ -525,7 +678,7 @@ entries:
     version: 0.2.0
   - apiVersion: v2
     appVersion: 23.4.0
-    created: "2023-11-06T15:51:28.149701031Z"
+    created: "2024-04-25T11:59:29.329233936+01:00"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
@@ -535,7 +688,7 @@ entries:
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
       version: 0.1.0
     description: A configurable IDOL NiFi setup
-    digest: f200f7aba8c104bf55e811900bfcf242d50ec221aa43c7e7efa50b0050514fe2
+    digest: 7abecb6c55023c69f9086a3e247e2636e40397fc85b4c9bd9c30c8d484b247fd
     name: idol-nifi
     urls:
     - release/idol-nifi-0.1.0.tgz
@@ -543,7 +696,24 @@ entries:
   idol-omnigroupserver:
   - apiVersion: v2
     appVersion: "24.1"
-    created: "2024-04-09T15:27:57.936099757+01:00"
+    created: "2024-04-25T11:59:29.336398156+01:00"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helmidol-library
+      version: 0.11.0
+    - condition: idol-licenseserver.enabled
+      name: idol-licenseserver
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helmidol-licenseserver
+      version: 0.4.0
+    description: Adds IDOL OmniGroupServer
+    digest: 4d726bbb4bfc64b72a6303a023ee160f851581d4c603f7a0fb1a37e00ad8df86
+    name: idol-omnigroupserver
+    urls:
+    - release/idol-omnigroupserver-0.5.0.tgz
+    version: 0.5.0
+  - apiVersion: v2
+    appVersion: "24.1"
+    created: "2024-04-25T11:59:29.335453207+01:00"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
@@ -553,7 +723,7 @@ entries:
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
       version: 0.3.0
     description: Adds IDOL OmniGroupServer
-    digest: dfd8e079ef6eec15e9ee65eda3fc698a620bc176569456805ef108ec81b841eb
+    digest: 82a706b162254e63eaf436782758ce9deee1702bfaca75e8c5b7e5658057c808
     name: idol-omnigroupserver
     urls:
     - release/idol-omnigroupserver-0.4.0.tgz
@@ -594,7 +764,7 @@ entries:
     version: 0.3.0
   - apiVersion: v2
     appVersion: "24.1"
-    created: "2024-02-07T14:31:33.1455356Z"
+    created: "2024-04-25T11:59:29.334698007+01:00"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
@@ -604,14 +774,14 @@ entries:
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
       version: 0.1.0
     description: Adds IDOL OmniGroupServer
-    digest: b0fe0d211e62b9b02c3931faeff687deadc042f8249176198269051f9ae0b273
+    digest: df5e95912e07235bc0bd16a8ae0a44ed2f27236b1756c2dd6745e6a6669121b5
     name: idol-omnigroupserver
     urls:
     - release/idol-omnigroupserver-0.2.1.tgz
     version: 0.2.1
   - apiVersion: v2
     appVersion: "24.1"
-    created: "2024-01-25T17:03:32.2450541Z"
+    created: "2024-04-25T11:59:29.33413944+01:00"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
@@ -621,7 +791,7 @@ entries:
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
       version: 0.1.0
     description: Adds IDOL OmniGroupServer
-    digest: e8d792d063a9f140b4eb7ca5ee0ef52dd99587c33180235fc4e96df6258b49bb
+    digest: 3026734634b52a4076e788d5e2294acfc1c5b641870429f914bd1ee1ec8a35df
     name: idol-omnigroupserver
     urls:
     - release/idol-omnigroupserver-0.2.0.tgz
@@ -644,6 +814,28 @@ entries:
     - release/idol-omnigroupserver-0.1.0.tgz
     version: 0.1.0
   idol-qms:
+  - apiVersion: v2
+    appVersion: "24.1"
+    created: "2024-04-25T11:59:29.338866437+01:00"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helmidol-library
+      version: 0.11.0
+    - alias: singleAgentstore
+      condition: singleAgentstore.enabled
+      name: single-content
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helmsingle-content
+      version: 0.9.0
+    - condition: single-content.enabled
+      name: single-content
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helmsingle-content
+      version: 0.9.0
+    description: Adds IDOL QMS
+    digest: e1509285aa7ba82e534d2899bcc8747e5e610aed8a32e217215c14bc1555ee3c
+    name: idol-qms
+    urls:
+    - release/idol-qms-0.4.0.tgz
+    version: 0.4.0
   - apiVersion: v2
     appVersion: "24.1"
     created: "2024-04-09T15:27:57.939562173+01:00"
@@ -713,7 +905,7 @@ entries:
   idol-stack:
   - apiVersion: v2
     appVersion: 23.4.0
-    created: "2023-11-09T15:29:08.201202495Z"
+    created: "2024-04-25T11:59:29.343568642+01:00"
     dependencies:
     - condition: idol-licenseserver.enabled
       name: idol-licenseserver
@@ -736,12 +928,25 @@ entries:
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
       version: 0.1.0
     description: An IDOL setup
-    digest: 34e26fbd25aad3ceef7e8d75637e93c3041902ae4bbe6bd0d6778df75ce4d8a8
+    digest: fe0aa3a3a8fdb341b571ea92759cb5588b4b000b1def58eba6c4c49b98a522fe
     name: idol-stack
     urls:
     - release/idol-stack-0.1.0.tgz
     version: 0.1.0
   idol-view:
+  - apiVersion: v2
+    appVersion: "24.1"
+    created: "2024-04-25T11:59:29.344581385+01:00"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helmidol-library
+      version: 0.11.0
+    description: Adds IDOL View
+    digest: a86b13ae6ab9ff848179bb41cc2d39136e7da777d11f541552ce698ed8c7e5fe
+    name: idol-view
+    urls:
+    - release/idol-view-0.4.0.tgz
+    version: 0.4.0
   - apiVersion: v2
     appVersion: "24.1"
     created: "2024-04-09T15:27:57.940923609+01:00"
@@ -770,18 +975,35 @@ entries:
     version: 0.2.0
   - apiVersion: v2
     appVersion: "24.1"
-    created: "2024-01-29T10:32:12.93695582Z"
+    created: "2024-04-25T11:59:29.344021794+01:00"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
       version: 0.6.0
     description: Adds IDOL View
-    digest: b92b7b682c3180f657e1816d12b3ef41767706284d597b00ae5d279b3daf3edd
+    digest: 6d3e747188a0f04459b2bc944ac61b1c33ec2ccc05e2f4682893712cc54747fb
     name: idol-view
     urls:
     - release/idol-view-0.1.0.tgz
     version: 0.1.0
   single-content:
+  - apiVersion: v2
+    appVersion: "24.1"
+    created: "2024-04-25T11:59:29.346142773+01:00"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helmidol-library
+      version: 0.11.0
+    - condition: idol-licenseserver.enabled
+      name: idol-licenseserver
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helmidol-licenseserver
+      version: 0.4.0
+    description: A configurable single-IDOL setup
+    digest: f464b3c696b04b59e22135d02c7e46fc104acda0e150a7a766b36d699c60dc4e
+    name: single-content
+    urls:
+    - release/single-content-0.9.0.tgz
+    version: 0.9.0
   - apiVersion: v2
     appVersion: "24.1"
     created: "2024-04-09T15:27:57.943121711+01:00"
@@ -835,7 +1057,7 @@ entries:
     version: 0.6.0
   - apiVersion: v2
     appVersion: "24.1"
-    created: "2024-02-05T16:23:34.214321947Z"
+    created: "2024-04-25T11:59:29.345368047+01:00"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
@@ -845,7 +1067,7 @@ entries:
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
       version: 0.1.0
     description: A configurable single-IDOL setup
-    digest: 01cc0d27965a27a08f88bce9fa7c2ac50fc015252524e5c2ad1264e055195e2d
+    digest: 96c07effdf4a472f016a54c0c609f4ddf50bb664c6ee28502f8957486af8da0a
     name: single-content
     urls:
     - release/single-content-0.5.1.tgz
@@ -935,4 +1157,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2024-04-09T15:27:57.923756721+01:00"
+generated: "2024-04-25T12:08:17.675744416+01:00"

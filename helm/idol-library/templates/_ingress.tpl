@@ -15,6 +15,11 @@
 {{- $root := get . "root" | required "missing root" -}}
 {{- $component := get . "component" | required "missing component" -}}
 {{- $ingress := get . "ingress" | required "missing ingress" -}}
+{{- $paths := get . "paths" | default list -}}
+{{- $portmapping := get . "portmapping" | default (dict 
+    "aci-port" $ingress.path
+    "service-port" $ingress.servicePath
+    "index-port" $ingress.indexPath) -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -23,9 +28,15 @@ metadata:
   annotations:
 {{- $annotations := dict -}}
 {{- if eq $ingress.type "nginx" }}
+  {{- $headers := print 
+    (ternary "" (printf "more_set_headers \"AciPortPath: %s\";\n" $ingress.path)  (empty $ingress.path))
+    (ternary "" (printf "more_set_headers \"ServicePortPath: %s\";\n" $ingress.servicePath)  (empty $ingress.servicePath))
+    (ternary "" (printf "more_set_headers \"IndexPortPath: %s\";\n" $ingress.indexPath)  (empty $ingress.indexPath))
+  -}}
   {{- $_ := mergeOverwrite $annotations (dict
       "nginx.ingress.kubernetes.io/rewrite-target" "/$1"
       "nginx.ingress.kubernetes.io/backend-protocol" (ternary "HTTPS" "HTTP" $component.usingTLS)
+      "nginx.ingress.kubernetes.io/configuration-snippet" $headers
   ) -}}
   {{- if $ingress.proxyBodySize }}
     {{- $_ := set $annotations "nginx.ingress.kubernetes.io/proxy-body-size" ($ingress.proxyBodySize) -}}
@@ -50,9 +61,24 @@ spec:
 {{- end }}
   rules:
   - http:
+      paths:
+{{- range $portType, $pathKey := $portmapping -}}
+{{- if $pathKey }}
+      - path: {{ include "idol-library.ingress.path" (dict "ingress" $ingress "path" $pathKey) }}
+        pathType: {{ include "idol-library.ingress.pathtype" $component }}
+        backend: 
+          service:
+            name: {{ $component.name | quote }}
+            port:
+              name: {{ $portType }}
+{{- end -}}
+{{- end -}}
+{{- if $paths -}}
+{{ toYaml $paths | nindent 6 }}
+{{- end -}}
 {{- if $ingress.host }}
     host: {{ $ingress.host }}
-{{- end }}
+{{- end -}}
 {{- end }}
 
 
@@ -62,6 +88,8 @@ Generates ingress
 @param .component The component values
 @param .ingress The ingress specific values
 @param .destination Template to merge onto
+@param .paths Extra paths to be merged into template
+@param .portmapping Dictionary of port types and paths
 */}}
 {{- define "idol-library.ingress" -}}
 {{- $root := get . "root" | required "missing root" -}}

@@ -14,18 +14,5 @@
     "ingress" .Values.dah.ingress
     "destination" "distributedidol.dah.ingress")  -}}
 {{- define "distributedidol.dah.ingress" -}}
-{{- $root := get . "root" | required "missing root" -}}
-{{- $component := get . "component" | required "missing component" -}}
-{{- $pathType := (include "idol-library.ingress.pathtype" $component) -}}
-spec:
-  rules:
-  - http:
-      paths:
-      - path: {{ include "idol-library.ingress.path" (dict "ingress" $component.ingress "path" "/dah/") }}
-        pathType: {{ $pathType }}
-        backend:
-          service:
-            name: {{ $component.name }}
-            port:
-              name: aci-port
+{{/* Any DAH specific merges to base template go here */}}
 {{- end -}}

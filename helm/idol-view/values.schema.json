@@ -84,11 +84,18 @@
                 },
                 "annotations": {
                     "type": "object"
+                },
+                "path": {
+                    "$ref": "#/$defs/required_string"
+                },
+                "servicePath": {
+                    "type": "string"
                 }
             },
             "required":[
                 "enabled",
-                "type"
+                "type",
+                "path"
             ]
         },
         "idolImage":{
@@ -184,7 +191,15 @@
                     "$ref": "#/$defs/optional_object"
                 },
                 "ingress": {
-                    "$ref": "#/$defs/ingressCommon"
+                    "type":"object",
+                    "properties":{
+                    },
+                    "required":[
+                    ],
+                    "allOf":[
+                        {"$ref":"#/$defs/ingressCommon"}
+                    ],
+                    "unevaluatedProperties": false
                 }
             },
             "required":[
