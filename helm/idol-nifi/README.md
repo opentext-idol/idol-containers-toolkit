@@ -43,7 +43,7 @@ Provides a scaleable IDOL NiFi cluster instance (NiFi, NiFi Registry and ZooKeep
 | ingressBasicAuthData | string | `"YWRtaW46JGFwcjEkSDY1dnBkTU8kMXAxOGMxN3BuZVFUT2ZjVC9TZkZzMQo="` | base64 encoded htpasswd https://httpd.apache.org/docs/2.4/misc/password_encryptions.html. Default is admin/admin |
 | ingressClassName | string | `""` | Optional, https://kubernetes.io/docs/concepts/services-networking/ingress/#the-ingress-resource, applied to all ingress objects |
 | ingressProxyBodySize | string | `"2048m"` | the maximum allowed size of the client request body, defining the maximum size of requests that can be made to IDOL components within the installation, e.g. the amount of data sent in DREADDDATA index commands. The value should be an nginx "size" value. See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the corresponding nginx configuration parameter. |
-| ingressType | string | `"nginx"` | setup ingress for that controller type. Valid values are nginx or haproxy (used by OpenShift) |
+| ingressType | string | `"nginx"` | setup ingress for that controller type. Valid values are nginx, haproxy (used by OpenShift) or custom |
 | metrics-server.args[0] | string | `"--kubelet-insecure-tls"` |  |
 | name | string | `"idol-nifi"` | used to name statefulset, service, ingress |
 | nifi.autoScaling.enabled | bool | `true` | deploy a horizontal pod autoscaler for the nifi statefulset |
