@@ -18,7 +18,7 @@
                 },
                 "ingressType": {
                     "type": "string",
-                    "enum": ["nginx","haproxy"]
+                    "enum": ["nginx","haproxy","custom"]
                 },
                 "usingTLS":{
                     "type": "boolean"
