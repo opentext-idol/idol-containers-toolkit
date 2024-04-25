@@ -237,9 +237,6 @@
                 "ingress": {
                     "type":"object",
                     "properties":{
-                        "path": {
-                            "$ref": "#/$defs/required_string"
-                        }
                     },
                     "required":[
                     ],
