@@ -454,37 +454,13 @@ prometheus:
   name: "prometheus"
   port: "9090"
 
-  # -- whether aci/service/index ports are configured to use TLS (https).
+  # -- Optional configMap name holding extra environnment variables for prometheus container
+  envConfigMap: ""
+
+  # -- whether prometheus port is configured to use TLS (https).
   # If configuring for TLS, then consider setting IDOL_SSL_COMPONENT_CERT_PATH and IDOL_SSL_COMPONENT_KEY_PATH in envConfigMap
   # to provide required TLS certificates
   usingTLS: false
-
-  # -- Optional configMap name holding extra environnment variables for content container
-  envConfigMap: ""
-
-  # -- Optional PodSecurityContext (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podsecuritycontext-v1-core)
-  podSecurityContext:
-    # -- enable PodSecurityContext. Setting to false omits.
-    enabled: false
-    fsGroup: 0
-    runAsUser: 1000
-    runAsGroup: 0
-
-  # -- Optional SecurityContext for container (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#securitycontext-v1-core)
-  containerSecurityContext:
-    # -- enable SecurityContext for container. Setting to false omits.
-    enabled: false
-
-  # -- Optional resources for container (see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers)
-  resources:
-    # -- enable resources for container. Setting to false omits.
-    enabled: false
-    limits:
-      cpu: 1000m
-      memory: 1Gi
-    requests:
-      cpu: 1000m
-      memory: 1Gi
   
   ingress:
     # -- Create ingress resource

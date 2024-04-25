@@ -6,6 +6,18 @@
             "properties": {
                 "global": {
                     "$ref": "#/$defs/global"
+                },
+                "answerbankAgentstore":{
+                    "$ref": "#/$defs/optional_object"
+                },
+                "passageextractorAgentstore":{
+                    "$ref": "#/$defs/optional_object"
+                },
+                "postgresql":{
+                    "$ref": "#/$defs/optional_object"
+                },
+                "single-content":{
+                    "$ref": "#/$defs/optional_object"
                 }
             },
             "required": [

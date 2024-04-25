@@ -148,8 +148,7 @@
             ],
             "allOf":[
                 {"$ref":"#/$defs/ingressBase"}
-            ],
-            "unevaluatedProperties": false
+            ]
         },
         "idolImage":{
             "type": "object",
@@ -454,6 +453,12 @@
                 "port":{
                     "$ref": "#/$defs/port_number"
                 },
+                "envConfigMap":{
+                    "type": "string"
+                },
+                "usingTLS":{
+                    "type": "boolean"
+                },
                 "ingress": {
                     "type":"object",
                     "properties":{
@@ -473,6 +478,7 @@
             "required":[
                 "name",
                 "port",
+                "usingTLS",
                 "ingress"
             ],
             "unevaluatedProperties": false
