@@ -1,31 +1,38 @@
 # BEGIN COPYRIGHT NOTICE
-# (c) Copyright 2023 Micro Focus or one of its affiliates.
+# Copyright 2023-2024 Open Text.
+#
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
 # END COPYRIGHT NOTICE
 
-SUBCHARTS:=idol-library \
-	idol-licenseserver \
-	idol-community \
-	idol-eductionserver \
-	idol-find \
-	idol-mediaserver \
-	idol-nifi \
-	idol-omnigroupserver \
-	idol-stack \
-	idol-qms \
-	idol-answerserver \
-	idol-view \
-	distributed-idol \
-	single-content
+# all charts
+CHARTS:=$(subst /,,$(dir $(wildcard */Chart.yaml)))
 
-PACKAGE_SUBCHARTS:=$(addprefix package-,${SUBCHARTS})
-CLEAN_SUBCHARTS:=$(addprefix clean-,${SUBCHARTS})
-# subcharts for which we use helm-docs to generate the README.md from README.md.gotmpl
-README_SUBCHARTS:=$(basename $(wildcard */README.md.gotmpl))
+# charts with values schema
+SCHEMA_CHARTS:=$(subst /,,$(dir $(wildcard */values.schema.json)))
+
+# Non-packaging charts
+SKIP_PACKAGE_CHARTS:=idol-library-example-test
+
+CLEAN_CHARTS:=$(addprefix clean-,${CHARTS})
+PACKAGE_CHARTS:=$(addprefix package-,$(filter-out ${SKIP_PACKAGE_CHARTS},${CHARTS}))
+VALIDATE_SCHEMA_CHARTS:=$(addprefix validateschema-,${SCHEMA_CHARTS})
+
+PYTHON_CMD?=python3
+
+# charts for which we use helm-docs to generate the README.md from README.md.gotmpl
+README_CHARTS:=$(basename $(wildcard */README.md.gotmpl))
 THIS_YEAR?=$(shell date +%Y)
 
 UPDATE_DEPENDENCIES?=-u
 
-.PHONY: package-all ${PACKAGE_SUBCHARTS} clean-all ${CLEAN_SUBCHARTS}
+.PHONY: package-all ${PACKAGE_CHARTS} 
+.PHONY: clean-all ${CLEAN_CHARTS} 
+.PHONY: validate-all ${VALIDATE_SCHEMA_CHARTS}
 
 default: package-all index.yaml
 
@@ -41,21 +48,33 @@ index.yaml: $(wildcard staging/release/*) ot_copyright_notice.stl
 	mv index.yaml.nxt index.yaml
 
 # packages releases to staging directory
-${PACKAGE_SUBCHARTS}: package-% : %/README.md
+${PACKAGE_CHARTS}: package-% : %/README.md 
 	if [ -z `git ls-files --other --exclude-standard $*` ]; then \
 		helm package ${UPDATE_DEPENDENCIES} -d staging/release $*/ ; \
 	else \
 		echo "Untracked files exist in $*" ; \
 	fi
 
-${README_SUBCHARTS}: %/README.md: %/values.yaml %/Chart.yaml %/README.md.gotmpl
+# generated README.md files
+${README_CHARTS}: %/README.md: %/values.yaml %/Chart.yaml %/README.md.gotmpl
 	docker run --rm -v `pwd`/$*:/helm-docs -u `id -u` jnorwood/helm-docs:latest
 
-package-all: ${PACKAGE_SUBCHARTS}
+package-all: ${PACKAGE_CHARTS}
 
-${CLEAN_SUBCHARTS}: clean-% : 
+# run schema validation
+${VALIDATE_SCHEMA_CHARTS}: validateschema-%: utils/validate.schema.py
+	${PYTHON_CMD} utils/validate.schema.py c $*
+
+# add schema validation as prerequisite for packaging
+$(addprefix package-,${SCHEMA_CHARTS}): package-% : validateschema-%
+
+validate-all: ${VALIDATE_SCHEMA_CHARTS}
+
+${CLEAN_CHARTS}: clean-% : 
 	-${RM} $*/charts/*
 	-${RM} $*/Chart.lock
 
-clean-all: ${CLEAN_SUBCHARTS}
+clean-all: ${CLEAN_CHARTS}
 
+# Makefile variable debugging (e.g. make print-CHARTS)
+print-%  : ; @echo $* = $($*)
