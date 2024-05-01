@@ -221,6 +221,12 @@
                 "oauthToolConfigMap": {
                     "type": "string"
                 },
+                "ogsStorageClass":{
+                    "$ref": "#/$defs/required_string"
+                },
+                "ogsVolumeSize":{
+                    "$ref": "#/$defs/volume_size"
+                },
                 "ingress": {
                     "type":"object",
                     "properties":{

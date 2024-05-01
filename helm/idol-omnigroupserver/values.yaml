@@ -35,6 +35,17 @@ idolImage:
   # -- used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy)
   imagePullPolicy: "IfNotPresent"
 
+# ogsVolumeSize -- Size of the PersistentVolumeClaim that is created
+# for each OmniGroupServer instance. The Kubernetes cluster will need to provide
+# enough PersistentVolumes to satisify the claims made for the desired number
+# of OmniGroupServer instances.
+ogsVolumeSize: 16Gi
+
+# ogsStorageClass -- Name of the storage class used to provision a PersistentVolume
+# for each OmniGroupServer instance.
+# The associated PVCs are named index-{name}-{pod number}
+ogsStorageClass: "idol-ogs-storage-class"
+
 # -- whether aci/service/index ports are configured to use TLS (https).
 # If configuring for TLS, then consider setting IDOL_SSL_COMPONENT_CERT_PATH and IDOL_SSL_COMPONENT_KEY_PATH in envConfigMap
 # to provide required TLS certificates
