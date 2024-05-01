@@ -31,7 +31,6 @@ files.add_argument('values', help='path to values.yaml/json')
 
 args = ap.parse_args()
 
-#print(args.mode)
 if args.mode.startswith('f'):
     schema_path = args.schema_json
     instance_path = args.values
