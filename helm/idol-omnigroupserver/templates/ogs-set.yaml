@@ -8,7 +8,23 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-{{ define "idolomnigroupserver.deployment.base" }}
+{{ define "idolomnigroupserver.statefulset.base" }}
+{{/* specific merges to statefulset specification */}}
+{{- $component := get . "component" | required "idolomnigroupserver.statefulset.base: missing component" -}}
+spec:
+  template:
+    spec:
+      terminationGracePeriodSeconds: 300
+  volumeClaimTemplates:
+  - metadata:
+      name: index
+      labels: {{- include "idol-library.labels" . | nindent 8 }}
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: {{ $component.ogsStorageClass }}
+      resources:
+        requests:
+          storage: {{ $component.ogsVolumeSize }}
 {{- end -}}
 
 {{- $volumes := list }}
@@ -18,8 +34,8 @@
 {{ include "idol-library.util.merge" (dict
   "root" .
   "component" .Values
-  "source" "idol-library.aciserver.deployment.base.v1"
-  "destination" "idolomnigroupserver.deployment.base" 
+  "source" "idol-library.aciserver.statefulset.base.v1"
+  "destination" "idolomnigroupserver.statefulset.base" 
   "containers" (list "idolomnigroupserver.container")
   "volumes" $volumes
 ) }}

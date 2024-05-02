@@ -20,7 +20,7 @@
 {{- $root := get . "root" | required "idolomnigroupserver.container: missing root" -}}
 {{- $component := get . "component" | required "idolomnigroupserver.container: missing component" -}}
 {{- $env := list }}
-{{- $volumeMounts := list }}
+{{- $volumeMounts := (list (dict "name" "index" "mountPath" "/omnigroupserver/DBs")) }}
 {{- if $component.oauthToolConfigMap }}
 {{- $env = append $env (dict "name" "OAUTH_TOOL_CFG" "value" "/etc/config/oauth/oauth_tool.cfg")}}
 {{- $volumeMounts = concat $volumeMounts (list (dict "name" "oauth-tool-config-file" "mountPath" "/etc/config/oauth" "readOnly" true) (dict "name" "oauth-prestart-scripts" "mountPath" "/omnigroupserver/prestart_scripts" "readOnly" true)) }}
