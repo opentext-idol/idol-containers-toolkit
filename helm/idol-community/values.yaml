@@ -79,6 +79,9 @@ resources:
     cpu: 1000m
     memory: 1Gi
 
+# replicas -- number of replica pods for this container (defaults to 1)
+replicas: 1
+
 # queryserviceName -- query service/hostname (maps to Community DataDRE configuration).
 queryserviceName: "idol-query-service"
 # queryserviceACIPort -- query service aci port (maps to Community DataDRE configuration).

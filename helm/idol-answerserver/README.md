@@ -1,6 +1,6 @@
 # idol-answerserver
 
-![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![AppVersion: 24.1](https://img.shields.io/badge/AppVersion-24.1-informational?style=flat-square)
+![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![AppVersion: 24.1](https://img.shields.io/badge/AppVersion-24.1-informational?style=flat-square)
 
 Provides an IDOL answerserver deployment.
 
@@ -24,11 +24,11 @@ files, then redeploy the chart with LLM configuration information in your answer
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.11.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.12.0 |
+| https://charts.bitnami.com/bitnami | postgresql | 13.2.3 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | passageextractorAgentstore(single-content) | 0.9.0 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | answerbankAgentstore(single-content) | 0.9.0 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | single-content | 0.9.0 |
-| https://charts.bitnami.com/bitnami | postgresql | 13.2.3 |
 
 ## Values
 
@@ -103,6 +103,7 @@ files, then redeploy the chart with LLM configuration information in your answer
 | postgresql.primary.initdb.scriptsConfigMap | string | `"idol-factbank-postgres-init"` |  |
 | postgresql.primary.persistence.storageClass | string | `"standard"` |  |
 | postgresql.primary.podSecurityContext.enabled | bool | `true` |  |
+| replicas | int | `1` | number of replica pods for this container |
 | resources | object | `{"enabled":false,"limits":{"cpu":"1000m","memory":"1Gi"},"requests":{"cpu":"1000m","memory":"1Gi"}}` | Optional resources for container (see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers) |
 | resources.enabled | bool | `false` | enable resources for container. Setting to false omits. |
 | servicePort | string | `"12002"` | port service will serve service connections on |

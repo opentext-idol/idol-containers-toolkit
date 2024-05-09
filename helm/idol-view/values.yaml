@@ -76,6 +76,9 @@ resources:
     cpu: 1000m
     memory: 1Gi
 
+# replicas -- number of replica pods for this container (defaults to 1)
+replicas: 1
+
 # -- Default configuration for [Viewing]::IdolHost
 agentStoreName: "idol-agentstore"
 # -- Default configuration for [Viewing]::IdolPort

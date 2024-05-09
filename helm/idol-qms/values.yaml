@@ -138,6 +138,8 @@ servicePort: "16002"
 # livenessProbe -- container livenessProbe settings
 livenessProbe:
   initialDelaySeconds: 120
+# replicas -- number of replica pods for this container (defaults to 1)
+replicas: 1
 
 
 singleAgentstore:

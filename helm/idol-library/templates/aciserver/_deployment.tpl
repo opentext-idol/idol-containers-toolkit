@@ -26,7 +26,7 @@ metadata:
   name: {{ $component.name | quote }}
   labels: {{- include "idol-library.labels" . | nindent 4 }}
 spec:
-  replicas: 1
+  replicas: {{ $component.replicas | default 1 | int }}
   selector:
     matchLabels:
       app: {{ $component.name | quote }}

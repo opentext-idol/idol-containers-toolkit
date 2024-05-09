@@ -195,6 +195,9 @@
                 },
                 "resources":{
                     "$ref": "#/$defs/optional_object"
+                },
+                "replicas":{
+                    "type": "integer"
                 }
             },
             "required":[

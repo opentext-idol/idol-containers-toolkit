@@ -82,6 +82,9 @@ resources:
     cpu: 1000m
     memory: 1Gi
 
+# replicas -- number of replica pods for this container (defaults to 1)
+replicas: 1
+
 ##### INGRESS VARIABLES #####
 
 ingress:
