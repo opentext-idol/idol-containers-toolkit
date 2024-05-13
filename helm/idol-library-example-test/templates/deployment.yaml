@@ -11,9 +11,6 @@
 
 {{ define "idolacitest.deployment.base" }}
 {{/* specific merges to deployment specification */}}
-{{- $component := get . "component" | required "idolacitest.deployment.base: missing component" -}}
-spec:
-  replicas: 2
 {{- end -}}
 
 {{ include "idol-library.util.merge" (dict

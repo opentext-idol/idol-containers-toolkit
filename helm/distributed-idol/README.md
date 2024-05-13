@@ -253,7 +253,7 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | dah.name | string | `"idol-dah"` | used to name statefulset, service, ingress |
 | dah.podSecurityContext | object | `{"enabled":false,"fsGroup":0,"runAsGroup":0,"runAsUser":1000}` | Optional PodSecurityContext (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podsecuritycontext-v1-core) |
 | dah.podSecurityContext.enabled | bool | `false` | enable PodSecurityContext. Setting to false omits. |
-| dah.replicas | int | `1` |  |
+| dah.replicas | int | `1` | number of replica pods for this container (defaults to 1) |
 | dah.resources | object | `{"enabled":false,"limits":{"cpu":"1000m","memory":"1Gi"},"requests":{"cpu":"1000m","memory":"1Gi"}}` | Optional resources for container (see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers) |
 | dah.resources.enabled | bool | `false` | enable resources for container. Setting to false omits. |
 | dah.servicePort | string | `"9062"` | port service will serve service connections on |
