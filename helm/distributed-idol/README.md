@@ -8,7 +8,7 @@ END COPYRIGHT NOTICE
 # distributed-idol
 <!-- omit in toc -->
 
-![Version: 0.8.0](https://img.shields.io/badge/Version-0.8.0-informational?style=flat-square) ![AppVersion: 23.4.0](https://img.shields.io/badge/AppVersion-23.4.0-informational?style=flat-square)
+![Version: 0.9.0](https://img.shields.io/badge/Version-0.9.0-informational?style=flat-square) ![AppVersion: 23.4.0](https://img.shields.io/badge/AppVersion-23.4.0-informational?style=flat-square)
 
 - [Overview](#overview)
 - [Prerequisites](#prerequisites)
@@ -185,9 +185,9 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.11.0 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | 0.4.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.12.0 |
 | https://kubernetes-sigs.github.io/metrics-server | metrics-server | 3.8.2 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | 0.4.0 |
 
 ## Values
 
@@ -253,6 +253,7 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | dah.name | string | `"idol-dah"` | used to name statefulset, service, ingress |
 | dah.podSecurityContext | object | `{"enabled":false,"fsGroup":0,"runAsGroup":0,"runAsUser":1000}` | Optional PodSecurityContext (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podsecuritycontext-v1-core) |
 | dah.podSecurityContext.enabled | bool | `false` | enable PodSecurityContext. Setting to false omits. |
+| dah.replicas | int | `1` | number of replica pods for this container (defaults to 1) |
 | dah.resources | object | `{"enabled":false,"limits":{"cpu":"1000m","memory":"1Gi"},"requests":{"cpu":"1000m","memory":"1Gi"}}` | Optional resources for container (see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers) |
 | dah.resources.enabled | bool | `false` | enable resources for container. Setting to false omits. |
 | dah.servicePort | string | `"9062"` | port service will serve service connections on |

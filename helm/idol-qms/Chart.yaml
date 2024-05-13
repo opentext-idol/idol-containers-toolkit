@@ -10,12 +10,12 @@
 # END COPYRIGHT NOTICE
 apiVersion: v2
 name: idol-qms
-version: "0.4.0"
+version: "0.5.0"
 appVersion: "24.1"
 description: Adds IDOL QMS
 dependencies:
 - name: idol-library
-  version: "0.11.0"
+  version: "0.12.0"
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 - name: single-content
   alias: "singleAgentstore"

@@ -200,6 +200,9 @@
                         {"$ref":"#/$defs/ingressCommon"}
                     ],
                     "unevaluatedProperties": false
+                },
+                "replicas": {
+                    "type": "integer"
                 }
             },
             "required":[

@@ -1,6 +1,6 @@
 # idol-mediaserver
 
-![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![AppVersion: 24.1](https://img.shields.io/badge/AppVersion-24.1-informational?style=flat-square)
+![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![AppVersion: 24.1](https://img.shields.io/badge/AppVersion-24.1-informational?style=flat-square)
 
 Provides an IDOL MediaServer deployment.
 
@@ -20,7 +20,7 @@ This chart may be used to provide optical class recognition and speech-to-text f
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.11.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.12.0 |
 
 ## Values
 
@@ -56,6 +56,7 @@ This chart may be used to provide optical class recognition and speech-to-text f
 | podSecurityContext | object | `{"enabled":false,"fsGroup":0,"runAsGroup":0,"runAsUser":1000}` | Optional PodSecurityContext (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podsecuritycontext-v1-core) |
 | podSecurityContext.enabled | bool | `false` | enable PodSecurityContext. Setting to false omits. |
 | processMaximumThreads | int | `1` | The maximum number of Process actions that can be run simultaneously Increase this value to match available Channels, if you increase the Channels values See MediaServer documentation for more information about Process actions |
+| replicas | int | `1` | number of replica pods for this container (defaults to 1) |
 | resources | object | `{"enabled":false,"limits":{"cpu":"1000m","memory":"1Gi"},"requests":{"cpu":"1000m","memory":"1Gi"}}` | Optional resources for container (see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers) |
 | resources.enabled | bool | `false` | enable resources for container. Setting to false omits. |
 | servicePort | string | `"14001"` | port service will serve service connections on |

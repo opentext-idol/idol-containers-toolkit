@@ -272,6 +272,9 @@ dah:
   # to provide required TLS certificates
   usingTLS: false
 
+  # -- number of replica pods for this container (defaults to 1)
+  replicas: 1
+
   ##### NETWORKING CONFIGURATION #####
   # This section contains parameters to configure various network-related
   # properties in this chart.

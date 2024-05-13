@@ -149,6 +149,8 @@ servicePort: "12002"
 # livenessProbe -- container livenessProbe settings
 livenessProbe:
   initialDelaySeconds: 120
+# replicas -- number of replica pods for this container
+replicas: 1
 
 
 passageextractorAgentstore:

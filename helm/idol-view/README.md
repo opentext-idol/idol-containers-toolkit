@@ -1,6 +1,6 @@
 # idol-view
 
-![Version: 0.4.0](https://img.shields.io/badge/Version-0.4.0-informational?style=flat-square) ![AppVersion: 24.1](https://img.shields.io/badge/AppVersion-24.1-informational?style=flat-square)
+![Version: 0.5.0](https://img.shields.io/badge/Version-0.5.0-informational?style=flat-square) ![AppVersion: 24.1](https://img.shields.io/badge/AppVersion-24.1-informational?style=flat-square)
 
 Provides an IDOL View deployment.
 
@@ -25,7 +25,7 @@ You may wish to deploy this chart alongside _idol-nifi_.
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.11.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.12.0 |
 
 ## Values
 
@@ -66,6 +66,7 @@ You may wish to deploy this chart alongside _idol-nifi_.
 | podSecurityContext.enabled | bool | `false` | enable PodSecurityContext. Setting to false omits. |
 | queryserviceACIPort | string | `"9060"` | Default configuration for [UniversalViewing]::DocumentStorePort |
 | queryserviceName | string | `"idol-query-service"` | Default configuration for [UniversalViewing]::DocumentStoreHost |
+| replicas | int | `1` | number of replica pods for this container (defaults to 1) |
 | resources | object | `{"enabled":false,"limits":{"cpu":"1000m","memory":"1Gi"},"requests":{"cpu":"1000m","memory":"1Gi"}}` | Optional resources for container (see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers) |
 | resources.enabled | bool | `false` | enable resources for container. Setting to false omits. |
 | servicePort | string | `"9082"` | port service will serve service connections on |
