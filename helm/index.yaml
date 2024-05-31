@@ -804,7 +804,7 @@ entries:
   idol-omnigroupserver:
   - apiVersion: v2
     appVersion: "24.1"
-    created: "2024-05-31T10:06:36.7358107+01:00"
+    created: "2024-05-31T10:13:26.1676213+01:00"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
@@ -814,7 +814,7 @@ entries:
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
       version: 0.4.0
     description: Adds IDOL OmniGroupServer
-    digest: bbd545301e79f40c7df7ab79f705fd20c993540e46855ed7d3808f7c3c6b9131
+    digest: 460e314f1f559de47a8d927def4d63262d376356ea707250e08028b21acfa0f4
     name: idol-omnigroupserver
     urls:
     - release/idol-omnigroupserver-0.6.0.tgz
@@ -1317,4 +1317,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2024-05-31T10:06:36.7263358+01:00"
+generated: "2024-05-31T10:13:26.1620401+01:00"
