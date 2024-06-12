@@ -55,6 +55,9 @@ envFrom:
   - configMapRef:
       name: idol-nifi-env
       optional: false
+  - configMapRef:
+      name: idol-nifi-keys-env
+      optional: false
 lifecycle:
   postStart:
     exec:
