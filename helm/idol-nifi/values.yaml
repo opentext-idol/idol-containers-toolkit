@@ -157,6 +157,13 @@ nifi:
     # -- optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules
     aciHost: ""
 
+  # -- optional nifi.security.keystorePasswd value (see https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#security_properties)
+  keystorePassword: ""
+  # -- optional nifi.security.truststorePasswd value (see https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#security_properties)
+  truststorePassword: ""
+  # -- optional nifi.sensitive.props.key value (see https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#nifi_sensitive_props_key)
+  sensitivePropsKey: ""
+
 nifiRegistry:
   ingress:
     # nifiRegistry.ingress.enabled -- whether to deploy ingress for nifi

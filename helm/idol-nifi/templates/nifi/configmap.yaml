@@ -17,7 +17,7 @@ metadata:
 data:
   JAVA_HOME: "/usr/lib/jvm/jre-11"
   JAVA_OPTS: "-XX:UseAVX=0 -Djavax.net.debug=ssl,handshake"
-  KEYSTORE_PASSWORD: "th1s1s3up34e5r37"
+  KEYSTORE_PASSWORD: {{ .Values.nifi.keystorePassword | default (randAlphaNum 24) | quote }}
   KEYSTORE_PATH: "${NIFI_HOME}/keytool/keystore.p12"
   KEYSTORE_TYPE: "PKCS12"
   NIFI_ANALYTICS_PREDICT_ENABLED: "true"
@@ -41,8 +41,7 @@ data:
   NIFI_SECURITY_AUTORELOAD_ENABLED: "true"
   NIFI_SECURITY_AUTORELOAD_INTERVAL: "5 min"
   NIFI_SECURITY_NEEDCLIENTAUTH: "true"
-  NIFI_SENSITIVE_PROPS_KEY_PROTECTED: "th1s1s3up34e5r37"
-  NIFI_SENSITIVE_PROPS_KEY: "th1s1s3up34e5r37"
+  NIFI_SENSITIVE_PROPS_KEY: {{ .Values.nifi.sensitivePropsKey | default (randAlphaNum 24) | quote }}
   NIFI_WEB_HTTP_PORT: "8080"
   NIFI_WEB_HTTPS_PORT: "8443"
 {{- if .Values.nifi.ingress.proxyPath }}
@@ -54,7 +53,7 @@ data:
   NIFI_ZK_CONNECT_STRING: "zookeeper:2181"
   NIFI_ZOOKEEPER_CONNECT_STRING: "zookeeper:2181"
   NIFI_REGISTRY_HOSTS: nifi-registry
-  TRUSTSTORE_PASSWORD: "th1s1s3up34e5r37"
+  TRUSTSTORE_PASSWORD: {{ .Values.nifi.truststorePassword | default (randAlphaNum 24) | quote }}
   TRUSTSTORE_PATH: "${NIFI_HOME}/keytool/truststore.jks"
   TRUSTSTORE_TYPE: "jks"
   IDOL_NIFI_FLOWFILE: {{ .Values.nifi.flowfile | quote }}

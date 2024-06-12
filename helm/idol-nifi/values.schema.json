@@ -154,6 +154,15 @@
                 },
                 "ingress": {
                     "$ref": "#/definitions/NifiIngress"
+                },
+                "keystorePassword": {
+                    "type":"string"
+                },
+                "truststorePassword": {
+                    "type":"string"
+                },
+                "sensitivePropsKey": {
+                    "type":"string"
                 }
             },
             "required": [
