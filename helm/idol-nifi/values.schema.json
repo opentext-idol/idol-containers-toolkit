@@ -251,12 +251,43 @@
                 },
                 "aciHost": {
                     "type": "string"
+                },
+                "TLS": {
+                    "$ref": "#/definitions/NifiIngressTLS"   
+                },
+                "aciTLS": {
+                    "$ref": "#/definitions/NifiIngressTLS"   
                 }
             },
             "required": [
-                "enabled"
+                "enabled",
+                "TLS",
+                "aciTLS"
             ],
             "title": "NifiIngress"
+        },
+        "NifiIngressTLS": {
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "secretName": {
+                    "type": "string"
+                },
+                "crt": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "enabled",
+                "secretName",
+                "crt",
+                "key"
+            ],
+            "title": "NifiIngressTLS"
         },
         "Resources": {
             "type": "object",
@@ -334,11 +365,15 @@
                 },
                 "host": {
                     "type": "string"
+                },
+                "TLS": {
+                    "$ref": "#/definitions/NifiIngressTLS"   
                 }
             },
             "required": [
                 "enabled",
-                "host"
+                "host",
+                "TLS"
             ],
             "title": "NifiRegistryIngress"
         },
