@@ -59,6 +59,12 @@ spec:
 {{- if $ingress.className }}
   ingressClassName: {{ $ingress.className }}
 {{- end }}
+{{- if $ingress.TLS.enabled }}
+  tls:
+  - hosts:
+      - {{ $ingress.host }}
+    secretName: {{ $ingress.TLS.secretName }}
+{{- end }}
   rules:
   - http:
       paths:
@@ -81,6 +87,21 @@ spec:
 {{- end -}}
 {{- end }}
 
+{{- define "idol-library.ingress.secret" -}}
+{{/*
+  TLS secret containing base64 encoded certificate and private key
+*/}}
+{{- $tls := get . "tls" | required "missing tls" -}}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ $tls.secretName }}
+  namespace: default
+data:
+  tls.crt: {{ $tls.crt }}
+  tls.key: {{ $tls.key }}
+type: kubernetes.io/tls
+{{- end }}
 
 {{/*
 Generates ingress

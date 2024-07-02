@@ -33,6 +33,12 @@ spec:
 {{- if .Values.ingressClassName }}
   ingressClassName: {{ .Values.ingressClassName | quote }}
 {{- end }}
+  {{- if .Values.nifiRegistry.ingress.TLS.enabled }}
+  tls:
+  - hosts:
+      - {{ .Values.nifiRegistry.ingress.host }}
+    secretName: {{ .Values.nifiRegistry.ingress.TLS.secretName }}
+  {{- end }}
   rules:
   - http:
       paths:
@@ -60,4 +66,8 @@ spec:
 {{- if .Values.nifiRegistry.ingress.host }}
     host: {{ .Values.nifiRegistry.ingress.host | quote }}
 {{- end }}
+{{ if .Values.nifiRegistry.ingress.TLS.enabled -}}
+---
+{{ include "idol-library.ingress.secret" (dict "tls" .Values.nifiRegistry.ingress.TLS) -}}
+{{- end -}}
 {{- end -}}

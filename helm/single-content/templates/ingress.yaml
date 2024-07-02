@@ -15,4 +15,8 @@
     "destination" "single-content.ingress")  -}}
 {{- define "single-content.ingress" -}}
 {{/* Any View specific merges to base template go here */}}
+{{- end }}
+{{ if .Values.ingress.TLS.enabled -}}
+---
+{{ include "idol-library.ingress.secret" (dict "tls" .Values.ingress.TLS) -}}
 {{- end -}}

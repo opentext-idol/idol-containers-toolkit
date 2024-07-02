@@ -129,6 +129,19 @@ ingress:
   # e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations
   annotations: {}
 
+  TLS:
+    # -- Whether ingress uses TLS. You must set an ingress host if this is enabled. 
+    enabled: false
+
+    # -- The name of the secret for ingress TLS, if enabled. 
+    secretName: ""
+
+    # -- Certificate to use for TLS
+    crt: ""
+
+    # -- Private key to use for TLS
+    key: ""
+
 ##### INTERNAL VARIABLES #####
 # Values specified below this point in the file should not need to be overriden.
 # They are generally here in values.yaml so that DRY principles and a consistent
