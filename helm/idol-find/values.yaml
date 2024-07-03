@@ -55,31 +55,43 @@ licenseServerPort: "20000"
 # This section contains parameters to configure various network-related
 # properties in this chart.
 
-# ingressProxyBodySize is the maximum allowed size of the client request body, defining
-# the maximum size of requests that can be made to IDOL components within the installation, e.g.
-# the amount of data sent in DREADDDATA index commands.
-# The value should be an nginx "size" value.
-# See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the
-# corresponding nginx configuration parameter.
-ingressProxyBodySize: 2048m
+ingress:
+  # Create ingress resource
+  enabled: true
 
-# ingressType controls ingress setup for that controller type.
-# Valid values are nginx or haproxy (used by OpenShift)
-ingressType: nginx
+  # Ingress controller type to setup for.
+  # Valid values are nginx or haproxy (used by OpenShift)
+  type: nginx
 
-# ingressClassName is an optional parameter to override the default ingress class
-ingressClassName: ""
+  # Optional parameter to override the default ingress class
+  className: ""
 
-# ingressHost is an optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules)
-# For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration)
-ingressHost: ""
+  # Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules).
+  # For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration)
+  host: ""
 
-# ingressPort is the external port the ingress is exposed on.
-# For Kubernetes-in-Docker, this may be different to the container ingress port.
-ingressPort: ""
+  # The external port the ingress is exposed on.
+  # For Kubernetes-in-Docker, this may be different to the container ingress port.
+  port: ""
 
-# exposeServers can be set to `true` to create ingress endpoints for ACI servers
-exposeServers: true
+  # Maximum allowed size of the client request body, defining
+  # the maximum size of requests that can be made to IDOL components within the installation, e.g.
+  # the amount of data sent in DREADDDATA index commands.
+  # The value should be an nginx "size" value.
+  # See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the
+  # corresponding nginx configuration parameter.
+  proxyBodySize: 2048m
+
+  # -- Whether ingress uses TLS. You must set an ingress host to use this. 
+  tls:
+    # -- The name of the secret for ingress TLS. Leave empty if not using TLS. 
+    secretName: ""
+
+    # -- Certificate to use for tls
+    crt: ""
+
+    # -- Private key to use for tls
+    key: ""
 
 #####################################
 

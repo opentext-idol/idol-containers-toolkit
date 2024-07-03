@@ -1,13 +1,14 @@
 # BEGIN COPYRIGHT NOTICE
 # (c) Copyright 2022 Micro Focus or one of its affiliates.
 # END COPYRIGHT NOTICE
-{{- if .Values.exposeServers }}
+{{- $ingress := .Values.ingress }}
+{{- if $ingress.enabled }}
 {{- /*
  nginx ingress needs path capture to achieve prefix type routing
 */}}
 {{- $pathSuffix := "" }}
 {{- $pathType := "Prefix" }}
-{{- if eq .Values.ingressType "nginx" }}
+{{- if eq $ingress.type "nginx" }}
 {{- $pathSuffix = "(.*)"}}
 {{- $pathType = "ImplementationSpecific" }}
 {{- end }}
@@ -15,18 +16,24 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ .Values.findIngressName }}-aci
-  labels: {{- include "idol-library.labels" . | nindent 4 }}
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values) | nindent 4 }}
   annotations:
-{{- if eq .Values.ingressType "nginx" }}
+{{- if eq $ingress.type "nginx" }}
     nginx.ingress.kubernetes.io/rewrite-target: /$1
-    nginx.ingress.kubernetes.io/proxy-body-size: {{ .Values.ingressProxyBodySize }}
-{{- else if eq .Values.ingressType "haproxy" }}
+    nginx.ingress.kubernetes.io/proxy-body-size: {{ $ingress.proxyBodySize }}
+{{- else if eq $ingress.type "haproxy" }}
     haproxy.router.openshift.io/rewrite-target: / 
-    haproxy.router.openshift.io/proxy-body-size: {{ .Values.ingressProxyBodySize }}
+    haproxy.router.openshift.io/proxy-body-size: {{ $ingress.proxyBodySize }}
 {{- end }}
 spec:
-{{- if .Values.ingressClassName }}
-  ingressClassName: {{ .Values.ingressClassName }}
+{{- if $ingress.className }}
+  ingressClassName: {{ $ingress.className }}
+{{- end }}
+{{- if $ingress.tls.secretName }}
+  tls:
+  - hosts:
+      - {{ $ingress.host | required "tls.secretName was specified but no host value supplied" }}
+    secretName: {{ $ingress.tls.secretName }}
 {{- end }}
   rules:
   - http:
@@ -45,7 +52,11 @@ spec:
             name: {{ .Values.viewServerName }}
             port:
               name: {{ .Values.idolACIPortName }}
-{{- if .Values.ingressHost }}
-    host: {{ .Values.ingressHost }}
+{{- if $ingress.host }}
+    host: {{ $ingress.host }}
+{{- end }}
+{{ if $ingress.tls.secretName -}}
+---
+{{ include "idol-library.ingress.secret" (dict "tls" $ingress.tls) -}}
 {{- end }}
 {{- end }}
