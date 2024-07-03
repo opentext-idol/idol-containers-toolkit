@@ -19,10 +19,10 @@
       port:
         name: index-port
 {{- end -}}
-{{- include "idol-library.ingress" (dict 
+{{ include "idol-library.ingress" (dict 
     "root" .
     "component" .Values.dih
     "ingress" .Values.dih.ingress
     "destination" "distributedidol.dih.ingress"
     "paths" (fromYamlArray (include "distributedidol.dih.custompaths" .))
-    "portmapping" (dict "metrics-port" .Values.dih.ingress.metricsPath "aci-port" .Values.dih.ingress.path)) }}
+    "portmapping" (dict "metrics-port" .Values.dih.ingress.metricsPath "aci-port" .Values.dih.ingress.path)) -}}

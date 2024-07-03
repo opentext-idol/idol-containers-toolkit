@@ -21,9 +21,9 @@
         name: aci-port
 {{- end }}
 {{- end -}}
-{{- include "idol-library.ingress" (dict 
+{{ include "idol-library.ingress" (dict 
     "root" .
     "component" .Values.content
     "ingress" .Values.content.ingress
     "destination" "distributedidol.content.ingress"
-    "paths" (fromYamlArray (include "distributedidol.content.custompaths" .))) }}
+    "paths" (fromYamlArray (include "distributedidol.content.custompaths" .))) -}}
