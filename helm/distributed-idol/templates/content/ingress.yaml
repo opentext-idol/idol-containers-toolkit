@@ -27,7 +27,3 @@
     "ingress" .Values.content.ingress
     "destination" "distributedidol.content.ingress"
     "paths" (fromYamlArray (include "distributedidol.content.custompaths" .))) }}
-{{ if .Values.content.ingress.TLS.enabled -}}
----
-{{ include "idol-library.ingress.secret" (dict "tls" .Values.content.ingress.TLS) -}}
-{{- end -}}

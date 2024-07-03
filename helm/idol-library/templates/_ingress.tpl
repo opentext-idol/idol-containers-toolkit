@@ -59,11 +59,11 @@ spec:
 {{- if $ingress.className }}
   ingressClassName: {{ $ingress.className }}
 {{- end }}
-{{- if $ingress.TLS.enabled }}
+{{- if $ingress.tls.secretName }}
   tls:
   - hosts:
-      - {{ $ingress.host | required "tls.enabled was true but no host value supplied" }}
-    secretName: {{ $ingress.TLS.secretName }}
+      - {{ $ingress.host | required "tls.secretName was specified but no host value supplied" }}
+    secretName: {{ $ingress.tls.secretName }}
 {{- end }}
   rules:
   - http:
@@ -119,6 +119,10 @@ Generates ingress
 {{- if $ingress.enabled }}
 {{- $_ := set . "source" "idol-library.ingress.base" -}}
 {{- include "idol-library.util.merge" $_ -}}
+{{- end }}
+{{ if $ingress.tls.secretName -}}
+---
+{{ include "idol-library.ingress.secret" (dict "tls" $ingress.tls) -}}
 {{- end -}}
 {{- end -}}
 

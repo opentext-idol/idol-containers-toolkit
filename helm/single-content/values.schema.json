@@ -95,7 +95,7 @@
                 "servicePath": {
                     "type": "string"
                 },
-                "TLS": {
+                "tls": {
                     "$ref": "#/$defs/ingressTLS"
                 }
             },
@@ -103,15 +103,12 @@
                 "enabled",
                 "type",
                 "path",
-                "TLS"
+                "tls"
             ]
         },
         "ingressTLS":{
             "type": "object",
             "properties":{
-                "enabled": {
-                    "type": "boolean"
-                },
                 "secretName": {
                     "type": "string"
                 },
@@ -123,10 +120,7 @@
                 }
             },
             "required":[
-                "enabled",
-                "secretName",
-                "crt",
-                "key"
+                "secretName"
             ]
         },
         "idolImage":{

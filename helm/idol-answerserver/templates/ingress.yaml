@@ -15,8 +15,4 @@
     "destination" "idol-answerserver.ingress")  -}}
 {{- define "idol-answerserver.ingress" -}}
 {{/* Any answerserver specific merges to base template go here */}}
-{{- end }}
-{{ if .Values.ingress.TLS.enabled -}}
----
-{{ include "idol-library.ingress.secret" (dict "tls" .Values.ingress.TLS) -}}
 {{- end -}}

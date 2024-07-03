@@ -17,8 +17,4 @@
 {{/* Any View specific merges to base template go here */}}
 {{- $root := get . "root" | required "missing root" -}}
 {{- $component := get . "component" | required "missing component" -}}
-{{- end }}
-{{ if .Values.ingress.TLS.enabled -}}
----
-{{ include "idol-library.ingress.secret" (dict "tls" .Values.ingress.TLS) -}}
 {{- end -}}

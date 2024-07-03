@@ -10,8 +10,4 @@
     "portmapping" (dict "prometheus-port" .Values.prometheus.ingress.prometheusPath)) -}}
 {{- define "distributedidol.prometheus.ingress" -}}
 {{/* Any prometheus specific merges to base template go here */}}
-{{- end }}
-{{ if .Values.prometheus.ingress.TLS.enabled -}}
----
-{{ include "idol-library.ingress.secret" (dict "tls" .Values.prometheus.ingress.TLS) -}}
 {{- end -}}

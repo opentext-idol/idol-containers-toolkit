@@ -26,7 +26,3 @@
     "destination" "distributedidol.dih.ingress"
     "paths" (fromYamlArray (include "distributedidol.dih.custompaths" .))
     "portmapping" (dict "metrics-port" .Values.dih.ingress.metricsPath "aci-port" .Values.dih.ingress.path)) }}
-{{ if .Values.dih.ingress.TLS.enabled -}}
----
-{{ include "idol-library.ingress.secret" (dict "tls" .Values.dih.ingress.TLS) -}}
-{{- end -}}

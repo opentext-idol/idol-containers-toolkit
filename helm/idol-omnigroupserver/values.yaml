@@ -131,17 +131,15 @@ ingress:
   # e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations
   annotations: {}
 
-  TLS:
-    # -- Whether ingress uses TLS. You must set an ingress host if this is enabled. 
-    enabled: false
-
-    # -- The name of the secret for ingress TLS, if enabled. 
+  # -- Whether ingress uses TLS. You must set an ingress host to use this. 
+  tls:
+    # -- The name of the secret for ingress TLS. Leave empty if not using TLS. 
     secretName: ""
 
-    # -- Certificate to use for TLS
+    # -- Certificate to use for tls
     crt: ""
 
-    # -- Private key to use for TLS
+    # -- Private key to use for tls
     key: ""
 
 ##### INTERNAL VARIABLES #####

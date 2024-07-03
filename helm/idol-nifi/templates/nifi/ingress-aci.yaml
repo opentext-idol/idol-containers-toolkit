@@ -35,7 +35,7 @@ spec:
 {{- if .Values.ingressClassName }}
   ingressClassName: {{ .Values.ingressClassName }}
 {{- end }}
-{{- if .Values.nifi.ingress.aciTLS.enabled }}
+{{- if .Values.nifi.ingress.aciTLS.secretName }}
   tls:
   - hosts:
       - {{ .Values.nifi.ingress.host }}
@@ -54,7 +54,7 @@ spec:
 {{- if .Values.nifi.ingress.aciHost }}
     host: {{ .Values.nifi.ingress.aciHost | quote }}
 {{- end }}
-{{ if .Values.nifi.ingress.aciTLS.enabled -}}
+{{ if .Values.nifi.ingress.aciTLS.secretName -}}
 ---
 {{ include "idol-library.ingress.secret" (dict "tls" .Values.nifi.ingress.aciTLS) -}}
 {{- end -}}

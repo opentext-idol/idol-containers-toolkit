@@ -15,8 +15,4 @@
     "destination" "distributedidol.dah.ingress")  -}}
 {{- define "distributedidol.dah.ingress" -}}
 {{/* Any DAH specific merges to base template go here */}}
-{{- end }}
-{{ if .Values.dah.ingress.TLS.enabled -}}
----
-{{ include "idol-library.ingress.secret" (dict "tls" .Values.dah.ingress.TLS) -}}
 {{- end -}}

@@ -157,24 +157,20 @@ nifi:
     # -- optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules
     aciHost: ""
     
-    TLS:
-      # -- Whether ingress uses TLS. You must set an ingress host if this is enabled. 
-      enabled: false
-      # -- The name of the secret for ingress TLS, if enabled. 
+    tls:
+      # -- The name of the secret for ingress TLS. Leave empty if not using TLS. 
       secretName: ""
-      # -- Certificate to use for TLS
+      # -- Certificate to use for tls
       crt: ""
-      # -- Private key to use for TLS
+      # -- Private key to use for tls
       key: ""
     
     aciTLS:
-      # -- Whether aci ingress uses TLS. You must set an ingress aciHost if this is enabled. 
-      enabled: false
-      # -- The name of the secret for aci ingress TLS, if enabled. 
+      # -- The name of the secret for aci ingress tls. Leave empty if not using TLS.
       secretName: ""
-      # -- Certificate to use for TLS
+      # -- Certificate to use for tls
       crt: ""
-      # -- Private key to use for TLS
+      # -- Private key to use for tls
       key: ""
 
   # -- optional nifi.security.keystorePasswd value (see https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#security_properties)
@@ -196,14 +192,12 @@ nifiRegistry:
     # nifiRegistry.ingress.host -- optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules
     host: ""
 
-    TLS:
-      # -- Whether ingress uses TLS. You must set an ingress host if this is enabled. 
-      enabled: false
-      # -- The name of the secret for ingress TLS, if enabled. 
+    tls:
+      # -- The name of the secret for ingress TLS. Leave empty if not using TLS. 
       secretName: ""
-      # -- Certificate to use for TLS
+      # -- Certificate to use for tls
       crt: ""
-      # -- Private key to use for TLS
+      # -- Private key to use for tls
       key: ""
   
   # nifiRegistry.resources -- https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits
