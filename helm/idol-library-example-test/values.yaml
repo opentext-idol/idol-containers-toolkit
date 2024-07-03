@@ -125,7 +125,7 @@ ingress:
   # e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations
   annotations: {}
 
-  TLS:
+  tls:
     # -- Whether ingress uses TLS. You must set an ingress host if this is enabled. 
     enabled: false
 
