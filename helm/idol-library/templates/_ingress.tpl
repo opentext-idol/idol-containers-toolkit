@@ -62,7 +62,7 @@ spec:
 {{- if $ingress.TLS.enabled }}
   tls:
   - hosts:
-      - {{ $ingress.host }}
+      - {{ $ingress.host | required "tls.enabled was true but no host value supplied" }}
     secretName: {{ $ingress.TLS.secretName }}
 {{- end }}
   rules:
