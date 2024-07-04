@@ -97,8 +97,8 @@ kind: Secret
 metadata:
   name: {{ $tls.secretName }}
 data:
-  tls.crt: {{ $tls.crt }}
-  tls.key: {{ $tls.key }}
+  tls.crt: {{ $tls.crt | required "missing tls.crt" }}
+  tls.key: {{ $tls.key | required "missing tls.key" }}
 type: kubernetes.io/tls
 {{- end }}
 
