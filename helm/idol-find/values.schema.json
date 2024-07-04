@@ -242,11 +242,32 @@
                 "proxyBodySize":{
                     "type":"string",
                     "pattern": "^\\d+(?:\\.\\d+)?(?:Ki|Mi|Gi|Ti|Pi|Ei|m|k|M|G|T|P|E)?$"
+                },
+                "tls":{
+                    "$ref": "#/$defs/ingressTLS"
                 }
             },
             "required":[
                 "enabled",
-                "type"
+                "type",
+                "tls"
+            ]
+        },
+        "ingressTLS":{
+            "type": "object",
+            "properties":{
+                "secretName": {
+                    "type": "string"
+                },
+                "crt": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                }
+            },
+            "required":[
+                "secretName"
             ]
         }
     }

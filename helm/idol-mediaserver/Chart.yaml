@@ -16,4 +16,4 @@ description: Adds IDOL MediaServer
 dependencies:
 - name: idol-library
   version: "0.13.0"
-  repository: file://../idol-library
+  repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
