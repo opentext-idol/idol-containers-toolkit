@@ -156,6 +156,27 @@ nifi:
     proxyHost: ""
     # -- optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules
     aciHost: ""
+    
+    # -- Whether ingress uses TLS. You must set an ingress host to use this. 
+    # See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
+    tls:
+    # -- The name of the secret for ingress TLS. Leave empty if not using TLS. 
+    # If specified then either this secret must already exist, or crt and key values must be provided and secret will be created.. 
+      secretName: ""
+      # -- Certificate data value to generate tls Secret (should be base64 encoded)
+      crt: ""
+      # -- Private key data value to generate tls Secret (should be base64 encoded)
+      key: ""
+    
+    # -- Whether aci ingress uses TLS. You must set an ingress aciHost to use this. 
+    # See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
+    aciTLS:
+      # -- The name of the secret for aci ingress tls. Leave empty if not using TLS.
+      secretName: ""
+      # -- Certificate data value to generate tls Secret (should be base64 encoded)
+      crt: ""
+      # -- Private key data value to generate tls Secret (should be base64 encoded)
+      key: ""
 
   # -- optional nifi.security.keystorePasswd value (see https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#security_properties)
   # Setting this value is recommended. If it is not set, it will default to a generated value
@@ -175,6 +196,17 @@ nifiRegistry:
     annotations: {}
     # nifiRegistry.ingress.host -- optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules
     host: ""
+
+    # -- Whether ingress uses TLS. You must set an ingress host to use this. 
+    # See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
+    tls:
+      # -- The name of the secret for ingress TLS. Leave empty if not using TLS. 
+      # If specified then either this secret must already exist, or crt and key values must be provided and secret will be created.
+      secretName: ""
+      # -- Certificate data value to generate tls Secret (should be base64 encoded)
+      crt: ""
+      # -- Private key data value to generate tls Secret (should be base64 encoded)
+      key: ""
   
   # nifiRegistry.resources -- https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits
   resources:

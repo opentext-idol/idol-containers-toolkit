@@ -11,6 +11,20 @@
             "type": "string",
             "minLength": 1
         },
+        "ingress": {
+            "type":"object",
+                    "properties":{
+                        "port": {
+                            "$ref": "#/$defs/port_number"
+                        }
+                    },
+                    "required":[
+                    ],
+                    "allOf":[
+                        {"$ref":"#/$defs/ingressCommon"}
+                    ],
+                    "unevaluatedProperties": false
+        },
         "imagePullSecrets": {
             "type": "array",
             "minItems": 1,
@@ -25,26 +39,6 @@
         },
         "licenseServerPort": {
             "$ref": "#/$defs/port_number"
-        },
-        "ingressProxyBodySize": {
-            "type": "string",
-            "pattern": "^\\d+(?:\\.\\d+)?(?:Ki|Mi|Gi|Ti|Pi|Ei|m|k|M|G|T|P|E)?$"
-        },
-        "ingressType": {
-            "type": "string",
-            "enum": ["nginx","haproxy"]
-        },
-        "ingressClassName": {
-            "type": "string"
-        },
-        "ingressHost": {
-            "type": "string"
-        },
-        "ingressPort": {
-            "$ref": "#/$defs/port_number"
-        },
-        "exposeServers": {
-            "type": "boolean"
         },
         "queryserviceName": {
             "type": "string",
@@ -171,11 +165,10 @@
     "required": [
         "idolImageRegistry",
         "idolVersion",
+        "ingress",
         "imagePullSecrets",
         "licenseServerHostname",
         "licenseServerPort",
-        "ingressProxyBodySize",
-        "ingressType",
         "livenessProbePath",
         "queryserviceName",
         "queryserviceACIPort",
@@ -229,6 +222,53 @@
                     "type": "integer"
                 }
             }
+        },
+        "ingressCommon":{
+            "type": "object",
+            "properties":{
+                "enabled": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": ["nginx","haproxy"]
+                },
+                "className": {
+                    "type": "string"
+                },
+                "host": {
+                    "type": "string"
+                },
+                "proxyBodySize":{
+                    "type":"string",
+                    "pattern": "^\\d+(?:\\.\\d+)?(?:Ki|Mi|Gi|Ti|Pi|Ei|m|k|M|G|T|P|E)?$"
+                },
+                "tls":{
+                    "$ref": "#/$defs/ingressTLS"
+                }
+            },
+            "required":[
+                "enabled",
+                "type",
+                "tls"
+            ]
+        },
+        "ingressTLS":{
+            "type": "object",
+            "properties":{
+                "secretName": {
+                    "type": "string"
+                },
+                "crt": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                }
+            },
+            "required":[
+                "secretName"
+            ]
         }
     }
 }

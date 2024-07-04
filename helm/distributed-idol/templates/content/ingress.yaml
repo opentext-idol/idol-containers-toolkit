@@ -26,4 +26,4 @@
     "component" .Values.content
     "ingress" .Values.content.ingress
     "destination" "distributedidol.content.ingress"
-    "paths" (fromYamlArray (include "distributedidol.content.custompaths" .)))  -}}
+    "paths" (fromYamlArray (include "distributedidol.content.custompaths" .))) -}}

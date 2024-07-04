@@ -81,12 +81,33 @@
                 },
                 "annotations": {
                     "type": "object"
+                },
+                "tls": {
+                    "$ref": "#/$defs/ingressTLS"
                 }
             },
             "required":[
                 "enabled",
                 "type",
-                "path"
+                "path",
+                "tls"
+            ]
+        },
+        "ingressTLS":{
+            "type": "object",
+            "properties":{
+                "secretName": {
+                    "type": "string"
+                },
+                "crt": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                }
+            },
+            "required":[
+                "secretName"
             ]
         },
         "server_modules": {

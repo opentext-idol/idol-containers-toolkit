@@ -51,6 +51,12 @@ spec:
 {{- if .Values.ingressClassName }}
   ingressClassName: {{ .Values.ingressClassName | quote }}
 {{- end }}
+{{- if .Values.nifi.ingress.tls.secretName }}
+  tls:
+  - hosts:
+      - {{ .Values.nifi.ingress.host }}
+    secretName: {{ .Values.nifi.ingress.tls.secretName }}
+{{- end }}
   rules:
   - http:
       paths:
@@ -64,4 +70,8 @@ spec:
 {{- if .Values.nifi.ingress.host }}
     host: {{ .Values.nifi.ingress.host | quote }}
 {{- end }}
+{{ if .Values.nifi.ingress.tls.secretName -}}
+---
+{{ include "idol-library.ingress.secret" (dict "tls" .Values.nifi.ingress.tls) -}}
+{{- end -}}
 {{- end -}}

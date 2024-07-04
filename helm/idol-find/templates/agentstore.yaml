@@ -12,7 +12,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Values.agentStoreName }}
-  labels: {{- include "idol-library.labels" . | nindent 4 }}
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values) | nindent 4 }}
 spec:
   ports:
   - port: {{ .Values.agentStoreACIPort | int }}
@@ -28,7 +28,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.agentStoreName }}
-  labels: {{- include "idol-library.labels" . | nindent 4 }}
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values) | nindent 4 }}
 spec:
   replicas: 1
   selector:
@@ -36,7 +36,7 @@ spec:
       app: {{ .Values.agentStoreName }}
   template:
     metadata:
-      labels: {{- include "idol-library.labels" . | nindent 8 }}
+      labels: {{- include "idol-library.labels" (dict "root" . "component" .Values) | nindent 8 }}
         app: {{ .Values.agentStoreName }}
     spec:
       imagePullSecrets:

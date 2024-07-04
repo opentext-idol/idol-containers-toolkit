@@ -207,6 +207,19 @@ content:
     # e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations
     annotations: {}
 
+    # -- Whether ingress uses TLS. You must set an ingress host to use this. 
+    # See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls 
+    tls:
+      # -- The name of the secret for ingress TLS. Leave empty if not using TLS. 
+      # If specified then either this secret must already exist, or crt and key values must be provided and secret will be created.. 
+      secretName: ""
+
+      # -- Certificate data value to generate tls Secret (should be base64 encoded)
+      crt: ""
+
+      # -- Private key data value to generate tls Secret (should be base64 encoded)
+      key: ""
+
   #####################################
 
   ##### INTERNAL VARIABLES #####
@@ -313,6 +326,19 @@ dah:
     # be overriden/augmented here
     # e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations
     annotations: {}
+
+    # -- Whether ingress uses TLS. You must set an ingress host to use this. 
+    # See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls 
+    tls:
+      # -- The name of the secret for ingress TLS. Leave empty if not using TLS. 
+      # If specified then either this secret must already exist, or crt and key values must be provided and secret will be created.. 
+      secretName: ""
+
+      # -- Certificate data value to generate tls Secret (should be base64 encoded)
+      crt: ""
+
+      # -- Private key data value to generate tls Secret (should be base64 encoded)
+      key: ""
     
 
   #####################################
@@ -428,6 +454,19 @@ dih:
     # be overriden/augmented here
     # e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations
     annotations: {}
+
+    # -- Whether ingress uses TLS. You must set an ingress host to use this. 
+    # See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls 
+    tls:
+      # -- The name of the secret for ingress TLS. Leave empty if not using TLS. 
+      # If specified then either this secret must already exist, or crt and key values must be provided and secret will be created.. 
+      secretName: ""
+
+      # -- Certificate data value to generate tls Secret (should be base64 encoded)
+      crt: ""
+
+      # -- Private key data value to generate tls Secret (should be base64 encoded)
+      key: ""
     
 
   #####################################
@@ -496,6 +535,19 @@ prometheus:
     # be overriden/augmented here
     # e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations
     annotations: {}
+
+    # -- Whether ingress uses TLS. You must set an ingress host to use this. 
+    # See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls 
+    tls:
+      # -- The name of the secret for ingress TLS. Leave empty if not using TLS. 
+      # If specified then either this secret must already exist, or crt and key values must be provided and secret will be created.. 
+      secretName: ""
+
+      # -- Certificate data value to generate tls Secret (should be base64 encoded)
+      crt: ""
+
+      # -- Private key data value to generate tls Secret (should be base64 encoded)
+      key: ""
 
 ##### INTERNAL VARIABLES #####
 # Values specified below this point in the file should not need to be overriden.
