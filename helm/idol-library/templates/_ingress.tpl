@@ -96,7 +96,6 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: {{ $tls.secretName }}
-  namespace: default
 data:
   tls.crt: {{ $tls.crt }}
   tls.key: {{ $tls.key }}
