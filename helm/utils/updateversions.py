@@ -75,7 +75,7 @@ def get_dependent_charts(graph: dict, chart_dir: str, latest_version: str):
             dependent_charts.append(key)
     return dependent_charts
 
-def update_charts(chart_dir: str, dry_run: bool, decrement: bool):
+def update_charts(chart_dirs: list, dry_run: bool, decrement: bool):
     dependency_graph = build_dependency_graph()
     updated_versions = {}
     charts_processed = set()
@@ -98,7 +98,8 @@ def update_charts(chart_dir: str, dry_run: bool, decrement: bool):
         for dependent in dependents:
             process_chart(dependent)
 
-    process_chart(chart_dir)
+    for chart_dir in chart_dirs:
+        process_chart(chart_dir)
 
     # update dependencies for all processed charts
     for processed_chart in charts_processed:
@@ -106,7 +107,7 @@ def update_charts(chart_dir: str, dry_run: bool, decrement: bool):
         
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Update Helm chart versions.')
-    parser.add_argument('chart', help='Name of the chart to update, including all charts depending on it', type=str)
+    parser.add_argument('--charts', nargs='+', required=True, help='Names of the charts to update')
     parser.add_argument('--dry-run', action='store_true', help='prints updates that would occur, but does not actually modify any files')
     parser.add_argument('--decrement', action='store_true', help='decrement version numbers instead of incrementing them')
     args = parser.parse_args()
@@ -121,4 +122,4 @@ if __name__ == '__main__':
             return dumper.represent_scalar('tag:yaml.org,2002:str', data)
         yaml.representer.add_representer(str, str_presenter)
 
-    update_charts(args.chart, args.dry_run, args.decrement)
+    update_charts(args.charts, args.dry_run, args.decrement)

@@ -21,7 +21,6 @@ SKIP_PACKAGE_CHARTS:=idol-library-example-test
 CLEAN_CHARTS:=$(addprefix clean-,${CHARTS})
 PACKAGE_CHARTS:=$(addprefix package-,$(filter-out ${SKIP_PACKAGE_CHARTS},${CHARTS}))
 VALIDATE_SCHEMA_CHARTS:=$(addprefix validateschema-,${SCHEMA_CHARTS})
-UPDATE_VERSIONS_CHARTS:=$(addprefix updateversions-,${CHARTS})
 
 PYTHON_CMD?=python3
 
@@ -31,13 +30,17 @@ THIS_YEAR?=$(shell date +%Y)
 
 UPDATE_DEPENDENCIES?=-u
 
+# update-versions parameters
+# Can overwrite UPDATE_VERSIONS_CHARTS to specify which charts to update
+# Will update all chart versions by default
+UPDATE_VERSIONS_CHARTS ?= $(CHARTS)
 UPDATE_VERSIONS_DRY_RUN?=
 UPDATE_VERSIONS_DECREMENT?=
 
 .PHONY: package-all ${PACKAGE_CHARTS} 
 .PHONY: clean-all ${CLEAN_CHARTS} 
 .PHONY: validate-all ${VALIDATE_SCHEMA_CHARTS}
-.PHONY: updateversions-all ${UPDATE_VERSIONS_CHARTS}
+.PHONY: update-versions
 
 default: package-all index.yaml
 
@@ -76,10 +79,8 @@ $(addprefix package-,${SCHEMA_CHARTS}): package-% : validateschema-%
 validate-all: ${VALIDATE_SCHEMA_CHARTS}
 
 # update chart versions
-${UPDATE_VERSIONS_CHARTS}: updateversions-%: utils/updateversions.py
-	${PYTHON_CMD} utils/updateversions.py $* $(UPDATE_VERSIONS_DRY_RUN) $(UPDATE_VERSIONS_DECREMENT)
-
-updateversions-all: ${UPDATE_VERSIONS_CHARTS}
+update-versions:
+	${PYTHON_CMD} utils/updateversions.py --charts $(UPDATE_VERSIONS_CHARTS) $(UPDATE_VERSIONS_DRY_RUN) $(UPDATE_VERSIONS_DECREMENT)
 
 ${CLEAN_CHARTS}: clean-% : 
 	-${RM} $*/charts/*
