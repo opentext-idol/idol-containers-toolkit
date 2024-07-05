@@ -122,8 +122,7 @@
             "type": "object",
             "properties":{
                 "registry": {
-                    "type": "string",
-                    "format": "hostname"
+                    "$ref": "#/$defs/required_string"
                 },
                 "version": {
                     "$ref": "#/$defs/required_string"

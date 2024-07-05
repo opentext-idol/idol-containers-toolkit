@@ -96,7 +96,7 @@
             "properties":{
                 "registry": {
                     "type": "string",
-                    "format": "hostname"
+                    "minLength": 1
                 },
                 "version": {
                     "type": "string",
