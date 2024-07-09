@@ -5,7 +5,7 @@
     "properties": {
         "idolImageRegistry": {
             "type": "string",
-            "format": "hostname"
+            "minLength": 1
         },
         "idolVersion": {
             "type": "string",
