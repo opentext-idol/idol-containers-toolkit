@@ -108,6 +108,19 @@ ingress:
   # -- Ingress controller path for service connections.
   servicePath: "/eductionserver/service/"
 
+  # -- Whether ingress uses TLS. You must set an ingress host to use this. 
+  # See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls 
+  tls:
+    # -- The name of the secret for ingress TLS. Leave empty if not using TLS. 
+    # If specified then either this secret must already exist, or crt and key values must be provided and secret will be created.. 
+    secretName: ""
+
+    # -- Certificate data value to generate tls Secret (should be base64 encoded)
+    crt: ""
+
+    # -- Private key data value to generate tls Secret (should be base64 encoded)
+    key: ""
+
 ##### INTERNAL VARIABLES #####
 # name -- used to name deployment, service, ingress
 name: "idol-eductionserver"

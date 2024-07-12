@@ -34,6 +34,9 @@ spec:
         - configMapRef:
             name: idol-nifi-env
             optional: false
+        - configMapRef:
+            name: idol-nifi-keys-env
+            optional: false
         {{- if $component.containerSecurityContext.enabled }}
         securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml | nindent 10 }}
           readOnlyRootFilesystem: true
@@ -66,6 +69,9 @@ spec:
         envFrom:
         - configMapRef:
             name: idol-nifi-env
+            optional: false
+        - configMapRef:
+            name: idol-nifi-keys-env
             optional: false
         resources:
           requests:

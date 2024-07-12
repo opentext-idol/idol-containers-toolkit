@@ -96,7 +96,7 @@
             "properties":{
                 "registry": {
                     "type": "string",
-                    "format": "hostname"
+                    "minLength": 1
                 },
                 "version": {
                     "type": "string",
@@ -154,6 +154,15 @@
                 },
                 "ingress": {
                     "$ref": "#/definitions/NifiIngress"
+                },
+                "keystorePassword": {
+                    "type":"string"
+                },
+                "truststorePassword": {
+                    "type":"string"
+                },
+                "sensitivePropsKey": {
+                    "type":"string"
                 }
             },
             "required": [
@@ -242,12 +251,37 @@
                 },
                 "aciHost": {
                     "type": "string"
+                },
+                "tls": {
+                    "$ref": "#/definitions/NifiIngressTLS"   
+                },
+                "aciTLS": {
+                    "$ref": "#/definitions/NifiIngressTLS"   
                 }
             },
             "required": [
-                "enabled"
+                "enabled",
+                "tls",
+                "aciTLS"
             ],
             "title": "NifiIngress"
+        },
+        "NifiIngressTLS": {
+            "properties": {
+                "secretName": {
+                    "type": "string"
+                },
+                "crt": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "secretName"
+            ],
+            "title": "NifiIngressTLS"
         },
         "Resources": {
             "type": "object",
@@ -325,11 +359,15 @@
                 },
                 "host": {
                     "type": "string"
+                },
+                "tls": {
+                    "$ref": "#/definitions/NifiIngressTLS"   
                 }
             },
             "required": [
                 "enabled",
-                "host"
+                "host",
+                "tls"
             ],
             "title": "NifiRegistryIngress"
         },

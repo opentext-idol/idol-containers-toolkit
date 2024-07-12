@@ -81,12 +81,33 @@
                 },
                 "annotations": {
                     "type": "object"
+                },
+                "tls": {
+                    "$ref": "#/$defs/ingressTLS"
                 }
             },
             "required":[
                 "enabled",
                 "type",
-                "path"
+                "path",
+                "tls"
+            ]
+        },
+        "ingressTLS":{
+            "type": "object",
+            "properties":{
+                "secretName": {
+                    "type": "string"
+                },
+                "crt": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                }
+            },
+            "required":[
+                "secretName"
             ]
         },
         "server_modules": {
@@ -104,16 +125,13 @@
             "type": "object",
             "properties":{
                 "registry": {
-                    "type": "string",
-                    "format": "hostname"
+                    "$ref": "#/$defs/required_string"
                 },
                 "version": {
-                    "type": "string",
-                    "minLength": 1
+                    "$ref": "#/$defs/required_string"
                 },
                 "repo": {
-                    "type": "string",
-                    "minLength": 1
+                    "$ref": "#/$defs/required_string"
                 }
             },
             "required":[

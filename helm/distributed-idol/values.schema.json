@@ -126,11 +126,15 @@
                 },
                 "annotations": {
                     "type": "object"
+                },
+                "tls": {
+                    "$ref": "#/$defs/ingressTLS"
                 }
             },
             "required":[
                 "enabled",
-                "type"
+                "type",
+                "tls"
             ]
         },
         "ingressCommon":{
@@ -150,12 +154,28 @@
                 {"$ref":"#/$defs/ingressBase"}
             ]
         },
+        "ingressTLS":{
+            "type": "object",
+            "properties":{
+                "secretName": {
+                    "type": "string"
+                },
+                "crt": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                }
+            },
+            "required":[
+                "secretName"
+            ]
+        },
         "idolImage":{
             "type": "object",
             "properties":{
                 "registry": {
-                    "type": "string",
-                    "format": "hostname"
+                    "$ref": "#/$defs/required_string"
                 },
                 "version": {
                     "$ref": "#/$defs/required_string"

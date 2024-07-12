@@ -8,11 +8,13 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-{{ include "idol-library.ingress" (dict 
-    "root" .
-    "component" .Values
-    "ingress" .Values.ingress
-    "destination" "single-content.ingress")  -}}
-{{- define "single-content.ingress" -}}
-{{/* Any View specific merges to base template go here */}}
-{{- end -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: idol-nifi-keys-env
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifi) | nindent 4 -}}
+    app: nifi
+data:
+  KEYSTORE_PASSWORD: {{ .Values.nifi.keystorePassword | default (randAlphaNum 24) | quote }}
+  NIFI_SENSITIVE_PROPS_KEY: {{ .Values.nifi.sensitivePropsKey | default (randAlphaNum 24) | quote }}
+  TRUSTSTORE_PASSWORD: {{ .Values.nifi.truststorePassword | default (randAlphaNum 24) | quote }}
