@@ -256,16 +256,20 @@
                     "type": "string"
                 },
                 "tls": {
-                    "$ref": "#/definitions/NifiIngressTLS"   
+                    "$ref": "#/definitions/NifiIngressTLS"
                 },
                 "aciTLS": {
-                    "$ref": "#/definitions/NifiIngressTLS"   
+                    "$ref": "#/definitions/NifiIngressTLS"
+                },
+                "metricsTLS": {
+                    "$ref": "#/definitions/NifiIngressTLS"
                 }
             },
             "required": [
                 "enabled",
                 "tls",
-                "aciTLS"
+                "aciTLS",
+                "metricsTLS"
             ],
             "title": "NifiIngress"
         },

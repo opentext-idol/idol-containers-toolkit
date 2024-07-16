@@ -23,6 +23,10 @@ data:
 {{ tpl (.Files.Get "resources/nifi-wait.sh") . | indent 4 }}
   connect-registry.sh: |
 {{ tpl (.Files.Get "resources/nifi-connect-registry.sh") . | indent 4 }}
+  prometheous-reporting.sh: |
+{{ tpl (.Files.Get "resources/nifi-prometheous-reporting.sh") . | indent 4 }}
+  prometheous-reporting-task.json: |
+{{ tpl (.Files.Get "resources/prometheous-reporting-task.json") . | indent 4 }}
   preStop.sh: |
 {{ tpl (.Files.Get "resources/nifi-preStop.sh") . | indent 4 }}
   postStart.sh: |

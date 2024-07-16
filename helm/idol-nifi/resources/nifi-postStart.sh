@@ -26,6 +26,7 @@ logfile=/opt/nifi/nifi-current/logs/post-start.log
 
     /scripts/wait.sh
     /scripts/connect-registry.sh
+    /scripts/prometheous-reporting.sh
     /scripts/import-flow.sh
 
     echo [$(date)] postStart completed

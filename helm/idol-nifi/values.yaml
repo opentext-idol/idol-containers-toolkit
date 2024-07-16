@@ -179,6 +179,16 @@ nifi:
       crt: ""
       # -- Private key data value to generate tls Secret (should be base64 encoded)
       key: ""
+      
+    # -- Whether metrics ingress uses TLS. You must set an ingress metricsHost to use this. 
+    # See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
+    metricsTLS:
+      # -- The name of the secret for metrics ingress tls. Leave empty if not using TLS.
+      secretName: ""
+      # -- Certificate data value to generate tls Secret (should be base64 encoded)
+      crt: ""
+      # -- Private key data value to generate tls Secret (should be base64 encoded)
+      key: ""
 
   # -- optional nifi.security.keystorePasswd value (see https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#security_properties)
   # Setting this value is recommended. If it is not set, it will default to a generated value
