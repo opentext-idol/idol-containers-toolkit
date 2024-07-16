@@ -76,10 +76,10 @@ spec:
         resources:
           requests:
             cpu: 20m
-            memory: 10Mi
+            memory: 50Mi
           limits:
             cpu: 20m
-            memory: 10Mi
+            memory: 50Mi
         {{- if $component.containerSecurityContext.enabled }}
         securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml | nindent 10 }}
           readOnlyRootFilesystem: true
