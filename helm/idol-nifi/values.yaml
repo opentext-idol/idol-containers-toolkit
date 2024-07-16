@@ -229,6 +229,35 @@ nifiRegistry:
       cpu: 1000m
       memory: 1Gi
 
+nifiPrometheus:
+  ingress:
+    # nifiRegistry.ingress.enabled -- whether to deploy ingress for nifi
+    enabled: true
+    # nifiRegistry.ingress.annotations -- optional ingress annotations
+    annotations: {}
+    # nifiRegistry.ingress.host -- optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules
+    host: ""
+
+    # -- Whether ingress uses TLS. You must set an ingress host to use this. 
+    # See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
+    tls:
+      # -- The name of the secret for ingress TLS. Leave empty if not using TLS. 
+      # If specified then either this secret must already exist, or crt and key values must be provided and secret will be created.
+      secretName: ""
+      # -- Certificate data value to generate tls Secret (should be base64 encoded)
+      crt: ""
+      # -- Private key data value to generate tls Secret (should be base64 encoded)
+      key: ""
+      
+ #nifiRegistry.resources -- https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits
+  resources:
+    requests:
+      cpu: 200m
+      memory: 1Gi
+    limits: 
+      cpu: 1000m
+      memory: 1Gi
+
 zookeeper:
   # zookeeper.resources -- https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits
   resources:

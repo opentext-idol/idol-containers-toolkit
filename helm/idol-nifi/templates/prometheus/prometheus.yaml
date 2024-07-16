@@ -1,0 +1,58 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2024 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nifi-prometheus
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifiPrometheus) | nindent 4 -}}
+    app: nifi-prometheus
+    name: nifi-prometheus
+  annotations:
+    app.kubernetes.io/name: nifi-prometheus
+    app.kubernetes.io/part-of: nifi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nifi-prometheus
+  template:
+    metadata:
+      labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifiPrometheus) | nindent 8 -}}
+        app: nifi-prometheus
+    spec:
+      serviceAccountName: nifi-prometheus
+      automountServiceAccountToken: true
+      imagePullSecrets:
+        {{- range .Values.global.imagePullSecrets }}
+        - name: {{ . }}
+        {{- end }}
+      containers:
+      - name: nifi-prometheus
+        image: prom/prometheus:v2.53.1
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: prometheus-config
+          mountPath: /etc/prometheus
+        - name: prometheus-data
+          mountPath: /prometheus
+        args:
+        - '--config.file=/etc/prometheus/prometheus.yml'
+        - '--storage.tsdb.path=/prometheus'
+        - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+        - '--web.console.templates=/usr/share/prometheus/consoles'
+        - '--web.external-url=/prometheus/'
+        - '--web.route-prefix=/prometheus/'
+      volumes:
+        - name: prometheus-config
+          configMap:
+            name: prometheus-config
+        - name: prometheus-data
+          emptyDir: {}
