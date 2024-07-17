@@ -215,6 +215,9 @@
                 "maxReplicas": {
                     "type": "integer"
                 },
+                "stabilizationWindowSeconds": {
+                    "type": "integer"
+                },
                 "metrics": {
                     "type": "array",
                     "items": {

@@ -97,6 +97,8 @@ nifi:
     minReplicas: 1
     # -- the maximum size of the nifi statefulset
     maxReplicas: 8
+    # -- no. of seconds a limit must be exceed before scaling the nifi statefulset
+    stabilizationWindowSeconds: 300
     # -- one or more metrics controlling the horizontal pod autoscaler (https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/horizontal-pod-autoscaler-v2/#HorizontalPodAutoscalerSpec)
     metrics:
     - type: Resource

@@ -24,7 +24,9 @@ spec:
   maxReplicas: {{ .Values.nifi.autoScaling.maxReplicas | int }}
   behavior:
     scaleUp:
-      stabilizationWindowSeconds: 300
+      stabilizationWindowSeconds: {{ .Values.nifi.autoScaling.stabilizationWindowSeconds | int }}
+    scaleDown:
+      stabilizationWindowSeconds: {{ .Values.nifi.autoScaling.stabilizationWindowSeconds | int }}
   metrics:
 {{ with .Values.nifi.autoScaling.metrics }}
 {{- toYaml . | trim | indent 4 }}
