@@ -27,19 +27,19 @@ idolImage:
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
   registry: "microfocusidolserver"
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
-  version: "24.1"
+  version: "24.3"
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
   repo: "answerserver"
 
 # answerServerVolumeSize -- Size of the PersistentVolumeClaim that is created
 # for each AnswerServer instance. The Kubernetes cluster will need to provide
-# enough PersistentVolumes to satisify the claims made for the desired number
+# enough PersistentVolumes to satisfy the claims made for the desired number
 # of AnswerServer instances.
 answerServerVolumeSize: 2Gi
 
 # answerServerStorageClass -- Name of the storage class used to provision a PersistentVolume
 # for each AnswerServer instance.
-# The associated PVCs are named licensing-{name}-{pod number}
+# The associated PVCs are named state-{name}-{pod number}
 answerServerStorageClass: "idol-answerserver-storage-class"
 
 # -- whether aci/service/index ports are configured to use TLS (https).

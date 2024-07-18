@@ -25,6 +25,8 @@
   "source" "idol-library.aciserver.container.base.v1"
   "destination" "idolanswerserver.container.base" 
   "env" (list (dict "name" "IDOL_COMMAND_PARAMS" "value" "-idolcluster"))
-  "volumeMounts" (list (dict "name" "licensing" "mountPath" "/answerserver/license"))
+  "volumeMounts" (list (dict "name" "state" "mountPath" "/answerserver/license" "subPath" "license")
+                       (dict "name" "state" "mountPath" "/answerserver/uid" "subPath" "uid")
+                       (dict "name" "state" "mountPath" "/home/idoluser/.cache/huggingface" "subPath" "huggingface"))
 ) -}}
 {{- end -}}

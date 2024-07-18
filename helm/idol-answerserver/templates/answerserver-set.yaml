@@ -17,7 +17,7 @@ spec:
       terminationGracePeriodSeconds: 300
   volumeClaimTemplates:
   - metadata:
-      name: licensing
+      name: state
       labels: {{- include "idol-library.labels" . | nindent 8 }}
     spec:
       accessModes: [ "ReadWriteOnce" ]
