@@ -229,6 +229,10 @@ nifiRegistry:
       cpu: 1000m
       memory: 1Gi
 
+nifiMetrics:
+  servicePort: 443
+  containerPort: 6443
+
 nifiPrometheus:
   ingress:
     # nifiRegistry.ingress.enabled -- whether to deploy ingress for nifi
