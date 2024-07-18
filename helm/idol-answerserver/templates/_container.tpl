@@ -27,6 +27,6 @@
   "env" (list (dict "name" "IDOL_COMMAND_PARAMS" "value" "-idolcluster"))
   "volumeMounts" (list (dict "name" "state" "mountPath" "/answerserver/license" "subPath" "license")
                        (dict "name" "state" "mountPath" "/answerserver/uid" "subPath" "uid")
-                       (dict "name" "state" "mountPath" "/home/idoluser/.cache/huggingface" "subPath" "huggingface"))
+                       (dict "name" "state" "mountPath" "/home/idoluser/.cache" "subPath" ".cache"))
 ) -}}
 {{- end -}}
