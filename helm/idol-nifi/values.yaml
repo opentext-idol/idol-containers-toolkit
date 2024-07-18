@@ -101,19 +101,22 @@ nifi:
     stabilizationWindowSeconds: 300
     # -- one or more metrics controlling the horizontal pod autoscaler (https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/horizontal-pod-autoscaler-v2/#HorizontalPodAutoscalerSpec)
     metrics:
-    - type: Resource
-      resource:
-        name: memory
+    # -- Scale up if the average queue utilization per nifi node is greater than 25%
+    - type: Pods
+      pods:
+        metric:
+          name: nifi_percent_used_count_avg
         target:
-          type: Utilization
-          averageUtilization: 90
-    - type: Resource
-      resource:
-        name: cpu
+          type: AverageValue
+          averageValue: 25
+    # -- Scale up if there are more than 20000 queued items per nifi node
+    - type: Pods
+      pods:
+        metric:
+          name: nifi_amount_items_queued_total
         target:
-          type: Utilization
-          averageUtilization: 90
-
+          type: AverageValue
+          averageValue: 20000
   # -- https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits
   resources:
     requests:
