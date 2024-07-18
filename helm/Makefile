@@ -30,9 +30,17 @@ THIS_YEAR?=$(shell date +%Y)
 
 UPDATE_DEPENDENCIES?=-u
 
+# update-versions parameters
+# Can overwrite UPDATE_VERSIONS_CHARTS to specify which charts to update
+# Will update all chart versions by default
+UPDATE_VERSIONS_CHARTS ?= $(CHARTS)
+UPDATE_VERSIONS_DRY_RUN?=
+UPDATE_VERSIONS_DECREMENT?=
+
 .PHONY: package-all ${PACKAGE_CHARTS} 
 .PHONY: clean-all ${CLEAN_CHARTS} 
 .PHONY: validate-all ${VALIDATE_SCHEMA_CHARTS}
+.PHONY: update-versions
 
 default: package-all index.yaml
 
@@ -69,6 +77,10 @@ ${VALIDATE_SCHEMA_CHARTS}: validateschema-%: utils/validate.schema.py
 $(addprefix package-,${SCHEMA_CHARTS}): package-% : validateschema-%
 
 validate-all: ${VALIDATE_SCHEMA_CHARTS}
+
+# update chart versions
+update-versions:
+	${PYTHON_CMD} utils/updateversions.py --charts $(UPDATE_VERSIONS_CHARTS) $(UPDATE_VERSIONS_DRY_RUN) $(UPDATE_VERSIONS_DECREMENT)
 
 ${CLEAN_CHARTS}: clean-% : 
 	-${RM} $*/charts/*
