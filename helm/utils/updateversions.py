@@ -51,7 +51,6 @@ def update_dependencies(chart_dir: str, updated_versions: dict, dependency_graph
     if 'dependencies' in chart_yaml:
         for dep in chart_yaml['dependencies']:
             # only update dependency version if it's the latest one 
-            #print(dependency_graph.keys())
             if dep['name'] in updated_versions and dep['version'] == dependency_graph[dep['name']]['version']:
                 dep['version'] = updated_versions[dep['name']]
             elif dep['name'] in updated_versions and dep['name'] in dependency_graph:
