@@ -16,8 +16,8 @@ metadata:
   labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifiMetrics) | nindent 4 }}
 spec:
   ports:
-  - port: {{ .Values.nifiMetrics.servicePort | int }}
-    targetPort: {{ .Values.nifiMetrics.containerPort | int }}
+  - port: 443
+    targetPort: 6443
   selector:
     app: idol-nifi-metrics
 ---
@@ -77,14 +77,14 @@ spec:
         image: registry.k8s.io/prometheus-adapter/prometheus-adapter:v0.11.1
         args:
         - /adapter
-        - --secure-port={{ .Values.nifiMetrics.containerPort | int }}
+        - --secure-port=6443
         - --cert-dir=/tmp/cert
         - --prometheus-url=http://nifi-prometheus:9090/prometheus
         - --metrics-relist-interval=1m
         - --v=4
         - --config=/etc/adapter/config.yaml
         ports:
-        - containerPort: {{ .Values.nifiMetrics.containerPort | int }}
+        - containerPort: 6443
         volumeMounts:
         - mountPath: /etc/adapter/
           name: config
