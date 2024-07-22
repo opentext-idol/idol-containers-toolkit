@@ -20,7 +20,7 @@ metadata:
     nginx.ingress.kubernetes.io/affinity-mode: persistent
 {{- end }}
 {{/* ingress setup is very dependent on cluster ingress controller so allow user value annotations */ -}}
-{{ with .Values.nifiRegistry.ingress.annotations }}
+{{ with .Values.nifiPrometheus.ingress.annotations }}
 {{- toYaml . | trim | indent 4 }}
 {{- end }}
 spec:
