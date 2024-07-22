@@ -8,7 +8,7 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-{{- if .Values.nifiPrometheus.ingress.enabled }}
+{{- if and .Values.nifiPrometheus.enabled .Values.nifiPrometheus.ingress.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:

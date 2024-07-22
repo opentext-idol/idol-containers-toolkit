@@ -234,7 +234,13 @@ nifiRegistry:
       cpu: 1000m
       memory: 1Gi
 
+nifiMetrics:
+  # -- whether to deploy custom nifi autoscaling metrics from prometheus data
+  enabled: true
+
 nifiPrometheus:
+  # -- whether to deploy prometheus monitoring for nifi
+  enabled: true
   ingress:
     # nifiPrometheus.ingress.enabled -- whether to deploy ingress for nifi
     enabled: true

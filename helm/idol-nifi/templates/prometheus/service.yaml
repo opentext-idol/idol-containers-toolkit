@@ -8,6 +8,7 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
+{{- if .Values.nifiPrometheus.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -26,3 +27,4 @@ spec:
     port: 9090
     targetPort: 9090
     name: prometheus
+{{- end -}}

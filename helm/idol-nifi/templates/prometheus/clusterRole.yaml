@@ -8,6 +8,7 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
+{{- if .Values.nifiPrometheus.enabled }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -49,3 +50,4 @@ subjects:
 - kind: ServiceAccount
   name: nifi-prometheus
   namespace: {{ include "idol-library.namespace" . | quote }}
+{{- end -}}

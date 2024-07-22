@@ -8,6 +8,7 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
+{{- if .Values.nifiPrometheus.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -56,3 +57,4 @@ spec:
             name: prometheus-config
         - name: prometheus-data
           emptyDir: {}
+{{- end -}}

@@ -8,6 +8,7 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
+{{- if .Values.nifiPrometheus.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -44,3 +45,4 @@ data:
         - source_labels: [__meta_kubernetes_pod_name]
           action: replace
           target_label: kubernetes_pod_name
+{{- end -}}

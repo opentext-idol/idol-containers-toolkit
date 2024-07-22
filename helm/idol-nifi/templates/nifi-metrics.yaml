@@ -8,7 +8,7 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-{{- if .Values.nifi.autoScaling.enabled }}
+{{- if and .Values.nifi.autoScaling.enabled .Values.nifiMetrics.enabled .Values.nifiPrometheus.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
