@@ -236,11 +236,11 @@ nifiRegistry:
 
 nifiPrometheus:
   ingress:
-    # nifiRegistry.ingress.enabled -- whether to deploy ingress for nifi
+    # nifiPrometheus.ingress.enabled -- whether to deploy ingress for nifi
     enabled: true
-    # nifiRegistry.ingress.annotations -- optional ingress annotations
+    # nifiPrometheus.ingress.annotations -- optional ingress annotations
     annotations: {}
-    # nifiRegistry.ingress.host -- optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules
+    # nifiPrometheus.ingress.host -- optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules
     host: ""
 
     # -- Whether ingress uses TLS. You must set an ingress host to use this. 
