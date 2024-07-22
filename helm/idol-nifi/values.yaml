@@ -161,6 +161,8 @@ nifi:
     proxyHost: ""
     # -- optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules
     aciHost: ""
+    # -- optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules
+    metricsHost: ""
     
     # -- Whether ingress uses TLS. You must set an ingress host to use this. 
     # See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls

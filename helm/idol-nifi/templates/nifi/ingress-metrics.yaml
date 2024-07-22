@@ -45,7 +45,7 @@ spec:
             name: idol-nifi
             port:
               name: metrics
-{{- if .Values.nifi.ingress.PrefixHost }}
+{{- if .Values.nifi.ingress.metricsHost }}
     host: {{ .Values.nifi.ingress.metricsHost | quote }}
 {{- end }}
 {{ if .Values.nifi.ingress.metricsTLS.secretName -}}

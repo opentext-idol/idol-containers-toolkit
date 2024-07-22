@@ -255,6 +255,9 @@
                 "aciHost": {
                     "type": "string"
                 },
+                "metricsHost": {
+                    "type": "string"
+                },
                 "tls": {
                     "$ref": "#/definitions/NifiIngressTLS"
                 },
