@@ -234,41 +234,6 @@ nifiRegistry:
       cpu: 1000m
       memory: 1Gi
 
-nifiMetrics:
-  # -- whether to deploy custom nifi autoscaling metrics from prometheus data
-  enabled: true
-
-nifiPrometheus:
-  # -- whether to deploy prometheus monitoring for nifi
-  enabled: true
-  ingress:
-    # nifiPrometheus.ingress.enabled -- whether to deploy ingress for nifi
-    enabled: true
-    # nifiPrometheus.ingress.annotations -- optional ingress annotations
-    annotations: {}
-    # nifiPrometheus.ingress.host -- optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules
-    host: ""
-
-    # -- Whether ingress uses TLS. You must set an ingress host to use this. 
-    # See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
-    tls:
-      # -- The name of the secret for ingress TLS. Leave empty if not using TLS. 
-      # If specified then either this secret must already exist, or crt and key values must be provided and secret will be created.
-      secretName: ""
-      # -- Certificate data value to generate tls Secret (should be base64 encoded)
-      crt: ""
-      # -- Private key data value to generate tls Secret (should be base64 encoded)
-      key: ""
-      
- #nifiRegistry.resources -- https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits
-  resources:
-    requests:
-      cpu: 200m
-      memory: 1Gi
-    limits: 
-      cpu: 1000m
-      memory: 1Gi
-
 zookeeper:
   # zookeeper.resources -- https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits
   resources:
@@ -291,3 +256,55 @@ idol-licenseserver:
 metrics-server:
   args:
     - "--kubelet-insecure-tls"
+
+prometheus:
+  enabled: true
+  server:
+    prefixURL: /prometheus
+    baseURL: /prometheus
+    ingress:
+      enabled: true
+      hosts:
+        - ""
+      pathType: Prefix
+      path: /prometheus
+    global:
+      scrape_interval: 15s
+
+prometheus-adapter:
+  enabled: true
+  metricsRelistInterval: 30s
+  prometheus:
+    url: http://idol-nifi-prometheus-server
+    port: 80
+    path: "/prometheus"
+  rules:
+    custom:
+    - seriesQuery: '{__name__="nifi_amount_items_queued"}'
+      resources:
+        template: <<.Resource>>
+      name:
+        matches: ".*"
+        as: "nifi_amount_items_queued_total"
+      metricsQuery: nifi_amount_items_queued{component_type="RootProcessGroup"}
+    - seriesQuery: '{__name__="nifi_amount_items_queued"}'
+      resources:
+        template: <<.Resource>>
+      name:
+        matches: ".*"
+        as: "nifi_amount_items_queued_avg"
+      metricsQuery: 'avg(nifi_amount_items_queued{component_type="Connection"}) by (pod,namespace)'
+    - seriesQuery: '{__name__="nifi_percent_used_count"}'
+      resources:
+        template: <<.Resource>>
+      name:
+        matches: ".*"
+        as: "nifi_percent_used_count_max"
+      metricsQuery: 'max(nifi_percent_used_count{component_type="Connection"}) by (pod,namespace)'
+    - seriesQuery: '{__name__="nifi_percent_used_count"}'
+      resources:
+        template: <<.Resource>>
+      name:
+        matches: ".*"
+        as: "nifi_percent_used_count_avg"
+      metricsQuery: 'avg(nifi_percent_used_count{component_type="Connection"}) by (pod,namespace)'
