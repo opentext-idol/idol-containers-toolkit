@@ -20,6 +20,13 @@ metadata:
 spec:
   serviceName: nifi
   template:
+{{- if $component.prometheus.enabled }}
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        prometheus.io/port: "9092"
+{{- end }}
     spec:
       terminationGracePeriodSeconds: 90
       automountServiceAccountToken: false
@@ -76,10 +83,10 @@ spec:
         resources:
           requests:
             cpu: 20m
-            memory: 10Mi
+            memory: 50Mi
           limits:
             cpu: 20m
-            memory: 10Mi
+            memory: 50Mi
         {{- if $component.containerSecurityContext.enabled }}
         securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml | nindent 10 }}
           readOnlyRootFilesystem: true

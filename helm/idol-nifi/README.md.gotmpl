@@ -26,6 +26,22 @@ Provides a scaleable IDOL NiFi cluster instance (NiFi, NiFi Registry and ZooKeep
 
 {{ template "chart.requirementsSection" . }}
 
+## Scaling NiFi
+
+When `nifi.autoScaling.enabled` is set to `true`, some considerations must be made in order for the NiFi cluster to usefully scale.
+
+* `Load Balance Strategy` on NiFi connections - When creating a NiFi flow, connections can be configured to load balance across the NiFi cluster (see https://nifi.apache.org/docs/nifi-docs/html/user-guide.html#Load_Balancing ). Some connections in the NiFi flow must be configured to a value other than `Do not load balance` to enable NiFi FlowFiles to be distributed across the cluster. Setting the `Load Balance Strategy` to `Round Robin` for some connections is recommended for even load balancing.
+
+* Scaling metrics specified in `nifi.autoScaling.metrics` - When autoscaling NiFi, appropriate metrics must be chosen for effective scaling. Values.yaml specifies two scaling metrics by default:
+    * Total number of FlowFiles queued, per NiFi cluster node - If there are more than 20,000 FlowFiles queued (on average) per NiFi cluster node, this will cause the NiFi cluster to scale up.
+    * Average queue utilization, per NiFi cluster node - If the queue utilization exceeds 25% (on average) per NiFi cluster node, this will cause the NiFi cluster to scale up.
+
+  These metrics can be used as is, with custom limits, or you can specify your own scaling metrics based upon any Prometheus metric(s).
+
+To run a NiFi cluster, you may need to use an external database for storing state information. Many NiFi Ingest processors need to store state information. For example, IDOL Connectors store information about what they have retrieved from a data repository. This information needs to be in an external database so that it is accessible to all of the nodes in the cluster. Configure the connection to your database server by creating a database service. When you configure the IDOL connectors in your data flow, set the property `State Database Service` to the name of the database service that you created.
+
+The files that your connectors download from your data repositories must also be accessible to all of the nodes in a cluster. When you configure your connectors, set the property `adv:IngestSharedPath` to a location, such as a shared folder, that is accessible from all of the nodes in the cluster. Alternatively, set the property `adv:FlowFileEmbedFiles` to `TRUE`, so that the binary file content is included in the FlowFiles created by the connector.
+
 {{ template "chart.valuesSection" . }}
 
 {{ template "helm-docs.versionFooter" . }}

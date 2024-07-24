@@ -42,3 +42,7 @@ spec:
     port: 11000
     targetPort: 11000
     name: connector-aci
+  - protocol: TCP
+    port: 9092
+    targetPort: 9092
+    name: metrics

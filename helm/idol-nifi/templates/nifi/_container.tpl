@@ -24,6 +24,8 @@ ports:
   name: cluster-lb
 - containerPort: 11000
   name: connector-aci
+- containerPort: 9092
+  name: metrics
 env:
   - name: POD_IP
     valueFrom:

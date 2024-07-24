@@ -97,21 +97,27 @@ nifi:
     minReplicas: 1
     # -- the maximum size of the nifi statefulset
     maxReplicas: 8
+    # -- no. of seconds a limit must be exceed before scaling the nifi statefulset
+    stabilizationWindowSeconds: 300
     # -- one or more metrics controlling the horizontal pod autoscaler (https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/horizontal-pod-autoscaler-v2/#HorizontalPodAutoscalerSpec)
+    # @default -- See below
     metrics:
-    - type: Resource
-      resource:
-        name: memory
+    # -- Scale up if the average queue utilization per nifi node is greater than 25%
+    - type: Pods
+      pods:
+        metric:
+          name: nifi_percent_used_count_avg
         target:
-          type: Utilization
-          averageUtilization: 90
-    - type: Resource
-      resource:
-        name: cpu
+          type: AverageValue
+          averageValue: 25
+    # -- Scale up if there are more than 20000 queued items per nifi node
+    - type: Pods
+      pods:
+        metric:
+          name: nifi_amount_items_queued_total
         target:
-          type: Utilization
-          averageUtilization: 90
-
+          type: AverageValue
+          averageValue: 20000
   # -- https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits
   resources:
     requests:
@@ -156,6 +162,8 @@ nifi:
     proxyHost: ""
     # -- optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules
     aciHost: ""
+    # -- optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules
+    metricsHost: ""
     
     # -- Whether ingress uses TLS. You must set an ingress host to use this. 
     # See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
@@ -172,6 +180,16 @@ nifi:
     # See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
     aciTLS:
       # -- The name of the secret for aci ingress tls. Leave empty if not using TLS.
+      secretName: ""
+      # -- Certificate data value to generate tls Secret (should be base64 encoded)
+      crt: ""
+      # -- Private key data value to generate tls Secret (should be base64 encoded)
+      key: ""
+      
+    # -- Whether metrics ingress uses TLS. You must set an ingress metricsHost to use this. 
+    # See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
+    metricsTLS:
+      # -- The name of the secret for metrics ingress tls. Leave empty if not using TLS.
       secretName: ""
       # -- Certificate data value to generate tls Secret (should be base64 encoded)
       crt: ""
@@ -239,3 +257,71 @@ idol-licenseserver:
 metrics-server:
   args:
     - "--kubelet-insecure-tls"
+
+# -- `prometheus` sub-chart configuration
+# Required for auto-scaling. 
+# See https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus
+# @default -- Default configuration to support `idol-nifi` autoscaling. See values.yaml for details.
+prometheus:
+  enabled: true
+  server:
+    prefixURL: /prometheus
+    baseURL: /prometheus
+    ingress:
+      enabled: true
+      hosts:
+        - ""
+      pathType: Prefix
+      path: /prometheus
+    global:
+      scrape_interval: 15s
+  alertmanager:
+    enabled: false
+  prometheus-node-exporter:
+    enabled: false
+  prometheus-pushgateway:
+    enabled: false
+  kube-state-metrics:
+    enabled: false
+
+# -- `prometheus-adapter` sub-chart configuration
+# Required for auto-scaling. 
+# See https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-adapter
+# @default -- Default configuration to support `idol-nifi` autoscaling. See values.yaml for details.
+prometheus-adapter:
+  enabled: true
+  metricsRelistInterval: 30s
+  prometheus:
+    url: http://{{ .Release.Name }}-prometheus-server
+    port: 80
+    path: "/prometheus"
+  rules:
+    custom:
+    - seriesQuery: '{__name__="nifi_amount_items_queued"}'
+      resources:
+        template: <<.Resource>>
+      name:
+        matches: ".*"
+        as: "nifi_amount_items_queued_total"
+      metricsQuery: nifi_amount_items_queued{component_type="RootProcessGroup"}
+    - seriesQuery: '{__name__="nifi_amount_items_queued"}'
+      resources:
+        template: <<.Resource>>
+      name:
+        matches: ".*"
+        as: "nifi_amount_items_queued_avg"
+      metricsQuery: 'avg(nifi_amount_items_queued{component_type="Connection"}) by (pod,namespace)'
+    - seriesQuery: '{__name__="nifi_percent_used_count"}'
+      resources:
+        template: <<.Resource>>
+      name:
+        matches: ".*"
+        as: "nifi_percent_used_count_max"
+      metricsQuery: 'max(nifi_percent_used_count{component_type="Connection"}) by (pod,namespace)'
+    - seriesQuery: '{__name__="nifi_percent_used_count"}'
+      resources:
+        template: <<.Resource>>
+      name:
+        matches: ".*"
+        as: "nifi_percent_used_count_avg"
+      metricsQuery: 'avg(nifi_percent_used_count{component_type="Connection"}) by (pod,namespace)'
