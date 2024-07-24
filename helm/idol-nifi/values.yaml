@@ -100,6 +100,7 @@ nifi:
     # -- no. of seconds a limit must be exceed before scaling the nifi statefulset
     stabilizationWindowSeconds: 300
     # -- one or more metrics controlling the horizontal pod autoscaler (https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/horizontal-pod-autoscaler-v2/#HorizontalPodAutoscalerSpec)
+    # @default -- See below
     metrics:
     # -- Scale up if the average queue utilization per nifi node is greater than 25%
     - type: Pods
@@ -257,6 +258,10 @@ metrics-server:
   args:
     - "--kubelet-insecure-tls"
 
+# -- `prometheus` sub-chart configuration
+# Required for auto-scaling. 
+# See https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus
+# @default -- Default configuration to support `idol-nifi` autoscaling. See values.yaml for details.
 prometheus:
   enabled: true
   server:
@@ -279,6 +284,10 @@ prometheus:
   kube-state-metrics:
     enabled: false
 
+# -- `prometheus-adapter` sub-chart configuration
+# Required for auto-scaling. 
+# See https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-adapter
+# @default -- Default configuration to support `idol-nifi` autoscaling. See values.yaml for details.
 prometheus-adapter:
   enabled: true
   metricsRelistInterval: 30s
