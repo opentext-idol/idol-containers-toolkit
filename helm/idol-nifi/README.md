@@ -15,7 +15,7 @@ Provides a scaleable IDOL NiFi cluster instance (NiFi, NiFi Registry and ZooKeep
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://charts.bitnami.com/bitnami | postgresql | 13.2.3 |
+| https://kubernetes-sigs.github.io/metrics-server | metrics-server | 3.8.2 |
 | https://prometheus-community.github.io/helm-charts | prometheus | 25.0 |
 | https://prometheus-community.github.io/helm-charts | prometheus-adapter | 4.2.0 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.13.0 |
@@ -109,20 +109,6 @@ The files that your connectors download from your data repositories must also be
 | nifiRegistry.ingress.tls.secretName | string | `""` | The name of the secret for ingress TLS. Leave empty if not using TLS.  If specified then either this secret must already exist, or crt and key values must be provided and secret will be created. |
 | nifiRegistry.resources | object | `{"limits":{"cpu":"1000m","memory":"1Gi"},"requests":{"cpu":"200m","memory":"1Gi"}}` | https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits |
 | podSecurityContext | object | `{"enabled":true,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000,"seccompProfile":{"type":"RuntimeDefault"}}` | pod security context definition  See https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod |
-| postgresql.auth.database | string | `"postgres"` |  |
-| postgresql.auth.password | string | `"postgres"` |  |
-| postgresql.auth.username | string | `"postgres"` |  |
-| postgresql.enabled | bool | `true` |  |
-| postgresql.primary.containerSecurityContext.enabled | bool | `false` |  |
-| postgresql.primary.containerSecurityContext.runAsUser | string | `"auto"` |  |
-| postgresql.primary.podSecurityContext.enabled | bool | `false` |  |
-| postgresql.primary.podSecurityContext.fsGroup | string | `""` |  |
-| postgresql.readReplicas.containerSecurityContext.enabled | bool | `false` |  |
-| postgresql.readReplicas.containerSecurityContext.runAsUser | string | `"auto"` |  |
-| postgresql.readReplicas.podSecurityContext.enabled | bool | `false` |  |
-| postgresql.readReplicas.podSecurityContext.fsGroup | string | `""` |  |
-| postgresql.volumePermissions.enabled | bool | `false` |  |
-| postgresql.volumePermissions.securityContext.runAsUser | string | `"auto"` |  |
 | prometheus | object | Default configuration to support `idol-nifi` autoscaling. See values.yaml for details. | `prometheus` sub-chart configuration Required for auto-scaling.  See https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus |
 | prometheus-adapter | object | Default configuration to support `idol-nifi` autoscaling. See values.yaml for details. | `prometheus-adapter` sub-chart configuration Required for auto-scaling.  See https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-adapter |
 | usingTLS | bool | `false` | whether ports are configured to use TLS (https). |
