@@ -283,7 +283,7 @@ prometheus-adapter:
   enabled: true
   metricsRelistInterval: 30s
   prometheus:
-    url: http://idol-nifi-prometheus-server
+    url: http://{{ .Release.Name }}-prometheus-server
     port: 80
     path: "/prometheus"
   rules:
