@@ -18,7 +18,7 @@
       <bundle>
         <group>idol.nifi</group>
         <artifact>idol-nifi-framework</artifact>
-        <version>23.3.0</version>
+        <version>24.3.0</version>
       </bundle>
       <maxConcurrentTasks>1</maxConcurrentTasks>
       <schedulingPeriod>0 sec</schedulingPeriod>
@@ -64,7 +64,7 @@
       <bundle>
         <group>idol.nifi</group>
         <artifact>idol-nifi-framework</artifact>
-        <version>23.3.0</version>
+        <version>24.3.0</version>
       </bundle>
       <maxConcurrentTasks>1</maxConcurrentTasks>
       <schedulingPeriod>0 sec</schedulingPeriod>
@@ -111,7 +111,7 @@
       <bundle>
         <group>idol.nifi</group>
         <artifact>idol-nifi-framework</artifact>
-        <version>23.3.0</version>
+        <version>24.3.0</version>
       </bundle>
       <maxConcurrentTasks>1</maxConcurrentTasks>
       <schedulingPeriod>0 sec</schedulingPeriod>
@@ -146,7 +146,7 @@
       <bundle>
         <group>idol.nifi.connector</group>
         <artifact>idol-nifi-connector-filesystem</artifact>
-        <version>23.3.0</version>
+        <version>24.3.0</version>
       </bundle>
       <maxConcurrentTasks>1</maxConcurrentTasks>
       <schedulingPeriod>30 sec</schedulingPeriod>
@@ -476,7 +476,7 @@
       <bundle>
         <group>idol.nifi</group>
         <artifact>idol-nifi-framework</artifact>
-        <version>23.3.0</version>
+        <version>24.3.0</version>
       </bundle>
       <enabled>true</enabled>
       <property>
@@ -496,7 +496,7 @@
       <bundle>
         <group>idol.nifi</group>
         <artifact>idol-nifi-framework</artifact>
-        <version>23.3.0</version>
+        <version>24.3.0</version>
       </bundle>
       <enabled>true</enabled>
       <property>

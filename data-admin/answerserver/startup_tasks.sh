@@ -20,7 +20,7 @@ function wait_for_pg_isready {
             exit 1
         fi
 
-        pg_isready -d $DBNAME -h $HOST -p $PORT -U $USER --quiet
+        /usr/pgsql-14/bin/pg_isready -d $DBNAME -h $HOST -p $PORT -U $USER --quiet
         case "$?" in
         0     ) return;;
         1 | 2 ) sleep $SLEEP_TIME; RETRIES=$((RETRIES+1));;
