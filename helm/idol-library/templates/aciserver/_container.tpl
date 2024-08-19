@@ -56,6 +56,16 @@ volumeMounts:
 {{- range $component.additionalVolumeMounts }}
 - {{ . | toYaml | nindent 10 }}
 {{- end }}
+{{- if $root.Values.global.idolOemLicenseSecret }}
+- name: oem-license
+  mountPath: {{ printf "/%s/licensekey.dat" (trimPrefix "idol-" $component.name) }}
+  subPath: licensekey.dat
+  readOnly: true
+- name: oem-license
+  mountPath: {{ printf "/%s/versionkey.dat" (trimPrefix "idol-" $component.name) }}
+  subPath: versionkey.dat
+  readOnly: true
+{{- end }}
 env:
 - name: IDOL_COMPONENT_CFG
   value: {{ printf "/etc/config/idol/%s.cfg" (trimPrefix "idol-" $component.name) }}

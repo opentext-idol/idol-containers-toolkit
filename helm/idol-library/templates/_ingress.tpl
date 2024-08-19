@@ -83,7 +83,7 @@ spec:
 {{ toYaml $paths | nindent 6 }}
 {{- end -}}
 {{- if $ingress.host }}
-    host: {{ $ingress.host }}
+    host: {{ $ingress.host | quote }}
 {{- end -}}
 {{- end }}
 

@@ -34,7 +34,16 @@ spec:
     metadata:
       labels: {{- include "idol-library.labels" $ctx | nindent 8 }}
         app: {{ $component.name | quote }}
+      {{- if $component.annotations }}
+      annotations:
+        {{- with $component.annotations }}
+        {{- toYaml . | trim | nindent 8 }}
+        {{- end }}
+      {{- end }}
     spec:
+      {{- if $component.serviceAccountName }}
+      serviceAccountName: {{ $component.serviceAccountName }}
+      {{- end }}
       imagePullSecrets:
       {{- range $root.Values.global.imagePullSecrets }}
       - name: {{ . }}
@@ -48,6 +57,11 @@ spec:
       - name: config-map
         configMap:
           name: {{ default (printf "%s-default-cfg" $component.name) $component.existingConfigMap }}
+      {{- end }}
+      {{- if $root.Values.global.idolOemLicenseSecret }}
+      - name: oem-license
+        secret:
+          secretName: {{ $root.Values.global.idolOemLicenseSecret }}
       {{- end }}
       {{- range $volumes }}
       - {{ . | toYaml | nindent 8 }}
