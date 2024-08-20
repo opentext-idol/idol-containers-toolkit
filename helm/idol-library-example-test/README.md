@@ -16,7 +16,7 @@ The Values shown below are 'common' ACI server parameters.
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../idol-library | idol-library | 0.13.0 |
+| file://../idol-library | idol-library | 0.14.0 |
 
 ## Values
 

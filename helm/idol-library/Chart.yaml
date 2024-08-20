@@ -18,6 +18,6 @@ description: An IDOL Helm library chart for Kubernetes
 # pipeline. Library charts do not define any templates and therefore cannot be deployed.
 type: library
 
-# This is the chart version. This version number should be incremented each time you make changes
+# This is the chart version. This version number should be incremented each time you publish changes
 # to the chart and its templates, including the app version.
-version: 0.13.0
+version: 0.14.0
