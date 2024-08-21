@@ -682,7 +682,7 @@ entries:
   idol-nifi:
   - apiVersion: v2
     appVersion: 24.1.0
-    created: "2024-08-19T13:59:20.58599557+01:00"
+    created: "2024-08-21T12:18:07.21752632+01:00"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
@@ -704,7 +704,7 @@ entries:
       repository: https://prometheus-community.github.io/helm-charts
       version: 4.2.0
     description: A configurable IDOL NiFi setup
-    digest: dd3f6531fc4ef3394871ab98b46007be6d7118226a6b435aec1cd7a35ba33e6b
+    digest: 829152d3d8d9aabaeb01953e1a65ee68f74998ad1ec6b7c53ee96deed50b1ec0
     name: idol-nifi
     urls:
     - release/idol-nifi-0.6.0.tgz
