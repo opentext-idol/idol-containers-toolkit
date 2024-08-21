@@ -16,27 +16,44 @@
 
 global:
   # -- Global override value for idolImage.registry
+  # @section -- Globals
   idolImageRegistry: ""
   # -- Global override value for idolImage.version
+  # @section -- Globals
   idolVersion: ""
   # -- Global secrets used to pull container images
+  # @section -- Globals
   imagePullSecrets:
   - "dockerhub-secret"
+  # -- Global override value for idolImage.imagePullPolicy, has no effect if it is empty or is removed
+  # @section -- Globals
+  imagePullPolicy: ""
+  # -- Optional Secret containing OEM licensekey.dat and versionkey.dat files for licensing
+  # @section -- Globals
+  idolOemLicenseSecret: ""
 
 idolImage:
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
   registry: "microfocusidolserver"
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
-  version: "24.1"
+  version: "24.3"
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
   repo: "mediaserver-english"
+  # -- used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy)
+  imagePullPolicy: "IfNotPresent"
+
+# -- Additional annotations applied to deployment/statefulset (https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/)
+annotations: {}
+
+# -- Additional labels applied to all objects (https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/)
+labels: {}
 
 # licenseServerHostname -- the hostname of the IDOL LicenseServer (or abstraction)
 licenseServerHostname: "idol-licenseserver"
 # licenseServerPort -- the ACI port of the IDOL LicenseServer (or abstraction)
 licenseServerPort: "20000"
 
-# existingConfigMap -- if specified, mounted at /etc/config/idol and expected to provide mediaserver.cfg
+# -- if specified, mounted at /etc/config/idol and expected to provide mediaserver.cfg
 existingConfigMap: ""
 
 # -- Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
@@ -77,8 +94,11 @@ resources:
     cpu: 1000m
     memory: 1Gi
 
-# replicas -- number of replica pods for this container (defaults to 1)
+# -- number of replica pods for this container (defaults to 1)
 replicas: 1
+
+# -- Optional serviceAccountName for the pods (https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account)
+serviceAccountName: ""
 
 # -- The maximum number of Process actions that can be run simultaneously
 # Increase this value to match available Channels, if you increase the Channels values
@@ -140,23 +160,29 @@ modules:
 
 ingress:
   # -- Create ingress resource
+  # @section -- Ingress
   enabled: true
 
   # -- Ingress controller type to setup for.
   # Valid values are nginx or haproxy (used by OpenShift)
+  # @section -- Ingress
   type: nginx
 
   # -- Optional parameter to override the default ingress class
+  # @section -- Ingress
   className: ""
 
   # -- Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules).
   # For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration)
+  # @section -- Ingress
   host: ""
 
   # -- Ingress controller path for ACI connections.
+  # @section -- Ingress
   path: "/mediaserver/"
 
   # -- Ingress controller path for service connections.
+  # @section -- Ingress
   servicePath: "/mediaserver/service/"
 
   # -- Maximum allowed size of the client request body, defining
@@ -165,25 +191,31 @@ ingress:
   # The value should be an nginx "size" value.
   # See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the
   # corresponding nginx configuration parameter.
+  # @section -- Ingress
   proxyBodySize: 2048m
 
   # -- Ingress controller specific annotations
   # Some annotations are added automatically based on ingress.type and other values, but can 
-  # be overriden/augmented here
+  # be overridden/augmented here
   # e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations
+  # @section -- Ingress
   annotations: {}
 
   # -- Whether ingress uses TLS. You must set an ingress host to use this. 
   # See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls 
+  # @section -- Ingress
   tls:
     # -- The name of the secret for ingress TLS. Leave empty if not using TLS. 
     # If specified then either this secret must already exist, or crt and key values must be provided and secret will be created.. 
+    # @section -- Ingress
     secretName: ""
 
     # -- Certificate data value to generate tls Secret (should be base64 encoded)
+    # @section -- Ingress
     crt: ""
 
     # -- Private key data value to generate tls Secret (should be base64 encoded)
+    # @section -- Ingress
     key: ""
 
 ##### INTERNAL VARIABLES #####
