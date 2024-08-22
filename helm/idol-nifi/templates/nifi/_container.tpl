@@ -60,6 +60,11 @@ envFrom:
   - configMapRef:
       name: idol-nifi-keys-env
       optional: false
+{{- if $component.envConfigMap }}
+  - configMapRef: 
+      name: {{ $component.envConfigMap | quote }}
+      optional: false
+{{- end }}
 lifecycle:
   postStart:
     exec:
