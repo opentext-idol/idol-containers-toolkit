@@ -11,21 +11,29 @@
 
 global:
   # -- Global override value for idolImage.registry
+  # @section -- Globals
   idolImageRegistry: ""
   # -- Global override value for idolImage.version
+  # @section -- Globals
   idolVersion: ""
   # -- Global secrets used to pull container images
+  # @section -- Globals
   imagePullSecrets:
   - "dockerhub-secret"
   # -- Global override value for idolImage.imagePullPolicy, has no effect if it is empty or is removed
+  # @section -- Globals
   imagePullPolicy: ""
+  # -- Optional Secret containing OEM licensekey.dat and versionkey.dat files for licensing. 
+  # Mounted at /nifi/licensekey.dat and /nifi/versionkey.dat
+  # @section -- Globals
+  idolOemLicenseSecret: ""
 
 idolImage:
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
   registry: "microfocusidolserver"
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
-  version: "24.1"
-  # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}.
+  version: "24.3"
+  # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
   repo: "nifi-full"
   # -- used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy)
   imagePullPolicy: "IfNotPresent"
@@ -35,6 +43,12 @@ usingTLS: false
 
 # name -- used to name statefulset, service, ingress
 name: idol-nifi
+
+# -- Additional annotations applied to statefulset (https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/)
+annotations: {}
+
+# -- Additional labels applied to objects (https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/)
+labels: {}
 
 # existingConfigMap -- if specified, mounted at /etc/config/idol
 envConfigMap: ""
@@ -88,6 +102,9 @@ containerSecurityContext:
   capabilities:
     drop:
       - ALL
+
+# -- Optional serviceAccountName for the pods (https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account)
+serviceAccountName: ""
 
 nifi:
   autoScaling:
