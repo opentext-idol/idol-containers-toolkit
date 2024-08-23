@@ -9,7 +9,7 @@ a single IDOL Content instance. Intended as a much lighter-weight alternative to
 the `distributed-idol` chart, for use in testing charts that expect one or both
 of these endpoints to exist in the cluster.
 
-> Full documentation for Content available from https://www.microfocus.com/documentation/idol/IDOL_24.3/Content_24.3_Documentation/Help/
+> Full documentation for Content available from https://www.microfocus.com/documentation/idol/IDOL_24_3/Content_24.3_Documentation/Help/
 
 ## Requirements
 

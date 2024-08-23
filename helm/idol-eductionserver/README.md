@@ -14,7 +14,7 @@ The config file can be overridden via `existingConfigMap`.
 
 This chart may be used to provide entity extraction, entity redaction and sentiment analysis functionality.
 
-> Full documentation for Eduction Server available from https://www.microfocus.com/documentation/idol/IDOL_24.3/EductionServer_24.3_Documentation/Help/
+> Full documentation for Eduction Server available from https://www.microfocus.com/documentation/idol/IDOL_24_3/EductionServer_24.3_Documentation/Help/
 
 
 

@@ -8,7 +8,7 @@
 Helm Variable Testing:
 
 - Component: Content
-- DocsLink: https://www.microfocus.com/documentation/idol/IDOL_24.1/Content_24.1_Documentation/Help/
+- DocsLink: https://www.microfocus.com/documentation/idol/IDOL_24_1/Content_24.1_Documentation/Help/
 
 The Values shown below are 'common' ACI server parameters.
 
@@ -58,12 +58,12 @@ The Values shown below are 'common' ACI server parameters.
 | annotations | object | `{}` | Additional annotations applied to deployment/statefulset (https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) |
 | containerSecurityContext | object | `{"enabled":false}` | Optional SecurityContext for container (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#securitycontext-v1-core) |
 | containerSecurityContext.enabled | bool | `false` | enable SecurityContext for container. Setting to false omits. |
-| envConfigMap | string | `""` | Optional configMap name holding extra environnment variables for content container |
+| envConfigMap | string | `""` | Optional configMap name holding extra environnment variables for container |
 | existingConfigMap | string | `""` | if specified, mounted at /etc/config/idol and expected to provide $IDOL_COMPONENT.cfg                      or content.cfg if $IDOL_COMPONENT is unavailable. |
 | idolImage.imagePullPolicy | string | `"IfNotPresent"` | used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) |
 | idolImage.registry | string | `"microfocusidolserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | idolImage.repo | string | `"content"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}. |
-| idolImage.version | string | `"24.1"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
+| idolImage.version | string | `"24.3"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | labels | object | `{}` | Additional labels applied to all objects (https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/) |
 | licenseServerHostname | string | `"idol-licenseserver"` | maps to [License] LicenseServerHost in the IDOL cfg files Should point to a resolvable IDOL LicenseServer (or Kubernetes service abstraction - see the idol-licenseserver chart) |
 | licenseServerPort | string | `"20000"` | the ACI port of the IDOL LicenseServer (or abstraction) |

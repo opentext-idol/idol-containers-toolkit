@@ -18,7 +18,7 @@ and `idol-query-service` services. These systems are all optional and can be dis
 To use a passageextractorLLM system, you must first set up a persistent volume and index the appropriate model
 files, then redeploy the chart with LLM configuration information in your answerserver configuration file.
 
-> Full documentation for answerserver available from https://www.microfocus.com/documentation/idol/IDOL_24.3/answerserver_24.3_Documentation/Help/
+> Full documentation for answerserver available from https://www.microfocus.com/documentation/idol/IDOL_24_3/answerserver_24.3_Documentation/Help/
 
 ## Requirements
 

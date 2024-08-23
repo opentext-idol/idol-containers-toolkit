@@ -13,7 +13,7 @@ The config file can be overridden via `existingConfigMap`.
 
 This chart may be used to provide query & result modification and promotion management functionality.
 
-> Full documentation for QMS available from https://www.microfocus.com/documentation/idol/IDOL_24.3/QMS_24.3_Documentation/Help/
+> Full documentation for QMS available from https://www.microfocus.com/documentation/idol/IDOL_24_3/QMS_24.3_Documentation/Help/
 
 ## Requirements
 
