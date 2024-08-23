@@ -50,7 +50,7 @@ annotations: {}
 # -- Additional labels applied to objects (https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/)
 labels: {}
 
-# existingConfigMap -- if specified, mounted at /etc/config/idol
+# -- Optional configMap name holding extra environnment variables for container
 envConfigMap: ""
 
 # -- Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
@@ -147,11 +147,11 @@ nifi:
       memoryMi: 8192
   
   dataVolume:
-    # storageClass -- Name of the storage class used to provision a PersistentVolume
+    # -- Name of the storage class used to provision a PersistentVolume
     # for each NiFi instance.
     # The associated PVCs are named statedata-{name}-{pod number}
     storageClass: "idol-nifi-storage-class"
-    # volumeSize -- Size of the PersistentVolumeClaim that is created
+    # -- Size of the PersistentVolumeClaim that is created
     # for each NiFi instance. The Kubernetes cluster will need to provide
     # enough PersistentVolumes to satisify the claims made for the desired number
     # of NiFi instances. The size chosen here provides a hard limit on the size

@@ -57,7 +57,7 @@ The files that your connectors download from your data repositories must also be
 | additionalVolumes | list | `[]` | Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes) |
 | annotations | object | `{}` | Additional annotations applied to statefulset (https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) |
 | containerSecurityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"privileged":false}` | container security context definition  See https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container |
-| envConfigMap | string | `""` |  |
+| envConfigMap | string | `""` | Optional configMap name holding extra environnment variables for container |
 | idol-licenseserver.enabled | bool | `false` | whether to deploy an IDOL LicenseServer service abstraction |
 | idol-licenseserver.licenseServerPort | string | `"20000"` | the ACI port of the IDOL LicenseServer (or abstraction) |
 | idol-licenseserver.licenseServerService | string | `"idol-licenseserver"` | the hostname of the IDOL LicenseServer (or abstraction) |
@@ -81,8 +81,8 @@ The files that your connectors download from your data repositories must also be
 | nifi.autoScaling.metrics[1] | object | `{"pods":{"metric":{"name":"nifi_amount_items_queued_total"},"target":{"averageValue":20000,"type":"AverageValue"}},"type":"Pods"}` | Scale up if there are more than 20000 queued items per nifi node |
 | nifi.autoScaling.minReplicas | int | `1` | the minimum size of the nifi statefulset |
 | nifi.autoScaling.stabilizationWindowSeconds | int | `300` | no. of seconds a limit must be exceed before scaling the nifi statefulset |
-| nifi.dataVolume.storageClass | string | `"idol-nifi-storage-class"` |  |
-| nifi.dataVolume.volumeSize | string | `"16Gi"` |  |
+| nifi.dataVolume.storageClass | string | `"idol-nifi-storage-class"` | Name of the storage class used to provision a PersistentVolume for each NiFi instance. The associated PVCs are named statedata-{name}-{pod number} |
+| nifi.dataVolume.volumeSize | string | `"16Gi"` | Size of the PersistentVolumeClaim that is created for each NiFi instance. The Kubernetes cluster will need to provide enough PersistentVolumes to satisify the claims made for the desired number of NiFi instances. The size chosen here provides a hard limit on the size of the NiFi data storage in each NiFi instance. |
 | nifi.flowfile | string | `"/scripts/flow-basic-idol.json"` | the flowfile definition to import.  Set this to any non-existing path to bypass flow import (start with a blank flow). Customize the NiFi image and set this to a filepath within that image to import your own customized flow. |
 | nifi.ingress.aciHost | string | `""` | optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules |
 | nifi.ingress.aciTLS | object | `{"crt":"","key":"","secretName":""}` | Whether aci ingress uses TLS. You must set an ingress aciHost to use this.  See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls |
