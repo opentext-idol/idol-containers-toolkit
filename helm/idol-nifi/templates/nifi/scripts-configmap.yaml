@@ -28,7 +28,7 @@ data:
 {{ tpl (.Files.Get "resources/nifi-prometheous-reporting.sh") . | indent 4 }}
   prometheous-reporting-task.json: |
 {{ tpl (.Files.Get "resources/prometheous-reporting-task.json") . | indent 4 }}
-{{- end -}}
+{{- end }}
   preStop.sh: |
 {{ tpl (.Files.Get "resources/nifi-preStop.sh") . | indent 4 }}
   postStart.sh: |

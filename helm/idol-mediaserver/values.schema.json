@@ -132,13 +132,18 @@
                 },
                 "repo": {
                     "$ref": "#/$defs/required_string"
+                },
+                "imagePullPolicy": {
+                    "type": "string",
+                    "enum": ["Always", "IfNotPresent", "Never"]
                 }
             },
             "required":[
                 "registry",
                 "version",
                 "repo"
-            ]
+            ],
+            "unevaluatedProperties": false
         },
         "global":{
             "type": "object",
@@ -153,9 +158,16 @@
                     "type": "array",
                     "minItems": 1,
                     "items": {
-                        "type": "string",
-                        "minLength": 1
+                        "$ref": "#/$defs/required_string"
                     }
+                },
+                "imagePullPolicy": {
+                    "type": "string",
+                        "enum": ["", "Always", "IfNotPresent", "Never"]
+                },
+                "idolOemLicenseSecret": {
+                    "type": "string",
+                    "description": "Optional Secret containing OEM licensekey.dat and versionkey.dat files for licensing."
                 }
             },
             "required":[
@@ -206,9 +218,39 @@
                 },
                 "replicas": {
                     "type": "integer"
+                },
+                "labels": {
+                    "additionalProperties": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "description": "Additional labels applied to all objects (https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/)",
+                    "type": [
+                      "object",
+                      "null"
+                    ]
+                },
+                "annotations": {
+                    "additionalProperties": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "description": "Additional annotations applied to deployment/statefulset (https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/)",
+                    "type": [
+                      "object",
+                      "null"
+                    ]
+                },
+                "serviceAccountName":{
+                    "type": "string",
+                    "description": "Optional serviceAccountName for the pods (https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account)"
                 }
             },
-            "required": [
+            "required":[
                 "idolImage",
                 "ingress",
                 "name",
