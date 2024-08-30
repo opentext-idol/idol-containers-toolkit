@@ -760,6 +760,35 @@ entries:
   idol-nifi:
   - apiVersion: v2
     appVersion: 24.3.0
+    created: "2024-08-30T19:49:37.818622206+01:00"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.14.0
+    - condition: idol-licenseserver.enabled
+      name: idol-licenseserver
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.4.0
+    - condition: nifi.autoScaling.enabled
+      name: metrics-server
+      repository: https://kubernetes-sigs.github.io/metrics-server
+      version: 3.8.2
+    - condition: prometheus.enabled
+      name: prometheus
+      repository: https://prometheus-community.github.io/helm-charts
+      version: "25.0"
+    - condition: prometheus-adapter.enabled
+      name: prometheus-adapter
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 4.2.0
+    description: A configurable IDOL NiFi setup
+    digest: 9db72816b1cd925874f4b596462039f605ce09d347fc556ac51f19b26a9205b9
+    name: idol-nifi
+    urls:
+    - release/idol-nifi-0.8.0.tgz
+    version: 0.8.0
+  - apiVersion: v2
+    appVersion: 24.3.0
     created: "2024-08-23T16:08:30.246536413+01:00"
     dependencies:
     - name: idol-library
@@ -1244,6 +1273,32 @@ entries:
     version: 0.1.0
   idol-stack:
   - apiVersion: v2
+    appVersion: 24.1.0
+    created: "2024-08-30T19:49:37.83115307+01:00"
+    dependencies:
+    - condition: idol-licenseserver.enabled
+      name: idol-licenseserver
+      repository: file://../idol-licenseserver
+      version: 0.4.0
+    - condition: single-content.enabled
+      name: single-content
+      repository: file://../single-content
+      version: 0.10.0
+    - condition: distributed-idol.enabled
+      name: distributed-idol
+      repository: file://../distributed-idol
+      version: 0.10.0
+    - condition: idol-nifi.enabled
+      name: idol-nifi
+      repository: file://../idol-nifi
+      version: 0.8.0
+    description: An IDOL setup
+    digest: 06561b41c2be2df40a85cba1db19702126b0fe5845365b620ff7f24b82aea432
+    name: idol-stack
+    urls:
+    - release/idol-stack-0.2.0.tgz
+    version: 0.2.0
+  - apiVersion: v2
     appVersion: 23.4.0
     created: "2024-04-25T11:59:29.343568642+01:00"
     dependencies:
@@ -1540,4 +1595,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2024-08-23T16:08:30.18174078+01:00"
+generated: "2024-08-30T19:49:37.810084961+01:00"

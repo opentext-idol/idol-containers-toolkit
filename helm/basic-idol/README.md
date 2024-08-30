@@ -1,3 +1,8 @@
+# NOTE
+THIS CHART IS DEPRECATED.
+To run a basic-idol setup with helm, consider using a deployment which combines the relevant helm charts
+(idol-nifi, idol-content, idol-commmunity, etc.), as is done in, e.g., idol-stack.
+
 # IDOL Helm Charts
 
 _Helm_ is a package manager for Kubernetes, a system for automating deployment, scaling, and management of containerized applications.
