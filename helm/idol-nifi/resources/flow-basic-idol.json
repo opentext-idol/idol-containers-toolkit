@@ -4,6 +4,7 @@
         "instanceIdentifier": "a4590192-0191-1000-9c61-ff707868c90f",
         "name": "Basic IDOL",
         "comments": "",
+        "parameterContextName": "IDOL NiFi Flow Parameters",
         "position": {
             "x": 0.0,
             "y": 0.0
@@ -14,6 +15,7 @@
                 "instanceIdentifier": "ae3ded7f-19a9-3d02-55c0-3fa7b88a20c8",
                 "name": "Document Processing",
                 "comments": "",
+                "parameterContextName": "IDOL NiFi Flow Parameters",
                 "position": {
                     "x": 1272.0,
                     "y": 800.0
@@ -806,11 +808,11 @@
                             "CompressIndexFiles": "false",
                             "KillDuplicates": "",
                             "UseXmlIndexing": "true",
-                            "Port": "9100",
+                            "Port": "#{IndexACIPort}",
                             "DocumentRegistryService": "75cf16cb-e705-3dee-ad74-465007bfbdc8",
                             "ReplaceAllRefs": "false",
                             "IdolLicenseService": "9f64332c-8d01-3949-bf85-d80a3513e14f",
-                            "Host": "idol-content",
+                            "Host": "#{IndexHost}",
                             "IndexOverSocket": "true",
                             "DefaultDatabaseName": "Default",
                             "IndexPriority": null,
@@ -1831,6 +1833,7 @@
                 "instanceIdentifier": "22eb7eee-f530-3d33-6f45-0100cd4654c6",
                 "name": "Connectors",
                 "comments": "",
+                "parameterContextName": "IDOL NiFi Flow Parameters",
                 "position": {
                     "x": 1272.0,
                     "y": 496.0
@@ -1841,6 +1844,7 @@
                         "instanceIdentifier": "6d51eb65-52c8-38d8-95fd-4ce32818c6ea",
                         "name": "Connector ACI",
                         "comments": "",
+                        "parameterContextName": "IDOL NiFi Flow Parameters",
                         "position": {
                             "x": 224.8130170225313,
                             "y": -82.93700940919956
@@ -2213,6 +2217,7 @@
                         "instanceIdentifier": "2e3094d7-b878-3c34-bf52-1cf198c7ac7f",
                         "name": "Connector Groups",
                         "comments": "",
+                        "parameterContextName": "IDOL NiFi Flow Parameters",
                         "position": {
                             "x": 224.8130170225313,
                             "y": 557.0629905908004
@@ -2223,6 +2228,7 @@
                                 "instanceIdentifier": "4f2b0427-1171-30cb-af67-c934f1401543",
                                 "name": "FileSystem Connector Group",
                                 "comments": "",
+                                "parameterContextName": "IDOL NiFi Flow Parameters",
                                 "position": {
                                     "x": 248.0,
                                     "y": 80.0
@@ -3124,8 +3130,8 @@
                                         },
                                         "properties": {
                                             "SSLConfigService": null,
-                                            "LicenseServerHost": "${license.server.hostname}",
-                                            "LicenseServerPort": "20000"
+                                            "LicenseServerHost": "#{LicenseServerHost}",
+                                            "LicenseServerPort": "#{LicenseServerACIPort}"
                                         },
                                         "propertyDescriptors": {
                                             "SSLConfigService": {
@@ -3884,8 +3890,8 @@
                 },
                 "properties": {
                     "SSLConfigService": null,
-                    "LicenseServerHost": "idol-licenseserver",
-                    "LicenseServerPort": "20000"
+                    "LicenseServerHost": "#{LicenseServerHost}",
+                    "LicenseServerPort": "#{LicenseServerACIPort}"
                 },
                 "propertyDescriptors": {
                     "SSLConfigService": {
@@ -3933,7 +3939,43 @@
         "flowFileOutboundPolicy": "STREAM_WHEN_AVAILABLE"
     },
     "externalControllerServices": {},
-    "parameterContexts": {},
+    "parameterContexts": {
+        "IDOL NiFi Flow Parameters": {
+            "componentType": "PARAMETER_CONTEXT",
+            "inheritedParameterContexts": [],
+            "name": "IDOL NiFi Flow Parameters",
+            "parameters": [
+                {
+                "description": "",
+                "name": "IndexHost",
+                "provided": false,
+                "sensitive": false,
+                "value": "idol-index-service"
+                },
+                {
+                "description": "",
+                "name": "LicenseServerHost",
+                "provided": false,
+                "sensitive": false,
+                "value": "idol-licenseserver"
+                },
+                {
+                "description": "",
+                "name": "IndexACIPort",
+                "provided": false,
+                "sensitive": false,
+                "value": "9070"
+                },
+                {
+                "description": "",
+                "name": "LicenseServerACIPort",
+                "provided": false,
+                "sensitive": false,
+                "value": "20000"
+                }
+            ]
+        }
+    },
     "flowEncodingVersion": "1.0",
     "parameterProviders": {},
     "latest": false
