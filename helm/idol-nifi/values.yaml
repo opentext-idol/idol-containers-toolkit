@@ -144,7 +144,7 @@ nifi:
     limits:
       cpu: 4000m
       # -- memory limit in mebibytes (value used in jvm memory calculation)
-      memoryMi: 8192
+      memoryMi: 10240
   
   dataVolume:
     # -- Name of the storage class used to provision a PersistentVolume
