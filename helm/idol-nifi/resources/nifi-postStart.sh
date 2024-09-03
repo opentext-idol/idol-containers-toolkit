@@ -13,7 +13,7 @@
 
 logfile=/opt/nifi/nifi-current/logs/post-start.log
 (
-    if [ "/" == "${JAVA_HOME:-/}" ]
+    if [ -z "${JAVA_HOME}" ]
     then
         JAVA_HOME=$(java -XshowSettings:properties -version 2>&1 | grep java.home | cut -d = -f 2 | xargs)
         export JAVA_HOME="$JAVA_HOME"
@@ -26,7 +26,7 @@ logfile=/opt/nifi/nifi-current/logs/post-start.log
     grep "${statefulsetname}-0." /etc/hostname
     notprimary=$?
     if [ 1 == ${notprimary} ]; then
-        echo [$(date)] Skipping post-start checks as non-primary instance
+        echo ["$(date)"] Skipping post-start checks as non-primary instance
         exit 0
     fi
 
@@ -37,5 +37,5 @@ logfile=/opt/nifi/nifi-current/logs/post-start.log
     fi
     /scripts/import-flow.sh
 
-    echo [$(date)] postStart completed
+    echo ["$(date)"] postStart completed
 ) | tee -a ${logfile}
