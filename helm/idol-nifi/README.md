@@ -105,8 +105,8 @@ The files that your connectors download from your data repositories must also be
 | nifi.ingress.tls.secretName | string | `""` | The name of the secret for ingress TLS. Leave empty if not using TLS.  If specified then either this secret must already exist, or crt and key values must be provided and secret will be created..  |
 | nifi.jvmMemoryRatio | float | `0.5` | What proportion of the pod memory to allocate for JVM usage |
 | nifi.keystorePassword | string | `""` | optional nifi.security.keystorePasswd value (see https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#security_properties) Setting this value is recommended. If it is not set, it will default to a generated value |
-| nifi.resources | object | `{"limits":{"cpu":"4000m","memoryMi":8192},"requests":{"cpu":"2000m","memoryMi":4096}}` | https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits |
-| nifi.resources.limits.memoryMi | int | `8192` | memory limit in mebibytes (value used in jvm memory calculation) |
+| nifi.resources | object | `{"limits":{"cpu":"4000m","memoryMi":10240},"requests":{"cpu":"2000m","memoryMi":4096}}` | https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits |
+| nifi.resources.limits.memoryMi | int | `10240` | memory limit in mebibytes (value used in jvm memory calculation) |
 | nifi.resources.requests.memoryMi | int | `4096` | memory requested in mebibytes (value used in jvm memory calculation) |
 | nifi.sensitivePropsKey | string | `""` | optional nifi.sensitive.props.key value (see https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#nifi_sensitive_props_key) Setting this value is recommended. If it is not set, it will default to a generated value |
 | nifi.truststorePassword | string | `""` | optional nifi.security.truststorePasswd value (see https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#security_properties) Setting this value is recommended. If it is not set, it will default to a generated value |
