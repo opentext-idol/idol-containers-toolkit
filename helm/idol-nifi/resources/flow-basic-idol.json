@@ -3437,7 +3437,7 @@
                                     "x": 16.0,
                                     "y": -248.0
                                 },
-                                "label": "To add a connector group: \n- Create a process group with the desired connector router and relations.\n- Add a GetFileSystem processor which, upon success, routes to the Synchronize Output output port.\n- In the ConnectorGroupRouter processor in the level above, add a new property for the connector group\n  (e.g. WebConnectorGroup with value Web) and create a connection to the new connector group\n  process group.\n- Make sure all failures are routed to the UnregisterDocument processor.",
+                                "label": "To add a connector group: \n- Create a process group with the desired connector router and relations.\n- Add a Get<connector> processor which, upon success, routes to the Synchronize Output output port.\n- In the ConnectorGroupRouter processor in the level above, add a new property for the connector group\n  (e.g. WebConnectorGroup with value Web) and create a connection to the new connector group\n  process group.\n- Make sure all failures are routed to the UnregisterDocument processor.",
                                 "zIndex": 0,
                                 "width": 856.0,
                                 "height": 168.0,
