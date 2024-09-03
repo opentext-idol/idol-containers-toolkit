@@ -13,6 +13,12 @@
 
 logfile=/opt/nifi/nifi-current/logs/post-start.log
 (
+    if [ "/" == "${JAVA_HOME:-/}" ]
+    then
+        JAVA_HOME=$(java -XshowSettings:properties -version 2>&1 | grep java.home | cut -d = -f 2 | xargs)
+        export JAVA_HOME="$JAVA_HOME"
+        echo ["$(date)"] Using auto-detected JAVA_HOME: "$JAVA_HOME"
+    fi
     /scripts/nifiProperties.sh
     /scripts/security.sh
 
