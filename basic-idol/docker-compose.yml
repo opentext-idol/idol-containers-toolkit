@@ -59,7 +59,7 @@ services:
       - idol-agentstore
   idol-nifi:
     <<: *common-server
-    image: ${IDOL_REGISTRY}/nifi-full:${IDOL_SERVER_VERSION} # choose nifi-minimal or nifi-full
+    image: ${IDOL_REGISTRY}/nifi-minimal:${IDOL_SERVER_VERSION} # choose nifi-minimal or nifi-full
     environment:
       - NIFI_WEB_PROXY_CONTEXT_PATH=/idol-nifi
       - NIFI_WEB_HTTP_PORT=8081
