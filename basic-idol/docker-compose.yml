@@ -64,9 +64,16 @@ services:
       - NIFI_WEB_PROXY_CONTEXT_PATH=/idol-nifi
       - NIFI_WEB_HTTP_PORT=8081
       - NIFI_SENSITIVE_PROPS_KEY=my_nifi_sensitive_props_key
+      - IDOL_NIFI_FLOWFILE=/opt/nifi/scripts/flow-basic-idol.json
     volumes:
       - idol-ingest-volume:/idol-ingest
-      - ./nifi/flow/basic.xml:/opt/nifi/flow/this_flow.xml:ro # this controls which NiFi flow is used
+      - ./nifi/resources/import-flow.sh:/opt/nifi/scripts/import-flow.sh
+      - ./nifi/resources/basic-idol-entrypoint.sh:/opt/nifi/scripts/basic-idol-entrypoint.sh
+      - ./nifi/flow/basic.json:/opt/nifi/scripts/flow-basic-idol.json
+    entrypoint:
+      - sh
+      - -c
+      - "/opt/nifi/scripts/basic-idol-entrypoint.sh"
   idol-find:
     image: ${IDOL_REGISTRY}/find:${IDOL_SERVER_VERSION}
     labels:
