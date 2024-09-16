@@ -72,7 +72,7 @@ env:
 {{- range $env }}
 - {{ . | toYaml | nindent 10 }}
 {{- end }}
-{{- if $component.usingTLS -}}
+{{- if $component.usingTLS }}
 - name: IDOL_SSL
   value: "1"
 {{- end }}
