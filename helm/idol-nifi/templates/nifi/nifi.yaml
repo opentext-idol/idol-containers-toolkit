@@ -113,7 +113,8 @@ spec:
   "destination" "idolnifi.statefulset.base" 
   "containers" (list "idolnifi.container")
   "volumes" (list (dict "name" "data" "emptyDir" (dict "sizeLimit" "3Gi"))
-                  (dict "name" "scripts" "configMap" (dict "name" "idol-nifi-scripts" "optional" false "defaultMode" 0755)))
+                  (dict "name" "scripts" "configMap" (dict "name" "idol-nifi-scripts" "optional" false "defaultMode" 0755))
+                  (dict "name" "dshm" "emptyDir" (dict "medium" "Memory" "sizeLimit" "256Mi")))
   "addConfigMap" false
 ) -}}
 
