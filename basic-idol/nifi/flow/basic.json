@@ -2196,9 +2196,7 @@
                                 "groupIdentifier": "6565d9c9-e8ea-3119-98a3-7821bd52940b"
                             }
                         ],
-                        "variables": {
-                            "connector.aci.port": "10000"
-                        },
+                        "variables": {},
                         "defaultFlowFileExpiration": "0 sec",
                         "defaultBackPressureObjectThreshold": 10000,
                         "defaultBackPressureDataSizeThreshold": "1 GB",
