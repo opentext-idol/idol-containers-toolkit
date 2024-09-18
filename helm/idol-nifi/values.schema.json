@@ -5,6 +5,12 @@
         "Values": {
             "type": "object",
             "properties": {
+                "annotations": {
+                    "type": "object"
+                },
+                "labels": {
+                    "type": "object"
+                },
                 "ingressClassName": {
                     "type": "string"
                 },
@@ -60,6 +66,10 @@
                 },
                 "additionalVolumeMounts":{
                     "type": "array"
+                },
+                "serviceAccountName":{
+                    "type": "string",
+                    "description": "Optional serviceAccountName for the pods (https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account)"
                 },
                 "nifi": {
                     "$ref": "#/definitions/Nifi"
@@ -195,6 +205,10 @@
                 "imagePullPolicy": {
                     "type": "string",
                     "enum": ["", "Always", "IfNotPresent", "Never"]
+                },
+                "idolOemLicenseSecret": {
+                    "type": "string",
+                    "description": "Optional Secret containing OEM licensekey.dat and versionkey.dat files for licensing."
                 }
             },
             "required":[
@@ -213,6 +227,9 @@
                     "minimum": 1
                 },
                 "maxReplicas": {
+                    "type": "integer"
+                },
+                "stabilizationWindowSeconds": {
                     "type": "integer"
                 },
                 "metrics": {
@@ -252,17 +269,24 @@
                 "aciHost": {
                     "type": "string"
                 },
+                "metricsHost": {
+                    "type": "string"
+                },
                 "tls": {
-                    "$ref": "#/definitions/NifiIngressTLS"   
+                    "$ref": "#/definitions/NifiIngressTLS"
                 },
                 "aciTLS": {
-                    "$ref": "#/definitions/NifiIngressTLS"   
+                    "$ref": "#/definitions/NifiIngressTLS"
+                },
+                "metricsTLS": {
+                    "$ref": "#/definitions/NifiIngressTLS"
                 }
             },
             "required": [
                 "enabled",
                 "tls",
-                "aciTLS"
+                "aciTLS",
+                "metricsTLS"
             ],
             "title": "NifiIngress"
         },

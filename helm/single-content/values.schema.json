@@ -166,6 +166,10 @@
                 "imagePullPolicy": {
                     "type": "string",
                     "enum": ["", "Always", "IfNotPresent", "Never"]
+                },
+                "idolOemLicenseSecret": {
+                    "type": "string",
+                    "description": "Optional Secret containing OEM licensekey.dat and versionkey.dat files for licensing."
                 }
             },
             "required":[
@@ -216,6 +220,36 @@
                 },
                 "resources":{
                     "$ref": "#/$defs/optional_object"
+                },
+                "labels": {
+                    "additionalProperties": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "description": "Additional labels applied to all objects (https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/)",
+                    "type": [
+                      "object",
+                      "null"
+                    ]
+                },
+                "annotations": {
+                    "additionalProperties": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "description": "Additional annotations applied to deployment/statefulset (https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/)",
+                    "type": [
+                      "object",
+                      "null"
+                    ]
+                },
+                "serviceAccountName":{
+                    "type": "string",
+                    "description": "Optional serviceAccountName for the pods (https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account)"
                 }
             },
             "required":[

@@ -1,0 +1,14 @@
+{
+   "component": {
+     "name": "PrometheusReportingTask",
+     "type": "org.apache.nifi.reporting.prometheus.PrometheusReportingTask",
+     "properties": {
+       "prometheus-reporting-task-metrics-endpoint-port": "9092",
+       "prometheus-reporting-task-instance-id": "${hostname(true)}",
+       "prometheus-reporting-task-metrics-strategy": "All Components",
+       "prometheus-reporting-task-metrics-send-jvm": "true",
+       "prometheus-reporting-task-ssl-context": null,
+       "prometheus-reporting-task-client-auth": "No Authentication"
+     }
+   }
+ }

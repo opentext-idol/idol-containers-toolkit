@@ -16,35 +16,50 @@
 # docker-compose -f docker-compose.yml -f docker-compose.add-mmap.yml up
 version: "3.7"
 
-# The version of IDOL components to use
+x-common-labels: &common-labels
+  docker-compose/instance: ${INSTANCE:-basic-idol}
+
+x-common-server: &common-server
+# Change the IP to the address of an external IDOL LicenseServer instance
+  extra_hosts:
+  - idol-licenseserver:${LICENSESERVER_IP}
+  labels:
+    <<: *common-labels
+
 x-args-shared: 
   - &mmap-postgres-password ieBPwmujrKEY9sh6oaybA8wyf
 
-# Change the IP to the address of an external IDOL LicenseServer instance
-x-external-licenseserver-host: &external-licenseserver-host
-  - idol-licenseserver:${LICENSESERVER_IP}
-
 volumes:
-  items:
+  items: &common-volume
+    labels:
+      <<: *common-labels
   static_video:
+    <<: *common-volume
   mediaserver-processed-video:
+    <<: *common-volume
   mmap-postgres-events: # Persistent storage for db
+    <<: *common-volume
 
 services:
-  idol-mediaserver:
-    image: ${IDOL_REGISTRY}/mediaserver-enus:${IDOL_SERVER_VERSION}
-    extra_hosts: *external-licenseserver-host
-    ports:
-      - 14000-14001:14000-14001
-    volumes:
-     - mediaserver-processed-video:/processed-video
+  # modified services
   idol-nifi:
     depends_on: [idol-mmap-app]
     volumes:
       - ./nifi/flow/with.mmap.xml:/opt/nifi/flow/this_flow.xml:ro # this controls which NiFi flow is used
       - mediaserver-processed-video:/processed-video
+
+  # additional services
+  idol-mediaserver:
+    <<: *common-server
+    image: ${IDOL_REGISTRY}/mediaserver-english:${IDOL_SERVER_VERSION}
+    ports:
+      - 14000-14001:14000-14001
+    volumes:
+     - mediaserver-processed-video:/processed-video
   idol-mmap-postgres:
     image: postgres:11-alpine
+    labels:
+      <<: *common-labels
     environment: 
       POSTGRES_DB: mmap-events
       POSTGRES_USER: mmap
@@ -53,18 +68,18 @@ services:
       - mmap-postgres-events:/var/lib/postgresql/data
       - ../common-files/mmap-postgres/schema:/docker-entrypoint-initdb.d
   idol-mmap-playlistserver:
+    <<: *common-server
     image: ${IDOL_REGISTRY}/mediaserver-playlistserver:${IDOL_SERVER_VERSION}
-    extra_hosts: *external-licenseserver-host
     ports:
       - 24000-24001:24000-24001
     volumes:
       - static_video:/mmap/data/static-video/final
   idol-mmap-app:
+    <<: *common-server
     depends_on: [idol-mmap-postgres, idol-mmap-playlistserver]
     image: ${IDOL_REGISTRY}/mmap_app:${IDOL_SERVER_VERSION}
     environment:
       MMAP_POSTGRES_PASSWORD: *mmap-postgres-password
-    extra_hosts: *external-licenseserver-host
     ports:
       - 8002:8080
       - 8443:8443

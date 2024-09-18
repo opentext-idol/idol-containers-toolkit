@@ -1,0 +1,55 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+{{- if and .Values.prometheus.enabled .Values.nifi.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: idol-nifi-metrics
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifi) | nindent 4 -}}
+  annotations:
+    app.kubernetes.io/name: nifi-metrics
+    app.kubernetes.io/part-of: nifi
+{{- if eq .Values.ingressType "nginx" }}
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/affinity-mode: persistent
+{{- end }}
+{{/* ingress setup is very dependent on cluster ingress controller so allow user value annotations */ -}}
+{{ with .Values.nifi.ingress.annotations }}
+{{- toYaml . | trim | indent 4 }}
+{{- end }}
+spec:
+{{- if .Values.ingressClassName }}
+  ingressClassName: {{ .Values.ingressClassName | quote }}
+{{- end }}
+{{- if .Values.nifi.ingress.metricsTLS.secretName }}
+  tls:
+  - hosts:
+      - {{ .Values.nifi.ingress.host }}
+    secretName: {{ .Values.nifi.ingress.metricsTLS.secretName }}
+{{- end }}
+  rules:
+  - http:
+      paths:
+      - path: /metrics
+        pathType: Prefix
+        backend:
+          service:
+            name: idol-nifi
+            port:
+              name: metrics
+{{- if .Values.nifi.ingress.metricsHost }}
+    host: {{ .Values.nifi.ingress.metricsHost | quote }}
+{{- end }}
+{{ if .Values.nifi.ingress.metricsTLS.secretName -}}
+---
+{{ include "idol-library.ingress.secret" (dict "tls" .Values.nifi.ingress.metricsTLS) -}}
+{{- end -}}
+{{- end }}

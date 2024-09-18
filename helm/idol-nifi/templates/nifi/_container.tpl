@@ -24,6 +24,8 @@ ports:
   name: cluster-lb
 - containerPort: 11000
   name: connector-aci
+- containerPort: 9092
+  name: metrics
 env:
   - name: POD_IP
     valueFrom:
@@ -58,6 +60,11 @@ envFrom:
   - configMapRef:
       name: idol-nifi-keys-env
       optional: false
+{{- if $component.envConfigMap }}
+  - configMapRef: 
+      name: {{ $component.envConfigMap | quote }}
+      optional: false
+{{- end }}
 lifecycle:
   postStart:
     exec:

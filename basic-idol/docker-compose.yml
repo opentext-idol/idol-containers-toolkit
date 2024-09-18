@@ -20,46 +20,65 @@
 
 version: "3.7"
 
+x-common-labels: &common-labels
+  docker-compose/instance: ${INSTANCE:-basic-idol}
+
+x-common-server: &common-server
 # Change the IP to the address of an external IDOL LicenseServer instance
-x-external-licenseserver-host: &external-licenseserver-host
+  extra_hosts:
   - idol-licenseserver:${LICENSESERVER_IP}
+  labels:
+    <<: *common-labels
 
 # Any files dropped into this volume will be ingested and indexed
 volumes:
   idol-ingest-volume:
+    labels:
+      <<: *common-labels
 
 services:
-  idol-content:
+  idol-content: 
+    <<: *common-server
     image: ${IDOL_REGISTRY}/content:${IDOL_SERVER_VERSION}
-    extra_hosts: *external-licenseserver-host
   idol-agentstore:
+    <<: *common-server
     image: ${IDOL_REGISTRY}/agentstore:${IDOL_SERVER_VERSION}
-    extra_hosts: *external-licenseserver-host
   idol-categorisation-agentstore:
+    <<: *common-server
     image: ${IDOL_REGISTRY}/categorisation-agentstore:${IDOL_SERVER_VERSION}
-    extra_hosts: *external-licenseserver-host
   idol-community:
+    <<: *common-server
     image: ${IDOL_REGISTRY}/community:${IDOL_SERVER_VERSION}
-    extra_hosts: *external-licenseserver-host
     depends_on:
       - idol-content
       - idol-agentstore
   idol-view:
+    <<: *common-server
     image: ${IDOL_REGISTRY}/view:${IDOL_SERVER_VERSION}
-    extra_hosts: *external-licenseserver-host
     depends_on:
       - idol-agentstore
   idol-nifi:
+    <<: *common-server
     image: ${IDOL_REGISTRY}/nifi-minimal:${IDOL_SERVER_VERSION} # choose nifi-minimal or nifi-full
+    shm_size: 256m
     environment:
       - NIFI_WEB_PROXY_CONTEXT_PATH=/idol-nifi
       - NIFI_WEB_HTTP_PORT=8081
-    extra_hosts: *external-licenseserver-host
+      - NIFI_SENSITIVE_PROPS_KEY=my_nifi_sensitive_props_key
+      - IDOL_NIFI_FLOWFILE=/opt/nifi/scripts/flow-basic-idol.json
     volumes:
       - idol-ingest-volume:/idol-ingest
-      - ./nifi/flow/basic.xml:/opt/nifi/flow/this_flow.xml:ro # this controls which NiFi flow is used
+      - ./nifi/resources/import-flow.sh:/opt/nifi/scripts/import-flow.sh
+      - ./nifi/resources/basic-idol-entrypoint.sh:/opt/nifi/scripts/basic-idol-entrypoint.sh
+      - ./nifi/flow/basic.json:/opt/nifi/scripts/flow-basic-idol.json
+    entrypoint:
+      - sh
+      - -c
+      - "/opt/nifi/scripts/basic-idol-entrypoint.sh"
   idol-find:
     image: ${IDOL_REGISTRY}/find:${IDOL_SERVER_VERSION}
+    labels:
+      <<: *common-labels
     environment:
       - IDOL_UI_CFG=config_basic.json # this controls the configuration of Find
     depends_on:
@@ -67,6 +86,8 @@ services:
       - idol-view
   httpd-reverse-proxy:
     image: httpd:2.4
+    labels:
+      <<: *common-labels
     volumes:
       - ./httpd-reverse-proxy/httpd.conf:/usr/local/apache2/conf/httpd.conf:ro
     depends_on:

@@ -15,7 +15,6 @@ metadata:
   labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifi) | nindent 4 -}}
     app: nifi
 data:
-  JAVA_HOME: "/usr/lib/jvm/jre-11"
   JAVA_OPTS: "-XX:UseAVX=0 -Djavax.net.debug=ssl,handshake"
   KEYSTORE_PATH: "${NIFI_HOME}/keytool/keystore.p12"
   KEYSTORE_TYPE: "PKCS12"

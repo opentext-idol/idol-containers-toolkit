@@ -17,17 +17,17 @@ description: An IDOL setup
 dependencies:
 - name: idol-licenseserver
   condition: idol-licenseserver.enabled
-  version: "0.2.0"
-  repository: file://../idol-licenseserver
+  version: "0.4.0"
+  repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 - name: single-content
   condition: single-content.enabled
-  version: "0.7.0"
-  repository: file://../single-content
+  version: "0.10.0"
+  repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 - name: distributed-idol
   condition: distributed-idol.enabled
-  version: "0.7.0"
-  repository: file://../distributed-idol
+  version: "0.10.0"
+  repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 - name: idol-nifi
   condition: idol-nifi.enabled
-  version: "0.3.0"
-  repository: file://../idol-nifi
+  version: "0.8.0"
+  repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
