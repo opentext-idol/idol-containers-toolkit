@@ -6,8 +6,12 @@ from tempfile import NamedTemporaryFile
 from typing import Dict, Optional
 
 class HelmChartTestBase():
-    chartpath = 'dummy'
-    update_dependency = False
+    chartpath = 'dummy'         # path to chart
+    update_dependency = False   # whether to run helm dependency update before running tests
+    debug = False               # --debug
+    # --validate requires a server connection and will clash with existing resources
+    # so best to use an empty namespace to avoid
+    validation_namespace = ''
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -25,7 +29,13 @@ class HelmChartTestBase():
             content = yaml.dump(values)
             tmp_file.write(content.encode())
             tmp_file.flush()
-            templates = subprocess.check_output(["helm", "template", '--values', tmp_file.name, name, self.chartpath])
+            cmd = ['helm','template']
+            cmd.extend(['--values', tmp_file.name, name, self.chartpath])
+            if HelmChartTestBase.validation_namespace:
+                cmd.extend(['-n', HelmChartTestBase.validation_namespace, '--validate'])
+            if HelmChartTestBase.debug:
+                cmd.extend(['--debug'])
+            templates = subprocess.check_output(cmd)
             ret = dict()
             for obj in yaml.load_all(templates, Loader=yaml.FullLoader):
                 if not obj:

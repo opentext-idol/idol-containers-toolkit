@@ -2,6 +2,11 @@ import os
 import unittest
 
 from utils.acibase import AciTestBase
+from utils.testbase import HelmChartTestBase
+
+# Testing options
+HelmChartTestBase.validation_namespace = ''
+HelmChartTestBase.debug = False
 
 class TestIdolLibraryExample(AciTestBase, unittest.TestCase):
     chartpath = os.path.join('..','idol-library-example-test')
