@@ -24,13 +24,13 @@ class HelmChartTestBase():
         return yaml.load(values, Loader=yaml.FullLoader)
 
     def render_chart(self, values: Optional[Dict] = None, name: str ='test') -> Dict:
-        values = values or {}
         with NamedTemporaryFile() as tmp_file:
-            content = yaml.dump(values)
-            tmp_file.write(content.encode())
-            tmp_file.flush()
-            cmd = ['helm','template']
-            cmd.extend(['--values', tmp_file.name, name, self.chartpath])
+            cmd = ['helm','template', name, self.chartpath ]
+            if values:
+                content = yaml.dump(values)
+                tmp_file.write(content.encode())
+                tmp_file.flush()
+                cmd.extend(['--values', tmp_file.name])
             if HelmChartTestBase.validation_namespace:
                 cmd.extend(['-n', HelmChartTestBase.validation_namespace, '--validate'])
             if HelmChartTestBase.debug:
