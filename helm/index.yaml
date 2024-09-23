@@ -768,6 +768,35 @@ entries:
     version: 0.1.0
   idol-nifi:
   - apiVersion: v2
+    appVersion: 24.4.0
+    created: "2024-09-23T11:03:27.272955879+01:00"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.14.1
+    - condition: idol-licenseserver.enabled
+      name: idol-licenseserver
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.4.0
+    - condition: nifi.autoScaling.enabled
+      name: metrics-server
+      repository: https://kubernetes-sigs.github.io/metrics-server
+      version: 3.8.2
+    - condition: prometheus.enabled
+      name: prometheus
+      repository: https://prometheus-community.github.io/helm-charts
+      version: "25.0"
+    - condition: prometheus-adapter.enabled
+      name: prometheus-adapter
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 4.2.0
+    description: A configurable IDOL NiFi setup
+    digest: 3135a25370c496fbf7b05cae3de19ea3e5758eba931f7ed1df62717e1070f9c2
+    name: idol-nifi
+    urls:
+    - release/idol-nifi-0.8.1.tgz
+    version: 0.8.1
+  - apiVersion: v2
     appVersion: 24.3.0
     created: "2024-09-03T18:58:27.293667224+01:00"
     dependencies:
@@ -1621,4 +1650,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2024-09-23T10:17:13.911902288+01:00"
+generated: "2024-09-23T11:03:27.249046543+01:00"
