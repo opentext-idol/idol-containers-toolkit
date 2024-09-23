@@ -13,6 +13,27 @@ entries:
   distributed-idol:
   - apiVersion: v2
     appVersion: 23.4.0
+    created: "2024-09-23T11:36:42.773132748+01:00"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.14.1
+    - condition: idol-licenseserver.enabled
+      name: idol-licenseserver
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.4.0
+    - condition: setupMirrored
+      name: metrics-server
+      repository: https://kubernetes-sigs.github.io/metrics-server
+      version: 3.8.2
+    description: A configurable distributed IDOL setup
+    digest: 7fd7251e22d188adcd3acab3f5ebbf3a28b421d9528902c44feca13a57632040
+    name: distributed-idol
+    urls:
+    - release/distributed-idol-0.10.0.tgz
+    version: 0.10.0
+  - apiVersion: v2
+    appVersion: 23.4.0
     created: "2024-05-13T13:04:44.153146017+01:00"
     dependencies:
     - name: idol-library
@@ -1428,6 +1449,32 @@ entries:
     version: 0.1.0
   idol-stack:
   - apiVersion: v2
+    appVersion: "24.4"
+    created: "2024-09-23T12:14:58.605489987+01:00"
+    dependencies:
+    - condition: idol-licenseserver.enabled
+      name: idol-licenseserver
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.4.0
+    - condition: single-content.enabled
+      name: single-content
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.10.1
+    - condition: distributed-idol.enabled
+      name: distributed-idol
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.10.0
+    - condition: idol-nifi.enabled
+      name: idol-nifi
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.8.1
+    description: An IDOL setup
+    digest: 6d968922f228d519dcee9fab97607366389dd1977217f512f1cba40d552afda6
+    name: idol-stack
+    urls:
+    - release/idol-stack-0.2.1.tgz
+    version: 0.2.1
+  - apiVersion: v2
     appVersion: 24.1.0
     created: "2024-09-03T18:58:27.321644955+01:00"
     dependencies:
@@ -1780,4 +1827,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2024-09-23T11:15:01.66330798+01:00"
+generated: "2024-09-23T12:14:58.577930171+01:00"
