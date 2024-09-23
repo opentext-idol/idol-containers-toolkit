@@ -521,6 +521,15 @@ entries:
     version: 0.1.0
   idol-library:
   - apiVersion: v2
+    created: "2024-09-23T10:14:15.962467877+01:00"
+    description: An IDOL Helm library chart for Kubernetes
+    digest: db4f5a7b8ba0099587ac53e95a5401a7c1af4cb0cba8fd3d5ed9159395f69dd9
+    name: idol-library
+    type: library
+    urls:
+    - release/idol-library-0.14.1.tgz
+    version: 0.14.1
+  - apiVersion: v2
     created: "2024-08-19T17:21:32.574996009+01:00"
     description: An IDOL Helm library chart for Kubernetes
     digest: b7762dc057c6d19183cf1f17dfee18fb8dcb7fe9626519e2f3be0e6ebc313a34
@@ -1595,4 +1604,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2024-09-03T18:58:27.27492937+01:00"
+generated: "2024-09-23T10:14:15.961751397+01:00"
