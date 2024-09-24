@@ -69,7 +69,7 @@ spec:
       {{- range $component.additionalVolumes }}
       - {{ . | toYaml | nindent 8 }}
       {{- end }}
-      {{- if (dig "podSecurityContext" "enabled" false $component.AsMap) }}
+      {{- if (dig "podSecurityContext" "enabled" false ($component | merge (dict))) }}
       securityContext: {{- omit $component.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
 
