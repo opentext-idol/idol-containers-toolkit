@@ -222,11 +222,14 @@ nifi:
   # -- optional nifi.sensitive.props.key value (see https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#nifi_sensitive_props_key)
   # Setting this value is recommended. If it is not set, it will default to a generated value
   sensitivePropsKey: ""
+  # -- optional will default to the created registry instance when nifiRegistry.enabled=true
+  registryHosts: ""
 
 nifiClusters:
  - {}
 
 nifiRegistry:
+  enabled: true
   ingress:
     # nifiRegistry.ingress.enabled -- whether to deploy ingress for nifi
     enabled: true

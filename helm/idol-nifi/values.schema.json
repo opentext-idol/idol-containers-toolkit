@@ -176,6 +176,9 @@
                 },
                 "sensitivePropsKey": {
                     "type":"string"
+                },
+                "registryHosts": {
+                    "type":"string"
                 }
             },
             "required": [
@@ -227,6 +230,9 @@
                         "type":"string"
                     },
                     "sensitivePropsKey": {
+                        "type":"string"
+                    },
+                    "registryHosts": {
                         "type":"string"
                     }
                 },
@@ -406,6 +412,9 @@
         "NifiRegistry": {
             "type": "object",
             "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
                 "ingress": {
                     "$ref": "#/definitions/NifiRegistryIngress"
                 },
@@ -414,6 +423,7 @@
                 }
             },
             "required": [
+                "enabled",
                 "ingress",
                 "resources"
             ],

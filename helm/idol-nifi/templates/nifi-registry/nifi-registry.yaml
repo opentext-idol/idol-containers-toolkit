@@ -8,27 +8,28 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
+{{- if .Values.nifiRegistry.enabled }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: nifi-registry
+  name: {{ .Values.name }}-reg
   labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifiRegistry) | nindent 4 -}}
-    name: nifi-registry
-    app: nifi-registry
+    name: {{ .Values.name }}-reg
+    app: {{ .Values.name }}-reg
   annotations:
-    app.kubernetes.io/name: nifi-registry
-    app.kubernetes.io/part-of: {{ $.Values.name }}
+    app.kubernetes.io/name: {{ .Values.name }}-reg
+    app.kubernetes.io/part-of: {{ .Values.name }}
 spec:
   revisionHistoryLimit: 1
-  serviceName: nifi-registry
+  serviceName: {{ .Values.name }}-reg
   podManagementPolicy: OrderedReady
   selector:
     matchLabels:
-      app: nifi-registry
+      app: {{ .Values.name }}-reg
   template:
     metadata:
       labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifiRegistry) | nindent 8 -}}
-        app: nifi-registry
+        app: {{ .Values.name }}-reg
     spec:
       automountServiceAccountToken: false
       enableServiceLinks: false
@@ -41,7 +42,7 @@ spec:
       imagePullSecrets:
       - name: dockerhub-secret
       containers:
-      - name: nifi-registry
+      - name: {{ .Values.name }}-reg
         image: docker.io/apache/nifi-registry:1.23.0
         imagePullPolicy: IfNotPresent
         ports:
@@ -56,7 +57,7 @@ spec:
                 fieldPath: status.podIP
         envFrom:
           - configMapRef:
-              name: nifi-registry-cm
+              name: {{ .Values.name }}-reg-cm
               optional: false
         livenessProbe:
           exec:
@@ -101,6 +102,7 @@ spec:
             sizeLimit: 2Gi
         - name: scripts
           configMap:
-            name: nifi-registry-scripts-cm
+            name: {{ .Values.name }}-reg-scripts-cm
             optional: false
             defaultMode: 0755
+{{- end -}}

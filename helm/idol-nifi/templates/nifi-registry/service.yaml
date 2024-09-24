@@ -8,19 +8,20 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
+{{- if .Values.nifiRegistry.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: nifi-registry
+  name: {{ .Values.name }}-reg
   labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifiRegistry) | nindent 4 -}}
-    app: nifi-registry
+    app: {{ .Values.name }}-reg
   annotations:
-    app.kubernetes.io/name: nifi-registry
+    app.kubernetes.io/name: {{ .Values.name }}-reg
     app.kubernetes.io/part-of: {{ $.Values.name }}
 spec:
   type: ClusterIP
   selector:
-    app: nifi-registry
+    app: {{ .Values.name }}-reg
   ports:
   - protocol: TCP
     port: 18080
@@ -30,3 +31,4 @@ spec:
     port: 18443
     targetPort: 18443
     name: https
+{{- end -}}

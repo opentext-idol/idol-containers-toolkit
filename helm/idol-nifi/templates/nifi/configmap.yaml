@@ -53,7 +53,7 @@ data:
 {{- end }}
   NIFI_ZK_CONNECT_STRING: "{{ $nifiCluster.clusterId }}-zk:2181"
   NIFI_ZOOKEEPER_CONNECT_STRING: "{{ $nifiCluster.clusterId }}-zk:2181"
-  NIFI_REGISTRY_HOSTS: nifi-registry
+  NIFI_REGISTRY_HOSTS: "{{ $.Values.nifiRegistry.enabled | ternary (print $.Values.name "-reg") $nifiCluster.registryHosts }}"
   TRUSTSTORE_PATH: "${NIFI_HOME}/keytool/truststore.jks"
   TRUSTSTORE_TYPE: "jks"
   IDOL_NIFI_FLOWFILE: {{ $nifiCluster.flowfile | quote }}

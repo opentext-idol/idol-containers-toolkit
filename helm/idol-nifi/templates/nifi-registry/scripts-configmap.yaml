@@ -8,12 +8,14 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
+{{- if .Values.nifiRegistry.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: nifi-registry-scripts-cm
+  name: {{ .Values.name }}-reg-scripts-cm
   labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifiRegistry) | nindent 4 -}}
-    app: nifi-registry
+    app: {{ .Values.name }}-reg
 data:
   postStart.sh: |
 {{ tpl (.Files.Get "resources/nifi-registry-postStart.sh") . | indent 4 }}
+{{- end -}}
