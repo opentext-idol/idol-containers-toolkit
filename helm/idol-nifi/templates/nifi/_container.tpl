@@ -13,6 +13,7 @@
 {{/* specific merges to container specification */}}
 {{- $root := get . "root" | required "idolnifi.container.base: missing root" -}}
 {{- $component := get . "component" | required "idolnifi.container.base: missing component" -}}
+{{- $nifiCluster := get . "nifiCluster" | required "idolnifi.container.base: missing nifiCluster" -}}
 ports:
 - containerPort: 8080
   name: http
@@ -44,23 +45,23 @@ env:
   - name: NIFI_UI_BANNER_TEXT
     value: $(POD_NAME) # Use pod name for banner
   - name: NIFI_WEB_HTTP_HOST
-    value: $(POD_NAME).nifi.$(POD_NAMESPACE).svc.cluster.local # Use pod fqdn as web host
+    value: $(POD_NAME).{{ $.nifiCluster.clusterId }}.$(POD_NAMESPACE).svc.cluster.local # Use pod fqdn as web host
   - name: NIFI_CLUSTER_NODE_ADDRESS
-    value: $(POD_NAME).nifi.$(POD_NAMESPACE).svc.cluster.local # Use pod fqdn as node address
+    value: $(POD_NAME).{{ $.nifiCluster.clusterId }}.$(POD_NAMESPACE).svc.cluster.local # Use pod fqdn as node address
   - name: NIFI_REMOTE_INPUT_SOCKET_HOST
-    value: $(POD_NAME).nifi.$(POD_NAMESPACE).svc.cluster.local # Use pod fqdn as input socket address
+    value: $(POD_NAME).{{ $.nifiCluster.clusterId }}.$(POD_NAMESPACE).svc.cluster.local # Use pod fqdn as input socket address
   - name: NIFI_REMOTE_INPUT_HOST
-    value: $(POD_NAME).nifi.$(POD_NAMESPACE).svc.cluster.local # Use pod fqdn as input host address
+    value: $(POD_NAME).{{ $.nifiCluster.clusterId }}.$(POD_NAMESPACE).svc.cluster.local # Use pod fqdn as input host address
   - name: HOSTNAME
     value: $(POD_IP) # Use pod ip as hostname
   - name: NODE_IDENTITY
     value: $(POD_NAME) # Use pod name as identity
 envFrom:
   - configMapRef:
-      name: idol-nifi-env
+      name: {{ $component.name }}-env
       optional: false
   - configMapRef:
-      name: idol-nifi-keys-env
+      name: {{ $component.name }}-keys-env
       optional: false
 {{- if $component.envConfigMap }}
   - configMapRef: 
@@ -98,11 +99,11 @@ readinessProbe:
   successThreshold: 1
 resources:
   requests:
-    cpu: {{ $component.nifi.resources.requests.cpu }}
-    memory: {{ printf "%dMi" ( $component.nifi.resources.requests.memoryMi | int) }}
+    cpu: {{ $nifiCluster.resources.requests.cpu }}
+    memory: {{ printf "%dMi" ( $nifiCluster.resources.requests.memoryMi | int) }}
   limits:
-    cpu: {{ $component.nifi.resources.limits.cpu }}
-    memory: {{ printf "%dMi" ( $component.nifi.resources.limits.memoryMi | int) }}
+    cpu: {{ $nifiCluster.resources.limits.cpu }}
+    memory: {{ printf "%dMi" ( $nifiCluster.resources.limits.memoryMi | int) }}
 {{- if $component.containerSecurityContext.enabled }}
 securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml | nindent 10 }}
 {{- end -}}
@@ -113,9 +114,11 @@ securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml
 {{- define "idolnifi.container" -}}
 {{- $root := get . "root" | required "idolnifi.container: missing root" -}}
 {{- $component := get . "component" | required "idolnifi.container: missing component" -}}
+{{- $nifiCluster := get . "nifiCluster" | required "idolnifi.container: missing nifiCluster" -}}
 {{- include "idol-library.util.merge" (dict
   "root" $root
   "component" $component
+  "nifiCluster" $nifiCluster
   "source" "idol-library.aciserver.container.base.v1"
   "destination" "idolnifi.container.base" 
   "volumeMounts" (list (dict "name" "statedata" "mountPath" "/opt/nifi/nifi-current/conf" "subPath" "conf" "readOnly" false)

@@ -8,28 +8,32 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-{{- if .Values.nifi.autoScaling.enabled }}
+{{- range $nifiClusterItem := .Values.nifiClusters }}
+{{ $nifiCluster := merge $nifiClusterItem $.Values.nifi (dict "clusterId" $.Values.name) }}
+{{- if $nifiCluster.autoScaling.enabled }}
+---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ .Values.name }}
-  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifi) | nindent 4 -}}
-    app.kubernetes.io/name: nifi
+  name: {{ $nifiCluster.clusterId }}
+  labels: {{- include "idol-library.labels" (dict "root" $ "component" $nifiCluster) | nindent 4 -}}
+    app.kubernetes.io/name: {{ $nifiCluster.clusterId }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: StatefulSet
-    name: {{ .Values.name }}
-  minReplicas: {{ .Values.nifi.autoScaling.minReplicas | int }}
-  maxReplicas: {{ .Values.nifi.autoScaling.maxReplicas | int }}
+    name: {{ $nifiCluster.clusterId }}
+  minReplicas: {{ $nifiCluster.autoScaling.minReplicas | int }}
+  maxReplicas: {{ $nifiCluster.autoScaling.maxReplicas | int }}
   behavior:
     scaleUp:
-      stabilizationWindowSeconds: {{ .Values.nifi.autoScaling.stabilizationWindowSeconds | int }}
+      stabilizationWindowSeconds: {{ $nifiCluster.autoScaling.stabilizationWindowSeconds | int }}
     scaleDown:
-      stabilizationWindowSeconds: {{ .Values.nifi.autoScaling.stabilizationWindowSeconds | int }}
+      stabilizationWindowSeconds: {{ $nifiCluster.autoScaling.stabilizationWindowSeconds | int }}
   metrics:
-{{ with .Values.nifi.autoScaling.metrics }}
+{{ with $nifiCluster.autoScaling.metrics }}
 {{- toYaml . | trim | indent 4 }}
 {{- end }}
 
-{{- end }}
+{{- end -}}
+{{- end -}}

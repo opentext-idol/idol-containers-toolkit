@@ -223,6 +223,9 @@ nifi:
   # Setting this value is recommended. If it is not set, it will default to a generated value
   sensitivePropsKey: ""
 
+nifiClusters:
+ - {}
+
 nifiRegistry:
   ingress:
     # nifiRegistry.ingress.enabled -- whether to deploy ingress for nifi

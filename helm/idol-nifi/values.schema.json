@@ -74,6 +74,9 @@
                 "nifi": {
                     "$ref": "#/definitions/Nifi"
                 },
+                "nifiClusters": {
+                    "$ref": "#/definitions/NifiCluster"
+                },
                 "nifiRegistry": {
                     "$ref": "#/definitions/NifiRegistry"
                 },
@@ -184,6 +187,51 @@
                 "dataVolume"
             ],
             "title": "Nifi"
+        },
+        "NifiCluster": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "clusterId": {
+                        "type":"string",
+                        "minLength": 1
+                    },
+                    "autoScaling": {
+                        "$ref": "#/definitions/AutoScaling"
+                    },
+                    "resources": {
+                        "$ref": "#/definitions/Resources"
+                    },
+                    "dataVolume": {
+                        "$ref": "#/definitions/DataVolume"
+                    },
+                    "jvmMemoryRatio": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 0.99
+                    },
+                    "flowfile": {
+                        "type":"string",
+                        "minLength": 1
+                    },
+                    "ingress": {
+                        "$ref": "#/definitions/NifiIngress"
+                    },
+                    "keystorePassword": {
+                        "type":"string"
+                    },
+                    "truststorePassword": {
+                        "type":"string"
+                    },
+                    "sensitivePropsKey": {
+                        "type":"string"
+                    }
+                },
+                "title": "NifiCluster"
+            }
         },
         "Global":{
             "type": "object",

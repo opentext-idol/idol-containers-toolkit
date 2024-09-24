@@ -8,54 +8,58 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-{{- if .Values.nifi.ingress.enabled -}}
+{{- range $nifiClusterItem := .Values.nifiClusters }}
+{{ $nifiCluster := merge $nifiClusterItem $.Values.nifi (dict "clusterId" $.Values.name) }}
+{{- if $nifiCluster.ingress.enabled -}}
 {{- /*
  nginx ingress needs path capture to achieve prefix type routing
 */}}
 {{- $pathSuffix := "" }}
 {{- $pathType := "Prefix" }}
-{{- if eq .Values.ingressType "nginx" }}
+{{- if eq $.Values.ingressType "nginx" }}
 {{- $pathSuffix = "(.*)"}}
 {{- $pathType = "ImplementationSpecific" }}
 {{- end }}
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: idol-nifi-aci
-  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifi) | nindent 4 -}}
+  name: {{ $nifiCluster.clusterId }}-aci
+  labels: {{- include "idol-library.labels" (dict "root" $ "component" $nifiCluster) | nindent 4 -}}
   annotations:
-{{- if eq .Values.ingressType "nginx" }}
+{{- if eq $.Values.ingressType "nginx" }}
     nginx.ingress.kubernetes.io/rewrite-target: /$1
-    nginx.ingress.kubernetes.io/proxy-body-size: {{ .Values.ingressProxyBodySize }}
-{{- else if eq .Values.ingressType "haproxy" }}
+    nginx.ingress.kubernetes.io/proxy-body-size: {{ $.Values.ingressProxyBodySize }}
+{{- else if eq $.Values.ingressType "haproxy" }}
     haproxy.router.openshift.io/rewrite-target: / 
-    haproxy.router.openshift.io/proxy-body-size: {{ .Values.ingressProxyBodySize }}
+    haproxy.router.openshift.io/proxy-body-size: {{ $.Values.ingressProxyBodySize }}
 {{- end }}
 spec:
-{{- if .Values.ingressClassName }}
-  ingressClassName: {{ .Values.ingressClassName }}
+{{- if $.Values.ingressClassName }}
+  ingressClassName: {{ $.Values.ingressClassName }}
 {{- end }}
-{{- if .Values.nifi.ingress.aciTLS.secretName }}
+{{- if $nifiCluster.ingress.aciTLS.secretName }}
   tls:
   - hosts:
-      - {{ .Values.nifi.ingress.host }}
-    secretName: {{ .Values.nifi.ingress.aciTLS.secretName }}
+      - {{ $nifiCluster.ingress.host }}
+    secretName: {{ $nifiCluster.ingress.aciTLS.secretName }}
 {{- end }}
   rules:
   - http:
       paths:
-      - path: {{ print "/connector-aci/" $pathSuffix }}
+      - path: {{ print "/" (trimAll "/" (default ( len $.Values.nifiClusters | plural "" $nifiCluster.clusterId) $nifiCluster.ingress.proxyPath)) "/connector-aci/" $pathSuffix | quote }}
         pathType: {{ $pathType }}
         backend:
           service:
-            name: idol-nifi
+            name: {{ $nifiCluster.clusterId }}
             port:
               name: connector-aci
-{{- if .Values.nifi.ingress.aciHost }}
-    host: {{ .Values.nifi.ingress.aciHost | quote }}
+{{- if $nifiCluster.ingress.aciHost }}
+    host: {{ $nifiCluster.ingress.aciHost | quote }}
 {{- end }}
-{{ if .Values.nifi.ingress.aciTLS.secretName -}}
+{{ if $nifiCluster.ingress.aciTLS.secretName -}}
 ---
-{{ include "idol-library.ingress.secret" (dict "tls" .Values.nifi.ingress.aciTLS) -}}
+{{ include "idol-library.ingress.secret" (dict "tls" $nifiCluster.ingress.aciTLS) -}}
 {{- end -}}
-{{- end }}
+{{- end -}}
+{{- end -}}

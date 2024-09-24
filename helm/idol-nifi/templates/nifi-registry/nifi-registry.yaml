@@ -17,7 +17,7 @@ metadata:
     app: nifi-registry
   annotations:
     app.kubernetes.io/name: nifi-registry
-    app.kubernetes.io/part-of: nifi
+    app.kubernetes.io/part-of: {{ $.Values.name }}
 spec:
   revisionHistoryLimit: 1
   serviceName: nifi-registry

@@ -8,12 +8,15 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
+{{- range $nifiClusterItem := .Values.nifiClusters }}
+{{ $nifiCluster := merge $nifiClusterItem $.Values.nifi (dict "clusterId" $.Values.name) }}
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: idol-nifi-env
-  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifi) | nindent 4 -}}
-    app: nifi
+  name: {{ $nifiCluster.clusterId }}-env
+  labels: {{- include "idol-library.labels" (dict "root" $ "component" $nifiCluster) | nindent 4 -}}
+    app: {{ $nifiCluster.clusterId }}
 data:
   JAVA_OPTS: "-XX:UseAVX=0 -Djavax.net.debug=ssl,handshake"
   KEYSTORE_PATH: "${NIFI_HOME}/keytool/keystore.p12"
@@ -33,22 +36,25 @@ data:
   NIFI_CONTENT_REPOSITORY_ARCHIVE_ENABLED: "false"
   NIFI_ELECTION_MAX_CANDIDATES: "1"
   NIFI_ELECTION_MAX_WAIT: "2 min"
-  NIFI_JVM_HEAP_INIT: {{ printf "%dm" ( mulf .Values.nifi.resources.requests.memoryMi .Values.nifi.jvmMemoryRatio | int ) }}
-  NIFI_JVM_HEAP_MAX: {{ printf "%dm" ( mulf .Values.nifi.resources.limits.memoryMi .Values.nifi.jvmMemoryRatio | int ) }}
+  NIFI_JVM_HEAP_INIT: {{ printf "%dm" ( mulf $nifiCluster.resources.requests.memoryMi $nifiCluster.jvmMemoryRatio | int ) }}
+  NIFI_JVM_HEAP_MAX: {{ printf "%dm" ( mulf $nifiCluster.resources.limits.memoryMi $nifiCluster.jvmMemoryRatio | int ) }}
   NIFI_SECURITY_AUTORELOAD_ENABLED: "true"
   NIFI_SECURITY_AUTORELOAD_INTERVAL: "5 min"
   NIFI_SECURITY_NEEDCLIENTAUTH: "true"
   NIFI_WEB_HTTP_PORT: "8080"
   NIFI_WEB_HTTPS_PORT: "8443"
-{{- if .Values.nifi.ingress.proxyPath }}
-  NIFI_WEB_PROXY_CONTEXT_PATH: {{ .Values.nifi.ingress.proxyPath | quote }}
+{{- if $nifiCluster.ingress.proxyPath }}
+  NIFI_WEB_PROXY_CONTEXT_PATH: {{ $nifiCluster.ingress.proxyPath | quote }}
+{{- else if gt (len $.Values.nifiClusters) 1 }}
+  NIFI_WEB_PROXY_CONTEXT_PATH: "/{{ $nifiCluster.clusterId }}"
 {{- end }}
-{{- if .Values.nifi.ingress.proxyHost }}
-  NIFI_WEB_PROXY_HOST: {{ .Values.nifi.ingress.proxyHost | quote }}
+{{- if $nifiCluster.ingress.proxyHost }}
+  NIFI_WEB_PROXY_HOST: {{ $nifiCluster.ingress.proxyHost | quote }}
 {{- end }}
-  NIFI_ZK_CONNECT_STRING: "zookeeper:2181"
-  NIFI_ZOOKEEPER_CONNECT_STRING: "zookeeper:2181"
+  NIFI_ZK_CONNECT_STRING: "{{ $nifiCluster.clusterId }}-zk:2181"
+  NIFI_ZOOKEEPER_CONNECT_STRING: "{{ $nifiCluster.clusterId }}-zk:2181"
   NIFI_REGISTRY_HOSTS: nifi-registry
   TRUSTSTORE_PATH: "${NIFI_HOME}/keytool/truststore.jks"
   TRUSTSTORE_TYPE: "jks"
-  IDOL_NIFI_FLOWFILE: {{ .Values.nifi.flowfile | quote }}
+  IDOL_NIFI_FLOWFILE: {{ $nifiCluster.flowfile | quote }}
+{{- end }}
