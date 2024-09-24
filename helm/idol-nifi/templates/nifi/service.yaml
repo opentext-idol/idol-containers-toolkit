@@ -46,3 +46,7 @@ spec:
     port: 9092
     targetPort: 9092
     name: metrics
+  - protocol: TCP
+    port: 10000
+    targetPort: 10000
+    name: remote-input

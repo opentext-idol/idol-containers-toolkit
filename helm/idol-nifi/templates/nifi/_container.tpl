@@ -26,6 +26,8 @@ ports:
   name: connector-aci
 - containerPort: 9092
   name: metrics
+- containerPort: 10000
+  name: remote-input
 env:
   - name: POD_IP
     valueFrom:
