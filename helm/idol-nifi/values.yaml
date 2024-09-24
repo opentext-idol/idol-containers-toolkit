@@ -278,6 +278,7 @@ idol-licenseserver:
   licenseServerPort: "20000"
 
 metrics-server:
+  enabled: true
   args:
     - "--kubelet-insecure-tls"
 
