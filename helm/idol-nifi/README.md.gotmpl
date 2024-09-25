@@ -57,7 +57,7 @@ Each cluster will use parameters from the nifi section by default, but can be ov
 Alternatively, this helm chart can be installed multiple times. In this case, the first deployment should deploy nifi registry, prometheus, metrics-server etc, and any further deployments should specify:
 ```
 nifi:
-  registryHosts: [existing-deployment-name]-reg
+  registryHost: [existing-deployment-name]-reg
 nifiRegistry:
   enabled: false
 prometheus:

@@ -176,7 +176,7 @@
                 "sensitivePropsKey": {
                     "type":"string"
                 },
-                "registryHosts": {
+                "registryHost": {
                     "type":"string"
                 }
             }
