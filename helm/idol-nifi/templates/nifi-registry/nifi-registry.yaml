@@ -42,7 +42,7 @@ spec:
       imagePullSecrets:
       - name: dockerhub-secret
       containers:
-      - name: {{ .Values.name }}-reg
+      - name: nifi-registry
         image: docker.io/apache/nifi-registry:1.23.0
         imagePullPolicy: IfNotPresent
         ports:
