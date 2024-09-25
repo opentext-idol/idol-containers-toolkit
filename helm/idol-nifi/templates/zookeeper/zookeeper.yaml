@@ -63,7 +63,7 @@ spec:
             value: "server.1=$(POD_IP):2888:3888;2181"
         envFrom:
           - configMapRef:
-              name: {{ $nifiCluster.clusterId }}-zk-cm
+              name: {{ $.Values.name }}-zk-cm
               optional: false
         livenessProbe:
           exec:

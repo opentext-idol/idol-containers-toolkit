@@ -8,15 +8,12 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-{{- range $nifiClusterItem := .Values.nifiClusters }}
-{{ $nifiCluster := merge $nifiClusterItem $.Values.nifi (dict "clusterId" $.Values.name) }}
----
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ $nifiCluster.clusterId }}-zk-cm
-  labels: {{- include "idol-library.labels" (dict "root" $ "component" $.Values.zookeeper) | nindent 4 -}}
-    app: {{ $nifiCluster.clusterId }}-zk
+  name: {{ .Values.name }}-zk-cm
+  labels: {{- include "idol-library.labels" (dict "root" $ "component" .Values.zookeeper) | nindent 4 -}}
+    app: {{ .Values.name }}-zk
 data:
   ALLOW_ANONYMOUS_LOGIN: "yes"
   ZOO_ADMINSERVER_ENABLED: "false"
@@ -27,4 +24,3 @@ data:
   ZOO_STANDALONE_ENABLED: "true"
   ZOO_SYNC_LIMIT: "6"
   ZOO_TICK_TIME: "4000"
-{{- end -}}
