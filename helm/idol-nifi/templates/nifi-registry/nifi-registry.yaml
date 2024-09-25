@@ -40,7 +40,9 @@ spec:
       securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
 {{- end }}
       imagePullSecrets:
-      - name: dockerhub-secret
+{{- range .Values.global.imagePullSecrets }}
+      - name: {{ . }}
+{{- end }}
       containers:
       - name: nifi-registry
         image: docker.io/apache/nifi-registry:1.23.0
