@@ -13,7 +13,7 @@
 
 set -x -o allexport
 
-if [ ! -z "${NIFI_REGISTRY_HOSTS}" ]; then
+if [ -z "${NIFI_REGISTRY_HOSTS}" ]; then
     echo [$(date)] "No NiFi Registry hosts"
     echo [$(date)] "Flow import skipped"
     exit 0
