@@ -30,6 +30,13 @@ logfile=/opt/nifi/nifi-current/logs/post-start.log
         exit 0
     fi
 
+    onetimeFile=/opt/nifi/nifi-current/conf/idol-nifi-onetime-setup-complete
+
+    if [ -f ${onetimeFile} ]; then
+        echo ["$(date)"] Skipping post-start due to ${onetimeFile}
+        exit 0
+    fi
+
     /scripts/wait.sh
     /scripts/connect-registry.sh
     if [ -f /scripts/prometheous-reporting.sh ]; then
@@ -38,4 +45,6 @@ logfile=/opt/nifi/nifi-current/logs/post-start.log
     /scripts/import-flow.sh
 
     echo ["$(date)"] postStart completed
+
+    touch ${onetimeFile}
 ) | tee -a ${logfile}

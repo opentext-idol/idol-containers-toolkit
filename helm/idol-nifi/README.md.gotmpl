@@ -42,6 +42,33 @@ To run a NiFi cluster, you may need to use an external database for storing stat
 
 The files that your connectors download from your data repositories must also be accessible to all of the nodes in a cluster. When you configure your connectors, set the property `adv:IngestSharedPath` to a location, such as a shared folder, that is accessible from all of the nodes in the cluster. Alternatively, set the property `adv:FlowFileEmbedFiles` to `TRUE`, so that the binary file content is included in the FlowFiles created by the connector.
 
+## Deploying multiple NiFi clusters
+
+Multiple NiFi clusters can be deployed from a single helm install command by specifying nifiClusters in the provided values.yaml, e.g.
+```
+    nifiClusters:
+    - clusterId: nf1
+    - clusterId: nf2
+```
+Each NiFi cluster will, by default, be accessible at [hostname]/[clusterId]/nifi and can communicate with each other by using http://[clusterId]:8080/nifi as the instance url when configuring remote process groups.
+
+Each cluster will use parameters from the nifi section by default, but can be overridden in the nifiClusters entry.
+
+Alternatively, this helm chart can be installed multiple times. In this case, the first deployment should deploy nifi registry, prometheus, metrics-server etc, and any further deployments should specify:
+```
+nifi:
+  registryHost: [existing-deployment-name]-reg
+nifiRegistry:
+  enabled: false
+prometheus:
+  enabled: false
+prometheus-adapter:
+  enabled: false
+metrics-server:
+  enabled: false
+```
+Each deployment will require a unique name, and ingress points should be manually specified such that they do not conflict. NiFi clusters can communicate with each other by using http://[name]:8080/nifi as the instance url when configuring remote process groups.
+
 {{ template "chart.valuesSection" . }}
 
 {{ template "helm-docs.versionFooter" . }}

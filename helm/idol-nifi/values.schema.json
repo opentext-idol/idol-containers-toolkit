@@ -1,7 +1,7 @@
 {
-    "$schema": "https://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/Values",
-    "definitions": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$ref": "#/$defs/Values",
+    "$defs": {
         "Values": {
             "type": "object",
             "properties": {
@@ -34,14 +34,14 @@
                     "minLength": 1
                 },
                 "global": {
-                    "#ref": "#/definitions/Global"
+                    "#ref": "#/$defs/Global"
                 },
                 "indexserviceName": {
                     "type": "string",
                     "minLength": 1
                 },
                 "indexserviceACIPort": {
-                    "#ref": "#/definitions/port_number"
+                    "#ref": "#/$defs/port_number"
                 },
                 "podSecurityContext":{
                     "type": "object",
@@ -72,16 +72,19 @@
                     "description": "Optional serviceAccountName for the pods (https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account)"
                 },
                 "nifi": {
-                    "$ref": "#/definitions/Nifi"
+                    "$ref": "#/$defs/Nifi"
+                },
+                "nifiClusters": {
+                    "$ref": "#/$defs/NifiCluster"
                 },
                 "nifiRegistry": {
-                    "$ref": "#/definitions/NifiRegistry"
+                    "$ref": "#/$defs/NifiRegistry"
                 },
                 "zookeeper": {
-                    "$ref": "#/definitions/Zookeeper"
+                    "$ref": "#/$defs/Zookeeper"
                 },
                 "idol-licenseserver": {
-                    "$ref": "#/definitions/IdolLicenseserver"
+                    "$ref": "#/$defs/IdolLicenseserver"
                 }
             },
             "required": [
@@ -140,18 +143,17 @@
             ],
             "title": "IdolLicenseserver"
         },
-        "Nifi": {
+        "NifiProperties": {
             "type": "object",
-            "additionalProperties": false,
             "properties": {
                 "autoScaling": {
-                    "$ref": "#/definitions/AutoScaling"
+                    "$ref": "#/$defs/AutoScaling"
                 },
                 "resources": {
-                    "$ref": "#/definitions/Resources"
+                    "$ref": "#/$defs/Resources"
                 },
                 "dataVolume": {
-                    "$ref": "#/definitions/DataVolume"
+                    "$ref": "#/$defs/DataVolume"
                 },
                 "jvmMemoryRatio": {
                     "type": "number",
@@ -163,7 +165,7 @@
                     "minLength": 1
                 },
                 "ingress": {
-                    "$ref": "#/definitions/NifiIngress"
+                    "$ref": "#/$defs/NifiIngress"
                 },
                 "keystorePassword": {
                     "type":"string"
@@ -173,8 +175,17 @@
                 },
                 "sensitivePropsKey": {
                     "type":"string"
+                },
+                "registryHost": {
+                    "type":"string"
                 }
-            },
+            }
+        },
+        "Nifi":{
+            "allOf": [
+                {"$ref": "#/$defs/NifiProperties"}
+            ],
+            "unevaluatedProperties": false,
             "required": [
                 "autoScaling",
                 "flowfile",
@@ -184,6 +195,25 @@
                 "dataVolume"
             ],
             "title": "Nifi"
+        },
+        "NifiCluster": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "unevaluatedProperties": false,
+                "allOf": [
+                    {"$ref":"#/$defs/NifiProperties"},
+                    {
+                        "properties": {
+                        "clusterId":{
+                            "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "title": "NifiCluster"
+            }
         },
         "Global":{
             "type": "object",
@@ -273,13 +303,13 @@
                     "type": "string"
                 },
                 "tls": {
-                    "$ref": "#/definitions/NifiIngressTLS"
+                    "$ref": "#/$defs/NifiIngressTLS"
                 },
                 "aciTLS": {
-                    "$ref": "#/definitions/NifiIngressTLS"
+                    "$ref": "#/$defs/NifiIngressTLS"
                 },
                 "metricsTLS": {
-                    "$ref": "#/definitions/NifiIngressTLS"
+                    "$ref": "#/$defs/NifiIngressTLS"
                 }
             },
             "required": [
@@ -312,10 +342,10 @@
             "additionalProperties": false,
             "properties": {
                 "requests": {
-                    "$ref": "#/definitions/Limits"
+                    "$ref": "#/$defs/Limits"
                 },
                 "limits": {
-                    "$ref": "#/definitions/Limits"
+                    "$ref": "#/$defs/Limits"
                 }
             },
             "required": [
@@ -358,14 +388,18 @@
         "NifiRegistry": {
             "type": "object",
             "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
                 "ingress": {
-                    "$ref": "#/definitions/NifiRegistryIngress"
+                    "$ref": "#/$defs/NifiRegistryIngress"
                 },
                 "resources": {
                     "type": "object"
                 }
             },
             "required": [
+                "enabled",
                 "ingress",
                 "resources"
             ],
@@ -385,7 +419,7 @@
                     "type": "string"
                 },
                 "tls": {
-                    "$ref": "#/definitions/NifiIngressTLS"   
+                    "$ref": "#/$defs/NifiIngressTLS"   
                 }
             },
             "required": [

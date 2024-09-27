@@ -222,10 +222,20 @@ nifi:
   # -- optional nifi.sensitive.props.key value (see https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#nifi_sensitive_props_key)
   # Setting this value is recommended. If it is not set, it will default to a generated value
   sensitivePropsKey: ""
+  # -- optional hostname of an existing nifi registry instance.
+  # Defaults to the created registry instance when nifiRegistry.enabled=true
+  registryHost: ""
+
+# -- nifi cluster instances. Each cluster instance inherits values from the nifi section.
+# When more than one cluster is specified, setting a clusterId is required
+nifiClusters:
+ - {}
 
 nifiRegistry:
+  # -- whether to deploy a nifi registry instance
+  enabled: true
   ingress:
-    # nifiRegistry.ingress.enabled -- whether to deploy ingress for nifi
+    # nifiRegistry.ingress.enabled -- whether to deploy ingress for nifi registry
     enabled: true
     # nifiRegistry.ingress.annotations -- optional ingress annotations
     annotations: {}
@@ -272,6 +282,8 @@ idol-licenseserver:
   licenseServerPort: "20000"
 
 metrics-server:
+  # -- whether to deploy a metrics server instance
+  enabled: true
   args:
     - "--kubelet-insecure-tls"
 

@@ -8,19 +8,22 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
+{{- range $nifiClusterItem := .Values.nifiClusters }}
+{{ $nifiCluster := merge $nifiClusterItem $.Values.nifi (dict "clusterId" $.Values.name) }}
+---
 apiVersion: v1
 kind: Service
 metadata:
-  name: idol-nifi
-  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifi) | nindent 4 -}}
-    app: nifi
+  name: {{ $nifiCluster.clusterId }}
+  labels: {{- include "idol-library.labels" (dict "root" $ "component" $nifiCluster) | nindent 4 -}}
+    app: {{ $nifiCluster.clusterId }}
   annotations:
-    app.kubernetes.io/name: nifi
-    app.kubernetes.io/part-of: nifi
+    app.kubernetes.io/name: {{ $nifiCluster.clusterId }}
+    app.kubernetes.io/part-of: {{ $.Values.name }}
 spec:
   type: ClusterIP
   selector:
-    app: {{ .Values.name }}
+    app: {{ $nifiCluster.clusterId }}
   ports:
   - protocol: TCP
     port: 6342
@@ -46,3 +49,8 @@ spec:
     port: 9092
     targetPort: 9092
     name: metrics
+  - protocol: TCP
+    port: 10000
+    targetPort: 10000
+    name: remote-input
+{{- end }}

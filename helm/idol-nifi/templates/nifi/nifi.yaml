@@ -13,12 +13,13 @@
 {{/* specific merges to statefulset specification */}}
 {{- $root := get . "root" | required "idolnifi.statefulset.base: missing root" -}}
 {{- $component := get . "component" | required "idolnifi.statefulset.base: missing component" -}}
+{{- $nifiCluster := get . "nifiCluster" | required "idolnifi.statefulset.base: missing nifiCluster" -}}
 metadata:
   labels:
-    app: nifi
-    name: nifi
+    app: {{ $nifiCluster.clusterId }}
+    name: {{ $nifiCluster.clusterId }}
 spec:
-  serviceName: nifi
+  serviceName: {{ $nifiCluster.clusterId }}
   template:
 {{- if $component.prometheus.enabled }}
     metadata:
@@ -39,10 +40,10 @@ spec:
         image: {{ include "idol-library.idolImage" (dict "root" $root "idolImage" $component.idolImage) }}
         envFrom:
         - configMapRef:
-            name: idol-nifi-env
+            name: {{ $component.name }}-env
             optional: false
         - configMapRef:
-            name: idol-nifi-keys-env
+            name: {{ $component.name }}-keys-env
             optional: false
         {{- if $component.containerSecurityContext.enabled }}
         securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml | nindent 10 }}
@@ -69,16 +70,16 @@ spec:
         - -c
         - |
           echo "Connecting to Zookeeper ${NIFI_ZK_CONNECT_STRING}"
-          until nc -vzw 1 zookeeper 2181 ; do
+          until nc -vzw 1 ${NIFI_ZK_CONNECT_STRING//:/ } ; do
             echo "Waiting for zookeeper to start"
             sleep 3
           done
         envFrom:
         - configMapRef:
-            name: idol-nifi-env
+            name: {{ $component.name }}-env
             optional: false
         - configMapRef:
-            name: idol-nifi-keys-env
+            name: {{ $component.name }}-keys-env
             optional: false
         resources:
           requests:
@@ -100,22 +101,27 @@ spec:
       labels: {{- include "idol-library.labels" . | nindent 8 }}
     spec:
       accessModes: [ "ReadWriteOnce" ]
-      storageClassName: {{ $component.nifi.dataVolume.storageClass }}
+      storageClassName: {{ $nifiCluster.dataVolume.storageClass }}
       resources:
         requests:
-          storage: {{ $component.nifi.dataVolume.volumeSize }}
+          storage: {{ $nifiCluster.dataVolume.volumeSize }}
 {{- end -}}
 
+{{- range $nifiClusterItem := .Values.nifiClusters }}
+{{ $nifiCluster := merge $nifiClusterItem $.Values.nifi (dict "clusterId" $.Values.name) }}
+---
 {{- include "idol-library.util.merge" (dict
-  "root" .
-  "component" .Values
+  "root" $
+  "component" (merge (dict "name" $nifiCluster.clusterId) $.Values)
+  "nifiCluster" $nifiCluster
   "source" "idol-library.aciserver.statefulset.base.v1"
   "destination" "idolnifi.statefulset.base" 
   "containers" (list "idolnifi.container")
   "volumes" (list (dict "name" "data" "emptyDir" (dict "sizeLimit" "3Gi"))
-                  (dict "name" "scripts" "configMap" (dict "name" "idol-nifi-scripts" "optional" false "defaultMode" 0755))
+                  (dict "name" "scripts" "configMap" (dict "name" (print $.Values.name "-scripts") "optional" false "defaultMode" 0755))
                   (dict "name" "dshm" "emptyDir" (dict "medium" "Memory" "sizeLimit" "256Mi")))
   "addConfigMap" false
 ) -}}
+{{- end -}}
 
 

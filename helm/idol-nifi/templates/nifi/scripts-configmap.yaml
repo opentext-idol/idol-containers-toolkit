@@ -11,9 +11,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: idol-nifi-scripts
+  name: {{ $.Values.name }}-scripts
   labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifi) | nindent 4 -}}
-    app: nifi
+    app: {{ $.Values.name }}
 data:
   security.sh: |
 {{ tpl (.Files.Get "resources/nifi-security.sh") . | indent 4 }}

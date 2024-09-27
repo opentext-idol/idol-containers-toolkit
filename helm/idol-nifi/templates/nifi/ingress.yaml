@@ -8,70 +8,77 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-{{- if .Values.nifi.ingress.enabled -}}
+{{- range $nifiClusterItem := .Values.nifiClusters }}
+{{ $nifiCluster := merge $nifiClusterItem $.Values.nifi (dict "clusterId" $.Values.name) }}
+{{- if $nifiCluster.ingress.enabled -}}
 {{- /*
  nginx ingress needs path capture to achieve prefix type routing
 */}}
 {{- $pathSuffix := "" }}
 {{- $pathType := "Prefix" }}
-{{- if eq .Values.ingressType "nginx" }}
+{{- if eq $.Values.ingressType "nginx" }}
 {{- $pathSuffix = "(.*)"}}
 {{- $pathType = "ImplementationSpecific" }}
 {{- end }}
-
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: idol-nifi
-  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifi) | nindent 4 -}}
-    app: nifi
+  name: {{ $nifiCluster.clusterId }}
+  labels: {{- include "idol-library.labels" (dict "root" $ "component" $nifiCluster) | nindent 4 -}}
+    app: {{ $nifiCluster.clusterId }}
   annotations: 
-    app.kubernetes.io/name: nifi
-    app.kubernetes.io/part-of: nifi
-{{- if eq .Values.ingressType "nginx" }}
-    nginx.ingress.kubernetes.io/proxy-body-size: {{ .Values.ingressProxyBodySize }}
+    app.kubernetes.io/name: {{ $nifiCluster.clusterId }}
+    app.kubernetes.io/part-of: {{ $nifiCluster.clusterId }}
+{{- if eq $.Values.ingressType "nginx" }}
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/proxy-body-size: {{ $.Values.ingressProxyBodySize }}
     nginx.ingress.kubernetes.io/affinity: cookie
     nginx.ingress.kubernetes.io/affinity-mode: persistent
     nginx.ingress.kubernetes.io/auth-type: basic
-    nginx.ingress.kubernetes.io/auth-secret: nifi-basic-auth
+    nginx.ingress.kubernetes.io/auth-secret: {{ $.Values.name }}-basic-auth
     nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
     nginx.ingress.kubernetes.io/configuration-snippet: |
       server_tokens off;
       proxy_pass_header Authorization;
       proxy_set_header Authorization $http_authorization;
-{{- else if eq .Values.ingressType "haproxy" }}
+{{- if (trimAll "/" (default ( len $.Values.nifiClusters | plural "" $nifiCluster.clusterId) $nifiCluster.ingress.proxyPath)) }}
+      proxy_set_header X-ProxyContextPath {{ print "/" (trimAll "/" (default ( len $.Values.nifiClusters | plural "" $nifiCluster.clusterId) $nifiCluster.ingress.proxyPath)) | quote }};
+{{- end }}
+{{- else if eq $.Values.ingressType "haproxy" }}
     haproxy.router.openshift.io/rewrite-target: / 
-    haproxy.router.openshift.io/proxy-body-size: {{ .Values.ingressProxyBodySize }}
+    haproxy.router.openshift.io/proxy-body-size: {{ $.Values.ingressProxyBodySize }}
 {{- end }}
 {{/* ingress setup is very dependent on cluster ingress controller so allow user value annotations */ -}}
-{{ with .Values.nifi.ingress.annotations }}
+{{ with $nifiCluster.ingress.annotations }}
 {{- toYaml . | trim | indent 4 }}
 {{- end }}
 spec:
-{{- if .Values.ingressClassName }}
-  ingressClassName: {{ .Values.ingressClassName | quote }}
+{{- if $.Values.ingressClassName }}
+  ingressClassName: {{ $.Values.ingressClassName | quote }}
 {{- end }}
-{{- if .Values.nifi.ingress.tls.secretName }}
+{{- if $nifiCluster.ingress.tls.secretName }}
   tls:
   - hosts:
-      - {{ .Values.nifi.ingress.host }}
-    secretName: {{ .Values.nifi.ingress.tls.secretName }}
+      - {{ $nifiCluster.ingress.host }}
+    secretName: {{ $nifiCluster.ingress.tls.secretName }}
 {{- end }}
   rules:
   - http:
       paths:
-      - path: {{ default "/" .Values.nifi.ingress.proxyPath | quote }}
-        pathType: Prefix
+      - path: {{ print (default ( len $.Values.nifiClusters | plural "/" (print "/" $nifiCluster.clusterId "/")) $nifiCluster.ingress.proxyPath) $pathSuffix | quote }}
+        pathType: {{ $pathType }}
         backend:
           service:
-            name: idol-nifi
+            name: {{ $nifiCluster.clusterId }}
             port:
               name: http
-{{- if .Values.nifi.ingress.host }}
-    host: {{ .Values.nifi.ingress.host | quote }}
+{{- if $nifiCluster.ingress.host }}
+    host: {{ $nifiCluster.ingress.host | quote }}
 {{- end }}
-{{ if .Values.nifi.ingress.tls.secretName -}}
+{{ if $nifiCluster.ingress.tls.secretName -}}
 ---
-{{ include "idol-library.ingress.secret" (dict "tls" .Values.nifi.ingress.tls) -}}
+{{ include "idol-library.ingress.secret" (dict "tls" $nifiCluster.ingress.tls) -}}
+{{- end -}}
 {{- end -}}
 {{- end -}}

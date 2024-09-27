@@ -13,8 +13,14 @@
 
 set -x -o allexport
 
+if [ -z "${NIFI_REGISTRY_HOSTS}" ]; then
+    echo [$(date)] "No NiFi Registry hosts"
+    echo [$(date)] "Flow import skipped"
+    exit 0
+fi
+
 NIFITOOLKITCMD=${NIFI_TOOLKIT_HOME}/bin/cli.sh
-NIFI_REGISTRY_URL=http://nifi-registry:18080
+NIFI_REGISTRY_URL=http://${NIFI_REGISTRY_HOSTS}:18080
 BUCKET_NAME="default-bucket"
 
 # The flow file we want to import

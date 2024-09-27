@@ -8,38 +8,43 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
+{{- range $nifiClusterItem := .Values.nifiClusters }}
+{{ $nifiCluster := merge $nifiClusterItem $.Values.nifi (dict "clusterId" $.Values.name) }}
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: zookeeper
-  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.zookeeper) | nindent 4 -}}
-    name: zookeeper
-    app: zookeeper
+  name: {{ $nifiCluster.clusterId }}-zk
+  labels: {{- include "idol-library.labels" (dict "root" $ "component" $.Values.zookeeper) | nindent 4 -}}
+    name: {{ $nifiCluster.clusterId }}-zk
+    app: {{ $nifiCluster.clusterId }}-zk
   annotations:
-    app.kubernetes.io/name: zookeeper
-    app.kubernetes.io/part-of: nifi
+    app.kubernetes.io/name: {{ $nifiCluster.clusterId }}-zk
+    app.kubernetes.io/part-of: {{ $nifiCluster.clusterId }}
 spec:
   revisionHistoryLimit: 1
-  serviceName: zookeeper
+  serviceName: {{ $nifiCluster.clusterId }}-zk
   podManagementPolicy: OrderedReady
   selector:
     matchLabels:
-      app: zookeeper
+      app: {{ $nifiCluster.clusterId }}-zk
   template:
     metadata:
-      labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.zookeeper) | nindent 8 -}}
-        app: zookeeper
+      labels: {{- include "idol-library.labels" (dict "root" $ "component" $.Values.zookeeper) | nindent 8 -}}
+        app: {{ $nifiCluster.clusterId }}-zk
     spec:
       automountServiceAccountToken: false
       enableServiceLinks: false
       setHostnameAsFQDN: true
       dnsPolicy: ClusterFirstWithHostNet
       restartPolicy: Always
-{{- if .Values.podSecurityContext.enabled }}
-      securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
+{{- if $.Values.podSecurityContext.enabled }}
+      securityContext: {{- omit $.Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
 {{- end }}
       imagePullSecrets:
-      - name: dockerhub-secret
+{{- range $.Values.global.imagePullSecrets }}
+      - name: {{ . }}
+{{- end }}
       containers:
       - name: zookeeper
         image: docker.io/zookeeper:3.8
@@ -60,7 +65,7 @@ spec:
             value: "server.1=$(POD_IP):2888:3888;2181"
         envFrom:
           - configMapRef:
-              name: zookeeper-cm
+              name: {{ $.Values.name }}-zk-cm
               optional: false
         livenessProbe:
           exec:
@@ -80,11 +85,11 @@ spec:
           timeoutSeconds: 10
           failureThreshold: 3
           successThreshold: 1
-        {{- if .Values.zookeeper.resources }}
-        resources: {{ toYaml .Values.zookeeper.resources | nindent 10 }}
+        {{- if $.Values.zookeeper.resources }}
+        resources: {{ toYaml $.Values.zookeeper.resources | nindent 10 }}
         {{- end }}
-        {{- if .Values.containerSecurityContext.enabled }}
-        securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+        {{- if $.Values.containerSecurityContext.enabled }}
+        securityContext: {{- omit $.Values.containerSecurityContext "enabled" | toYaml | nindent 10 }}
           readOnlyRootFilesystem: true
         {{- end }}
         volumeMounts:
@@ -101,3 +106,4 @@ spec:
         - name: data
           emptyDir:
             sizeLimit: 2Gi
+{{- end -}}
