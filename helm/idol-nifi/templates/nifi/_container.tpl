@@ -123,6 +123,8 @@ securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml
   "destination" "idolnifi.container.base" 
   "volumeMounts" (list (dict "name" "statedata" "mountPath" "/opt/nifi/nifi-current/conf" "subPath" "conf" "readOnly" false)
                        (dict "name" "statedata" "mountPath" "/opt/nifi/nifi-current/data" "subPath" "data" "readOnly" false)
+                       (dict "name" "statedata" "mountPath" "/opt/nifi/nifi-current/run" "subPath" "run" "readOnly" false)
+                       (dict "name" "statedata" "mountPath" "/opt/nifi/nifi-current/state" "subPath" "state" "readOnly" false)
                        (dict "name" "statedata" "mountPath" "/opt/nifi/nifi-current/keytool" "subPath" "keytool" "readOnly" false)
                        (dict "name" "statedata" "mountPath" "/opt/nifi/nifi-current/content_repository" "subPath" "content_repository" "readOnly" false)
                        (dict "name" "statedata" "mountPath" "/opt/nifi/nifi-current/database_repository" "subPath" "database_repository" "readOnly" false)
