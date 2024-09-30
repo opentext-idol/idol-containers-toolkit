@@ -161,7 +161,7 @@ nifi:
   # -- What proportion of the pod memory to allocate for JVM usage
   jvmMemoryRatio: 0.5
 
-  # -- The flow definitions to import into NiFi registry. Specify the file, registry bucket name (will be cretaed if not found), and whether to import the flow as a process group into NiFi.
+  # -- The flow definitions to import into NiFi registry. Specify the file, registry bucket name (will be created if not found), and whether to import the flow as a process group into NiFi.
   # Customize the NiFi image and set this to one or more filepaths within that image to import your own customized flows.
   flows:
   - file: /scripts/flow-basic-idol.json
