@@ -161,10 +161,12 @@ nifi:
   # -- What proportion of the pod memory to allocate for JVM usage
   jvmMemoryRatio: 0.5
 
-  # -- the flowfile definition to import. 
-  # Set this to any non-existing path to bypass flow import (start with a blank flow).
-  # Customize the NiFi image and set this to a filepath within that image to import your own customized flow.
-  flowfile: /scripts/flow-basic-idol.json
+  # -- The flow definitions to import into NiFi registry. Specify the file, registry bucket name (will be cretaed if not found), and whether to import the flow as a process group into NiFi.
+  # Customize the NiFi image and set this to one or more filepaths within that image to import your own customized flows.
+  flows:
+  - file: /scripts/flow-basic-idol.json
+    bucket: "default-bucket"
+    import: true
 
   ingress:
     # -- whether to deploy ingress for nifi
@@ -261,6 +263,9 @@ nifiRegistry:
     limits: 
       cpu: 1000m
       memory: 1Gi
+  # -- Bucket names to create
+  bucketNames:
+  - "default-bucket"
 
 zookeeper:
   # zookeeper.resources -- https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits

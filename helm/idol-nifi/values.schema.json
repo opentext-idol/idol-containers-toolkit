@@ -143,6 +143,27 @@
             ],
             "title": "IdolLicenseserver"
         },
+        "Flow": {
+            "type": "object",
+            "properties": {
+                "file": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "bucket": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "import": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "file",
+                "bucket"
+            ],
+            "title": "Flow"
+        },
         "NifiProperties": {
             "type": "object",
             "properties": {
@@ -162,7 +183,14 @@
                 },
                 "flowfile": {
                     "type":"string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "description": "Deprecated, prefer 'flows'"
+                },
+                "flows": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/Flow"
+                    }
                 },
                 "ingress": {
                     "$ref": "#/$defs/NifiIngress"
@@ -188,7 +216,7 @@
             "unevaluatedProperties": false,
             "required": [
                 "autoScaling",
-                "flowfile",
+                "flows",
                 "ingress",
                 "jvmMemoryRatio",
                 "resources",
@@ -396,12 +424,21 @@
                 },
                 "resources": {
                     "type": "object"
+                },
+                "bucketNames": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type":"string",
+                        "minLength": 1
+                    }
                 }
             },
             "required": [
                 "enabled",
                 "ingress",
-                "resources"
+                "resources",
+                "bucketNames"
             ],
             "title": "NifiRegistry"
         },

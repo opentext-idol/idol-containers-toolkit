@@ -13,13 +13,42 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
 
     def test_multiple_nifi(self):
         clusterids = ['nf1','nf2','nf3','testnifi']
-        objs = self.render_chart({'name':'testnifi', 'nifiClusters':[{'clusterId': 'nf1'},
-                                           {'clusterId':'nf2'},
-                                           {'clusterId': 'nf3',
-                                            'flowfile':'flow3.json',
-                                            'ingress':{
-                                               'enabled':True,'proxyPath':'/','tls':{'secretName':''},'aciTLS':{'secretName':''},'metricsTLS':{'secretName':''}}},
-                                           {}]})
+        objs = self.render_chart(
+            {
+                'name':'testnifi',
+                'nifiClusters':[
+                    { 'clusterId':'nf1' },
+                    {
+                        'clusterId':'nf2',
+                        'flows':[
+                            {
+                                'file':'/scripts/flow1.json',
+                                'bucket': 'default-bucket',
+                                'import':True
+                            },
+                            {
+                                'file':'/scripts/flow2.json',
+                                'bucket': 'other-bucket',
+                                'import':False
+                            }
+                        ]
+                    },
+                    {
+                        'clusterId':'nf3',
+                        'flowfile':'flow3.json',
+                        'ingress':{
+                           'enabled':True,
+                           'proxyPath':'/',
+                           'tls':{ 'secretName':'' },
+                           'aciTLS':{ 'secretName':'' },
+                           'metricsTLS':{
+                             'secretName':''
+                           }
+                        }
+                    },
+                    {}
+                ]
+            })
         # expected manifests with multiple clusters
         self.assertGreaterEqual(set(objs['StatefulSet'].keys()),
                                 set(['testnifi-reg']+list(chain.from_iterable([[id,f'{id}-zk'] for id in clusterids]))))
@@ -33,6 +62,43 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
         self.assertEqual(objs['Ingress']['nf3']['spec']['rules'][0]['http']['paths'][0]['path'], f'/(.*)')
         self.assertNotIn('proxy_set_header X-ProxyContextPath',
                         objs['Ingress']['nf3']['metadata']['annotations']['nginx.ingress.kubernetes.io/configuration-snippet'])
+
+        # Flow env checks
+        for id in ['nf1','testnifi']:
+            self.assertEqual(objs['ConfigMap'][f'{id}-env']['data']['IDOL_NIFI_FLOW_COUNT'], '1')
+            self.assertEqual(objs['ConfigMap'][f'{id}-env']['data']['IDOL_NIFI_FLOW_FILE_0'], '/scripts/flow-basic-idol.json')
+            self.assertEqual(objs['ConfigMap'][f'{id}-env']['data']['IDOL_NIFI_FLOW_BUCKET_0'], 'default-bucket')
+            self.assertEqual(objs['ConfigMap'][f'{id}-env']['data']['IDOL_NIFI_FLOW_IMPORT_0'], 'true')
+
+        self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_COUNT'], '2')
+        self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_FILE_0'], '/scripts/flow1.json')
+        self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_BUCKET_0'], 'default-bucket')
+        self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_IMPORT_0'], 'true')
+        self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_FILE_1'], '/scripts/flow2.json')
+        self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_BUCKET_1'], 'other-bucket')
+        self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_IMPORT_1'], 'false')
+        
+        self.assertEqual(objs['ConfigMap']['nf3-env']['data']['IDOL_NIFI_FLOW_COUNT'], '1')
+        self.assertEqual(objs['ConfigMap']['nf3-env']['data']['IDOL_NIFI_FLOW_FILE_0'], 'flow3.json')
+        self.assertEqual(objs['ConfigMap']['nf3-env']['data']['IDOL_NIFI_FLOW_BUCKET_0'], 'default-bucket')
+        self.assertEqual(objs['ConfigMap']['nf3-env']['data']['IDOL_NIFI_FLOW_IMPORT_0'], 'true')
+
+    def test_default_registry_buckets(self):
+        objs = self.render_chart({})
+        self.assertEqual(objs['ConfigMap']['idol-nifi-reg-cm']['data']['NIFI_REGISTRY_BUCKET_NAMES'], 'default-bucket')
+
+    def test_registry_buckets(self):
+        objs = self.render_chart(
+            {
+                'nifiRegistry':{
+                    'bucketNames':[
+                        "default-bucket",
+                        "my-bucket",
+                        "some-bucket"
+                    ]
+                }
+            })
+        self.assertEqual(objs['ConfigMap']['idol-nifi-reg-cm']['data']['NIFI_REGISTRY_BUCKET_NAMES'], 'default-bucket,my-bucket,some-bucket')
 
 if __name__ == '__main__':
     unittest.main()

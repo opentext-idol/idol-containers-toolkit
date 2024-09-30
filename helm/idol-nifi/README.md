@@ -111,7 +111,7 @@ Each deployment will require a unique name, and ingress points should be manuall
 | nifi.autoScaling.stabilizationWindowSeconds | int | `300` | no. of seconds a limit must be exceed before scaling the nifi statefulset |
 | nifi.dataVolume.storageClass | string | `"idol-nifi-storage-class"` | Name of the storage class used to provision a PersistentVolume for each NiFi instance. The associated PVCs are named statedata-{name}-{pod number} |
 | nifi.dataVolume.volumeSize | string | `"16Gi"` | Size of the PersistentVolumeClaim that is created for each NiFi instance. The Kubernetes cluster will need to provide enough PersistentVolumes to satisify the claims made for the desired number of NiFi instances. The size chosen here provides a hard limit on the size of the NiFi data storage in each NiFi instance. |
-| nifi.flowfile | string | `"/scripts/flow-basic-idol.json"` | the flowfile definition to import.  Set this to any non-existing path to bypass flow import (start with a blank flow). Customize the NiFi image and set this to a filepath within that image to import your own customized flow. |
+| nifi.flows | list | `[{"bucket":"default-bucket","file":"/scripts/flow-basic-idol.json","import":true}]` | The flow definitions to import into NiFi registry. Specify the file, registry bucket name (will be cretaed if not found), and whether to import the flow as a process group into NiFi. Customize the NiFi image and set this to one or more filepaths within that image to import your own customized flows. |
 | nifi.ingress.aciHost | string | `""` | optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules |
 | nifi.ingress.aciTLS | object | `{"crt":"","key":"","secretName":""}` | Whether aci ingress uses TLS. You must set an ingress aciHost to use this.  See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls |
 | nifi.ingress.aciTLS.crt | string | `""` | Certificate data value to generate tls Secret (should be base64 encoded) |
@@ -140,6 +140,7 @@ Each deployment will require a unique name, and ingress points should be manuall
 | nifi.sensitivePropsKey | string | `""` | optional nifi.sensitive.props.key value (see https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#nifi_sensitive_props_key) Setting this value is recommended. If it is not set, it will default to a generated value |
 | nifi.truststorePassword | string | `""` | optional nifi.security.truststorePasswd value (see https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#security_properties) Setting this value is recommended. If it is not set, it will default to a generated value |
 | nifiClusters | list | `[{}]` | nifi cluster instances. Each cluster instance inherits values from the nifi section. When more than one cluster is specified, setting a clusterId is required |
+| nifiRegistry.bucketNames | list | `["default-bucket"]` | Bucket names to create |
 | nifiRegistry.enabled | bool | `true` | whether to deploy a nifi registry instance |
 | nifiRegistry.ingress.annotations | object | `{}` | optional ingress annotations |
 | nifiRegistry.ingress.enabled | bool | `true` | whether to deploy ingress for nifi registry |
