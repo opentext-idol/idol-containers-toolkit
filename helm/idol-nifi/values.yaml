@@ -263,6 +263,17 @@ nifiRegistry:
     limits: 
       cpu: 1000m
       memory: 1Gi
+
+  dataVolume:
+    # -- Name of the storage class used to provision a PersistentVolume
+    # for the NiFi Registry instance.
+    # The associated PVCs are named statedata-{name}-reg-{pod number}
+    storageClass: "idol-nifi-storage-class"
+    # -- Size of the PersistentVolumeClaim that is created
+    # for the NiFi Registry instance. The size chosen here provides a hard limit on the size
+    # of the NiFi Registry data storage in the NiFi Registry instance.
+    volumeSize: 2Gi
+
   # -- Bucket names to create
   bucketNames:
   - "default-bucket"

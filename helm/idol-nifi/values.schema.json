@@ -422,6 +422,9 @@
                 "ingress": {
                     "$ref": "#/$defs/NifiRegistryIngress"
                 },
+                "dataVolume": {
+                    "$ref": "#/$defs/DataVolume"
+                },
                 "resources": {
                     "type": "object"
                 },
@@ -438,7 +441,8 @@
                 "enabled",
                 "ingress",
                 "resources",
-                "bucketNames"
+                "bucketNames",
+                "dataVolume"
             ],
             "title": "NifiRegistry"
         },

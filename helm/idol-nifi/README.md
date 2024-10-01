@@ -111,7 +111,7 @@ Each deployment will require a unique name, and ingress points should be manuall
 | nifi.autoScaling.stabilizationWindowSeconds | int | `300` | no. of seconds a limit must be exceed before scaling the nifi statefulset |
 | nifi.dataVolume.storageClass | string | `"idol-nifi-storage-class"` | Name of the storage class used to provision a PersistentVolume for each NiFi instance. The associated PVCs are named statedata-{name}-{pod number} |
 | nifi.dataVolume.volumeSize | string | `"16Gi"` | Size of the PersistentVolumeClaim that is created for each NiFi instance. The Kubernetes cluster will need to provide enough PersistentVolumes to satisify the claims made for the desired number of NiFi instances. The size chosen here provides a hard limit on the size of the NiFi data storage in each NiFi instance. |
-| nifi.flows | list | `[{"bucket":"default-bucket","file":"/scripts/flow-basic-idol.json","import":true}]` | The flow definitions to import into NiFi registry. Specify the file, registry bucket name (will be created if not found), and whether to import the flow as a process group into NiFi. Customize the NiFi image and set this to one or more filepaths within that image to import your own customized flows. |
+| nifi.flows | list | `[{"bucket":"default-bucket","file":"/scripts/flow-basic-idol.json","import":true}]` | The flow definitions to import into NiFi registry. Specify the file, registry bucket name (will be created if not found), and whether to import the flow as a process group into NiFi. Customized flows can be added via a custom NiFi image or mounted into the pod (see `additionalVolumes` and `additionalVolumeMounts`) |
 | nifi.ingress.aciHost | string | `""` | optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules |
 | nifi.ingress.aciTLS | object | `{"crt":"","key":"","secretName":""}` | Whether aci ingress uses TLS. You must set an ingress aciHost to use this.  See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls |
 | nifi.ingress.aciTLS.crt | string | `""` | Certificate data value to generate tls Secret (should be base64 encoded) |
@@ -141,6 +141,8 @@ Each deployment will require a unique name, and ingress points should be manuall
 | nifi.truststorePassword | string | `""` | optional nifi.security.truststorePasswd value (see https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#security_properties) Setting this value is recommended. If it is not set, it will default to a generated value |
 | nifiClusters | list | `[{}]` | nifi cluster instances. Each cluster instance inherits values from the nifi section. When more than one cluster is specified, setting a clusterId is required |
 | nifiRegistry.bucketNames | list | `["default-bucket"]` | Bucket names to create |
+| nifiRegistry.dataVolume.storageClass | string | `"idol-nifi-storage-class"` | Name of the storage class used to provision a PersistentVolume for the NiFi Registry instance. The associated PVCs are named statedata-{name}-reg-{pod number} |
+| nifiRegistry.dataVolume.volumeSize | string | `"2Gi"` | Size of the PersistentVolumeClaim that is created for the NiFi Registry instance. The size chosen here provides a hard limit on the size of the NiFi Registry data storage in the NiFi Registry instance. |
 | nifiRegistry.enabled | bool | `true` | whether to deploy a nifi registry instance |
 | nifiRegistry.ingress.annotations | object | `{}` | optional ingress annotations |
 | nifiRegistry.ingress.enabled | bool | `true` | whether to deploy ingress for nifi registry |
