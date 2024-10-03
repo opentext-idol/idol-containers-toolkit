@@ -14,20 +14,45 @@
 logdir=/opt/nifi-registry/nifi-registry-current/logs
 mkdir -p ${logdir}
 
+. $( dirname "${BASH_SOURCE[0]}" )/nifi-toolkit-utils.sh
+
+NIFI_REGISTRY_URL=http://${HOSTNAME}:18080
+
 logfile=${logdir}/post-start.log
 (
-    for bucketname in ${NIFI_REGISTRY_BUCKET_NAMES//,/ }
-    do
-        echo [$(date)] Checking registry for "${bucketname}"
-        result=$("${NIFI_TOOLKIT_HOME}/bin/cli.sh" registry list-buckets -u "http://${HOSTNAME}:18080" | grep "${bucketname}")
-        rc=$?
-        until [ 0 == $rc ]
+    nifitoolkit_registry_waitForCLI "${NIFI_REGISTRY_URL}"
+
+    for i in $(seq 0 ${NIFI_REGISTRY_BUCKET_COUNT}); do
+        if [  $i -eq ${NIFI_REGISTRY_BUCKET_COUNT} ]; then
+            continue
+        fi
+
+        FLOWFILES_ENV_NAME=NIFI_REGISTRY_BUCKET_FILES_$i
+        BUCKETNAME_ENV_NAME=NIFI_REGISTRY_BUCKET_NAME_$i
+        FLOWFILES="${!FLOWFILES_ENV_NAME}"
+        BUCKET_NAME="${!BUCKETNAME_ENV_NAME}"
+
+        # Create the bucket
+        BUCKETID=
+        nifitoolkit_registry_findOrCreateBucket "${NIFI_REGISTRY_URL}" "${BUCKET_NAME}" BUCKETID
+        echo [$(date)] Got bucket "${BUCKET_NAME}": "${BUCKETID}"
+
+        # Import any flows
+        for FLOWFILE in ${FLOWFILES//,/ }
         do
-            "${NIFI_TOOLKIT_HOME}/bin/cli.sh" registry create-bucket --bucketName "${bucketname}" -u "http://${HOSTNAME}:18080"
-            result=$("${NIFI_TOOLKIT_HOME}/bin/cli.sh" registry list-buckets -u "http://${HOSTNAME}:18080" | grep "${bucketname}")
-            rc=$?
+            echo [$(date)] "Processing FLOWFILE ${FLOWFILE}"
+
+            if [ ! -f "${FLOWFILE}" ]; then
+                echo [$(date)] "FLOWFILE ${FLOWFILE} does not exist"
+                echo [$(date)] "Flow import skipped"
+                continue
+            fi
+
+            FLOWID=
+            FLOWVERSION=
+            nifitoolkit_registry_importFlow "${NIFI_REGISTRY_URL}" "${BUCKETID}" "${FLOWFILE}" FLOWID FLOWVERSION
+            echo [$(date)] Imported Flow "${FLOWID} (version ${FLOWVERSION})"
         done
-        echo [$(date)] Got bucket "${bucketname}": "${result}"
 
     done
 ) | tee -a ${logfile}

@@ -85,20 +85,31 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
 
     def test_default_registry_buckets(self):
         objs = self.render_chart({})
-        self.assertEqual(objs['ConfigMap']['idol-nifi-reg-cm']['data']['NIFI_REGISTRY_BUCKET_NAMES'], 'default-bucket')
+        self.assertEqual(objs['ConfigMap']['idol-nifi-reg-cm']['data']['NIFI_REGISTRY_BUCKET_COUNT'], '1')
+        self.assertEqual(objs['ConfigMap']['idol-nifi-reg-cm']['data']['NIFI_REGISTRY_BUCKET_NAME_0'], 'default-bucket')
+        self.assertEqual(objs['ConfigMap']['idol-nifi-reg-cm']['data']['NIFI_REGISTRY_BUCKET_FILES_0'], '/scripts/flow-basic-idol.json')
 
     def test_registry_buckets(self):
         objs = self.render_chart(
             {
                 'nifiRegistry':{
-                    'bucketNames':[
-                        "default-bucket",
-                        "my-bucket",
-                        "some-bucket"
+                    'buckets':[
+                        { "name": "default-bucket" },
+                        { "name": "my-bucket" },
+                        {
+                            "name": "some-bucket",
+                            "flowfiles": [ "/some/flow/file1.json", "/some/flow/file2.json" ]
+                        }
                     ]
                 }
             })
-        self.assertEqual(objs['ConfigMap']['idol-nifi-reg-cm']['data']['NIFI_REGISTRY_BUCKET_NAMES'], 'default-bucket,my-bucket,some-bucket')
+        self.assertEqual(objs['ConfigMap']['idol-nifi-reg-cm']['data']['NIFI_REGISTRY_BUCKET_COUNT'], '3')
+        self.assertEqual(objs['ConfigMap']['idol-nifi-reg-cm']['data']['NIFI_REGISTRY_BUCKET_NAME_0'], 'default-bucket')
+        self.assertEqual(objs['ConfigMap']['idol-nifi-reg-cm']['data']['NIFI_REGISTRY_BUCKET_FILES_0'], '')
+        self.assertEqual(objs['ConfigMap']['idol-nifi-reg-cm']['data']['NIFI_REGISTRY_BUCKET_NAME_1'], 'my-bucket')
+        self.assertEqual(objs['ConfigMap']['idol-nifi-reg-cm']['data']['NIFI_REGISTRY_BUCKET_FILES_1'], '')
+        self.assertEqual(objs['ConfigMap']['idol-nifi-reg-cm']['data']['NIFI_REGISTRY_BUCKET_NAME_2'], 'some-bucket')
+        self.assertEqual(objs['ConfigMap']['idol-nifi-reg-cm']['data']['NIFI_REGISTRY_BUCKET_FILES_2'], '/some/flow/file1.json,/some/flow/file2.json')
 
 if __name__ == '__main__':
     unittest.main()
