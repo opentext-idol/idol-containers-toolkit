@@ -50,6 +50,7 @@ then
     -keystore ${NIFI_HOME}/keytool/truststore.jks \
     -storetype jks \
     -keypass ${KEYSTORE_PASS:-$NIFI_SENSITIVE_PROPS_KEY} \
+    -keyalg RSA \
     -storepass ${KEY_PASS:-$NIFI_SENSITIVE_PROPS_KEY} \
     -KeySize 2048
 fi
