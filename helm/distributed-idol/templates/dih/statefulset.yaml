@@ -49,6 +49,9 @@ spec:
         {{- range .Values.global.imagePullSecrets }}
         - name: {{ . }}
         {{- end }}
+{{- if (dig "podSecurityContext" "enabled" false ($component | merge (dict))) }}
+      securityContext: {{- omit $component.podSecurityContext "enabled" | toYaml | nindent 8 }}
+{{- end }}
       containers:
       - name: {{ $component.name }}
         image: {{ include "idol-library.idolImage" (dict "root" . "idolImage" $component.idolImage )}}
