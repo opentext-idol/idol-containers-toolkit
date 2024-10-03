@@ -8,6 +8,12 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
+{{ include "idol-library.ingress" (dict 
+    "root" .
+    "component" .Values.content
+    "ingress" .Values.content.ingress
+    "destination" "distributedidol.content.ingress"
+    "paths" (fromYamlArray (include "distributedidol.content.custompaths" .))) -}}
 {{- define "distributedidol.content.ingress" -}}
 {{- end -}}
 {{- define "distributedidol.content.custompaths" -}}
@@ -21,9 +27,3 @@
         name: aci-port
 {{- end }}
 {{- end -}}
-{{ include "idol-library.ingress" (dict 
-    "root" .
-    "component" .Values.content
-    "ingress" .Values.content.ingress
-    "destination" "distributedidol.content.ingress"
-    "paths" (fromYamlArray (include "distributedidol.content.custompaths" .))) -}}
