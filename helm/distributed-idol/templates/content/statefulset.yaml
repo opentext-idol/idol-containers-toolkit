@@ -58,6 +58,9 @@ spec:
         envFrom:
         - configMapRef: {{ $component.envConfigMap | quote }}
         {{ end }}
+{{- if (dig "containerSecurityContext" "enabled" false ($component | merge (dict))) }}
+        securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+{{- end }}
         lifecycle:
           postStart:
             exec:

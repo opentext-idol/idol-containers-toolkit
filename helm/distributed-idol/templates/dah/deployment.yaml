@@ -60,6 +60,9 @@ spec:
         imagePullPolicy: IfNotPresent
         command: ["/bin/sh"]
         args: ["-c", "cd /dah && command cp -f /etc/config/idol/dah.cfg dah.cfg && ./run_idol.sh"]
+{{- if (dig "containerSecurityContext" "enabled" false ($component | merge (dict))) }}
+        securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+{{- end }}
         lifecycle:
           preStop:
             exec:

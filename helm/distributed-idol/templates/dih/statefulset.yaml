@@ -70,7 +70,9 @@ spec:
           fi
           ln -sf /opt/idol/dih/data/dih.cfg ./dih.cfg
           ./run_idol.sh
-        
+{{- if (dig "containerSecurityContext" "enabled" false ($component | merge (dict))) }}
+        securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+{{- end }}
         lifecycle:
           preStop:
             exec:
