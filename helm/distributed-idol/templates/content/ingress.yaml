@@ -17,12 +17,12 @@
 {{- define "distributedidol.content.ingress" -}}
 {{- end -}}
 {{- define "distributedidol.content.custompaths" -}}
-{{- range $i := untilStep 0 ( .Values.content.ingress.exposedContents | int ) 1 }}
-- path: {{ include "idol-library.ingress.path" (dict "ingress" .Values.content.ingress "path" (print "/content-" $i "/")) }}
-  pathType: {{ include "idol-library.ingress.pathtype" .Values.content }}
+{{- range $i := untilStep 0 ( $.Values.content.ingress.exposedContents | int ) 1 }}
+- path: {{ include "idol-library.ingress.path" (dict "ingress" $.Values.content.ingress "path" (print "/content-" $i "/")) }}
+  pathType: {{ include "idol-library.ingress.pathtype" $.Values.content }}
   backend:
     service:
-      name: {{ .Values.content.name }}-{{ $i }}
+      name: {{ $.Values.content.name }}-{{ $i }}
       port:
         name: aci-port
 {{- end }}
