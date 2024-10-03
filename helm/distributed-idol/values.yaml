@@ -199,7 +199,7 @@ content:
     proxyBodySize: 2048m
     
     # -- Allows ingress access to individual content engines. Set to max number of engines to expose
-    exposedContents: 1
+    exposedContents: 0
 
     # -- Ingress controller specific annotations
     # Some annotations are added automatically based on ingress.type and other values, but can 
