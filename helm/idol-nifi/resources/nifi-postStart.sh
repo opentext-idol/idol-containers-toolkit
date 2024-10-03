@@ -13,6 +13,8 @@
 
 logfile=/opt/nifi/nifi-current/logs/post-start.log
 (
+    . $( dirname "${BASH_SOURCE[0]}" )/nifi-toolkit-utils.sh
+
     if [ -z "${JAVA_HOME}" ]
     then
         JAVA_HOME=$(java -XshowSettings:properties -version 2>&1 | grep java.home | cut -d = -f 2 | xargs)
@@ -37,7 +39,8 @@ logfile=/opt/nifi/nifi-current/logs/post-start.log
         exit 0
     fi
 
-    /scripts/wait.sh
+    nifitoolkit_nifi_waitForCLI
+    
     /scripts/connect-registry.sh
     if [ -f /scripts/prometheous-reporting.sh ]; then
         /scripts/prometheous-reporting.sh

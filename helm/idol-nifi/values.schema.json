@@ -150,19 +150,56 @@
                     "type": "string",
                     "minLength": 1
                 },
-                "bucket": {
+                "name": {
                     "type": "string",
                     "minLength": 1
+                },
+                "version": {
+                    "type": "string"
+                },
+                "bucket": {
+                    "type": "string"
                 },
                 "import": {
                     "type": "boolean"
                 }
             },
-            "required": [
-                "file",
-                "bucket"
+            "dependencies": {
+                "name": ["bucket"],
+                "file": ["bucket"]
+            },
+            "oneOf": [
+                {
+                    "required": [
+                        "file"
+                    ]
+                },
+                {
+                    "required": [
+                        "name"
+                    ]
+                }
             ],
             "title": "Flow"
+        },
+        "Bucket": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "flowfiles": {
+                    "type": "array",
+                    "items": {
+                        "type":"string"
+                    }
+                }
+            },
+            "required": [
+                "name"
+            ],
+            "title": "Bucket"
         },
         "NifiProperties": {
             "type": "object",
@@ -439,7 +476,7 @@
                 "enabled",
                 "ingress",
                 "resources",
-                "bucketNames",
+                "buckets",
                 "dataVolume"
             ],
             "title": "NifiRegistry"

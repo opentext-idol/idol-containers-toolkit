@@ -17,6 +17,10 @@ logfile=/opt/nifi/nifi-current/logs/pre-stop.log
     grep "${statefulsetname}-0." /etc/hostname
     notprimary=$?
     if [ 0 == ${notprimary} ]; then
+
+        #This is a clean shutdown, so remove the onetime setup flag
+        rm /opt/nifi/nifi-current/conf/idol-nifi-onetime-setup-complete
+
         echo [$(date)] Skipping pre-stop as primary instance.
         exit 0
     fi

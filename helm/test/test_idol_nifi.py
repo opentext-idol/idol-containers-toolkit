@@ -30,6 +30,15 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
                                 'file':'/scripts/flow2.json',
                                 'bucket': 'other-bucket',
                                 'import':False
+                            },
+                            {
+                                'name':'Existing Flow',
+                                'bucket':'existing-bucket',
+                                'version':"123"
+                            },
+                            {
+                                'name':'Existing Flow2',
+                                'bucket':'existing-bucket'
                             }
                         ]
                     },
@@ -66,21 +75,42 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
         # Flow env checks
         for id in ['nf1','testnifi']:
             self.assertEqual(objs['ConfigMap'][f'{id}-env']['data']['IDOL_NIFI_FLOW_COUNT'], '1')
-            self.assertEqual(objs['ConfigMap'][f'{id}-env']['data']['IDOL_NIFI_FLOW_FILE_0'], '/scripts/flow-basic-idol.json')
+            self.assertEqual(objs['ConfigMap'][f'{id}-env']['data']['IDOL_NIFI_FLOW_FILE_0'], '')
+            self.assertEqual(objs['ConfigMap'][f'{id}-env']['data']['IDOL_NIFI_FLOW_NAME_0'], 'Basic IDOL')
             self.assertEqual(objs['ConfigMap'][f'{id}-env']['data']['IDOL_NIFI_FLOW_BUCKET_0'], 'default-bucket')
+            self.assertEqual(objs['ConfigMap'][f'{id}-env']['data']['IDOL_NIFI_FLOW_VERSION_0'], '')
             self.assertEqual(objs['ConfigMap'][f'{id}-env']['data']['IDOL_NIFI_FLOW_IMPORT_0'], 'true')
 
-        self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_COUNT'], '2')
+        self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_COUNT'], '4')
         self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_FILE_0'], '/scripts/flow1.json')
+        self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_NAME_0'], '')
         self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_BUCKET_0'], 'default-bucket')
+        self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_VERSION_0'], '')
         self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_IMPORT_0'], 'true')
+        
         self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_FILE_1'], '/scripts/flow2.json')
+        self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_NAME_1'], '')
         self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_BUCKET_1'], 'other-bucket')
+        self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_VERSION_1'], '')
         self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_IMPORT_1'], 'false')
         
+        self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_FILE_2'], '')
+        self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_NAME_2'], 'Existing Flow')
+        self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_BUCKET_2'], 'existing-bucket')
+        self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_VERSION_2'], '123')
+        self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_IMPORT_2'], 'true')
+        
+        self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_FILE_3'], '')
+        self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_NAME_3'], 'Existing Flow2')
+        self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_BUCKET_3'], 'existing-bucket')
+        self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_VERSION_3'], '')
+        self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_IMPORT_3'], 'true')
+
         self.assertEqual(objs['ConfigMap']['nf3-env']['data']['IDOL_NIFI_FLOW_COUNT'], '1')
         self.assertEqual(objs['ConfigMap']['nf3-env']['data']['IDOL_NIFI_FLOW_FILE_0'], 'flow3.json')
+        self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_NAME_0'], '')
         self.assertEqual(objs['ConfigMap']['nf3-env']['data']['IDOL_NIFI_FLOW_BUCKET_0'], 'default-bucket')
+        self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_VERSION_0'], '')
         self.assertEqual(objs['ConfigMap']['nf3-env']['data']['IDOL_NIFI_FLOW_IMPORT_0'], 'true')
 
     def test_default_registry_buckets(self):
