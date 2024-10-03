@@ -108,7 +108,7 @@ content:
 
   # -- Number of Content engines created on startup.
   # After startup the Content engine autoscaling kicks in and controls the number of Content engines. 
-  # The minimum valid value of initialContentEngineCount is 1.
+  # The minimum valid value of initialEngineCount is 1.
   # For an upgrade, you must specify the number of Content engines that were present.
   initialEngineCount: "1"
 
