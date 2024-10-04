@@ -44,6 +44,25 @@ nifitoolkit_nifi_findProcessGroup() {
     declare -g $OUT_EXISTINGFLOWSTATE="${EXISTINGFLOWSTATE}"
 }
 
+nifitoolkit_nifi_getClusterNodeCount() {
+    local OUT_NODECOUNT=$1
+
+    echo [$(date)] "Getting NiFi cluster summary"
+    local NODECOUNT=$(${NIFITOOLKITCMD} nifi cluster-summary -ot json | jq -r .clusterSummary.totalNodeCount)
+    RC=$?
+    # Wait to receieve a valid cluster node summary. There should be at least 1 node (this one).
+    until [ 0 == ${RC} ]&& [ ! -z ${NODECOUNT} ] && [ ${NODECOUNT} -gt 0 ];
+    do
+        echo [$(date)] "Waiting for NiFi cluster summary..."
+        sleep 5s
+        NODECOUNT=$(${NIFITOOLKITCMD} nifi cluster-summary -ot json | jq -r .clusterSummary.totalNodeCount)
+        RC=$?
+    done
+
+    echo [$(date)] "${NODECOUNT} node(s) in NiFi cluster"
+    declare -g $OUT_NODECOUNT="${NODECOUNT}"
+}
+
 nifitoolkit_nifi_changeProcessGroupVersion() {
     local PGID=$1
     local VERSION=$2

@@ -32,15 +32,15 @@ logfile=/opt/nifi/nifi-current/logs/post-start.log
         exit 0
     fi
 
-    onetimeFile=/opt/nifi/nifi-current/conf/idol-nifi-onetime-setup-complete
-
-    if [ -f ${onetimeFile} ]; then
-        echo ["$(date)"] Skipping post-start due to ${onetimeFile}
+    NODECOUNT=
+    nifitoolkit_nifi_getClusterNodeCount NODECOUNT
+    if [ ${NODECOUNT} -gt 1 ]; then
+        echo ["$(date)"] Skipping post-start checks as cluster is already running "( ${NODECOUNT} )"
         exit 0
     fi
 
     nifitoolkit_nifi_waitForCLI
-    
+
     /scripts/connect-registry.sh
     if [ -f /scripts/prometheous-reporting.sh ]; then
         /scripts/prometheous-reporting.sh
@@ -48,6 +48,4 @@ logfile=/opt/nifi/nifi-current/logs/post-start.log
     /scripts/import-flow.sh
 
     echo ["$(date)"] postStart completed
-
-    touch ${onetimeFile}
 ) | tee -a ${logfile}
