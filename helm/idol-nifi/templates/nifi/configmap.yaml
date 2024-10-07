@@ -56,5 +56,13 @@ data:
   NIFI_REGISTRY_HOSTS: "{{ $.Values.nifiRegistry.enabled | ternary (print $.Values.name "-reg") $nifiCluster.registryHost }}"
   TRUSTSTORE_PATH: "${NIFI_HOME}/keytool/truststore.jks"
   TRUSTSTORE_TYPE: "jks"
-  IDOL_NIFI_FLOWFILE: {{ $nifiCluster.flowfile | quote }}
+  IDOL_NIFI_FLOW_COUNT: "{{ $nifiCluster.flows | len }}"
+{{- /* Maintains backwards compatibility for the old nifi.flowfile by using that if explicitly set, else using the newer nifi.flows */}}
+{{- range $i,$flow := (empty $nifiCluster.flowfile | ternary $nifiCluster.flows (list ( dict "file" $nifiCluster.flowfile "bucket" "default-bucket" "import" true ))) }}
+  IDOL_NIFI_FLOW_FILE_{{ $i }}: {{ $flow.file | default "" | quote }}
+  IDOL_NIFI_FLOW_NAME_{{ $i }}: {{ $flow.name | default "" | quote }}
+  IDOL_NIFI_FLOW_VERSION_{{ $i }}: {{ $flow.version | default "" | quote }}
+  IDOL_NIFI_FLOW_BUCKET_{{ $i }}: {{ $flow.bucket | quote }}
+  IDOL_NIFI_FLOW_IMPORT_{{ $i }}: {{ hasKey $flow "import" | ternary $flow.import "true" | quote }}
 {{- end }}
+{{- end -}}
