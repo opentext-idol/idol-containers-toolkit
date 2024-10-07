@@ -13,7 +13,7 @@
 
 logfile=/opt/nifi/nifi-current/logs/post-start.log
 (
-    . $( dirname "${BASH_SOURCE[0]}" )/nifi-toolkit-utils.sh
+    . "$( dirname "${BASH_SOURCE[0]}" )/nifi-toolkit-utils.sh"
 
     if [ -z "${JAVA_HOME}" ]
     then
@@ -34,7 +34,7 @@ logfile=/opt/nifi/nifi-current/logs/post-start.log
 
     NODECOUNT=
     nifitoolkit_nifi_getClusterNodeCount NODECOUNT
-    if [ ${NODECOUNT} -gt 1 ]; then
+    if [ "${NODECOUNT}" -gt 1 ]; then
         echo ["$(date)"] Skipping post-start checks as cluster is already running "( ${NODECOUNT} )"
         exit 0
     fi
