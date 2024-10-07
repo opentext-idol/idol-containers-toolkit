@@ -56,7 +56,7 @@ nifi:
 To update the version of a flow deployed into NiFi, there are two methods:
 
 * Manually upload a new version of the flow into NiFi Registry, and then use the NiFi UI (https://nifi.apache.org/docs/nifi-docs/html/user-guide.html#change-version), APIs (https://nifi.apache.org/docs/nifi-docs/rest-api/index.html) or CLI (https://nifi.apache.org/docs/nifi-docs/html/toolkit-guide.html#nifi_CLI) to update the version of flow used by the deployed process group.
-* Re-install the helm template for the NiFi cluster. Persistent Volume Claims are created for the NiFi and NiFi Registry instances deployed by the template, meaning that the template can be re-installed without loosing its state. When a flow is deployed using either of the automated methods above, if there is an existing process group for the flow to be deployed, but the current version of that process group does not match the desired version, the version used by the process group is updated to the specified version.
+* Re-install the helm template for the NiFi cluster. Persistent Volume Claims are created for the NiFi and NiFi Registry instances deployed by the template, meaning that the template can be re-installed without losing its state. When a flow is deployed using either of the automated methods above, if there is an existing process group for the flow to be deployed, but the current version of that process group does not match the desired version, the version used by the process group is updated to the specified version.
 
 ## Pre-populating NiFi Registry with buckets and flows
 
