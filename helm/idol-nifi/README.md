@@ -65,9 +65,9 @@ Specify names of the NiFi Registry buckets to be created, and optionally the loc
 ```
 nifiRegistry:
   buckets:
-  - bucket: "my-bucket"
+  - name: "my-bucket"
     flowfiles: []
-  - bucket: "my-other-bucket"
+  - name: "my-other-bucket"
     flowfiles:
     - "/flows/flow1.json"
     - "/flows/flow2.json"
