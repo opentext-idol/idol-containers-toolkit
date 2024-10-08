@@ -7,6 +7,11 @@ class AciTestBase(HelmChartTestBase):
     @property
     def kinds(self):
         return self._kinds
+    
+    def workloads(self, objs, name):
+        for t in ['Deployment','StatefulSet']:
+            if t in self.kinds:
+                yield t, objs[t][name]
 
     def test_names(self):
         ''' Chart produces expected kinds/names '''
@@ -20,11 +25,27 @@ class AciTestBase(HelmChartTestBase):
     def test_using_tls(self):
         ''' usingTLS sets IDOL_SSL environment variable '''
         objs = self.render_chart({'name':'idol-aci-test', 'usingTLS':True})
-        for t in ['Deployment','StatefulSet']:
-            if t in self.kinds:
-                with self.subTest(t):
-                    self.assertIn({'name':'IDOL_SSL','value':'1'},
-                                objs[t]['idol-aci-test']['spec']['template']['spec']['containers'][0]['env'])
+        for kind,obj in self.workloads(objs, 'idol-aci-test'):
+            with self.subTest(kind):
+                self.assertIn({'name':'IDOL_SSL','value':'1'},
+                            obj['spec']['template']['spec']['containers'][0]['env'])
+                    
+    def test_custom_data(self):
+        ''' annotations/labels etc. written to Deployments/StatefulSets '''
+        labels = {'test-label':'test-label-value'}
+        annotations = {'test-annotation':'test-annotation-value'}
+        objs = self.render_chart({'name':'idol-aci-test', 
+                                  'labels':labels, 
+                                  'annotations': annotations,
+                                  'serviceAccountName': 'test-svc'})
+        for kind,obj in self.workloads(objs, 'idol-aci-test'):
+            with self.subTest(kind):
+                with self.subTest(f'{kind}-annotations'):
+                    self.assertEqual(annotations, obj['spec']['template']['metadata']['annotations'])
+                with self.subTest(f'{kind}-labels'):
+                    self.assertLessEqual(labels.items(), obj['spec']['template']['metadata']['labels'].items())
+                with self.subTest(f'{kind}-serviceAccountName'):
+                    self.assertEqual('test-svc', obj['spec']['template']['spec']['serviceAccountName'])
                     
 class StatefulSetTests():
     def test_volume_claim_templates(self):
