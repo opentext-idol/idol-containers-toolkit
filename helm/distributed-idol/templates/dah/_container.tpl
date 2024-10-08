@@ -1,6 +1,6 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2023 Open Text.
-# 
+# Copyright 2024 Open Text.
+#
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
 # products and services. Nothing herein should be construed as constituting an additional warranty.
@@ -23,9 +23,6 @@ lifecycle:
       - "-c"
       - |
 {{ tpl ($root.Files.Get "resources/dah_preStop.sh") $root | indent 16 }}
-volumeMounts:
-- name: config-volume
-  mountPath: /etc/config/idol
 {{- /* END of distributedidol.dah.container.base */ -}}
 {{- end -}}
 
@@ -37,6 +34,8 @@ volumeMounts:
   "component" $component
   "source" "idol-library.aciserver.container.base.v1"
   "destination" "distributedidol.dah.container.base"
+  "volumeMounts" (list (dict "name" "config-volume" "mountPath" "/etc/config/idol"))
+  "mountConfigMap" false
 ) -}}
 {{- /* END of distributedidol.dah.container */ -}}
 {{- end -}}
