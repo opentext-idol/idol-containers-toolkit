@@ -1,8 +1,9 @@
 import os
+import pathlib
 import subprocess
 import yaml
 
-from tempfile import NamedTemporaryFile
+from tempfile import TemporaryDirectory
 from typing import Dict, Optional
 
 class HelmChartTestBase():
@@ -24,13 +25,13 @@ class HelmChartTestBase():
         return yaml.load(values, Loader=yaml.FullLoader)
 
     def render_chart(self, values: Optional[Dict] = None, name: str ='test') -> Dict:
-        with NamedTemporaryFile() as tmp_file:
+        with TemporaryDirectory() as tmp_dir:
             cmd = ['helm','template', name, self.chartpath ]
             if values:
                 content = yaml.dump(values)
-                tmp_file.write(content.encode())
-                tmp_file.flush()
-                cmd.extend(['--values', tmp_file.name])
+                values_file = os.path.join(tmp_dir,'testvalues.yaml')
+                pathlib.Path(values_file).write_text(content, 'utf-8')
+                cmd.extend(['--values', values_file])
             if HelmChartTestBase.validation_namespace:
                 cmd.extend(['-n', HelmChartTestBase.validation_namespace, '--validate'])
             if HelmChartTestBase.debug:
@@ -53,4 +54,3 @@ class HelmChartTestBase():
         ''' Chart renders successfully with default values '''
         objs = self.render_chart()
         self.assertNotEqual(0, len(objs))
-

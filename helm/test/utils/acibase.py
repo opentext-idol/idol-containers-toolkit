@@ -25,4 +25,15 @@ class AciTestBase(HelmChartTestBase):
                 with self.subTest(t):
                     self.assertIn({'name':'IDOL_SSL','value':'1'},
                                 objs[t]['idol-aci-test']['spec']['template']['spec']['containers'][0]['env'])
+                    
+class StatefulSetTests():
+    def test_volume_claim_templates(self):
+        ''' Any StatefulSets do not contain chart version in volumeClaimTemplate labels '''
+        objs = self.render_chart({'name': 'test-vct', 'labels':{'hello':'world'}})
+        ss = objs.get('StatefulSet', {}).get('test-vct', None)
+        if ss:
+            self.assertIn('helm.sh/chart', ss['metadata']['labels'].keys())
+            self.assertIn('helm.sh/chart', ss['spec']['template']['metadata']['labels'].keys())
+            for vct in ss['spec']['volumeClaimTemplates']:
+                self.assertNotIn('helm.sh/chart', vct['metadata']['labels'].keys())
 
