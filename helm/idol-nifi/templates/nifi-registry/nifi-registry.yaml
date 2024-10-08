@@ -154,7 +154,7 @@ spec:
   volumeClaimTemplates:
   - metadata:
       name: statedata
-      labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifiRegistry) | nindent 8 }}
+      labels: {{- include "idol-library.labels.volumeClaimTemplates" (dict "root" . "component" .Values.nifiRegistry) | nindent 8 }}
     spec:
       accessModes: [ "ReadWriteOnce" ]
       storageClassName: {{ .Values.nifiRegistry.dataVolume.storageClass }}
