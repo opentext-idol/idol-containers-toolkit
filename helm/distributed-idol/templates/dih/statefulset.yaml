@@ -9,21 +9,13 @@
 #
 # END COPYRIGHT NOTICE
 {{ $component := .Values.dih }}
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: {{ $component.name }}
-  labels: {{- include "distributedidol.labels" . | nindent 4 }}
+
+{{ define "distributedidol.dih.statefulset.base" }}
+{{- $root := get . "root" | required "distributedidol.dih.statefulset.base: missing root" -}}
+{{- $component := get . "component" | required "distributedidol.dih.statefulset.base: missing component" -}}
+
 spec:
-  serviceName: {{ $component.name | quote }}
-  replicas: 1
-  selector:
-    matchLabels:
-      app: {{ $component.name }}
   template:
-    metadata:
-      labels: {{- include "distributedidol.labels" . | nindent 8 }}
-        app: {{ $component.name }}
     spec:
       setHostnameAsFQDN: true
       initContainers:
@@ -34,19 +26,19 @@ spec:
         env:
         - name: IDOL_CONTENT_SERVICE_PORT_ACI_PORT
           # This doesn't seem to be set by our headless service
-          value: {{ .Values.content.aciPort | quote }}
+          value: {{ $root.Values.content.aciPort | quote }}
         command:
         - sh
         - "-c"
         - |
-{{ tpl (.Files.Get "resources/dih_init.sh") . | indent 10 }}
+{{ tpl ($root.Files.Get "resources/dih_init.sh") $root | indent 10 }}
         volumeMounts:
         - name: config-map
           mountPath: /mnt/config-map
         - name: dih-persistent-storage
           mountPath: /mnt/store/dih
       imagePullSecrets:
-        {{- range .Values.global.imagePullSecrets }}
+        {{- range $root.Values.global.imagePullSecrets }}
         - name: {{ . }}
         {{- end }}
 {{- if (dig "podSecurityContext" "enabled" false ($component | merge (dict))) }}
@@ -55,103 +47,11 @@ spec:
 {{- if (dig "resources" "enabled" false ($component | merge (dict))) }}
         resources: {{- omit $component.resources "enabled" | toYaml | nindent 10 }}
 {{- end }}
-      containers:
-      - name: {{ $component.name }}
-        image: {{ include "idol-library.idolImage" (dict "root" . "idolImage" $component.idolImage )}}
-        imagePullPolicy: IfNotPresent
-        command: ["/bin/sh"]
-        args: 
-        - -c
-        - |
-          cd /dih
-          ln -sf /opt/idol/dih/data ./data
-          if [ -e /opt/idol/dih/data/dih.cfg ]
-          then
-            echo Using existing dih.cfg
-          else
-            cp /opt/idol/dih/data/dih.install.cfg /opt/idol/dih/data/dih.cfg
-          fi
-          ln -sf /opt/idol/dih/data/dih.cfg ./dih.cfg
-          ./run_idol.sh
-{{- if (dig "containerSecurityContext" "enabled" false ($component | merge (dict))) }}
-        securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml | nindent 10 }}
-{{- end }}
-        lifecycle:
-          preStop:
-            exec:
-              command:
-              - /bin/bash
-              - "-c"
-              - |
-{{ tpl (.Files.Get "resources/dih_preStop.sh") . | indent 16 }}
-        volumeMounts:
-        - name: dih-persistent-storage
-          mountPath: /opt/idol/dih/data
-        {{- range $component.additionalVolumeMounts }}
-        - {{ . | toYaml | nindent 10 }}
-        {{- end }}
-        env:
-        - name: IDOL_COMPONENT_CFG
-          # Override default in newer IDOL containers
-          value: "/dih/dih.cfg"
-        {{- if $component.envConfigMap }}
-        envFrom:
-        - configMapRef: {{ $component.envConfigMap | quote }}
-        {{ end }}
-        livenessProbe:
-          httpGet:
-            path: /a=getpid
-            port: {{ $component.aciPort | int }}
-{{- template "idol-library.standardLivenessProbe" $component.livenessProbe }}
-        ports:
-        - containerPort: {{ $component.aciPort | int }}
-          name: aci-port
-          protocol: TCP
-        - containerPort: {{ $component.servicePort | int }}
-          name: service-port
-          protocol: TCP
-        - containerPort: {{ $component.indexPort | int }}
-          name: index-port
-          protocol: TCP
-{{- /*
- Exporter monitors child fullness - unused in mirrored setup 
-*/}}
-{{- if and (.Values.autoscaling.enabled) (not .Values.setupMirrored) }}
-      - name: prometheus-exporter
-        image: python:3.11
-{{- if (coalesce .Values.global.http_proxy .Values.global.https_proxy) }}
-        envFrom:
-          - configMapRef:
-              name: http-proxy-config
-{{- end }}
-        imagePullPolicy: IfNotPresent
-        workingDir: /usr/src/app
-        command: ["/bin/sh"]
-        args: ["-c", "mkdir -p /usr/src/app && 
-          echo \"Copying files\" && 
-          cp /mnt/python/* /usr/src/app && 
-          cd /usr/src/app && 
-          echo \"Installing\" &&
-          pip install --no-cache-dir -r requirements.txt &&
-          echo \"Running\" &&
-          python dih_prometheus_exporter.py"]
-        volumeMounts:
-        - name: dih-prometheus-exporter-python
-          mountPath: /mnt/python
-        - name: python-src-app
-          mountPath: /usr/src/app
-        - name: python-local
-          mountPath: /.local
-        ports:
-        - containerPort: {{ $component.prometheusPort| int }}
-          name: metrics-port
-          protocol: TCP
-{{- end }}
       volumes:
       - name: config-map
         configMap:
           name: {{ default (printf "%s-default-cfg" $component.name) $component.existingConfigMap }}
-{{- if and (.Values.autoscaling.enabled) (not .Values.setupMirrored) }}
+{{- if and ($root.Values.autoscaling.enabled) (not $root.Values.setupMirrored) }}
       - name: dih-prometheus-exporter-python
         configMap:
           name: dih-prometheus-exporter-python
@@ -166,10 +66,20 @@ spec:
   volumeClaimTemplates:
   - metadata:
       name: dih-persistent-storage
-      labels: {{- include "distributedidol.labels" . | nindent 8 }}
+      labels: {{- include "distributedidol.labels" $root | nindent 8 }}
     spec:
       accessModes: [ "ReadWriteOnce" ]
       storageClassName: {{ $component.dihStorageClass }}
       resources:
         requests:
           storage: 1Gi
+{{- end -}}
+
+{{ include "idol-library.util.merge" (dict
+  "root" .
+  "component" $component
+  "source" "idol-library.aciserver.statefulset.base.v1"
+  "destination" "distributedidol.dih.statefulset.base"
+  "containers" (list "distributedidol.dih.container" "distributedidol.prometheus.container")
+  "mountConfigMap" false
+) }}
