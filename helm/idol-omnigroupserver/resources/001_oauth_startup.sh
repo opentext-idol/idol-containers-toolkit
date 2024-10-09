@@ -1,4 +1,4 @@
-#/bin/bash
+#! /bin/bash
 
 # BEGIN COPYRIGHT NOTICE
 # Copyright 2023-2024 Open Text.
@@ -11,12 +11,12 @@
 #
 # END COPYRIGHT NOTICE
 
-source /${IDOL_COMPONENT}/prestart_scripts/oauth_tool_setup_functions
+source "/${IDOL_COMPONENT}/prestart_scripts/oauth_tool_setup_functions"
 
 if [[ ! -e ${OAUTH_TOOL_CFG} ]]
 then
-    echo No oauth_tool.cfg provided at ${OAUTH_TOOL_CFG}: OAuth will not be automatically configured via oauth_tool
+    echo "No oauth_tool.cfg provided at ${OAUTH_TOOL_CFG}: OAuth will not be automatically configured via oauth_tool"
 else
-    echo Automatically configuring OAuth using oauth_tool and ${OAUTH_TOOL_CFG}
-    handle_oauth_setup ${IDOL_COMPONENT} ${IDOL_COMPONENT_CFG} ${OAUTH_TOOL_CFG}
+    echo "Automatically configuring OAuth using oauth_tool and ${OAUTH_TOOL_CFG}"
+    handle_oauth_setup "${IDOL_COMPONENT}" "${IDOL_COMPONENT_CFG}" "${OAUTH_TOOL_CFG}"
 fi

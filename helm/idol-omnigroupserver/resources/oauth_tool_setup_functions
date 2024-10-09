@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /bin/bash
 
 # BEGIN COPYRIGHT NOTICE
 # Copyright 2023-2024 Open Text.
@@ -12,9 +12,9 @@
 # END COPYRIGHT NOTICE
 
 # Sections / paths are written into our configfiles with surrounding
-# characters. Remove these surrounding characters.
+# characters [] or "". Remove these surrounding characters.
 function prepare_string() {
-    echo $1 | cut -c 2- | rev | cut -c 2- | rev
+    echo "$1" | tail -c +2 | head -c -2
 }
 
 function generate_missing_oauth_config() {
