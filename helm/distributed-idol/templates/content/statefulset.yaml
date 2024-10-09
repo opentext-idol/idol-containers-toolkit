@@ -22,6 +22,9 @@ spec:
         {{- range .Values.global.imagePullSecrets }}
         - name: {{ . }}
         {{- end }}
+{{- if (dig "podSecurityContext" "enabled" false ($component | merge (dict))) }}
+      securityContext: {{- omit $component.podSecurityContext "enabled" | toYaml | nindent 8 }}
+{{- end }}
       terminationGracePeriodSeconds: 300
       containers:
       - name: {{ $component.name }}
@@ -55,6 +58,12 @@ spec:
         envFrom:
         - configMapRef: {{ $component.envConfigMap | quote }}
         {{ end }}
+{{- if (dig "containerSecurityContext" "enabled" false ($component | merge (dict))) }}
+        securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+{{- end }}
+{{- if (dig "resources" "enabled" false ($component | merge (dict))) }}
+        resources: {{- omit $component.resources "enabled" | toYaml | nindent 10 }}
+{{- end }}
         lifecycle:
           postStart:
             exec:

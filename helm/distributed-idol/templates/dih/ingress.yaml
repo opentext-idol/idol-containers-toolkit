@@ -8,6 +8,13 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
+{{ include "idol-library.ingress" (dict 
+    "root" .
+    "component" .Values.dih
+    "ingress" .Values.dih.ingress
+    "destination" "distributedidol.dih.ingress"
+    "paths" (fromYamlArray (include "distributedidol.dih.custompaths" .))
+    "portmapping" (dict "metrics-port" .Values.dih.ingress.metricsPath "aci-port" .Values.dih.ingress.path)) -}}
 {{- define "distributedidol.dih.ingress" -}}
 {{- end -}}
 {{- define "distributedidol.dih.custompaths" -}}
@@ -19,10 +26,3 @@
       port:
         name: index-port
 {{- end -}}
-{{ include "idol-library.ingress" (dict 
-    "root" .
-    "component" .Values.dih
-    "ingress" .Values.dih.ingress
-    "destination" "distributedidol.dih.ingress"
-    "paths" (fromYamlArray (include "distributedidol.dih.custompaths" .))
-    "portmapping" (dict "metrics-port" .Values.dih.ingress.metricsPath "aci-port" .Values.dih.ingress.path)) -}}

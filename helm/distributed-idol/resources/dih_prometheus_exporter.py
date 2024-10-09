@@ -85,6 +85,7 @@ class Worker(object):
         def sort_children(c: DIHChild):
             # host string is of form pod-name-{id}.domain.blah - sort by pod id
             return int(c.host.split('.', 1)[0].split('-')[-1])
+        resp = None
         try:
             resp = requests.get('&'.join([f'http://{self.host}:{self.aci_port}/action=getstatus',
                 'responseformat=json',
