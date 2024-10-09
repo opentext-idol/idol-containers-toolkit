@@ -34,6 +34,12 @@ spec:
     metadata:
       labels: {{- include "idol-library.labels" . | nindent 8 }}
         app: {{ $component.name | quote }}
+      {{- if $component.annotations }}
+      annotations:
+        {{- with $component.annotations }}
+        {{- toYaml . | trim | nindent 8 }}
+        {{- end }}
+      {{- end }}
     spec:
       {{- if $component.serviceAccountName }}
       serviceAccountName: {{ $component.serviceAccountName }}

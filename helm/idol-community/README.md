@@ -1,6 +1,6 @@
 # idol-community
 
-![Version: 0.6.1](https://img.shields.io/badge/Version-0.6.1-informational?style=flat-square) ![AppVersion: 24.4](https://img.shields.io/badge/AppVersion-24.4-informational?style=flat-square)
+![Version: 0.6.2](https://img.shields.io/badge/Version-0.6.2-informational?style=flat-square) ![AppVersion: 24.4](https://img.shields.io/badge/AppVersion-24.4-informational?style=flat-square)
 
 Provides an IDOL Community deployment. By default this will provide basic user
 setup suitable to be used to login to IDOL Find.
@@ -19,9 +19,9 @@ and may wish to deploy alongside the _idol-omnigroupserver_ chart.
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.14.1 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.14.2 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | 0.4.0 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | single-content | 0.10.1 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | single-content | 0.10.2 |
 
 ## Values
 

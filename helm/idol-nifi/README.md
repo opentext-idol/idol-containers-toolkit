@@ -1,6 +1,6 @@
 # idol-nifi
 
-![Version: 0.8.1](https://img.shields.io/badge/Version-0.8.1-informational?style=flat-square) ![AppVersion: 24.4.0](https://img.shields.io/badge/AppVersion-24.4.0-informational?style=flat-square)
+![Version: 0.9.0](https://img.shields.io/badge/Version-0.9.0-informational?style=flat-square) ![AppVersion: 24.4.0](https://img.shields.io/badge/AppVersion-24.4.0-informational?style=flat-square)
 
 Provides a scaleable IDOL NiFi cluster instance (NiFi, NiFi Registry and ZooKeeper).
 
@@ -18,10 +18,10 @@ Provides a scaleable IDOL NiFi cluster instance (NiFi, NiFi Registry and ZooKeep
 | https://kubernetes-sigs.github.io/metrics-server | metrics-server | 3.8.2 |
 | https://prometheus-community.github.io/helm-charts | prometheus | 25.0 |
 | https://prometheus-community.github.io/helm-charts | prometheus-adapter | 4.2.0 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.14.1 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.14.2 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | 0.4.0 |
 
-## Deploying a flow into NiFi 
+## Deploying a flow into NiFi
 
 There are two methods for deploying a flow in a Nifi cluster:
 
@@ -47,7 +47,7 @@ nifi:
 To update the version of a flow deployed into NiFi, there are two methods:
 
 * Manually upload a new version of the flow into NiFi Registry, and then use the NiFi UI (https://nifi.apache.org/docs/nifi-docs/html/user-guide.html#change-version), APIs (https://nifi.apache.org/docs/nifi-docs/rest-api/index.html) or CLI (https://nifi.apache.org/docs/nifi-docs/html/toolkit-guide.html#nifi_CLI) to update the version of flow used by the deployed process group.
-* Re-install the helm template for the NiFi cluster. Persistent Volume Claims are created for the NiFi and NiFi Registry instances deployed by the template, meaning that the template can be re-installed without losing its state. When a flow is deployed using second method above, if there is an existing process group for the flow to be deployed, but the current version of that process group does not match the desired version, the version used by the process group is updated to the specified version.
+* Re-install the helm template for the NiFi cluster. Persistent Volume Claims are created for the NiFi and NiFi Registry instances deployed by the template, meaning that the template can be re-installed without losing its state. When a flow is deployed using the second method above, if there is an existing process group for the flow to be deployed, but the current version of that process group does not match the desired version, the version used by the process group is updated to the specified version.
 
 ## Pre-populating NiFi Registry with buckets and flows
 

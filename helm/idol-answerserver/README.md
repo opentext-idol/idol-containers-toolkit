@@ -1,6 +1,6 @@
 # idol-answerserver
 
-![Version: 0.4.1](https://img.shields.io/badge/Version-0.4.1-informational?style=flat-square) ![AppVersion: 24.4](https://img.shields.io/badge/AppVersion-24.4-informational?style=flat-square)
+![Version: 0.4.2](https://img.shields.io/badge/Version-0.4.2-informational?style=flat-square) ![AppVersion: 24.4](https://img.shields.io/badge/AppVersion-24.4-informational?style=flat-square)
 
 Provides an IDOL answerserver deployment.
 
@@ -25,10 +25,10 @@ files, then redeploy the chart with LLM configuration information in your answer
 | Repository | Name | Version |
 |------------|------|---------|
 | https://charts.bitnami.com/bitnami | postgresql | 13.2.3 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.14.1 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | passageextractorAgentstore(single-content) | 0.10.1 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | answerbankAgentstore(single-content) | 0.10.1 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | single-content | 0.10.1 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.14.2 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | passageextractorAgentstore(single-content) | 0.10.2 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | answerbankAgentstore(single-content) | 0.10.2 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | single-content | 0.10.2 |
 
 ## Values
 
