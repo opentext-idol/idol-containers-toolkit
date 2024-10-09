@@ -10,7 +10,7 @@
 # END COPYRIGHT NOTICE
 apiVersion: v2
 name: idol-omnigroupserver
-version: "0.7.2"
+version: "0.7.3"
 appVersion: "24.4"
 description: Adds IDOL OmniGroupServer
 dependencies:
