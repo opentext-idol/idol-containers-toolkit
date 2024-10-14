@@ -38,13 +38,6 @@ spec:
           mountPath: /mnt/config-map
         - name: dih-persistent-storage
           mountPath: /mnt/store/dih
-      imagePullSecrets:
-        {{- range $root.Values.global.imagePullSecrets }}
-        - name: {{ . }}
-        {{- end }}
-      {{- range $component.additionalVolumes }}
-      - {{ . | toYaml | nindent 8 }}
-      {{- end }}
   volumeClaimTemplates:
   - metadata:
       name: dih-persistent-storage
