@@ -8,6 +8,7 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
+{{ $root := . }}
 {{ $component := .Values.dih }}
 
 {{ define "distributedidol.dih.statefulset.base" }}
@@ -41,19 +42,6 @@ spec:
         {{- range $root.Values.global.imagePullSecrets }}
         - name: {{ . }}
         {{- end }}
-      volumes:
-      - name: config-map
-        configMap:
-          name: {{ default (printf "%s-default-cfg" $component.name) $component.existingConfigMap }}
-{{- if and ($root.Values.autoscaling.enabled) (not $root.Values.setupMirrored) }}
-      - name: dih-prometheus-exporter-python
-        configMap:
-          name: dih-prometheus-exporter-python
-      - name: python-src-app  # working directory for exporter
-        emptyDir: {}
-      - name: python-local  # for pip downloads
-        emptyDir: {}
-{{- end }}
       {{- range $component.additionalVolumes }}
       - {{ . | toYaml | nindent 8 }}
       {{- end }}
@@ -69,11 +57,19 @@ spec:
           storage: 1Gi
 {{- end -}}
 
+{{- $dihVolumes := list}}
+
+{{- if and ($root.Values.autoscaling.enabled) (not $root.Values.setupMirrored) }}
+{{- $dihVolumes = append $dihVolumes (dict "name" "dih-prometheus-exporter-python" "configMap" (dict "name" "dih-prometheus-exporter-python")) }}
+{{- $dihVolumes = append $dihVolumes (dict "name" "python-src-app" "emptyDir" (dict)) }}
+{{- $dihVolumes = append $dihVolumes (dict "name" "python-local" "emptyDir" (dict)) }}
+{{- end }}
+
 {{ include "idol-library.util.merge" (dict
   "root" .
   "component" $component
   "source" "idol-library.aciserver.statefulset.base.v1"
   "destination" "distributedidol.dih.statefulset.base"
   "containers" (list "distributedidol.dih.container" "distributedidol.prometheus.container")
-  "mountConfigMap" false
+  "volumes" $dihVolumes
 ) }}
