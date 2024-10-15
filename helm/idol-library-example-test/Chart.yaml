@@ -12,11 +12,11 @@
 apiVersion: v2
 name: idol-aci-test
 version: 0.4.0
-appVersion: "24.1"
+appVersion: "24.4"
 description: |
   This chart is for basic testing of templates from the idol-library library chart and is
   not intended to be used for any other purpose
 dependencies:
 - name: idol-library
-  version: "0.14.0"
+  version: "0.14.2"
   repository: file://../idol-library

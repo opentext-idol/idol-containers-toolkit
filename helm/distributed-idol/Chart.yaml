@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# (c) Copyright 2022-2023 Micro Focus or one of its affiliates.
+# (c) Copyright 2022-2024 Micro Focus or one of its affiliates.
 # END COPYRIGHT NOTICE
 apiVersion: v2
 name: distributed-idol
@@ -8,7 +8,7 @@ appVersion: "23.4.0"
 description: A configurable distributed IDOL setup
 dependencies:
 - name: idol-library
-  version: "0.13.0"
+  version: "0.14.1"
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 - name: idol-licenseserver
   condition: idol-licenseserver.enabled

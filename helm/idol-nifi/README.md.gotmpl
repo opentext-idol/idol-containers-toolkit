@@ -26,6 +26,49 @@ Provides a scaleable IDOL NiFi cluster instance (NiFi, NiFi Registry and ZooKeep
 
 {{ template "chart.requirementsSection" . }}
 
+## Deploying a flow into NiFi 
+
+There are two methods for deploying a flow in a Nifi cluster:
+
+* Manually creating a flow once the NiFi cluster has been deployed by specifying no flows to be deployed in the NiFi cluster.
+
+```
+nifi:
+  flows: []
+```
+
+* Naming an existing flow (or multiple flows) within NiFi Registry to deployed. Specify the name of the NiFi Registry bucket, and flow within that bucket, to create a version controlled process group within NiFi from. To deploy a specific version of the flow from NiFi Registry a version can optionally be specified. When not specified or the value is empty, the latest version of the flow is deployed.
+
+```
+nifi:
+  flows:
+  - name: "My Flow"
+    bucket: "my-bucket"
+  - name: "My Other Flow"
+    bucket: "my-bucket"
+    version: "2"
+```
+
+To update the version of a flow deployed into NiFi, there are two methods:
+
+* Manually upload a new version of the flow into NiFi Registry, and then use the NiFi UI (https://nifi.apache.org/docs/nifi-docs/html/user-guide.html#change-version), APIs (https://nifi.apache.org/docs/nifi-docs/rest-api/index.html) or CLI (https://nifi.apache.org/docs/nifi-docs/html/toolkit-guide.html#nifi_CLI) to update the version of flow used by the deployed process group.
+* Re-install the helm template for the NiFi cluster. Persistent Volume Claims are created for the NiFi and NiFi Registry instances deployed by the template, meaning that the template can be re-installed without losing its state. When a flow is deployed using the second method above, if there is an existing process group for the flow to be deployed, but the current version of that process group does not match the desired version, the version used by the process group is updated to the specified version.
+
+## Pre-populating NiFi Registry with buckets and flows
+
+Specify names of the NiFi Registry buckets to be created, and optionally the location of JSON flow files to be imported into the bucket.
+
+```
+nifiRegistry:
+  buckets:
+  - name: "my-bucket"
+    flowfiles: []
+  - name: "my-other-bucket"
+    flowfiles:
+    - "/flows/flow1.json"
+    - "/flows/flow2.json"
+```
+
 ## Scaling NiFi
 
 When `nifi.autoScaling.enabled` is set to `true`, some considerations must be made in order for the NiFi cluster to usefully scale.
@@ -41,6 +84,33 @@ When `nifi.autoScaling.enabled` is set to `true`, some considerations must be ma
 To run a NiFi cluster, you may need to use an external database for storing state information. Many NiFi Ingest processors need to store state information. For example, IDOL Connectors store information about what they have retrieved from a data repository. This information needs to be in an external database so that it is accessible to all of the nodes in the cluster. Configure the connection to your database server by creating a database service. When you configure the IDOL connectors in your data flow, set the property `State Database Service` to the name of the database service that you created.
 
 The files that your connectors download from your data repositories must also be accessible to all of the nodes in a cluster. When you configure your connectors, set the property `adv:IngestSharedPath` to a location, such as a shared folder, that is accessible from all of the nodes in the cluster. Alternatively, set the property `adv:FlowFileEmbedFiles` to `TRUE`, so that the binary file content is included in the FlowFiles created by the connector.
+
+## Deploying multiple NiFi clusters
+
+Multiple NiFi clusters can be deployed from a single helm install command by specifying nifiClusters in the provided values.yaml, e.g.
+```
+    nifiClusters:
+    - clusterId: nf1
+    - clusterId: nf2
+```
+Each NiFi cluster will, by default, be accessible at [hostname]/[clusterId]/nifi and can communicate with each other by using http://[clusterId]:8080/nifi as the instance url when configuring remote process groups.
+
+Each cluster will use parameters from the nifi section by default, but can be overridden in the nifiClusters entry.
+
+Alternatively, this helm chart can be installed multiple times. In this case, the first deployment should deploy nifi registry, prometheus, metrics-server etc, and any further deployments should specify:
+```
+nifi:
+  registryHost: [existing-deployment-name]-reg
+nifiRegistry:
+  enabled: false
+prometheus:
+  enabled: false
+prometheus-adapter:
+  enabled: false
+metrics-server:
+  enabled: false
+```
+Each deployment will require a unique name, and ingress points should be manually specified such that they do not conflict. NiFi clusters can communicate with each other by using http://[name]:8080/nifi as the instance url when configuring remote process groups.
 
 {{ template "chart.valuesSection" . }}
 

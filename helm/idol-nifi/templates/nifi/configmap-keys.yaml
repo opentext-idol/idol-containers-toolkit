@@ -8,13 +8,17 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
+{{- range $nifiClusterItem := .Values.nifiClusters }}
+{{ $nifiCluster := merge $nifiClusterItem $.Values.nifi (dict "clusterId" $.Values.name) }}
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: idol-nifi-keys-env
-  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifi) | nindent 4 -}}
-    app: nifi
+  name: {{ $nifiCluster.clusterId }}-keys-env
+  labels: {{- include "idol-library.labels" (dict "root" $ "component" $nifiCluster) | nindent 4 -}}
+    app: {{ $nifiCluster.clusterId }}
 data:
-  KEYSTORE_PASSWORD: {{ .Values.nifi.keystorePassword | default (randAlphaNum 24) | quote }}
-  NIFI_SENSITIVE_PROPS_KEY: {{ .Values.nifi.sensitivePropsKey | default (randAlphaNum 24) | quote }}
-  TRUSTSTORE_PASSWORD: {{ .Values.nifi.truststorePassword | default (randAlphaNum 24) | quote }}
+  KEYSTORE_PASSWORD: {{ $nifiCluster.keystorePassword | default (randAlphaNum 24) | quote }}
+  NIFI_SENSITIVE_PROPS_KEY: {{ $nifiCluster.sensitivePropsKey | default (randAlphaNum 24) | quote }}
+  TRUSTSTORE_PASSWORD: {{ $nifiCluster.truststorePassword | default (randAlphaNum 24) | quote }}
+{{- end }}

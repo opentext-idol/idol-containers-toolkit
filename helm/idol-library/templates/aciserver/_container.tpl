@@ -72,7 +72,7 @@ env:
 {{- range $env }}
 - {{ . | toYaml | nindent 10 }}
 {{- end }}
-{{- if $component.usingTLS -}}
+{{- if $component.usingTLS }}
 - name: IDOL_SSL
   value: "1"
 {{- end }}
@@ -81,10 +81,10 @@ envFrom:
 - configMapRef: 
     name: {{ $component.envConfigMap | quote }}
 {{ end }}
-{{- if (dig "containerSecurityContext" "enabled" false $component.AsMap) }}
+{{- if (dig "containerSecurityContext" "enabled" false ($component | merge (dict))) }}
 securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml | nindent 10 }}
 {{- end }}
-{{- if (dig "resources" "enabled" false $component.AsMap) }}
+{{- if (dig "resources" "enabled" false ($component | merge (dict))) }}
 resources: {{- omit $component.resources "enabled" | toYaml | nindent 10 }}
 {{- end }}
 

@@ -8,19 +8,22 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
+{{- range $nifiClusterItem := .Values.nifiClusters }}
+{{ $nifiCluster := merge $nifiClusterItem $.Values.nifi (dict "clusterId" $.Values.name) }}
+---
 apiVersion: v1
 kind: Service
 metadata:
-  name: zookeeper
-  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.zookeeper) | nindent 4 -}}
-    app: zookeeper
+  name: {{ $nifiCluster.clusterId }}-zk
+  labels: {{- include "idol-library.labels" (dict "root" $ "component" $.Values.zookeeper) | nindent 4 -}}
+    app: {{ $nifiCluster.clusterId }}-zk
   annotations:
-    app.kubernetes.io/name: zookeeper
-    app.kubernetes.io/part-of: nifi
+    app.kubernetes.io/name: {{ $nifiCluster.clusterId }}-zk
+    app.kubernetes.io/part-of: {{ $nifiCluster.clusterId }}
 spec:
   type: ClusterIP
   selector:
-    app: zookeeper
+    app: {{ $nifiCluster.clusterId }}-zk
   ports:
   - protocol: TCP
     port: 2181
@@ -34,3 +37,4 @@ spec:
     port: 7070
     targetPort: 7070
     name: metrics
+{{- end -}}

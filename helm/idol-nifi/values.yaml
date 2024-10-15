@@ -32,7 +32,7 @@ idolImage:
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
   registry: "microfocusidolserver"
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
-  version: "24.3"
+  version: "24.4"
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
   repo: "nifi-full"
   # -- used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy)
@@ -161,10 +161,14 @@ nifi:
   # -- What proportion of the pod memory to allocate for JVM usage
   jvmMemoryRatio: 0.5
 
-  # -- the flowfile definition to import. 
-  # Set this to any non-existing path to bypass flow import (start with a blank flow).
-  # Customize the NiFi image and set this to a filepath within that image to import your own customized flow.
-  flowfile: /scripts/flow-basic-idol.json
+  # -- The flow definitions to import into NiFi registry.
+  # Specify the file, registry bucket name (will be created if not found), and whether to import the flow as a process group into NiFi,
+  # or specify the name, bucket name (and optionally version, latest will be used if not specified) of an existing flow in NiFi Registry.
+  # Customized flows can be added via a custom NiFi image or mounted into the pod (see `additionalVolumes` and `additionalVolumeMounts`)
+  flows:
+  - name: "Basic IDOL"
+    bucket: "default-bucket"
+    version: ""
 
   ingress:
     # -- whether to deploy ingress for nifi
@@ -222,10 +226,20 @@ nifi:
   # -- optional nifi.sensitive.props.key value (see https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#nifi_sensitive_props_key)
   # Setting this value is recommended. If it is not set, it will default to a generated value
   sensitivePropsKey: ""
+  # -- optional hostname of an existing nifi registry instance.
+  # Defaults to the created registry instance when nifiRegistry.enabled=true
+  registryHost: ""
+
+# -- nifi cluster instances. Each cluster instance inherits values from the nifi section.
+# When more than one cluster is specified, setting a clusterId is required
+nifiClusters:
+ - {}
 
 nifiRegistry:
+  # -- whether to deploy a nifi registry instance
+  enabled: true
   ingress:
-    # nifiRegistry.ingress.enabled -- whether to deploy ingress for nifi
+    # nifiRegistry.ingress.enabled -- whether to deploy ingress for nifi registry
     enabled: true
     # nifiRegistry.ingress.annotations -- optional ingress annotations
     annotations: {}
@@ -252,6 +266,23 @@ nifiRegistry:
       cpu: 1000m
       memory: 1Gi
 
+  dataVolume:
+    # -- Name of the storage class used to provision a PersistentVolume
+    # for the NiFi Registry instance.
+    # The associated PVCs are named statedata-{name}-reg-{pod number}
+    storageClass: "idol-nifi-storage-class"
+    # -- Size of the PersistentVolumeClaim that is created
+    # for the NiFi Registry instance. The size chosen here provides a hard limit on the size
+    # of the NiFi Registry data storage in the NiFi Registry instance.
+    volumeSize: 2Gi
+
+  # -- Buckets to create. Specify the bucket name, and a list of flow files to populate the bucket with.
+  # Customized flows can be added via a custom NiFi Registry image or mounted into the pod (see `additionalVolumes` and `additionalVolumeMounts`)
+  buckets:
+  - name: "default-bucket"
+    flowfiles:
+    - /scripts/flow-basic-idol.json
+
 zookeeper:
   # zookeeper.resources -- https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits
   resources:
@@ -272,6 +303,8 @@ idol-licenseserver:
   licenseServerPort: "20000"
 
 metrics-server:
+  # -- whether to deploy a metrics server instance
+  enabled: true
   args:
     - "--kubelet-insecure-tls"
 

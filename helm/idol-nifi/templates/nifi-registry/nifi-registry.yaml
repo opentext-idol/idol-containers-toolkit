@@ -8,27 +8,28 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
+{{- if .Values.nifiRegistry.enabled }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: nifi-registry
+  name: {{ .Values.name }}-reg
   labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifiRegistry) | nindent 4 -}}
-    name: nifi-registry
-    app: nifi-registry
+    name: {{ .Values.name }}-reg
+    app: {{ .Values.name }}-reg
   annotations:
-    app.kubernetes.io/name: nifi-registry
-    app.kubernetes.io/part-of: nifi
+    app.kubernetes.io/name: {{ .Values.name }}-reg
+    app.kubernetes.io/part-of: {{ .Values.name }}
 spec:
   revisionHistoryLimit: 1
-  serviceName: nifi-registry
+  serviceName: {{ .Values.name }}-reg
   podManagementPolicy: OrderedReady
   selector:
     matchLabels:
-      app: nifi-registry
+      app: {{ .Values.name }}-reg
   template:
     metadata:
       labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifiRegistry) | nindent 8 -}}
-        app: nifi-registry
+        app: {{ .Values.name }}-reg
     spec:
       automountServiceAccountToken: false
       enableServiceLinks: false
@@ -39,7 +40,34 @@ spec:
       securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
 {{- end }}
       imagePullSecrets:
-      - name: dockerhub-secret
+{{- range .Values.global.imagePullSecrets }}
+      - name: {{ . }}
+{{- end }}
+      initContainers:
+      - name: ensure-conf
+        image: docker.io/apache/nifi-registry:1.23.0
+        envFrom:
+        - configMapRef:
+            name: {{ .Values.name }}-reg-cm
+            optional: false
+        {{- if .Values.containerSecurityContext.enabled }}
+        securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+          readOnlyRootFilesystem: true
+        {{- end }}
+        command:
+        - sh
+        - "-c"
+        - |
+          if [ -z "$(ls -A -- /mnt/store/nifi-registry/conf)" ]; then
+            echo Copying files into conf directory
+            cp -r /opt/nifi-registry/nifi-registry-current/conf/ /mnt/store/nifi-registry/
+          fi
+
+        volumeMounts:
+        - name: statedata
+          mountPath: /mnt/store/nifi-registry/conf
+          subPath: conf
+          readOnly: false
       containers:
       - name: nifi-registry
         image: docker.io/apache/nifi-registry:1.23.0
@@ -56,7 +84,7 @@ spec:
                 fieldPath: status.podIP
         envFrom:
           - configMapRef:
-              name: nifi-registry-cm
+              name: {{ .Values.name }}-reg-cm
               optional: false
         livenessProbe:
           exec:
@@ -89,6 +117,25 @@ spec:
           - name: scripts
             mountPath: /scripts
             readOnly: false
+          - name: statedata
+            mountPath: /opt/nifi-registry/nifi-registry-current/conf
+            subPath: conf
+            readOnly: false
+          - name: statedata
+            mountPath: /opt/nifi-registry/nifi-registry-current/database
+            subPath: database
+            readOnly: false
+          - name: statedata
+            mountPath: /opt/nifi-registry/nifi-registry-current/flow_storage
+            subPath: flow_storage
+            readOnly: false
+          - name: statedata
+            mountPath: /opt/nifi-registry/nifi-registry-current/run
+            subPath: run
+            readOnly: false
+          {{- range .Values.additionalVolumeMounts }}
+          - {{ . | toYaml | nindent 10 }}
+          {{- end }}
         lifecycle:
           postStart:
             exec:
@@ -101,6 +148,17 @@ spec:
             sizeLimit: 2Gi
         - name: scripts
           configMap:
-            name: nifi-registry-scripts-cm
+            name: {{ .Values.name }}-reg-scripts-cm
             optional: false
             defaultMode: 0755
+  volumeClaimTemplates:
+  - metadata:
+      name: statedata
+      labels: {{- include "idol-library.labels.volumeClaimTemplates" (dict "root" . "component" .Values.nifiRegistry) | nindent 8 }}
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: {{ .Values.nifiRegistry.dataVolume.storageClass }}
+      resources:
+        requests:
+          storage: {{ .Values.nifiRegistry.dataVolume.volumeSize }}
+{{- end -}}

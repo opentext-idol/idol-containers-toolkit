@@ -67,6 +67,8 @@ ${PACKAGE_CHARTS}: package-% : %/README.md
 ${README_CHARTS}: %/README.md: %/values.yaml %/Chart.yaml %/README.md.gotmpl
 	docker run --rm -v `pwd`/$*:/helm-docs -u `id -u` jnorwood/helm-docs:latest
 
+readme-all: ${README_CHARTS}
+
 package-all: ${PACKAGE_CHARTS}
 
 # run schema validation

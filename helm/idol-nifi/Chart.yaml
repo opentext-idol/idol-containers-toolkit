@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2023 Open Text.
+# Copyright 2023-2024 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -10,19 +10,19 @@
 # END COPYRIGHT NOTICE
 apiVersion: v2
 name: idol-nifi
-version: 0.8.0
-appVersion: "24.3.0"
+version: 0.9.0
+appVersion: "24.4.0"
 description: A configurable IDOL NiFi setup
 dependencies:
 - name: idol-library
-  version: "0.14.0"
+  version: "0.14.2"
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 - name: idol-licenseserver
   condition: idol-licenseserver.enabled
   version: "0.4.0"
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 - name: metrics-server
-  condition: nifi.autoScaling.enabled
+  condition: metrics-server.enabled
   version: "3.8.2"
   repository: "https://kubernetes-sigs.github.io/metrics-server"
 - name: prometheus

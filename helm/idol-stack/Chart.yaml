@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2023 Open Text.
+# Copyright 2023-2024 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -11,8 +11,8 @@
 
 apiVersion: v2
 name: idol-stack
-version: 0.2.0
-appVersion: "24.1.0"
+version: 0.2.2
+appVersion: "24.4"
 description: An IDOL setup
 dependencies:
 - name: idol-licenseserver
@@ -21,7 +21,7 @@ dependencies:
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 - name: single-content
   condition: single-content.enabled
-  version: "0.10.0"
+  version: "0.10.2"
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 - name: distributed-idol
   condition: distributed-idol.enabled
@@ -29,5 +29,5 @@ dependencies:
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 - name: idol-nifi
   condition: idol-nifi.enabled
-  version: "0.8.0"
+  version: "0.9.0"
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm

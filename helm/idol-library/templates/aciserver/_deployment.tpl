@@ -34,6 +34,12 @@ spec:
     metadata:
       labels: {{- include "idol-library.labels" . | nindent 8 }}
         app: {{ $component.name | quote }}
+      {{- if $component.annotations }}
+      annotations:
+        {{- with $component.annotations }}
+        {{- toYaml . | trim | nindent 8 }}
+        {{- end }}
+      {{- end }}
     spec:
       {{- if $component.serviceAccountName }}
       serviceAccountName: {{ $component.serviceAccountName }}
@@ -61,7 +67,7 @@ spec:
       {{- range $component.additionalVolumes }}
       - {{ . | toYaml | nindent 8 }}
       {{- end }}
-      {{- if (dig "podSecurityContext" "enabled" false $component.AsMap) }}
+      {{- if (dig "podSecurityContext" "enabled" false ($component | merge (dict))) }}
       securityContext: {{- omit $component.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
 {{- end -}}
