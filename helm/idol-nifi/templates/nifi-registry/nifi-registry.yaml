@@ -151,6 +151,9 @@ spec:
             name: {{ .Values.name }}-reg-scripts-cm
             optional: false
             defaultMode: 0755
+        {{- range .Values.additionalVolumes }}
+        - {{ toYaml . | indent 10 | trim }}
+        {{- end }}
   volumeClaimTemplates:
   - metadata:
       name: statedata
