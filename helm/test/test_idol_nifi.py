@@ -141,5 +141,18 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
         self.assertEqual(objs['ConfigMap']['idol-nifi-reg-cm']['data']['NIFI_REGISTRY_BUCKET_NAME_2'], 'some-bucket')
         self.assertEqual(objs['ConfigMap']['idol-nifi-reg-cm']['data']['NIFI_REGISTRY_BUCKET_FILES_2'], '/some/flow/file1.json,/some/flow/file2.json')
 
+    def test_additional_volumes(self):
+        objs = self.render_chart(
+            {
+                'additionalVolumeMounts': [
+                    {"name": "test-nifi-files", "mountPath": "/some/mount/point"}
+                ]
+            })
+        mounts = objs['StatefulSet']['idol-nifi-reg']['spec']['template']['spec']['containers'][0]['volumeMounts']
+        self.assertEqual(7, len(mounts))
+        additional_mount = mounts[-1]
+        self.assertEqual("test-nifi-files", additional_mount["name"])
+        self.assertEqual("/some/mount/point", additional_mount["mountPath"])
+
 if __name__ == '__main__':
     unittest.main()

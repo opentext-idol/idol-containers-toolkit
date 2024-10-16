@@ -134,7 +134,7 @@ spec:
             subPath: run
             readOnly: false
           {{- range .Values.additionalVolumeMounts }}
-          - {{ . | toYaml | nindent 10 }}
+          - {{ toYaml . | indent 12 | trim }}
           {{- end }}
         lifecycle:
           postStart:
