@@ -134,7 +134,7 @@ spec:
             subPath: run
             readOnly: false
           {{- range .Values.additionalVolumeMounts }}
-          - {{ . | toYaml | nindent 10 }}
+          - {{ toYaml . | indent 12 | trim }}
           {{- end }}
         lifecycle:
           postStart:
@@ -151,6 +151,9 @@ spec:
             name: {{ .Values.name }}-reg-scripts-cm
             optional: false
             defaultMode: 0755
+        {{- range .Values.additionalVolumes }}
+        - {{ toYaml . | indent 10 | trim }}
+        {{- end }}
   volumeClaimTemplates:
   - metadata:
       name: statedata
