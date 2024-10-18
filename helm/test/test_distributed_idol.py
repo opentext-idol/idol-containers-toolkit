@@ -1,7 +1,5 @@
 import os
 import unittest
-
-from itertools import chain
 from utils.testbase import HelmChartTestBase
 
 # Testing options
