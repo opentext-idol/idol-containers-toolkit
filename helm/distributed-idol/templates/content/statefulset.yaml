@@ -1,118 +1,47 @@
 # BEGIN COPYRIGHT NOTICE
-# (c) Copyright 2022 Micro Focus or one of its affiliates.
+# Copyright 2024 Open Text.
+#
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
 # END COPYRIGHT NOTICE
-{{ $component := .Values.content }}
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: {{ $component.name }}
-  labels: {{- include "distributedidol.labels" . | nindent 4 }}
+
+{{ define "distributed.content.statefulset.base" }}
+{{- $root := get . "root" | required "distributed.content.statefulset.base: missing root" -}}
+{{- $component := get . "component" | required "distributed.content.statefulset.base: missing component" -}}
 spec:
-  serviceName: {{ $component.name | quote }}
-  replicas: {{ int .Values.content.initialEngineCount }}
-  selector:
-    matchLabels:
-      app: {{ $component.name }}
+  replicas: {{ int $component.initialEngineCount }}
   template:
-    metadata:
-      labels: {{- include "distributedidol.labels" . | nindent 8 }}
-        app: {{ $component.name }}
     spec:
-      imagePullSecrets:
-        {{- range .Values.global.imagePullSecrets }}
-        - name: {{ . }}
-        {{- end }}
-{{- if (dig "podSecurityContext" "enabled" false ($component | merge (dict))) }}
-      securityContext: {{- omit $component.podSecurityContext "enabled" | toYaml | nindent 8 }}
-{{- end }}
       terminationGracePeriodSeconds: 300
-      containers:
-      - name: {{ $component.name }}
-        image: {{ include "idol-library.idolImage" (dict "root" . "idolImage" $component.idolImage )}}
-        imagePullPolicy: IfNotPresent
-        command:
-        - "/bin/bash"
-        args: 
-        - "-c"
-        - |
-{{ tpl (.Files.Get "resources/content_startup.sh") . | indent 10 }}
-        volumeMounts:
-        - name: config-map
-          mountPath: /etc/config/idol
-        - name: index
-          mountPath: /opt/idol/content/index
-{{- if .Values.setupMirrored }}
-        - name: archive-share
-          mountPath: /opt/idol/archive
-{{- end }}
-        {{- range $component.additionalVolumeMounts }}
-        - {{ . | toYaml | nindent 10 }}
-        {{- end }}
-        env:
-        - name: IDOL_CONTENT_SERVICE_PORT_ACI_PORT
-          # This doesn't seem to be set by our headless service
-          value: {{ $component.aciPort | quote }}
-        - name: IDOL_COMMAND_PARAMS
-          value: "-idolcluster"
-        {{- if $component.envConfigMap }}
-        envFrom:
-        - configMapRef: {{ $component.envConfigMap | quote }}
-        {{ end }}
-{{- if (dig "containerSecurityContext" "enabled" false ($component | merge (dict))) }}
-        securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml | nindent 10 }}
-{{- end }}
-{{- if (dig "resources" "enabled" false ($component | merge (dict))) }}
-        resources: {{- omit $component.resources "enabled" | toYaml | nindent 10 }}
-{{- end }}
-        lifecycle:
-          postStart:
-            exec:
-              command:
-              - /bin/bash
-              - "-c"
-              - |
-{{ tpl (.Files.Get "resources/content_postStart.sh") . | indent 16 }}
-          preStop:
-            exec:
-              command:
-              - /bin/bash
-              - "-c"
-              - |
-{{ tpl (.Files.Get "resources/content_preStop.sh") . | indent 16 }}
-        livenessProbe:
-          httpGet:
-            path: /a=getpid
-            port: {{ $component.aciPort | int }}
-{{- template "idol-library.standardLivenessProbe" $component.livenessProbe }}
-        ports:
-        - containerPort: {{ $component.aciPort | int }}
-          name: aci-port
-          protocol: TCP
-        - containerPort: {{ $component.servicePort | int }}
-          name: service-port
-          protocol: TCP
-        - containerPort: {{ $component.indexPort | int }}
-          name: index-port
-          protocol: TCP
-      volumes:
-      - name: config-map
-        configMap:
-          name: {{ default (printf "%s-default-cfg" $component.name) $component.existingConfigMap }}
-{{- if .Values.setupMirrored }}
-      - name: archive-share
-        persistentVolumeClaim:
-          claimName: backup-archive-pvc
-{{- end }}
-      {{- range $component.additionalVolumes }}
-      - {{ . | toYaml | nindent 8 }}
-      {{- end }}
   volumeClaimTemplates:
   - metadata:
       name: index
-      labels: {{- include "distributedidol.labels" . | nindent 8 }}
+      labels: {{- include "distributedidol.labels" $root | nindent 8 }}
     spec:
       accessModes: [ "ReadWriteOnce" ]
       storageClassName: {{ $component.contentStorageClass }}
       resources:
         requests:
           storage: {{ $component.contentVolumeSize }}
+{{- end }}
+
+{{- $contentVolumes := list }}
+{{- if .Values.setupMirrored }}
+{{- $contentVolumes = append $contentVolumes (dict
+   "name" "archive-share"
+   "persistentVolumeClaim" (dict "claimName" "backup-archive-pvc")
+) }}
+{{- end }}
+
+{{ include "idol-library.util.merge" (dict
+  "root" .
+  "component" .Values.content
+  "source" "idol-library.aciserver.statefulset.base.v1"
+  "destination" "distributed.content.statefulset.base"
+  "containers" (list "didolcontent.container")
+  "volumes" $contentVolumes
+) }}

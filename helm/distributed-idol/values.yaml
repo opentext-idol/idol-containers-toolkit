@@ -72,6 +72,24 @@ global:
   no_proxy: ""
 
 content:
+  global:
+    # -- Global override value for idolImage.registry
+    # @section -- Globals
+    idolImageRegistry: ""
+    # -- Global override value for idolImage.version
+    # @section -- Globals
+    idolVersion: ""
+    # -- Global secrets used to pull container images
+    # @section -- Globals
+    imagePullSecrets:
+    - "dockerhub-secret"
+    # -- Global override value for idolImage.imagePullPolicy, has no effect if it is empty or is removed
+    # @section -- Globals
+    imagePullPolicy: ""
+    # -- Optional Secret containing OEM licensekey.dat and versionkey.dat files for licensing
+    # @section -- Globals
+    idolOemLicenseSecret: ""
+
   idolImage:
     # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
     registry: "microfocusidolserver"
