@@ -21,7 +21,7 @@
 {{- $mountConfigMap := dig "mountConfigMap" true . -}}
 name: {{ $component.name | quote }}
 image: {{ include "idol-library.idolImage" (dict "root" $root "idolImage" $component.idolImage) }}
-imagePullPolicy: {{ default (default "IfNotPresent" $component.idolImage.imagePullPolicy) $component.global.imagePullPolicy | quote }}
+imagePullPolicy: {{ default (default "IfNotPresent" $component.idolImage.imagePullPolicy) $root.Values.global.imagePullPolicy | quote }}
 {{- if $component.aciPort }}
 livenessProbe:
   httpGet:

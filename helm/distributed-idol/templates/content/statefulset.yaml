@@ -37,11 +37,10 @@ spec:
 ) }}
 {{- end }}
 
-{{- $contentValues := merge .Values.content (dict "global" .Values.global) }}
 
 {{ include "idol-library.util.merge" (dict
   "root" .
-  "component" $contentValues
+  "component" .Values.content
   "source" "idol-library.aciserver.statefulset.base.v1"
   "destination" "distributed.content.statefulset.base"
   "containers" (list "didolcontent.container")
