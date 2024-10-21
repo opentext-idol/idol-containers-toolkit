@@ -1651,6 +1651,32 @@ entries:
   idol-stack:
   - apiVersion: v2
     appVersion: "24.4"
+    created: "2024-10-18T10:26:50.159425455+01:00"
+    dependencies:
+    - condition: idol-licenseserver.enabled
+      name: idol-licenseserver
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.4.0
+    - condition: single-content.enabled
+      name: single-content
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.10.2
+    - condition: distributed-idol.enabled
+      name: distributed-idol
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.10.0
+    - condition: idol-nifi.enabled
+      name: idol-nifi
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.9.1
+    description: An IDOL setup
+    digest: 850dd665b9ceb61d98eb6d0f9c4e5c66d940c4e243fb2ce3228e274fa1a716a2
+    name: idol-stack
+    urls:
+    - release/idol-stack-0.2.3.tgz
+    version: 0.2.3
+  - apiVersion: v2
+    appVersion: "24.4"
     created: "2024-10-09T13:55:14.214550407+01:00"
     dependencies:
     - condition: idol-licenseserver.enabled
@@ -2084,4 +2110,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2024-10-18T10:24:02.58944112+01:00"
+generated: "2024-10-18T10:26:50.131847855+01:00"
