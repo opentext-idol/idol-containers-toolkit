@@ -35,7 +35,6 @@ lifecycle:
         - "-c"
         - |
 {{ tpl ($root.Files.Get "resources/dih_preStop.sh") $root | nindent 16 }}
-{{- if $component.envConfigMap }}
 {{- /* END of distributedidol.dih.container.base */ -}}
 {{- end -}}
 
