@@ -20,7 +20,7 @@ spec:
   volumeClaimTemplates:
   - metadata:
       name: index
-      labels: {{- include "distributedidol.labels" $root | nindent 8 }}
+      labels: {{- include "idol-library.labels.volumeClaimTemplates" . | nindent 8 }}
     spec:
       accessModes: [ "ReadWriteOnce" ]
       storageClassName: {{ $component.contentStorageClass }}
