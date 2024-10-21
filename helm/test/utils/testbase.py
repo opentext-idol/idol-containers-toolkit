@@ -35,10 +35,41 @@ class HelmChartTestBase():
                         yield t, workload
 
     def check_tls(self, objs, names):
+        '''
+        Check that the IDOL_SSL environment variable is set to "1" in each workload's container spec.
+        '''
         for kind,obj in self.workloads(objs, names):
             with self.subTest(kind):
                 self.assertIn({'name':'IDOL_SSL','value':'1'},
                             obj['spec']['template']['spec']['containers'][0]['env'])
+
+    @staticmethod
+    def get_test_custom_data():
+        labels = {'test-label':'test-label-value'}
+        annotations = {'test-annotation':'test-annotation-value'}
+        return {
+                'labels': labels,
+                'annotations': annotations,
+                'serviceAccountName': 'test-svc'
+               }
+
+    def check_custom_data(self, objs, names):
+        ''' annotations/labels etc. written to Deployments/StatefulSets '''
+        expected_custom_data = self.get_test_custom_data()
+        for kind,obj in self.workloads(objs, names):
+            with self.subTest(kind):
+                with self.subTest(f'{kind}-annotations'):
+                    self.assertEqual(expected_custom_data['annotations'],
+                                        obj['spec']['template']['metadata']['annotations'])
+
+                with self.subTest(f'{kind}-labels'):
+                    self.assertLessEqual(expected_custom_data['labels'].items(),
+                                            obj['spec']['template']['metadata']['labels'].items())
+
+                with self.subTest(f'{kind}-serviceAccountName'):
+                    self.assertEqual(expected_custom_data['serviceAccountName'],
+                                        obj['spec']['template']['spec']['serviceAccountName'])
+
     def default_values(self):
         values = subprocess.check_output(['helm','show','values',self.chartpath])
         return yaml.load(values, Loader=yaml.FullLoader)

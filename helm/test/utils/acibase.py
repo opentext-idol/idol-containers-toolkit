@@ -20,20 +20,8 @@ class AciTestBase(HelmChartTestBase):
                     
     def test_custom_data(self):
         ''' annotations/labels etc. written to Deployments/StatefulSets '''
-        labels = {'test-label':'test-label-value'}
-        annotations = {'test-annotation':'test-annotation-value'}
-        objs = self.render_chart({'name':'idol-aci-test', 
-                                  'labels':labels, 
-                                  'annotations': annotations,
-                                  'serviceAccountName': 'test-svc'})
-        for kind,obj in self.workloads(objs, ['idol-aci-test']):
-            with self.subTest(kind):
-                with self.subTest(f'{kind}-annotations'):
-                    self.assertEqual(annotations, obj['spec']['template']['metadata']['annotations'])
-                with self.subTest(f'{kind}-labels'):
-                    self.assertLessEqual(labels.items(), obj['spec']['template']['metadata']['labels'].items())
-                with self.subTest(f'{kind}-serviceAccountName'):
-                    self.assertEqual('test-svc', obj['spec']['template']['spec']['serviceAccountName'])
+        objs = self.render_chart(self.get_test_custom_data())
+        self.check_custom_data(objs, ['idol-aci-test'])
                     
 class StatefulSetTests():
     def test_volume_claim_templates(self):

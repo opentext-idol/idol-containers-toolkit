@@ -12,6 +12,8 @@ class TestDistributedIdol(unittest.TestCase, HelmChartTestBase):
     def setUp(self):
         self._name = 'distributed-idol-test'
         self._kinds = ['Deployment','StatefulSet','Ingress','ConfigMap','Service']
+        self._aci_workloads = ['idol-content', 'idol-dah', 'idol-dih']
+        self._components = {'content', 'dah', 'dih', 'prometheus'}
 
     def test_kinds(self):
         '''
@@ -76,11 +78,23 @@ class TestDistributedIdol(unittest.TestCase, HelmChartTestBase):
         Check that setting usingTLS sets IDOL_SSL environment variable
         '''
         custom_values = { 'name': self._name }
-        for component in {'content', 'dah', 'dih', 'prometheus'}:
+        for component in self._components:
             custom_values.update( {component: {'usingTLS': True}} )
 
         objs = self.render_chart(custom_values)
-        self.check_tls(objs, ['idol-content', 'idol-dah', 'idol-dih'])
+        self.check_tls(objs, self._aci_workloads)
+
+
+    def test_custom_data(self):
+        ''' annotations/labels etc. written to Deployments/StatefulSets '''
+        test_custom_data = self.get_test_custom_data()
+
+        custom_values = { 'name': self._name }
+        for component in self._components:
+            custom_values.update( {component: test_custom_data} )
+
+        objs = self.render_chart(custom_values)
+        self.check_custom_data(objs, self._aci_workloads)
 
 if __name__ == '__main__':
     unittest.main()
