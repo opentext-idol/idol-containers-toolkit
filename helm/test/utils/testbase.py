@@ -14,12 +14,31 @@ class HelmChartTestBase():
     # so best to use an empty namespace to avoid
     validation_namespace = ''
 
+    _kinds = None
+
+    @property
+    def kinds(self):
+        return self._kinds
+
     @classmethod
     def setUpClass(cls) -> None:
         if os.path.isdir(cls.chartpath) and cls.update_dependency:
             subprocess.check_output(['helm','dependency','update',cls.chartpath])
         return super().setUpClass()
-    
+
+    def workloads(self, objs, names):
+        for t in ['Deployment','StatefulSet']:
+            if t not in self.kinds:
+                continue
+            for name, workload in objs[t].items():
+                if name in names:
+                        yield t, workload
+
+    def check_tls(self, objs, names):
+        for kind,obj in self.workloads(objs, names):
+            with self.subTest(kind):
+                self.assertIn({'name':'IDOL_SSL','value':'1'},
+                            obj['spec']['template']['spec']['containers'][0]['env'])
     def default_values(self):
         values = subprocess.check_output(['helm','show','values',self.chartpath])
         return yaml.load(values, Loader=yaml.FullLoader)

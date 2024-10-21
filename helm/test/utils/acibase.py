@@ -4,15 +4,6 @@ class AciTestBase(HelmChartTestBase):
     _kinds = ['Deployment','Ingress','Service','ConfigMap']
     version = '24.4'
 
-    @property
-    def kinds(self):
-        return self._kinds
-    
-    def workloads(self, objs, name):
-        for t in ['Deployment','StatefulSet']:
-            if t in self.kinds:
-                yield t, objs[t][name]
-
     def test_names(self):
         ''' Chart produces expected kinds/names '''
         name = 'test-name'
@@ -25,10 +16,7 @@ class AciTestBase(HelmChartTestBase):
     def test_using_tls(self):
         ''' usingTLS sets IDOL_SSL environment variable '''
         objs = self.render_chart({'name':'idol-aci-test', 'usingTLS':True})
-        for kind,obj in self.workloads(objs, 'idol-aci-test'):
-            with self.subTest(kind):
-                self.assertIn({'name':'IDOL_SSL','value':'1'},
-                            obj['spec']['template']['spec']['containers'][0]['env'])
+        self.check_tls(objs, ['idol-aci-test'])
                     
     def test_custom_data(self):
         ''' annotations/labels etc. written to Deployments/StatefulSets '''
@@ -38,7 +26,7 @@ class AciTestBase(HelmChartTestBase):
                                   'labels':labels, 
                                   'annotations': annotations,
                                   'serviceAccountName': 'test-svc'})
-        for kind,obj in self.workloads(objs, 'idol-aci-test'):
+        for kind,obj in self.workloads(objs, ['idol-aci-test']):
             with self.subTest(kind):
                 with self.subTest(f'{kind}-annotations'):
                     self.assertEqual(annotations, obj['spec']['template']['metadata']['annotations'])
