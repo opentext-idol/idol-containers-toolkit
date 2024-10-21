@@ -27,7 +27,8 @@ spec:
           value: {{ $root.Values.content.aciPort | quote }}
         {{- if $component.envConfigMap }}
         envFrom:
-        - configMapRef: {{ $component.envConfigMap | quote }}
+        - configMapRef:
+            name: {{ $component.envConfigMap | quote }}
         {{ end }}
         command:
         - sh
