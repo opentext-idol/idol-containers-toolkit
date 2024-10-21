@@ -66,9 +66,17 @@ volumeMounts:
   subPath: versionkey.dat
   readOnly: true
 {{- end }}
+{{- $idolComponentCfgExists := false }}
+{{- range $env }}
+  {{- if eq .name "IDOL_COMPONENT_CFG" }}
+    {{- $idolComponentCfgExists = true }}
+  {{- end }}
+{{- end }}
 env:
+{{- if not $idolComponentCfgExists }}
 - name: IDOL_COMPONENT_CFG
   value: {{ printf "/etc/config/idol/%s.cfg" (trimPrefix "idol-" $component.name) }}
+{{- end }}
 {{- range $env }}
 - {{ . | toYaml | nindent 10 }}
 {{- end }}

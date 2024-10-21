@@ -36,6 +36,7 @@ lifecycle:
   "destination" "distributedidol.dah.container.base"
   "volumeMounts" (list (dict "name" "config-volume" "mountPath" "/etc/config/idol"))
   "mountConfigMap" false
+  "env" (list (dict "name" "IDOL_COMPONENT_CFG"  "value" "/dah/dah.cfg"))
 ) -}}
 {{- /* END of distributedidol.dah.container */ -}}
 {{- end -}}
