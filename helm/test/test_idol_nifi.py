@@ -118,6 +118,7 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
         self.assertEqual(objs['ConfigMap']['idol-nifi-reg-cm']['data']['NIFI_REGISTRY_BUCKET_COUNT'], '1')
         self.assertEqual(objs['ConfigMap']['idol-nifi-reg-cm']['data']['NIFI_REGISTRY_BUCKET_NAME_0'], 'default-bucket')
         self.assertEqual(objs['ConfigMap']['idol-nifi-reg-cm']['data']['NIFI_REGISTRY_BUCKET_FILES_0'], '/scripts/flow-basic-idol.json')
+        self.assertEqual(objs['ConfigMap']['idol-nifi-env']['data']['NIFI_REGISTRY_HOSTS'], 'idol-nifi-reg')
 
     def test_registry_buckets(self):
         objs = self.render_chart(
@@ -156,6 +157,13 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
 
         volumes = objs['StatefulSet']['idol-nifi-reg']['spec']['template']['spec']['volumes']
         self.assertTrue(any(volume["name"] == "test-nifi-files" and volume.get("configMap", {}).get("name") == "test-nifi-cfg-map" for volume in volumes))
+
+    def test_registry_name(self):
+        objs = self.render_chart({'nifi':{
+            'registryHost': 'nifi-registry'
+        }})
+        self.assertEqual(objs['ConfigMap']['idol-nifi-env']['data']['NIFI_REGISTRY_HOSTS'], 'nifi-registry')
+
 
 if __name__ == '__main__':
     unittest.main()
