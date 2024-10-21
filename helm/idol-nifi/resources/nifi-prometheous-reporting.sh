@@ -12,7 +12,7 @@
 # END COPYRIGHT NOTICE
 
 
-echo [$(date)] Checking/registering prometheous reporting task
+echo "[$(date)] Checking/registering prometheous reporting task"
 result=$("${NIFI_TOOLKIT_HOME}/bin/cli.sh" nifi get-reporting-tasks | grep "PrometheusReportingTask")
 rc=$?
 until [ 0 == $rc ]
@@ -21,11 +21,11 @@ do
     result=$("${NIFI_TOOLKIT_HOME}/bin/cli.sh" nifi get-reporting-tasks | grep "PrometheusReportingTask")
     rc=$?
 done
-echo [$(date)] Got prometheous reporting task: "${result}"
+echo "[$(date)] Got prometheous reporting task: ${result}"
 
-taskid=$(echo "${result}" | egrep -oh "[0-9a-fA-F\-]{36}")
-echo [$(date)] Starting prometheous reporting task: "${taskid}"
+taskid=$(echo "${result}" | grep -Eoh "[0-9a-fA-F\-]{36}")
+echo "[$(date)] Starting prometheous reporting task: ${taskid}"
 
 "${NIFI_TOOLKIT_HOME}/bin/cli.sh" nifi start-reporting-tasks -rt "${taskid}"
 result=$("${NIFI_TOOLKIT_HOME}/bin/cli.sh" nifi get-reporting-tasks | grep "PrometheusReportingTask")
-echo [$(date)] Got prometheous reporting task: "${result}"
+echo "[$(date)] Got prometheous reporting task: ${result}"

@@ -43,6 +43,31 @@ spec:
 {{- range .Values.global.imagePullSecrets }}
       - name: {{ . }}
 {{- end }}
+      initContainers:
+      - name: ensure-conf
+        image: docker.io/apache/nifi-registry:1.23.0
+        envFrom:
+        - configMapRef:
+            name: {{ .Values.name }}-reg-cm
+            optional: false
+        {{- if .Values.containerSecurityContext.enabled }}
+        securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+          readOnlyRootFilesystem: true
+        {{- end }}
+        command:
+        - sh
+        - "-c"
+        - |
+          if [ -z "$(ls -A -- /mnt/store/nifi-registry/conf)" ]; then
+            echo Copying files into conf directory
+            cp -r /opt/nifi-registry/nifi-registry-current/conf/ /mnt/store/nifi-registry/
+          fi
+
+        volumeMounts:
+        - name: statedata
+          mountPath: /mnt/store/nifi-registry/conf
+          subPath: conf
+          readOnly: false
       containers:
       - name: nifi-registry
         image: docker.io/apache/nifi-registry:1.23.0
@@ -92,6 +117,25 @@ spec:
           - name: scripts
             mountPath: /scripts
             readOnly: false
+          - name: statedata
+            mountPath: /opt/nifi-registry/nifi-registry-current/conf
+            subPath: conf
+            readOnly: false
+          - name: statedata
+            mountPath: /opt/nifi-registry/nifi-registry-current/database
+            subPath: database
+            readOnly: false
+          - name: statedata
+            mountPath: /opt/nifi-registry/nifi-registry-current/flow_storage
+            subPath: flow_storage
+            readOnly: false
+          - name: statedata
+            mountPath: /opt/nifi-registry/nifi-registry-current/run
+            subPath: run
+            readOnly: false
+          {{- range .Values.additionalVolumeMounts }}
+          - {{ toYaml . | indent 12 | trim }}
+          {{- end }}
         lifecycle:
           postStart:
             exec:
@@ -107,4 +151,17 @@ spec:
             name: {{ .Values.name }}-reg-scripts-cm
             optional: false
             defaultMode: 0755
+        {{- range .Values.additionalVolumes }}
+        - {{ toYaml . | indent 10 | trim }}
+        {{- end }}
+  volumeClaimTemplates:
+  - metadata:
+      name: statedata
+      labels: {{- include "idol-library.labels.volumeClaimTemplates" (dict "root" . "component" .Values.nifiRegistry) | nindent 8 }}
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: {{ .Values.nifiRegistry.dataVolume.storageClass }}
+      resources:
+        requests:
+          storage: {{ .Values.nifiRegistry.dataVolume.volumeSize }}
 {{- end -}}

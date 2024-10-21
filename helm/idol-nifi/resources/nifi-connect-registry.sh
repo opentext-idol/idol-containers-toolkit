@@ -14,8 +14,8 @@
 set -x -o allexport
 for i in ${NIFI_REGISTRY_HOSTS//,/ }
 do
-    if [ ! -z "${NIFI_REGISTRY_HOSTS}" ]; then
-        echo [$(date)] Checking/registering registry ${i} 
+    if [ -n "${NIFI_REGISTRY_HOSTS}" ]; then
+        echo "[$(date)] Checking/registering registry ${i}"
         result=$("${NIFI_TOOLKIT_HOME}/bin/cli.sh" nifi list-reg-clients | grep "${i}")
         rc=$?
         until [ 0 == $rc ]
@@ -24,6 +24,6 @@ do
             result=$("${NIFI_TOOLKIT_HOME}/bin/cli.sh" nifi list-reg-clients | grep "${i}")
             rc=$?
         done
-        echo [$(date)] Got registry client: "${result}"
+        echo "[$(date)] Got registry client: ${result}"
     fi
 done

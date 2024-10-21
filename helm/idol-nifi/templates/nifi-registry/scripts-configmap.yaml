@@ -18,4 +18,8 @@ metadata:
 data:
   postStart.sh: |
 {{ tpl (.Files.Get "resources/nifi-registry-postStart.sh") . | indent 4 }}
-{{- end -}}
+{{- end }}
+  flow-basic-idol.json: |
+{{ tpl (.Files.Get "resources/flow-basic-idol.json") . | indent 4 }}
+  nifi-toolkit-utils.sh: |
+{{ tpl (.Files.Get "resources/nifi-toolkit-utils.sh") . | indent 4 }}

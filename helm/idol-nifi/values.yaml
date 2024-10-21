@@ -161,10 +161,14 @@ nifi:
   # -- What proportion of the pod memory to allocate for JVM usage
   jvmMemoryRatio: 0.5
 
-  # -- the flowfile definition to import. 
-  # Set this to any non-existing path to bypass flow import (start with a blank flow).
-  # Customize the NiFi image and set this to a filepath within that image to import your own customized flow.
-  flowfile: /scripts/flow-basic-idol.json
+  # -- The flow definitions to import into NiFi registry.
+  # Specify the file, registry bucket name (will be created if not found), and whether to import the flow as a process group into NiFi,
+  # or specify the name, bucket name (and optionally version, latest will be used if not specified) of an existing flow in NiFi Registry.
+  # Customized flows can be added via a custom NiFi image or mounted into the pod (see `additionalVolumes` and `additionalVolumeMounts`)
+  flows:
+  - name: "Basic IDOL"
+    bucket: "default-bucket"
+    version: ""
 
   ingress:
     # -- whether to deploy ingress for nifi
@@ -261,6 +265,23 @@ nifiRegistry:
     limits: 
       cpu: 1000m
       memory: 1Gi
+
+  dataVolume:
+    # -- Name of the storage class used to provision a PersistentVolume
+    # for the NiFi Registry instance.
+    # The associated PVCs are named statedata-{name}-reg-{pod number}
+    storageClass: "idol-nifi-storage-class"
+    # -- Size of the PersistentVolumeClaim that is created
+    # for the NiFi Registry instance. The size chosen here provides a hard limit on the size
+    # of the NiFi Registry data storage in the NiFi Registry instance.
+    volumeSize: 2Gi
+
+  # -- Buckets to create. Specify the bucket name, and a list of flow files to populate the bucket with.
+  # Customized flows can be added via a custom NiFi Registry image or mounted into the pod (see `additionalVolumes` and `additionalVolumeMounts`)
+  buckets:
+  - name: "default-bucket"
+    flowfiles:
+    - /scripts/flow-basic-idol.json
 
 zookeeper:
   # zookeeper.resources -- https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits

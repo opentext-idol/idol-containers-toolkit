@@ -1,16 +1,17 @@
 import os
 import unittest
 
-from utils.acibase import AciTestBase
+from utils.acibase import AciTestBase, StatefulSetTests
 from utils.testbase import HelmChartTestBase
 
 # Testing options
 HelmChartTestBase.validation_namespace = ''
 HelmChartTestBase.debug = False
 
-class TestIdolLibraryExample(AciTestBase, unittest.TestCase):
+class TestIdolLibraryExample(AciTestBase, StatefulSetTests, unittest.TestCase):
     chartpath = os.path.join('..','idol-library-example-test')
     _kinds = ['Deployment','StatefulSet','Ingress','ConfigMap','Service']
+
 
 class TestIdolAnswerServer(AciTestBase, unittest.TestCase):
     chartpath = os.path.join('..','idol-answerserver')

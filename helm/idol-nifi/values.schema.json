@@ -143,6 +143,64 @@
             ],
             "title": "IdolLicenseserver"
         },
+        "Flow": {
+            "type": "object",
+            "properties": {
+                "file": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "version": {
+                    "type": "string"
+                },
+                "bucket": {
+                    "type": "string"
+                },
+                "import": {
+                    "type": "boolean"
+                }
+            },
+            "dependencies": {
+                "name": ["bucket"],
+                "file": ["bucket"]
+            },
+            "oneOf": [
+                {
+                    "required": [
+                        "file"
+                    ]
+                },
+                {
+                    "required": [
+                        "name"
+                    ]
+                }
+            ],
+            "title": "Flow"
+        },
+        "Bucket": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "flowfiles": {
+                    "type": "array",
+                    "items": {
+                        "type":"string"
+                    }
+                }
+            },
+            "required": [
+                "name"
+            ],
+            "title": "Bucket"
+        },
         "NifiProperties": {
             "type": "object",
             "properties": {
@@ -162,7 +220,14 @@
                 },
                 "flowfile": {
                     "type":"string",
-                    "minLength": 1
+                    "minLength": 1,
+                    "description": "Deprecated, prefer 'flows'"
+                },
+                "flows": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/Flow"
+                    }
                 },
                 "ingress": {
                     "$ref": "#/$defs/NifiIngress"
@@ -188,7 +253,7 @@
             "unevaluatedProperties": false,
             "required": [
                 "autoScaling",
-                "flowfile",
+                "flows",
                 "ingress",
                 "jvmMemoryRatio",
                 "resources",
@@ -394,14 +459,25 @@
                 "ingress": {
                     "$ref": "#/$defs/NifiRegistryIngress"
                 },
+                "dataVolume": {
+                    "$ref": "#/$defs/DataVolume"
+                },
                 "resources": {
                     "type": "object"
+                },
+                "buckets": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/Bucket"
+                    }
                 }
             },
             "required": [
                 "enabled",
                 "ingress",
-                "resources"
+                "resources",
+                "buckets",
+                "dataVolume"
             ],
             "title": "NifiRegistry"
         },
