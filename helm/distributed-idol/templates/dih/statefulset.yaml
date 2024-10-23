@@ -58,8 +58,6 @@ spec:
 {{- $dihVolumes = append $dihVolumes (dict "name" "python-local" "emptyDir" (dict)) }}
 {{- end }}
 
-{{- $dihValues := merge .Values.dih (dict "global" .Values.global) }}
-
 {{- $dihContainers := list}}
 {{- $dihContainers = append $dihContainers "distributedidol.dih.container" }}
 
@@ -69,7 +67,7 @@ spec:
 
 {{ include "idol-library.util.merge" (dict
   "root" .
-  "component" $dihValues
+  "component" .Values.dih
   "source" "idol-library.aciserver.statefulset.base.v1"
   "destination" "distributedidol.dih.statefulset.base"
   "containers" $dihContainers
