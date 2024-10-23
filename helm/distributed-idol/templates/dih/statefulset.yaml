@@ -60,11 +60,18 @@ spec:
 
 {{- $dihValues := merge .Values.dih (dict "global" .Values.global) }}
 
+{{- $dihContainers := list}}
+{{- $dihContainers = append $dihContainers "distributedidol.dih.container" }}
+
+{{- if and ($root.Values.autoscaling.enabled) (not $root.Values.setupMirrored) }}
+{{- $dihContainers = append $dihContainers "distributedidol.prometheus.container" }}
+{{- end -}}
+
 {{ include "idol-library.util.merge" (dict
   "root" .
   "component" $dihValues
   "source" "idol-library.aciserver.statefulset.base.v1"
   "destination" "distributedidol.dih.statefulset.base"
-  "containers" (list "distributedidol.dih.container" "distributedidol.prometheus.container")
+  "containers" $dihContainers
   "volumes" $dihVolumes
 ) }}

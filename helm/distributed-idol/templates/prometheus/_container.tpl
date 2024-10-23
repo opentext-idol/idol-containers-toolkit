@@ -45,6 +45,7 @@ ports:
 {{- define "distributedidol.prometheus.container" -}}
 {{ $root := get . "root" | required "distributedidol.prometheus.container: missing root" }}
 {{ $component := get . "component" | required "distributedidol.prometheus.container: missing component" }}
+{{- if and ($root.Values.autoscaling.enabled) (not $root.Values.setupMirrored) }}
 {{- include "idol-library.util.merge" (dict
   "root" $root
   "component" $component
@@ -54,5 +55,6 @@ ports:
                        (dict "name" "python-src-app" "mountPath" "/usr/src/app")
                        (dict "name" "python-local" "mountPath" "/.local"))
 ) -}}
+{{- end -}}
 {{- /* END of distributedidol.prometheus.container */ -}}
 {{- end -}}
