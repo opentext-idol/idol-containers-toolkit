@@ -31,7 +31,7 @@ autoscaling:
   # -- Enable automatic scaling of the number of Content instances.
   # See maxDocumentCount for non-mirror mode or autoscalingTargetAverageCpuUse for mirror
   # With autoscalingEnabled=false, you can scale using:
-  #  kubectl scale statefuleset <contentName> --replicas=<N>
+  #  kubectl scale statefulset <contentName> --replicas=<N>
   # In a non-mirrored setup, you should redistribute the data before scaling down
   # - see the DREREDISTRIBUTE documentation
   enabled: true
@@ -43,7 +43,7 @@ autoscaling:
   # -- Maximum number of Content instances.
   maxReplicas: "6"
 
-  # -- corresponds to [Server]::MaxDocumentCount Content configuration parameter
+  # -- Corresponds to [Server]::MaxDocumentCount Content configuration parameter
   # Used in non-mirror mode
   maxDocumentCount: "5000"
 
@@ -58,17 +58,29 @@ autoscaling:
 
 global:
   # -- Global override value for idolImage.registry
+  # @section -- Globals
   idolImageRegistry: ""
   # -- Global override value for idolImage.version
+  # @section -- Globals
   idolVersion: ""
   # -- Global secrets used to pull container images
+  # @section -- Globals
   imagePullSecrets:
   - "dockerhub-secret"
+  # -- Global override value for idolImage.imagePullPolicy, has no effect if it is empty or is removed
+  # @section -- Globals
+  imagePullPolicy: ""
+  # -- Optional Secret containing OEM licensekey.dat and versionkey.dat files for licensing
+  # @section -- Globals
+  idolOemLicenseSecret: ""
   # -- Any required http_proxy settings relating to external network access
+  # @section -- Globals
   http_proxy: ""
   # -- Any required https_proxy settings relating to external network access
+  # @section -- Globals
   https_proxy: ""
   # -- Any required no_proxy settings relating to external network access
+  # @section -- Globals
   no_proxy: ""
 
 content:
@@ -76,14 +88,16 @@ content:
     # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
     registry: "microfocusidolserver"
     # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
-    version: "23.4"
+    version: "24.4"
     # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
     repo: "content"
+    # -- used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy)
+    imagePullPolicy: "IfNotPresent"
 
 
   # -- Size of the PersistentVolumeClaim that is created
   # for each Content instance. The Kubernetes cluster will need to provide
-  # enough PersistentVolumes to satisify the claims made for the desired number
+  # enough PersistentVolumes to satisfy the claims made for the desired number
   # of Content instances. The size chosen here provides a hard limit on the size
   # of the Content index in each Content instance.
   contentVolumeSize: 16Gi
@@ -108,7 +122,7 @@ content:
 
   # -- Number of Content engines created on startup.
   # After startup the Content engine autoscaling kicks in and controls the number of Content engines. 
-  # The minimum valid value of initialContentEngineCount is 1.
+  # The minimum valid value of initialEngineCount is 1.
   # For an upgrade, you must specify the number of Content engines that were present.
   initialEngineCount: "1"
 
@@ -130,7 +144,7 @@ content:
   # -- Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1)
   additionalVolumeMounts: []
 
-  # -- Optional configMap name holding extra environnment variables for content container
+  # -- Optional configMap name holding extra environment variables for content container
   envConfigMap: ""
 
   # -- Optional PodSecurityContext (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podsecuritycontext-v1-core)
@@ -203,7 +217,7 @@ content:
 
     # -- Ingress controller specific annotations
     # Some annotations are added automatically based on ingress.type and other values, but can 
-    # be overriden/augmented here
+    # be overridden/augmented here
     # e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations
     annotations: {}
 
@@ -223,7 +237,7 @@ content:
   #####################################
 
   ##### INTERNAL VARIABLES #####
-  # Values specified below this point in the file should not need to be overriden.
+  # Values specified below this point in the file should not need to be overridden.
   # They are generally here in values.yaml so that DRY principles and a consistent
   # scheme for specifying these values in the templates can be followed.
 
@@ -235,9 +249,11 @@ dah:
     # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
     registry: "microfocusidolserver"
     # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
-    version: "23.4"
+    version: "24.4"
     # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
     repo: "dah"
+    # -- used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy)
+    imagePullPolicy: "IfNotPresent"
 
   # -- port service will serve ACI connections on
   aciPort: "9060"
@@ -253,7 +269,7 @@ dah:
   # -- Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1)
   additionalVolumeMounts: []
 
-  # -- Optional configMap name holding extra environnment variables for dah container
+  # -- Optional configMap name holding extra environment variables for dah container
   envConfigMap: ""
 
   # -- Optional PodSecurityContext (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podsecuritycontext-v1-core)
@@ -323,7 +339,7 @@ dah:
 
     # -- Ingress controller specific annotations
     # Some annotations are added automatically based on ingress.type and other values, but can 
-    # be overriden/augmented here
+    # be overridden/augmented here
     # e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations
     annotations: {}
 
@@ -344,7 +360,7 @@ dah:
   #####################################
 
   ##### INTERNAL VARIABLES #####
-  # Values specified below this point in the file should not need to be overriden.
+  # Values specified below this point in the file should not need to be overridden.
   # They are generally here in values.yaml so that DRY principles and a consistent
   # scheme for specifying these values in the templates can be followed.
 
@@ -356,9 +372,11 @@ dih:
     # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
     registry: "microfocusidolserver"
     # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
-    version: "23.4"
+    version: "24.4"
     # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
     repo: "dih"
+    # -- used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy)
+    imagePullPolicy: "IfNotPresent"
 
   # -- port service will serve ACI connections on
   aciPort: "9070"
@@ -376,7 +394,7 @@ dih:
   # -- Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1)
   additionalVolumeMounts: []
 
-  # -- Optional configMap name holding extra environnment variables for dah container
+  # -- Optional configMap name holding extra environment variables for dah container
   envConfigMap: ""
 
   # -- Optional PodSecurityContext (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podsecuritycontext-v1-core)
@@ -451,7 +469,7 @@ dih:
 
     # -- Ingress controller specific annotations
     # Some annotations are added automatically based on ingress.type and other values, but can 
-    # be overriden/augmented here
+    # be overridden/augmented here
     # e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations
     annotations: {}
 
@@ -472,7 +490,7 @@ dih:
   #####################################
 
   ##### INTERNAL VARIABLES #####
-  # Values specified below this point in the file should not need to be overriden.
+  # Values specified below this point in the file should not need to be overridden.
   # They are generally here in values.yaml so that DRY principles and a consistent
   # scheme for specifying these values in the templates can be followed.
 
@@ -496,7 +514,7 @@ prometheus:
   name: "prometheus"
   port: "9090"
 
-  # -- Optional configMap name holding extra environnment variables for prometheus container
+  # -- Optional configMap name holding extra environment variables for prometheus container
   envConfigMap: ""
 
   # -- whether prometheus port is configured to use TLS (https).
@@ -532,7 +550,7 @@ prometheus:
 
     # -- Ingress controller specific annotations
     # Some annotations are added automatically based on ingress.type and other values, but can 
-    # be overriden/augmented here
+    # be overridden/augmented here
     # e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations
     annotations: {}
 
@@ -550,7 +568,7 @@ prometheus:
       key: ""
 
 ##### INTERNAL VARIABLES #####
-# Values specified below this point in the file should not need to be overriden.
+# Values specified below this point in the file should not need to be overridden.
 # They are generally here in values.yaml so that DRY principles and a consistent
 # scheme for specifying these values in the templates can be followed.
 

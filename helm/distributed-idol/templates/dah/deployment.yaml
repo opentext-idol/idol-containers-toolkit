@@ -9,20 +9,12 @@
 #
 # END COPYRIGHT NOTICE
 {{ $component := .Values.dah }}
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: {{ $component.name }}
-  labels: {{- include "distributedidol.labels" . | nindent 4 }}
+
+{{ define "distributedidol.dah.deployment.base" }}
+{{- $root := get . "root" | required "distributedidol.dah.deployment.base: missing root" -}}
+{{- $component := get . "component" | required "distributedidol.dah.deployment.base: missing component" -}}
 spec:
-  replicas: {{ $component.replicas | default 1 | int }}
-  selector:
-    matchLabels:
-      app: {{ $component.name }}
   template:
-    metadata:
-      labels: {{- include "distributedidol.labels" . | nindent 8 }}
-        app: {{ $component.name }}
     spec:
       initContainers:
       - name: edit-config
@@ -32,68 +24,29 @@ spec:
         env:
         - name: IDOL_CONTENT_SERVICE_PORT_ACI_PORT
           # This doesn't seem to be set by our headless service
-          value: {{ .Values.content.aciPort | quote }}
+          value: {{ $root.Values.content.aciPort | quote }}
         {{- if $component.envConfigMap }}
         envFrom:
-        - configMapRef: {{ $component.envConfigMap | quote }}
+        - configMapRef:
+            name: {{ $component.envConfigMap | quote }}
         {{ end }}
         command:
         - sh
         - "-c"
         - |
-{{ tpl (.Files.Get "resources/dah_init.sh") . | indent 10 }}
+{{ tpl ($root.Files.Get "resources/dah_init.sh") $root | indent 10 }}
         volumeMounts:
         - name: config-map
           mountPath: /mnt/config-map
         - name: config-volume
           mountPath: /mnt/config/idol
-      imagePullSecrets:
-        {{- range .Values.global.imagePullSecrets }}
-        - name: {{ . }}
-        {{- end }}
-      containers:
-      - name: {{ $component.name }}
-        image: {{ include "idol-library.idolImage" (dict "root" . "idolImage" $component.idolImage )}}
-        imagePullPolicy: IfNotPresent
-        command: ["/bin/sh"]
-        args: ["-c", "cd /dah && command cp -f /etc/config/idol/dah.cfg dah.cfg && ./run_idol.sh"]
-        lifecycle:
-          preStop:
-            exec:
-              command:
-              - /bin/bash
-              - "-c"
-              - |
-{{ tpl (.Files.Get "resources/dah_preStop.sh") . | indent 16 }}
-        volumeMounts:
-        - name: config-volume
-          mountPath: /etc/config/idol
-        {{- range $component.additionalVolumeMounts }}
-        - {{ . | toYaml | nindent 10 }}
-        {{- end }}
-        env:
-        - name: IDOL_COMPONENT_CFG
-          # Override default in newer IDOL containers
-          value: "/dah/dah.cfg"
-        livenessProbe:
-          httpGet:
-            path: /a=getpid
-            port: {{ $component.aciPort | int }}
-{{- template "idol-library.standardLivenessProbe" $component.livenessProbe }}
-        ports:
-        - containerPort: {{ $component.aciPort | int }}
-          name: aci-port
-          protocol: TCP
-        - containerPort: {{ $component.servicePort | int }}
-          name: service-port
-          protocol: TCP
-      volumes:
-      - name: config-volume
-        emptyDir: {}
-      - name: config-map
-        configMap:
-          name: {{ default (printf "%s-default-cfg" $component.name) $component.existingConfigMap }}
-      {{- range $component.additionalVolumes }}
-      - {{ . | toYaml | nindent 8 }}
-      {{- end }}
-          
+{{- end -}}
+
+{{ include "idol-library.util.merge" (dict
+  "root" .
+  "component" .Values.dah
+  "source" "idol-library.aciserver.deployment.base.v1"
+  "destination" "distributedidol.dah.deployment.base"
+  "containers" (list "distributedidol.dah.container")
+  "volumes" (list (dict "name" "config-volume" "emptyDir" (dict)))
+) }}

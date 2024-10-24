@@ -182,12 +182,17 @@
                 },
                 "repo": {
                     "$ref": "#/$defs/required_string"
+                },
+                "imagePullPolicy": {
+                    "type": "string",
+                    "enum": ["Always", "IfNotPresent", "Never"]
                 }
             },
             "required":[
                 "registry",
                 "version",
-                "repo"
+                "repo",
+                "imagePullPolicy"
             ],
             "unevaluatedProperties": false
         },
@@ -206,6 +211,10 @@
                     "items": {
                         "$ref": "#/$defs/required_string"
                     }
+                },
+                "imagePullPolicy": {
+                    "type": "string",
+                    "enum": ["", "Always", "IfNotPresent", "Never"]
                 },
                 "http_proxy":{
                     "type": "string"
@@ -340,8 +349,7 @@
             ],
             "allOf":[
                 { "$ref": "#/$defs/aciCommon" }
-            ],
-            "unevaluatedProperties": false
+            ]
         },
         "dah":{
             "type": "object",
@@ -366,8 +374,7 @@
             ],
             "allOf":[
                 { "$ref": "#/$defs/aciCommon" }
-            ],
-            "unevaluatedProperties": false
+            ]
         },
         "dih":{
             "type": "object",
@@ -401,8 +408,7 @@
             ],
             "allOf":[
                 { "$ref": "#/$defs/aciCommon" }
-            ],
-            "unevaluatedProperties": false
+            ]
         },
         "autoscaling":{
             "type": "object",

@@ -21,7 +21,7 @@
 {{- $mountConfigMap := dig "mountConfigMap" true . -}}
 name: {{ $component.name | quote }}
 image: {{ include "idol-library.idolImage" (dict "root" $root "idolImage" $component.idolImage) }}
-imagePullPolicy: {{ default (default "IfNotPresent" $component.idolImage.imagePullPolicy) $component.global.imagePullPolicy | quote }}
+imagePullPolicy: {{ default (default "IfNotPresent" $component.idolImage.imagePullPolicy) $root.Values.global.imagePullPolicy | quote }}
 {{- if $component.aciPort }}
 livenessProbe:
   httpGet:
@@ -66,9 +66,17 @@ volumeMounts:
   subPath: versionkey.dat
   readOnly: true
 {{- end }}
+{{- $idolComponentCfgExists := false }}
+{{- range $env }}
+  {{- if eq .name "IDOL_COMPONENT_CFG" }}
+    {{- $idolComponentCfgExists = true }}
+  {{- end }}
+{{- end }}
 env:
+{{- if not $idolComponentCfgExists }}
 - name: IDOL_COMPONENT_CFG
   value: {{ printf "/etc/config/idol/%s.cfg" (trimPrefix "idol-" $component.name) }}
+{{- end }}
 {{- range $env }}
 - {{ . | toYaml | nindent 10 }}
 {{- end }}

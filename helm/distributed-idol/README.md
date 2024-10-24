@@ -8,7 +8,7 @@ END COPYRIGHT NOTICE
 # distributed-idol
 <!-- omit in toc -->
 
-![Version: 0.10.0](https://img.shields.io/badge/Version-0.10.0-informational?style=flat-square) ![AppVersion: 23.4.0](https://img.shields.io/badge/AppVersion-23.4.0-informational?style=flat-square)
+![Version: 0.11.0](https://img.shields.io/badge/Version-0.11.0-informational?style=flat-square) ![AppVersion: 24.4.0](https://img.shields.io/badge/AppVersion-24.4.0-informational?style=flat-square)
 
 - [Overview](#overview)
 - [Prerequisites](#prerequisites)
@@ -38,9 +38,9 @@ The chart can deploy in mirror-mode (autoscaling to fulfil query demand) or in n
 The default is non-mirror mode.
 
 > Full documentation for the IDOL components is available from
-> - https://www.microfocus.com/documentation/idol/IDOL_23_4/Content_23.4_Documentation/Help/
-> - https://www.microfocus.com/documentation/idol/IDOL_23_4/DAH_23.4_Documentation/Help/
-> - https://www.microfocus.com/documentation/idol/IDOL_23_4/DIH_23.4_Documentation/Help/
+> - https://www.microfocus.com/documentation/idol/IDOL_24_4/Content_24.4_Documentation/Help/
+> - https://www.microfocus.com/documentation/idol/IDOL_24_4/DAH_24.4_Documentation/Help/
+> - https://www.microfocus.com/documentation/idol/IDOL_24_4/DIH_24.4_Documentation/Help/
 
 ## Prerequisites
 
@@ -186,15 +186,30 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | Repository | Name | Version |
 |------------|------|---------|
 | https://kubernetes-sigs.github.io/metrics-server | metrics-server | 3.8.2 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.14.1 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.14.3 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | 0.4.0 |
 
 ## Values
 
+### Globals
+
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| autoscaling.enabled | bool | `true` | Enable automatic scaling of the number of Content instances. See maxDocumentCount for non-mirror mode or autoscalingTargetAverageCpuUse for mirror With autoscalingEnabled=false, you can scale using:  kubectl scale statefuleset <contentName> --replicas=<N> In a non-mirrored setup, you should redistribute the data before scaling down - see the DREREDISTRIBUTE documentation |
-| autoscaling.maxDocumentCount | string | `"5000"` | corresponds to [Server]::MaxDocumentCount Content configuration parameter Used in non-mirror mode |
+| global.http_proxy | string | `""` | Any required http_proxy settings relating to external network access |
+| global.https_proxy | string | `""` | Any required https_proxy settings relating to external network access |
+| global.idolImageRegistry | string | `""` | Global override value for idolImage.registry |
+| global.idolOemLicenseSecret | string | `""` | Optional Secret containing OEM licensekey.dat and versionkey.dat files for licensing |
+| global.idolVersion | string | `""` | Global override value for idolImage.version |
+| global.imagePullPolicy | string | `""` | Global override value for idolImage.imagePullPolicy, has no effect if it is empty or is removed |
+| global.imagePullSecrets | list | `["dockerhub-secret"]` | Global secrets used to pull container images |
+| global.no_proxy | string | `""` | Any required no_proxy settings relating to external network access |
+
+### Other Values
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| autoscaling.enabled | bool | `true` | Enable automatic scaling of the number of Content instances. See maxDocumentCount for non-mirror mode or autoscalingTargetAverageCpuUse for mirror With autoscalingEnabled=false, you can scale using:  kubectl scale statefulset <contentName> --replicas=<N> In a non-mirrored setup, you should redistribute the data before scaling down - see the DREREDISTRIBUTE documentation |
+| autoscaling.maxDocumentCount | string | `"5000"` | Corresponds to [Server]::MaxDocumentCount Content configuration parameter Used in non-mirror mode |
 | autoscaling.maxReplicas | string | `"6"` | Maximum number of Content instances. |
 | autoscaling.minReplicas | string | `"2"` | Minimum number of Content instances. Ignored in non-mirror-mode |
 | autoscaling.targetAverageCpuUse | string | `"500m"` | Target CPU use of the Content instances. See metrics.containerResource.target.averageValue in https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/horizontal-pod-autoscaler-v2beta2/#HorizontalPodAutoscalerSpec Used in mirror mode |
@@ -205,14 +220,15 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | content.containerSecurityContext | object | `{"enabled":false}` | Optional SecurityContext for container (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#securitycontext-v1-core) |
 | content.containerSecurityContext.enabled | bool | `false` | enable SecurityContext for container. Setting to false omits. |
 | content.contentStorageClass | string | `"idol-content-storage-class"` | Name of the storage class used to provision a PersistentVolume for each Content instance. The associated PVCs are named index-{name}-{pod number} |
-| content.contentVolumeSize | string | `"16Gi"` | Size of the PersistentVolumeClaim that is created for each Content instance. The Kubernetes cluster will need to provide enough PersistentVolumes to satisify the claims made for the desired number of Content instances. The size chosen here provides a hard limit on the size of the Content index in each Content instance. |
-| content.envConfigMap | string | `""` | Optional configMap name holding extra environnment variables for content container |
+| content.contentVolumeSize | string | `"16Gi"` | Size of the PersistentVolumeClaim that is created for each Content instance. The Kubernetes cluster will need to provide enough PersistentVolumes to satisfy the claims made for the desired number of Content instances. The size chosen here provides a hard limit on the size of the Content index in each Content instance. |
+| content.envConfigMap | string | `""` | Optional configMap name holding extra environment variables for content container |
 | content.existingConfigMap | string | `""` | Optional configMap mounted at /etc/config/idol and expected to provide content.cfg and content_primary.cfg |
+| content.idolImage.imagePullPolicy | string | `"IfNotPresent"` | used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) |
 | content.idolImage.registry | string | `"microfocusidolserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | content.idolImage.repo | string | `"content"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
-| content.idolImage.version | string | `"23.4"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
+| content.idolImage.version | string | `"24.4"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | content.indexPort | string | `"9101"` | port service will serve index connections on |
-| content.ingress.annotations | object | `{}` | Ingress controller specific annotations Some annotations are added automatically based on ingress.type and other values, but can  be overriden/augmented here e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations |
+| content.ingress.annotations | object | `{}` | Ingress controller specific annotations Some annotations are added automatically based on ingress.type and other values, but can  be overridden/augmented here e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations |
 | content.ingress.className | string | `""` | Optional parameter to override the default ingress class |
 | content.ingress.enabled | bool | `true` | Create ingress resource |
 | content.ingress.exposedContents | int | `0` | Allows ingress access to individual content engines. Set to max number of engines to expose |
@@ -226,7 +242,7 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | content.ingress.tls.key | string | `""` | Private key data value to generate tls Secret (should be base64 encoded) |
 | content.ingress.tls.secretName | string | `""` | The name of the secret for ingress TLS. Leave empty if not using TLS.  If specified then either this secret must already exist, or crt and key values must be provided and secret will be created..  |
 | content.ingress.type | string | `"nginx"` | Ingress controller type to setup for. Valid values are nginx or haproxy (used by OpenShift) |
-| content.initialEngineCount | string | `"1"` | Number of Content engines created on startup. After startup the Content engine autoscaling kicks in and controls the number of Content engines.  The minimum valid value of initialContentEngineCount is 1. For an upgrade, you must specify the number of Content engines that were present. |
+| content.initialEngineCount | string | `"1"` | Number of Content engines created on startup. After startup the Content engine autoscaling kicks in and controls the number of Content engines.  The minimum valid value of initialEngineCount is 1. For an upgrade, you must specify the number of Content engines that were present. |
 | content.name | string | `"idol-content"` | used to name statefulset, service, ingress |
 | content.podSecurityContext | object | `{"enabled":false,"fsGroup":0,"runAsGroup":0,"runAsUser":1000}` | Optional PodSecurityContext (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podsecuritycontext-v1-core) |
 | content.podSecurityContext.enabled | bool | `false` | enable PodSecurityContext. Setting to false omits. |
@@ -241,12 +257,13 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | dah.additionalVolumes | list | `[]` | Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes) |
 | dah.containerSecurityContext | object | `{"enabled":false}` | Optional SecurityContext for container (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#securitycontext-v1-core) |
 | dah.containerSecurityContext.enabled | bool | `false` | enable SecurityContext for container. Setting to false omits. |
-| dah.envConfigMap | string | `""` | Optional configMap name holding extra environnment variables for dah container |
+| dah.envConfigMap | string | `""` | Optional configMap name holding extra environment variables for dah container |
 | dah.existingConfigMap | string | `""` | Optional configMap expected to provide dah.cfg |
+| dah.idolImage.imagePullPolicy | string | `"IfNotPresent"` | used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) |
 | dah.idolImage.registry | string | `"microfocusidolserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | dah.idolImage.repo | string | `"dah"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
-| dah.idolImage.version | string | `"23.4"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
-| dah.ingress.annotations | object | `{}` | Ingress controller specific annotations Some annotations are added automatically based on ingress.type and other values, but can  be overriden/augmented here e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations |
+| dah.idolImage.version | string | `"24.4"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
+| dah.ingress.annotations | object | `{}` | Ingress controller specific annotations Some annotations are added automatically based on ingress.type and other values, but can  be overridden/augmented here e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations |
 | dah.ingress.className | string | `""` | Optional parameter to override the default ingress class |
 | dah.ingress.enabled | bool | `true` | Create ingress resource |
 | dah.ingress.host | string | `""` | Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules). For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration) |
@@ -272,13 +289,14 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | dih.containerSecurityContext | object | `{"enabled":false}` | Optional SecurityContext for container (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#securitycontext-v1-core) |
 | dih.containerSecurityContext.enabled | bool | `false` | enable SecurityContext for container. Setting to false omits. |
 | dih.dihStorageClass | string | `"idol-dih-storage-class"` | Name of the storage class used to provision the persistent volume for the dih configuration and data The associated PVC is named dih-persistent-storage-<name>-0 |
-| dih.envConfigMap | string | `""` | Optional configMap name holding extra environnment variables for dah container |
+| dih.envConfigMap | string | `""` | Optional configMap name holding extra environment variables for dah container |
 | dih.existingConfigMap | string | `""` | Optional configMap expected to provide dih.cfg |
+| dih.idolImage.imagePullPolicy | string | `"IfNotPresent"` | used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) |
 | dih.idolImage.registry | string | `"microfocusidolserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | dih.idolImage.repo | string | `"dih"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
-| dih.idolImage.version | string | `"23.4"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
+| dih.idolImage.version | string | `"24.4"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | dih.indexPort | string | `"9071"` | port service will serve index connections on |
-| dih.ingress.annotations | object | `{}` | Ingress controller specific annotations Some annotations are added automatically based on ingress.type and other values, but can  be overriden/augmented here e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations |
+| dih.ingress.annotations | object | `{}` | Ingress controller specific annotations Some annotations are added automatically based on ingress.type and other values, but can  be overridden/augmented here e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations |
 | dih.ingress.className | string | `""` | Optional parameter to override the default ingress class |
 | dih.ingress.enabled | bool | `true` | Create ingress resource |
 | dih.ingress.host | string | `""` | Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules). For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration) |
@@ -298,12 +316,6 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | dih.resources.enabled | bool | `false` | enable resources for container. Setting to false omits. |
 | dih.servicePort | string | `"9072"` | port service will serve service connections on |
 | dih.usingTLS | bool | `false` | whether aci/service/index ports are configured to use TLS (https). If configuring for TLS, then consider setting IDOL_SSL_COMPONENT_CERT_PATH and IDOL_SSL_COMPONENT_KEY_PATH in envConfigMap to provide required TLS certificates |
-| global.http_proxy | string | `""` | Any required http_proxy settings relating to external network access |
-| global.https_proxy | string | `""` | Any required https_proxy settings relating to external network access |
-| global.idolImageRegistry | string | `""` | Global override value for idolImage.registry |
-| global.idolVersion | string | `""` | Global override value for idolImage.version |
-| global.imagePullSecrets | list | `["dockerhub-secret"]` | Global secrets used to pull container images |
-| global.no_proxy | string | `""` | Any required no_proxy settings relating to external network access |
 | idol-licenseserver.enabled | bool | `false` | create a cluster service proxying to a LicenseServer instance |
 | idol-licenseserver.licenseServerIp | string | `"this must be set to a valid IP address"` | IP address of LicenseServer instance |
 | indexserviceName | string | `"idol-index-service"` | internal parameter to specify the index service name. |
