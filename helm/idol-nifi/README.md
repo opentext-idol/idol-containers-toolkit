@@ -1,6 +1,6 @@
 # idol-nifi
 
-![Version: 0.9.1](https://img.shields.io/badge/Version-0.9.1-informational?style=flat-square) ![AppVersion: 24.4.0](https://img.shields.io/badge/AppVersion-24.4.0-informational?style=flat-square)
+![Version: 0.9.2](https://img.shields.io/badge/Version-0.9.2-informational?style=flat-square) ![AppVersion: 24.4.0](https://img.shields.io/badge/AppVersion-24.4.0-informational?style=flat-square)
 
 Provides a scaleable IDOL NiFi cluster instance (NiFi, NiFi Registry and ZooKeeper).
 

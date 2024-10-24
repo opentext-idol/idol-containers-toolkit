@@ -985,6 +985,35 @@ entries:
   idol-nifi:
   - apiVersion: v2
     appVersion: 24.4.0
+    created: "2024-10-21T16:06:42.752658684+01:00"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.14.2
+    - condition: idol-licenseserver.enabled
+      name: idol-licenseserver
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.4.0
+    - condition: metrics-server.enabled
+      name: metrics-server
+      repository: https://kubernetes-sigs.github.io/metrics-server
+      version: 3.8.2
+    - condition: prometheus.enabled
+      name: prometheus
+      repository: https://prometheus-community.github.io/helm-charts
+      version: "25.0"
+    - condition: prometheus-adapter.enabled
+      name: prometheus-adapter
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 4.2.0
+    description: A configurable IDOL NiFi setup
+    digest: 1e599a7bc366fe7d03380022c175fca5bf6bcc107343524d7c0b1a352d0f7254
+    name: idol-nifi
+    urls:
+    - release/idol-nifi-0.9.2.tgz
+    version: 0.9.2
+  - apiVersion: v2
+    appVersion: 24.4.0
     created: "2024-10-18T10:24:02.609330795+01:00"
     dependencies:
     - name: idol-library
@@ -1679,6 +1708,32 @@ entries:
     - release/idol-qms-0.1.0.tgz
     version: 0.1.0
   idol-stack:
+  - apiVersion: v2
+    appVersion: "24.4"
+    created: "2024-10-18T10:26:50.159425455+01:00"
+    dependencies:
+    - condition: idol-licenseserver.enabled
+      name: idol-licenseserver
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.4.0
+    - condition: single-content.enabled
+      name: single-content
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.10.2
+    - condition: distributed-idol.enabled
+      name: distributed-idol
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.10.0
+    - condition: idol-nifi.enabled
+      name: idol-nifi
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.9.1
+    description: An IDOL setup
+    digest: 850dd665b9ceb61d98eb6d0f9c4e5c66d940c4e243fb2ce3228e274fa1a716a2
+    name: idol-stack
+    urls:
+    - release/idol-stack-0.2.3.tgz
+    version: 0.2.3
   - apiVersion: v2
     appVersion: "24.4"
     created: "2024-10-09T13:55:14.214550407+01:00"
