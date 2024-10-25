@@ -15,7 +15,7 @@ Provides a scaleable IDOL NiFi cluster instance (NiFi, NiFi Registry and ZooKeep
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://charts.bitnami.com/bitnami | postgresql-ha | 14.3.4 |
+| https://charts.bitnami.com/bitnami | postgresql(postgresql-ha) | 14.3.4 |
 | https://kubernetes-sigs.github.io/metrics-server | metrics-server | 3.8.2 |
 | https://prometheus-community.github.io/helm-charts | prometheus | 25.0 |
 | https://prometheus-community.github.io/helm-charts | prometheus-adapter | 4.2.0 |
@@ -79,7 +79,7 @@ When `nifi.autoScaling.enabled` is set to `true`, some considerations must be ma
 
 #### State Data
 
-To run a NiFi cluster, you may need to use an external database for storing state information. Many NiFi Ingest processors need to store state information. For example, IDOL Connectors store information about what they have retrieved from a data repository. This information needs to be in an external database so that it is accessible to all of the nodes in the cluster. Configure the connection to your database server by creating a database service. When you configure the IDOL connectors in your data flow, set the property `State Database Service` to the name of the database service that you created. A PostgreSQL database will be deployed by default as a part of the helm install (which can be disabled in the provided values.yaml if not required by setting `postgresql-ha.enabled=false`). When configuring the `State Database Service`, use the following values for the processor properties:
+To run a NiFi cluster, you may need to use an external database for storing state information. Many NiFi Ingest processors need to store state information. For example, IDOL Connectors store information about what they have retrieved from a data repository. This information needs to be in an external database so that it is accessible to all of the nodes in the cluster. Configure the connection to your database server by creating a database service. When you configure the IDOL connectors in your data flow, set the property `State Database Service` to the name of the database service that you created. A PostgreSQL database will be deployed by default as a part of the helm install (which can be disabled in the provided values.yaml if not required by setting `postgresql.enabled=false`). When configuring the `State Database Service`, use the following values for the processor properties:
 
 Connection String: `Driver={PostgreSQL};Server=${PostgreSQLServer};Port=5432;Database=${PostgreSQLDatabase};Uid=${uid};Pwd=${pwd};`
 Uid: `${PostgreSQLUsername}`
@@ -216,8 +216,8 @@ Each deployment will require a unique name, and ingress points should be manuall
 | nifiRegistry.ingress.tls.secretName | string | `""` | The name of the secret for ingress TLS. Leave empty if not using TLS.  If specified then either this secret must already exist, or crt and key values must be provided and secret will be created. |
 | nifiRegistry.resources | object | `{"limits":{"cpu":"1000m","memory":"1Gi"},"requests":{"cpu":"200m","memory":"1Gi"}}` | https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits |
 | podSecurityContext | object | `{"enabled":true,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000,"seccompProfile":{"type":"RuntimeDefault"}}` | pod security context definition  See https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod |
-| postgresql-ha | object | Default configuration to support shared state data. See values.yaml for details. | `postgresql-ha` sub-chart configuration Required for shared state data storage across the nifi cluster. See https://github.com/bitnami/charts/tree/main/bitnami/postgresql-ha |
-| postgresql-ha.enabled | bool | `true` | whether to deploy the postgresql-ha subchart |
+| postgresql | object | Default configuration to support shared state data. See values.yaml for details. | `postgresql` sub-chart configuration Required for shared state data storage across the nifi cluster. See https://github.com/bitnami/charts/tree/main/bitnami/postgresql-ha |
+| postgresql.enabled | bool | `true` | whether to deploy the postgresql subchart |
 | prometheus | object | Default configuration to support `idol-nifi` autoscaling. See values.yaml for details. | `prometheus` sub-chart configuration Required for auto-scaling.  See https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus |
 | prometheus-adapter | object | Default configuration to support `idol-nifi` autoscaling. See values.yaml for details. | `prometheus-adapter` sub-chart configuration Required for auto-scaling.  See https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-adapter |
 | serviceAccountName | string | `""` | Optional serviceAccountName for the pods (https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account) |

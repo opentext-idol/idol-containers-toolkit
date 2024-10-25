@@ -150,11 +150,11 @@ do
             ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "LicenseServerHost" -pv "{{ (index .Values "idol-licenseserver").licenseServerService }}"
             ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "LicenseServerACIPort" -pv "{{ (index .Values "idol-licenseserver").licenseServerPort }}"
             ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "IndexHost" -pv "{{ .Values.indexserviceName }}"
-{{- if (index .Values "postgresql-ha" ).enabled }}
-            ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "PostgreSQLServer" -pv "{{ .Release.Name }}-postgresql-ha-pgpool"
-            ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "PostgreSQLDatabase" -pv "{{ (index .Values "postgresql-ha").postgresql.database }}"
-            ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "PostgreSQLUser" -pv "{{ (index .Values "postgresql-ha").postgresql.username }}" -ps true
-            ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "PostgreSQLPassword" -pv "{{ (index .Values "postgresql-ha").postgresql.password }}" -ps true
+{{- if .Values.postgresql.enabled }}
+            ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "PostgreSQLServer" -pv "{{ .Release.Name }}-postgresql-pgpool"
+            ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "PostgreSQLDatabase" -pv "{{ .Values.postgresql.postgresql.database }}"
+            ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "PostgreSQLUser" -pv "{{ .Values.postgresql.postgresql.username }}" -ps true
+            ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "PostgreSQLPassword" -pv "{{ .Values.postgresql.postgresql.password }}" -ps true
 {{- end}}
         fi
 

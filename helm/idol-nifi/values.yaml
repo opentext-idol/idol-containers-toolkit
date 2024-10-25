@@ -376,12 +376,12 @@ prometheus-adapter:
         as: "nifi_percent_used_count_avg"
       metricsQuery: 'avg(nifi_percent_used_count{component_type="Connection"}) by (pod,namespace)'
 
-# -- `postgresql-ha` sub-chart configuration
+# -- `postgresql` sub-chart configuration
 # Required for shared state data storage across the nifi cluster.
 # See https://github.com/bitnami/charts/tree/main/bitnami/postgresql-ha
 # @default -- Default configuration to support shared state data. See values.yaml for details.
-postgresql-ha:
-  # -- whether to deploy the postgresql-ha subchart
+postgresql:
+  # -- whether to deploy the postgresql subchart
   enabled: true
   pgpool:
     adminUsername: pgpool_admin

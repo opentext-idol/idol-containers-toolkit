@@ -92,15 +92,15 @@ spec:
         securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml | nindent 10 }}
           readOnlyRootFilesystem: true
         {{- end }}
-      {{- if (index $root.Values "postgresql-ha" ).enabled }}
+      {{- if $root.Values.postgresql.enabled }}
       - name: wait-for-postgres
         image: docker.io/busybox:1.36
         command:
         - sh
         - -c
         - |
-          echo "Connecting to PostgreSQL pool {{ $root.Release.Name }}-postgresql-ha-pgpool"
-          until nc -vzw 1 "{{ $root.Release.Name }}-postgresql-ha-pgpool:5432" ; do
+          echo "Connecting to PostgreSQL pool {{ $root.Release.Name }}-postgresql-pgpool"
+          until nc -vzw 1 "{{ $root.Release.Name }}-postgresql-pgpool:5432" ; do
             echo "Waiting for PostgreSQL pool to start"
             sleep 3
           done
