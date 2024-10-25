@@ -375,3 +375,41 @@ prometheus-adapter:
         matches: ".*"
         as: "nifi_percent_used_count_avg"
       metricsQuery: 'avg(nifi_percent_used_count{component_type="Connection"}) by (pod,namespace)'
+
+# -- `postgresql-ha` sub-chart configuration
+# Required for shared state data storage across the nifi cluster.
+# See https://github.com/bitnami/charts/tree/main/bitnami/postgresql-ha
+# @default -- Default configuration to support shared state data. See values.yaml for details.
+postgresql-ha:
+  # -- whether to deploy the postgresql-ha subchart
+  enabled: true
+  pgpool:
+    adminUsername: pgpool_admin
+    adminPassword: pgpool_admin
+  postgresql:
+    database: nifi-statedata
+    username: postgres
+    password: postgres
+    repmgrUsername: postgres_repmgr
+    repmgrPassword: postgres_repmgr
+    replicaCount: 1
+    resources:
+      requests:
+        cpu: 500m
+        memory: 500Mi
+      limits: 
+        cpu: 1000m
+        memory: 1Gi
+    extraVolumes:
+    - name: dshm
+      emptyDir:
+        medium: Memory
+        sizeLimit: 256Mi
+    extraVolumeMounts:
+    - name: dshm
+      mountPath: /dev/shm
+  persistence:
+    storageClass: "idol-nifi-storage-class"
+    size: 8Gi
+  metrics:
+    enabled: false
