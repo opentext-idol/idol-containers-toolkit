@@ -59,6 +59,9 @@ spec:
           fi
           echo Copying files into extensions directory
           cp -rnv /opt/nifi/nifi-current/extensions/ /mnt/store/nifi/
+        {{- range $nifiCluster.additionalExtensionFiles }}
+          cp -nv {{ . | quote }} /mnt/store/nifi/extensions
+        {{- end }}
         volumeMounts:
         - name: statedata
           mountPath: /mnt/store/nifi/conf
@@ -68,6 +71,9 @@ spec:
           mountPath: /mnt/store/nifi/extensions
           subPath: extensions
           readOnly: false
+        {{- range $root.Values.additionalVolumeMounts }}
+        - {{ toYaml . | indent 10 | trim }}
+        {{- end }}
       - name: wait-for-zookeeper
         image: docker.io/busybox:1.36
         command:

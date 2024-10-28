@@ -145,6 +145,7 @@ Each deployment will require a unique name, and ingress points should be manuall
 | metrics-server.args[0] | string | `"--kubelet-insecure-tls"` |  |
 | metrics-server.enabled | bool | `true` | whether to deploy a metrics server instance |
 | name | string | `"idol-nifi"` | used to name statefulset, service, ingress |
+| nifi.additionalExtensionFiles | list | `[]` | paths to additional NiFi extension files that are copied into the NiFi extensions directory during initialization |
 | nifi.autoScaling.enabled | bool | `true` | deploy a horizontal pod autoscaler for the nifi statefulset |
 | nifi.autoScaling.maxReplicas | int | `8` | the maximum size of the nifi statefulset |
 | nifi.autoScaling.metrics | list | See below | one or more metrics controlling the horizontal pod autoscaler (https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/horizontal-pod-autoscaler-v2/#HorizontalPodAutoscalerSpec) |
