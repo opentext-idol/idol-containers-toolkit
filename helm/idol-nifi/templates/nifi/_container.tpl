@@ -122,6 +122,7 @@ securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml
   "source" "idol-library.aciserver.container.base.v1"
   "destination" "idolnifi.container.base" 
   "volumeMounts" (list (dict "name" "statedata" "mountPath" "/opt/nifi/nifi-current/conf" "subPath" "conf" "readOnly" false)
+                       (dict "name" "statedata" "mountPath" "/opt/nifi/nifi-current/extensions" "subPath" "extensions" "readOnly" false)
                        (dict "name" "statedata" "mountPath" "/opt/nifi/nifi-current/data" "subPath" "data" "readOnly" false)
                        (dict "name" "statedata" "mountPath" "/opt/nifi/nifi-current/run" "subPath" "run" "readOnly" false)
                        (dict "name" "statedata" "mountPath" "/opt/nifi/nifi-current/state" "subPath" "state" "readOnly" false)
