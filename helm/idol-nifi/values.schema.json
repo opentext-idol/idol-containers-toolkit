@@ -229,6 +229,13 @@
                         "$ref": "#/$defs/Flow"
                     }
                 },
+                "additionalExtensionFiles": {
+                    "type": "array",
+                    "items": {
+                        "type":"string",
+                        "minLength": 1
+                    }
+                },
                 "ingress": {
                     "$ref": "#/$defs/NifiIngress"
                 },
