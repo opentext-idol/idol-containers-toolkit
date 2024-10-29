@@ -33,3 +33,8 @@ dependencies:
   condition: prometheus-adapter.enabled
   version: "4.2.0"
   repository: "https://prometheus-community.github.io/helm-charts"
+- name: postgresql-ha
+  alias: postgresql
+  condition: postgresql.enabled
+  version: "14.3.4"
+  repository: https://charts.bitnami.com/bitnami

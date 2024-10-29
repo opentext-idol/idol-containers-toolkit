@@ -103,6 +103,30 @@ spec:
         securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml | nindent 10 }}
           readOnlyRootFilesystem: true
         {{- end }}
+      {{- if $root.Values.postgresql.enabled }}
+      - name: wait-for-postgres
+        image: docker.io/busybox:1.36
+        command:
+        - sh
+        - -c
+        - |
+          echo "Connecting to PostgreSQL pool {{ $root.Release.Name }}-postgresql-pgpool"
+          until nc -vzw 1 "{{ $root.Release.Name }}-postgresql-pgpool:5432" ; do
+            echo "Waiting for PostgreSQL pool to start"
+            sleep 3
+          done
+        resources:
+          requests:
+            cpu: 20m
+            memory: 50Mi
+          limits:
+            cpu: 20m
+            memory: 50Mi
+        {{- if $component.containerSecurityContext.enabled }}
+        securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+          readOnlyRootFilesystem: true
+        {{- end }}
+      {{- end }}
       {{- if $component.podSecurityContext.enabled }}
       securityContext: {{- omit $component.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
