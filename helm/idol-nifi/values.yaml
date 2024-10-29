@@ -169,9 +169,6 @@ nifi:
   - name: "Basic IDOL"
     bucket: "default-bucket"
     version: ""
-    
-  # -- additional NiFi extension files to be copied into the NiFi extensions directory during pod initialization
-  additionalExtensionFiles: []
 
   ingress:
     # -- whether to deploy ingress for nifi

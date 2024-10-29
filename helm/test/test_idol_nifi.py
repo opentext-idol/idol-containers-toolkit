@@ -164,22 +164,6 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
         }})
         self.assertEqual(objs['ConfigMap']['idol-nifi-env']['data']['NIFI_REGISTRY_HOSTS'], 'nifi-registry')
 
-    def test_additional_extensions(self):
-        objs = self.render_chart(
-            {
-                'nifi': {
-                    "additionalExtensionFiles": [
-                        "/path/to/some/extension.file1",
-                        "/path/to/some/extension.file2"
-                    ]
-                }
-            })
-        self.assertRegex(
-            objs['StatefulSet']['idol-nifi']['spec']['template']['spec']['initContainers'][0]['command'][2],
-            'cp -nv "/path/to/some/extension.file1" /mnt/store/nifi/extensions')
-        self.assertRegex(
-            objs['StatefulSet']['idol-nifi']['spec']['template']['spec']['initContainers'][0]['command'][2],
-            'cp -nv "/path/to/some/extension.file2" /mnt/store/nifi/extensions')
 
 if __name__ == '__main__':
     unittest.main()
