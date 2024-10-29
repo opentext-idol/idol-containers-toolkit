@@ -15,13 +15,14 @@ Provides a scaleable IDOL NiFi cluster instance (NiFi, NiFi Registry and ZooKeep
 
 | Repository | Name | Version |
 |------------|------|---------|
+| https://charts.bitnami.com/bitnami | postgresql(postgresql-ha) | 14.3.4 |
 | https://kubernetes-sigs.github.io/metrics-server | metrics-server | 3.8.2 |
 | https://prometheus-community.github.io/helm-charts | prometheus | 25.0 |
 | https://prometheus-community.github.io/helm-charts | prometheus-adapter | 4.2.0 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.14.2 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | 0.4.0 |
 
-## Deploying a flow into NiFi
+## <a name="Deploying a flow into NiFi"></a>Deploying a flow into NiFi 
 
 There are two methods for deploying a flow in a Nifi cluster:
 
@@ -76,7 +77,26 @@ When `nifi.autoScaling.enabled` is set to `true`, some considerations must be ma
 
   These metrics can be used as is, with custom limits, or you can specify your own scaling metrics based upon any Prometheus metric(s).
 
-To run a NiFi cluster, you may need to use an external database for storing state information. Many NiFi Ingest processors need to store state information. For example, IDOL Connectors store information about what they have retrieved from a data repository. This information needs to be in an external database so that it is accessible to all of the nodes in the cluster. Configure the connection to your database server by creating a database service. When you configure the IDOL connectors in your data flow, set the property `State Database Service` to the name of the database service that you created.
+#### State Data
+
+To run a NiFi cluster, you may need to use an external database for storing state information. Many NiFi Ingest processors need to store state information. For example, IDOL Connectors store information about what they have retrieved from a data repository. This information needs to be in an external database so that it is accessible to all of the nodes in the cluster. Configure the connection to your database server by creating a database service. When you configure the IDOL connectors in your data flow, set the property `State Database Service` to the name of the database service that you created. A PostgreSQL database will be deployed by default as a part of the helm install (which can be disabled in the provided values.yaml if not required by setting `postgresql.enabled=false`). When configuring the `State Database Service`, use the following values for the processor properties:
+
+Connection String: `Driver={PostgreSQL};Server=${PostgreSQLServer};Port=5432;Database=${PostgreSQLDatabase};Uid=${uid};Pwd=${pwd};`
+Uid: `${PostgreSQLUsername}`
+Pwd: `${PostgreSQLPassword}`
+
+When defining a flow (See: [Deploying a flow into NiFi](#DeployingAFlowIntoNiFi)), define the following parameters in the Parameter Context for the root process group:
+
+| Name | Sensitive | Description |
+|------|-----------|-------------|
+|PostgreSQLServer|false|The hostname of the state database server|
+|PostgreSQLDatabase|false|The name of the database used to store state data|
+|PostgreSQLUser|true|The state database username|
+|PostgreSQLPassword|true|The state database password|
+
+These will be populated with the appropriate values, as per the definitions in the values.yaml, when the flow is deployed into the NiFi cluster.
+
+#### File Storage
 
 The files that your connectors download from your data repositories must also be accessible to all of the nodes in a cluster. When you configure your connectors, set the property `adv:IngestSharedPath` to a location, such as a shared folder, that is accessible from all of the nodes in the cluster. Alternatively, set the property `adv:FlowFileEmbedFiles` to `TRUE`, so that the binary file content is included in the FlowFiles created by the connector.
 
@@ -196,6 +216,8 @@ Each deployment will require a unique name, and ingress points should be manuall
 | nifiRegistry.ingress.tls.secretName | string | `""` | The name of the secret for ingress TLS. Leave empty if not using TLS.  If specified then either this secret must already exist, or crt and key values must be provided and secret will be created. |
 | nifiRegistry.resources | object | `{"limits":{"cpu":"1000m","memory":"1Gi"},"requests":{"cpu":"200m","memory":"1Gi"}}` | https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits |
 | podSecurityContext | object | `{"enabled":true,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000,"seccompProfile":{"type":"RuntimeDefault"}}` | pod security context definition  See https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod |
+| postgresql | object | Default configuration to support shared state data. See values.yaml for details. | `postgresql` sub-chart configuration Required for shared state data storage across the nifi cluster. See https://github.com/bitnami/charts/tree/main/bitnami/postgresql-ha |
+| postgresql.enabled | bool | `true` | whether to deploy the postgresql subchart |
 | prometheus | object | Default configuration to support `idol-nifi` autoscaling. See values.yaml for details. | `prometheus` sub-chart configuration Required for auto-scaling.  See https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus |
 | prometheus-adapter | object | Default configuration to support `idol-nifi` autoscaling. See values.yaml for details. | `prometheus-adapter` sub-chart configuration Required for auto-scaling.  See https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-adapter |
 | serviceAccountName | string | `""` | Optional serviceAccountName for the pods (https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account) |
