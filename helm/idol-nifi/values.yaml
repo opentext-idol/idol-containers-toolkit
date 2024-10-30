@@ -229,6 +229,8 @@ nifi:
   # -- optional hostname of an existing nifi registry instance.
   # Defaults to the created registry instance when nifiRegistry.enabled=true
   registryHost: ""
+  # -- number of seconds to allow for prestart scripts (optionally mounted to /opt/nifi/nifi-current/prestart_scripts/) to run.
+  allowedStartupSeconds: 60
 
 # -- nifi cluster instances. Each cluster instance inherits values from the nifi section.
 # When more than one cluster is specified, setting a clusterId is required

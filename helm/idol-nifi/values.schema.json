@@ -243,6 +243,10 @@
                 },
                 "registryHost": {
                     "type":"string"
+                },
+                "allowedStartupSeconds": {
+                    "type": "integer",
+                    "minimum": 10
                 }
             }
         },

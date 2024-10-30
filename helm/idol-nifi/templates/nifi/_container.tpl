@@ -79,12 +79,20 @@ lifecycle:
       command:
       - /bin/bash
       - /scripts/preStop.sh
+startupProbe:
+  exec:
+   command:
+     - pgrep
+     - java
+  periodSeconds: 10
+  timeoutSeconds: 10
+  failureThreshold: {{ div ( add $nifiCluster.allowedStartupSeconds 5 ) 10 }}
+  successThreshold: 1
 livenessProbe:
   exec:
    command:
      - pgrep
      - java
-  initialDelaySeconds: 60
   periodSeconds: 30
   timeoutSeconds: 10
   failureThreshold: 3
