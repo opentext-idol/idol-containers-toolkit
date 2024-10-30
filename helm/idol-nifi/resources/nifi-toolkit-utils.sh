@@ -148,7 +148,7 @@ nifitoolkit_registry_importFlow (){
             LATESTFLOWVERSION=$(${NIFITOOLKITCMD} registry list-flow-versions -u "${NIFI_REGISTRY_URL}" --flowIdentifier "${FLOWID}" -ot json | jq .[-1].version)
             if [ -n "${LATESTFLOWVERSION}" ]; then
                 #Sort, and remove fields added by the import-flow-version process
-                local JQ=(jq -S "del(.snapshotMetadata, .latest, ..|nulls)")
+                local JQ=(jq -S "del(.snapshotMetadata,.latest) | del(..|nulls)")
 
                 echo "[$(date)] Comparing flow ${FLOW_NAME} to latest version (${LATESTFLOWVERSION}) in registry..."
 
