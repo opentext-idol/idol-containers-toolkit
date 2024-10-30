@@ -159,8 +159,8 @@ do
         fi
 
         echo "[$(date)] FLOWFILE ${FLOWFILE} imported to ProcessGroup: ${PROCESSGROUP}."
+        NEW_PROCESS_GROUP_IDS+=("${PROCESSGROUP}")
     fi
-    NEW_PROCESS_GROUP_IDS+=("${PROCESSGROUP}")
 done
 
 for PROCESS_GROUP_ID in "${NEW_PROCESS_GROUP_IDS[@]}"
