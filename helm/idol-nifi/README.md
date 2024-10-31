@@ -1,6 +1,6 @@
 # idol-nifi
 
-![Version: 0.9.2](https://img.shields.io/badge/Version-0.9.2-informational?style=flat-square) ![AppVersion: 24.4.0](https://img.shields.io/badge/AppVersion-24.4.0-informational?style=flat-square)
+![Version: 0.10.0](https://img.shields.io/badge/Version-0.10.0-informational?style=flat-square) ![AppVersion: 24.4.0](https://img.shields.io/badge/AppVersion-24.4.0-informational?style=flat-square)
 
 Provides a scaleable IDOL NiFi cluster instance (NiFi, NiFi Registry and ZooKeeper).
 
@@ -19,10 +19,10 @@ Provides a scaleable IDOL NiFi cluster instance (NiFi, NiFi Registry and ZooKeep
 | https://kubernetes-sigs.github.io/metrics-server | metrics-server | 3.8.2 |
 | https://prometheus-community.github.io/helm-charts | prometheus | 25.0 |
 | https://prometheus-community.github.io/helm-charts | prometheus-adapter | 4.2.0 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.14.2 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.14.3 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | 0.4.0 |
 
-## <a name="Deploying a flow into NiFi"></a>Deploying a flow into NiFi 
+## <a name="Deploying a flow into NiFi"></a>Deploying a flow into NiFi
 
 There are two methods for deploying a flow in a Nifi cluster:
 

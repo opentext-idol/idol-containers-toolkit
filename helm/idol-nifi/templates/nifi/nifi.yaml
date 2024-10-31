@@ -139,7 +139,7 @@ spec:
 {{- range $nifiClusterItem := .Values.nifiClusters }}
 {{ $nifiCluster := merge $nifiClusterItem $.Values.nifi (dict "clusterId" $.Values.name) }}
 ---
-{{- include "idol-library.util.merge" (dict
+{{ include "idol-library.util.merge" (dict
   "root" $
   "component" (merge (dict "name" $nifiCluster.clusterId) $.Values)
   "nifiCluster" $nifiCluster
