@@ -65,6 +65,11 @@ nifiRegistry:
     - "/flows/flow2.json"
 ```
 
+## Providing additional NiFi extension files
+
+Startup scripts matching the pattern `/opt/nifi/nifi-current/prestart_scripts/*.sh` will be run during pod startup, a directory containing any scripts to be run should be mounted to
+`/opt/nifi/nifi-current/prestart_scripts/`. Additional NiFi Archive (NAR) extension files can be provided by utilizing a prestart script that loads the required extension files into the `/opt/nifi/nifi-current/extensions` directory. If a startup script is used to download extensions from an external source, `nifi.allowedStartupSeconds` may need to be increased to allow time for the files to be downloaded. Files in the `/opt/nifi/nifi-current/extensions` directory are persited in the `state-data` persistent volume, allowing for repeated downloads on pod restarts to be avoided.
+
 ## Scaling NiFi
 
 When `nifi.autoScaling.enabled` is set to `true`, some considerations must be made in order for the NiFi cluster to usefully scale.
@@ -165,6 +170,7 @@ Each deployment will require a unique name, and ingress points should be manuall
 | metrics-server.args[0] | string | `"--kubelet-insecure-tls"` |  |
 | metrics-server.enabled | bool | `true` | whether to deploy a metrics server instance |
 | name | string | `"idol-nifi"` | used to name statefulset, service, ingress |
+| nifi.allowedStartupSeconds | int | `60` | number of seconds to allow for prestart scripts (optionally mounted to /opt/nifi/nifi-current/prestart_scripts/) to run. |
 | nifi.autoScaling.enabled | bool | `true` | deploy a horizontal pod autoscaler for the nifi statefulset |
 | nifi.autoScaling.maxReplicas | int | `8` | the maximum size of the nifi statefulset |
 | nifi.autoScaling.metrics | list | See below | one or more metrics controlling the horizontal pod autoscaler (https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/horizontal-pod-autoscaler-v2/#HorizontalPodAutoscalerSpec) |

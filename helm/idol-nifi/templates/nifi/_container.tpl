@@ -79,12 +79,20 @@ lifecycle:
       command:
       - /bin/bash
       - /scripts/preStop.sh
+startupProbe:
+  exec:
+   command:
+     - pgrep
+     - java
+  periodSeconds: 10
+  timeoutSeconds: 10
+  failureThreshold: {{ div ( add $nifiCluster.allowedStartupSeconds 5 ) 10 }}
+  successThreshold: 1
 livenessProbe:
   exec:
    command:
      - pgrep
      - java
-  initialDelaySeconds: 60
   periodSeconds: 30
   timeoutSeconds: 10
   failureThreshold: 3
@@ -122,6 +130,7 @@ securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml
   "source" "idol-library.aciserver.container.base.v1"
   "destination" "idolnifi.container.base" 
   "volumeMounts" (list (dict "name" "statedata" "mountPath" "/opt/nifi/nifi-current/conf" "subPath" "conf" "readOnly" false)
+                       (dict "name" "statedata" "mountPath" "/opt/nifi/nifi-current/extensions" "subPath" "extensions" "readOnly" false)
                        (dict "name" "statedata" "mountPath" "/opt/nifi/nifi-current/data" "subPath" "data" "readOnly" false)
                        (dict "name" "statedata" "mountPath" "/opt/nifi/nifi-current/run" "subPath" "run" "readOnly" false)
                        (dict "name" "statedata" "mountPath" "/opt/nifi/nifi-current/state" "subPath" "state" "readOnly" false)
