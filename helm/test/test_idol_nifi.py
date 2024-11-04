@@ -40,7 +40,14 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
                                 'name':'Existing Flow2',
                                 'bucket':'existing-bucket'
                             }
-                        ]
+                        ],
+                        'service':{
+                            'additionalPorts':{
+                                'commonPort': {
+                                    'port': -1
+                                }
+                            }
+                        }
                     },
                     {
                         'clusterId':'nf3',
@@ -53,10 +60,32 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
                            'metricsTLS':{
                              'secretName':''
                            }
+                        },
+                         'service':{
+                            'additionalPorts':{
+                                'commonPort': {
+                                    'protocol': 'UDP'
+                                },
+                                'extra-port': {
+                                    'name': 'extra',
+                                    'protocol': 'UDP',
+                                    'port': 2223,
+                                    'targetPort': 2224
+                                }
+                            }
                         }
                     },
                     {}
-                ]
+                ],
+                "nifi":{
+                    "service": {
+                        "additionalPorts":{
+                            "commonPort":{
+                                "port": 2222
+                            }
+                        }
+                    }
+                }
             })
         # expected manifests with multiple clusters
         self.assertGreaterEqual(set(objs['StatefulSet'].keys()),
@@ -112,6 +141,13 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
         self.assertEqual(objs['ConfigMap']['nf3-env']['data']['IDOL_NIFI_FLOW_BUCKET_0'], 'default-bucket')
         self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_VERSION_0'], '')
         self.assertEqual(objs['ConfigMap']['nf3-env']['data']['IDOL_NIFI_FLOW_IMPORT_0'], 'true')
+
+        # Services
+        commonPortDef = {'name':'commonPort','port':2222}
+        self.assertIn(commonPortDef, objs['Service']['nf1']['spec']['ports'])
+        self.assertNotIn(commonPortDef, objs['Service']['nf2']['spec']['ports']) # -ve port number removes inherited def
+        self.assertIn({'name':'commonPort','port':2222, 'protocol':'UDP'}, objs['Service']['nf3']['spec']['ports'])
+        self.assertIn( {'name':'extra', 'protocol':'UDP', 'port':2223,'targetPort':2224,}, objs['Service']['nf3']['spec']['ports'])
 
     def test_default_registry_buckets(self):
         objs = self.render_chart({})

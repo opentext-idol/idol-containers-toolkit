@@ -232,6 +232,18 @@ nifi:
   # -- number of seconds to allow for prestart scripts (optionally mounted to /opt/nifi/nifi-current/prestart_scripts/) to run.
   allowedStartupSeconds: 60
 
+  service:
+    # -- mapping of additional ports to expose on the nifi service (e.g. if flow includes a HandleHttpRequest processor).
+    # Can minimally specify as `--set nifi.service.additionalPorts.{name}.port=12345`
+    additionalPorts: {}
+      # detailedFlowListenerExample:
+      #   name: flowListener
+      #   protocol: TCP
+      #   port: 13000
+      #   targetPort: 13000
+      # minimalFlowListenerExample:
+      #   port: 14000
+
 # -- nifi cluster instances. Each cluster instance inherits values from the nifi section.
 # When more than one cluster is specified, setting a clusterId is required
 nifiClusters:
