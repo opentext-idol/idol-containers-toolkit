@@ -53,4 +53,10 @@ spec:
     port: 10000
     targetPort: 10000
     name: remote-input
+  {{- range $portname,$portcfg := $nifiCluster.service.additionalPorts }}
+  {{- /* allow setting negative port to invalidate a configuration */}}
+  {{- if (gt (int $portcfg.port) 0) }}
+  - {{ merge $portcfg (dict "name" $portname) | toYaml | indent 4 | trim }}
+  {{- end }}
+  {{- end }}
 {{- end }}

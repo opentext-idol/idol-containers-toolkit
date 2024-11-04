@@ -247,6 +247,25 @@
                 "allowedStartupSeconds": {
                     "type": "integer",
                     "minimum": 10
+                },
+                "service":{
+                    "type": "object",
+                    "properties":{
+                        "additionalPorts":{
+                            "type": "object",
+                            "patternProperties":{
+                                "^[-a-zA-Z0-0]{0,63}$":{
+                                    "type": "object",
+                                    "description": "See ServicePort under https://kubernetes.io/docs/reference/kubernetes-api/service-resources/service-v1/#ServiceSpec",
+                                    "properties": {
+                                        "port":{
+                                            "type": "integer"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         },
@@ -261,7 +280,8 @@
                 "ingress",
                 "jvmMemoryRatio",
                 "resources",
-                "dataVolume"
+                "dataVolume",
+                "service"
             ],
             "title": "Nifi"
         },
