@@ -24,6 +24,8 @@ fi
 NIFI_REGISTRY_URL=http://${NIFI_REGISTRY_HOSTS}:18080
 NEW_PROCESS_GROUP_IDS=()
 
+nifitoolkit_registry_waitForCLI "${NIFI_REGISTRY_URL}"
+
 for i in $(seq 0 "${IDOL_NIFI_FLOW_COUNT}");
 do
     if [  "$i" -eq "${IDOL_NIFI_FLOW_COUNT}" ]; then
