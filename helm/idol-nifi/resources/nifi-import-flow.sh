@@ -192,8 +192,9 @@ if [ 0 != ${#NEW_PROCESS_GROUP_IDS[@]} ]; then
             ${NIFITOOLKITCMD} nifi pg-start -pgid "${PROCESS_GROUP_ID}" -verbose
         done
         sleep 5s
-        for PROCESS_GROUP_ID in "${START_PROCESS_GROUP_IDS[@]}"
+        for PROCESS_GROUP_INDEX in "${!START_PROCESS_GROUP_IDS[@]}"
         do
+            PROCESS_GROUP_ID=${START_PROCESS_GROUP_IDS[${PROCESS_GROUP_INDEX}]}
             echo "[$(date)] Checking processor status in ProcessGroup: ${PROCESS_GROUP_ID}."
             NIFISTATUS=$(${NIFITOOLKITCMD} nifi pg-status -pgid "${PROCESS_GROUP_ID}" -ot json)
             RC=$?
@@ -206,12 +207,14 @@ if [ 0 != ${#NEW_PROCESS_GROUP_IDS[@]} ]; then
             echo "[$(date)] Processor status: ${RUNNING} running, ${STOPPED} stopped, ${INVALID} invalid"
             if [ "0" == "$((STOPPED+INVALID))" ]; then
                 ${NIFITOOLKITCMD} nifi pg-status -pgid "${PROCESS_GROUP_ID}"
-                START_PROCESS_GROUP_IDS=("${START_PROCESS_GROUP_IDS[@]/${PROCESS_GROUP_ID}}")
+                unset "START_PROCESS_GROUP_IDS[${PROCESS_GROUP_INDEX}]"
+                echo "[$(date)] ${#START_PROCESS_GROUP_IDS[@]} Remaining ProcessGroups: ${START_PROCESS_GROUP_IDS[*]}."
             fi
         done
-        if [ 0 != ${#START_PROCESS_GROUP_IDS[@]} ]; then
-            sleep 5s
+        if [ 0 == ${#START_PROCESS_GROUP_IDS[@]} ]; then
+            break;
         fi
+        sleep 5s
     done
 
     for PROCESS_GROUP_ID in "${NEW_PROCESS_GROUP_IDS[@]}"
