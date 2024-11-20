@@ -160,54 +160,68 @@ do
 #{{- end }}
         fi
 
-        echo "[$(date)] FLOWFILE ${FLOWFILE} imported to ProcessGroup: ${PROCESSGROUP}."
+        echo "[$(date)] Flow '${FLOWNAME}' imported to ProcessGroup: ${PROCESSGROUP}."
         NEW_PROCESS_GROUP_IDS+=("${PROCESSGROUP}")
     fi
 done
 
-for PROCESS_GROUP_ID in "${NEW_PROCESS_GROUP_IDS[@]}"
-do
-    echo "[$(date)] Starting services in ProcessGroup: ${PROCESS_GROUP_ID}."
-
-    echo "[$(date)] Enabling services"
-    # Some processors can be slow to start up, so be forgiving
-    set +e
-    ${NIFITOOLKITCMD} nifi pg-enable-services -pgid "${PROCESS_GROUP_ID}" -verbose
-    RC=$?
-    if [ 0 != ${RC} ]; then
-        echo "[$(date)] nifi pg-enable-services failed (RC=${RC}). Services/processors may not be started."
-        # but continue
-    fi
-done
-
 if [ 0 != ${#NEW_PROCESS_GROUP_IDS[@]} ]; then
-    echo "[$(date)] Waiting after service start."
-    sleep 30s
-fi
+    for PROCESS_GROUP_ID in "${NEW_PROCESS_GROUP_IDS[@]}"
+    do
+        echo "[$(date)] Starting services in ProcessGroup: ${PROCESS_GROUP_ID}."
 
-for PROCESS_GROUP_ID in "${NEW_PROCESS_GROUP_IDS[@]}"
-do
-    echo "[$(date)] Starting processors in ProcessGroup: ${PROCESS_GROUP_ID}."
-    for i in {1..12} 
-    do 
-        ${NIFITOOLKITCMD} nifi pg-start -pgid "${PROCESS_GROUP_ID}" -verbose
-        sleep 5s
-        NIFISTATUS=$(${NIFITOOLKITCMD} nifi pg-status -pgid "${PROCESS_GROUP_ID}" -ot json)
+        set +e
+        ${NIFITOOLKITCMD} nifi pg-enable-services -pgid "${PROCESS_GROUP_ID}" -verbose
         RC=$?
         if [ 0 != ${RC} ]; then
-            sleep 5s
-            continue
-        fi
-        INVALID=$(echo "${NIFISTATUS}" | jq .invalidCount)
-        STOPPED=$(echo "${NIFISTATUS}" | jq .stoppedCount)
-        RUNNING=$(echo "${NIFISTATUS}" | jq .runningCount)
-        echo "[$(date)] Processor status: ${RUNNING} running, ${STOPPED} stopped, ${INVALID} invalid"
-        if [ "0" == "$((STOPPED+INVALID))" ]; then
-            break
+            echo "[$(date)] nifi pg-enable-services failed (RC=${RC}). Services/processors may not be started."
+            # but continue
         fi
     done
-    ${NIFITOOLKITCMD} nifi pg-status -pgid "${PROCESS_GROUP_ID}" 
-done
+
+    echo "[$(date)] Waiting after service start."
+    sleep 30s
+
+    START_PROCESS_GROUP_IDS=("${NEW_PROCESS_GROUP_IDS[@]}")
+
+    for i in {1..12} 
+    do
+        echo "[$(date)] Starting processors in ProcessGroups: ${START_PROCESS_GROUP_IDS[*]}."
+        for PROCESS_GROUP_ID in "${START_PROCESS_GROUP_IDS[@]}"
+        do
+            ${NIFITOOLKITCMD} nifi pg-start -pgid "${PROCESS_GROUP_ID}" -verbose
+        done
+        sleep 5s
+        for PROCESS_GROUP_INDEX in "${!START_PROCESS_GROUP_IDS[@]}"
+        do
+            PROCESS_GROUP_ID=${START_PROCESS_GROUP_IDS[${PROCESS_GROUP_INDEX}]}
+            echo "[$(date)] Checking processor status in ProcessGroup: ${PROCESS_GROUP_ID}."
+            NIFISTATUS=$(${NIFITOOLKITCMD} nifi pg-status -pgid "${PROCESS_GROUP_ID}" -ot json)
+            RC=$?
+            if [ 0 != ${RC} ]; then
+                continue
+            fi
+            INVALID=$(echo "${NIFISTATUS}" | jq .invalidCount)
+            STOPPED=$(echo "${NIFISTATUS}" | jq .stoppedCount)
+            RUNNING=$(echo "${NIFISTATUS}" | jq .runningCount)
+            echo "[$(date)] Processor status: ${RUNNING} running, ${STOPPED} stopped, ${INVALID} invalid"
+            if [ "0" == "$((STOPPED+INVALID))" ]; then
+                ${NIFITOOLKITCMD} nifi pg-status -pgid "${PROCESS_GROUP_ID}"
+                unset "START_PROCESS_GROUP_IDS[${PROCESS_GROUP_INDEX}]"
+                echo "[$(date)] ${#START_PROCESS_GROUP_IDS[@]} Remaining ProcessGroups: ${START_PROCESS_GROUP_IDS[*]}."
+            fi
+        done
+        if [ 0 == ${#START_PROCESS_GROUP_IDS[@]} ]; then
+            break;
+        fi
+        sleep 5s
+    done
+
+    for PROCESS_GROUP_ID in "${NEW_PROCESS_GROUP_IDS[@]}"
+    do
+        ${NIFITOOLKITCMD} nifi pg-status -pgid "${PROCESS_GROUP_ID}"
+    done
+fi
 
 echo "[$(date)] Flow import completed"
 
