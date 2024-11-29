@@ -28,16 +28,20 @@ spec:
         - name: IDOL_CONTENT_SERVICE_PORT_ACI_PORT
           # This doesn't seem to be set by our headless service
           value: {{ $root.Values.content.aciPort | quote }}
+        {{- if $component.usingTLS }}
+        - name: IDOL_SSL
+          value: "1"
+        {{- end }}
         command:
         - sh
-        - "-c"
-        - |
-{{ tpl ($root.Files.Get "resources/dih_init.sh") $root | indent 10 }}
+        - /scripts/distributed-idol/dih_init.sh
         volumeMounts:
         - name: config-map
           mountPath: /mnt/config-map
         - name: dih-persistent-storage
           mountPath: /mnt/store/dih
+        - name: dih-scripts
+          mountPath: /scripts/distributed-idol
   volumeClaimTemplates:
   - metadata:
       name: dih-persistent-storage
@@ -50,7 +54,10 @@ spec:
           storage: 1Gi
 {{- end -}}
 
-{{- $dihVolumes := list}}
+{{- $dihVolumes := list (dict
+    "name" "dih-scripts"
+    "configMap" (dict "name" (print .Values.dih.name "-scripts"))
+)}}
 
 {{- if and ($root.Values.autoscaling.enabled) (not $root.Values.setupMirrored) }}
 {{- $dihVolumes = append $dihVolumes (dict "name" "dih-prometheus-exporter-python" "configMap" (dict "name" "dih-prometheus-exporter-python")) }}

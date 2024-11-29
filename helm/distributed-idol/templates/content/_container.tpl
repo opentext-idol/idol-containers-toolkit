@@ -14,31 +14,26 @@
 command:
 - "/bin/bash"
 args:
-- "-c"
-- |
-{{ tpl ($root.Files.Get "resources/content_startup.sh") $root | indent 10 }}
+- /scripts/distributed-idol/content_startup.sh
 lifecycle:
   postStart:
     exec:
       command:
       - /bin/bash
-      - "-c"
-      - |
-{{ tpl ($root.Files.Get "resources/content_postStart.sh") $root | indent 16 }}
+      - /scripts/distributed-idol/content_postStart.sh
   preStop:
     exec:
       command:
       - /bin/bash
-      - "-c"
-      - |
-{{ tpl ($root.Files.Get "resources/content_preStop.sh") $root | indent 16 }}
+      - /scripts/distributed-idol/content_preStop.sh
 {{- end -}}
 
 {{- define "didolcontent.container" -}}
 {{- $root := get . "root" | required "didolcontent.container: missing root" -}}
 {{- $component := get . "component" | required "didolcontent.container: missing component" -}}
 
-{{- $contentVolumeMounts := list (dict "name" "index" "mountPath" "/opt/idol/content/index") }}
+{{- $contentVolumeMounts := list (dict "name" "index" "mountPath" "/opt/idol/content/index")
+  (dict "name" "content-scripts" "mountPath" "/scripts/distributed-idol") }}
 {{- if $root.Values.setupMirrored }}
 {{- $contentVolumeMounts = append $contentVolumeMounts (dict
   "name" "archive-share"

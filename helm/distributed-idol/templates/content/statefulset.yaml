@@ -29,7 +29,10 @@ spec:
           storage: {{ $component.contentVolumeSize }}
 {{- end }}
 
-{{- $contentVolumes := list }}
+{{- $contentVolumes := list (dict
+    "name" "content-scripts"
+    "configMap" (dict "name" (print .Values.content.name "-scripts"))
+)}}
 {{- if .Values.setupMirrored }}
 {{- $contentVolumes = append $contentVolumes (dict
    "name" "archive-share"
