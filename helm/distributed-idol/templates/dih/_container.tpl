@@ -32,9 +32,7 @@ lifecycle:
     exec:
       command:
         - /bin/bash
-        - "-c"
-        - |
-{{ tpl ($root.Files.Get "resources/dih_preStop.sh") $root | nindent 16 }}
+        - /scripts/distributed-idol/dih_preStop.sh
 {{- /* END of distributedidol.dih.container.base */ -}}
 {{- end -}}
 
@@ -46,7 +44,8 @@ lifecycle:
   "component" $component
   "source" "idol-library.aciserver.container.base.v1"
   "destination" "distributedidol.dih.container.base"
-  "volumeMounts" (list (dict "name" "dih-persistent-storage" "mountPath" "/opt/idol/dih/data"))
+  "volumeMounts" (list (dict "name" "dih-persistent-storage" "mountPath" "/opt/idol/dih/data")
+    (dict "name" "dih-scripts" "mountPath" "/scripts/distributed-idol"))
   "env" (list (dict "name" "IDOL_COMPONENT_CFG" "value" "/dih/dih.cfg"))
 ) -}}
 {{- /* END of distributedidol.dih.container */ -}}

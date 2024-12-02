@@ -16,8 +16,8 @@ metadata:
   labels: {{- include "distributedidol.labels" . | nindent 4 }}
 data:
   content.cfg: |
-{{ tpl (.Files.Get "resources/content.cfg") . | indent 4 }}
+{{ tpl (.Files.Get "resources/content.cfg") (dict "root" . "primary" false) | indent 4 }}
 
   content_primary.cfg: |
-{{ tpl (.Files.Get "resources/content_primary.cfg") . | indent 4 }}
+{{ tpl (.Files.Get "resources/content.cfg") (dict "root" . "primary" true) | indent 4 }}
 {{- end -}}

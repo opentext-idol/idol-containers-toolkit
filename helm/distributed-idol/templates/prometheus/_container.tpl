@@ -33,7 +33,11 @@ args:
     echo "Installing" &&
     pip install --no-cache-dir -r requirements.txt &&
     echo "Running" &&
-    python dih_prometheus_exporter.py
+    python dih_prometheus_exporter.py &
+    RUN_PID=$!
+    trap 'kill "${RUN_PID}"; wait "${RUN_PID}"' SIGINT SIGTERM
+    wait "${RUN_PID}"
+    echo "python exited"
 ports:
   - containerPort: {{ $component.prometheusPort| int }}
     name: metrics-port

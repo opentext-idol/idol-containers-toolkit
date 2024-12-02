@@ -1,7 +1,5 @@
-#! /bin/sh
-
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2023-2024 Open Text.
+# Copyright 2023 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -10,15 +8,13 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-
-# This is run by the dah edit-config initContainer to populate initial dah config
-
-. "/scripts/distributed-idol/common_utils.sh"
-
-logfile=/mnt/config/idol/edit-config.log
-(
-  echo "[$(date)] Start dah init"
-  getMaxPodId
-  writeDistIdolConfigChanges /mnt/config-map/dah.cfg /mnt/config/idol/dah.cfg
-  cp /mnt/config/idol/dah.cfg /mnt/config/idol/dah.install.cfg
-) | tee -a "${logfile}"
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.content.name }}-scripts
+  labels: {{- include "distributedidol.labels" . | nindent 4 }}
+data:
+{{- range $i, $val := list "common_utils.sh" "content_postStart.sh" "content_preStop.sh" "content_startup.sh"}}
+  {{ print $val }}: |
+{{ tpl ($.Files.Get (print "resources/" $val)) $ | indent 4 }}
+{{ end -}}

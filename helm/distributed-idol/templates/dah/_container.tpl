@@ -20,9 +20,7 @@ lifecycle:
     exec:
       command:
       - /bin/bash
-      - "-c"
-      - |
-{{ tpl ($root.Files.Get "resources/dah_preStop.sh") $root | indent 16 }}
+      - /scripts/distributed-idol/dah_preStop.sh
 {{- /* END of distributedidol.dah.container.base */ -}}
 {{- end -}}
 
@@ -34,7 +32,8 @@ lifecycle:
   "component" $component
   "source" "idol-library.aciserver.container.base.v1"
   "destination" "distributedidol.dah.container.base"
-  "volumeMounts" (list (dict "name" "config-volume" "mountPath" "/etc/config/idol"))
+  "volumeMounts" (list (dict "name" "config-volume" "mountPath" "/etc/config/idol")
+    (dict "name" "dah-scripts" "mountPath" "/scripts/distributed-idol"))
   "mountConfigMap" false
   "env" (list (dict "name" "IDOL_COMPONENT_CFG"  "value" "/dah/dah.cfg"))
 ) -}}
