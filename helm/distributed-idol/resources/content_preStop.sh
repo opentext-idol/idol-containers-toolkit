@@ -61,7 +61,7 @@ function handleDIH() {
 
 function handleDAH() {
   if getent hosts ${IDOL_DAH_HOSTNAME}; then
-    echo "[$(date)] Extant DIH detected, powering down ourselves ($hostname) in it."
+    echo "[$(date)] Extant DAH detected, powering down ourselves ($hostname) in it."
     echo "[$(date)] Waiting for DAH to be ACI-available."
     waitForAci idol-dah ${IDOL_DAH_ACI_PORT}
     echo "[$(date)] DAH is ACI-available"

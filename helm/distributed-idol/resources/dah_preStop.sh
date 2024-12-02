@@ -34,8 +34,6 @@ function waitForLastEngine() {
     done
 }
 
-. "$( dirname "${BASH_SOURCE[0]}" )/common_utils.sh"
-
 logfile=/etc/config/idol/dah_prestop.log
 (
   echo "[$(date)] DAH waiting for child engines before shutdown."
