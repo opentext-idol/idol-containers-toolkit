@@ -168,26 +168,35 @@ do
 done
 
 if [ 0 != ${#NEW_PROCESS_GROUP_IDS[@]} ]; then
-    for PROCESS_GROUP_ID in "${NEW_PROCESS_GROUP_IDS[@]}"
-    do
-        echo "[$(date)] Starting services in ProcessGroup: ${PROCESS_GROUP_ID}."
 
-        set +e
-        ${NIFITOOLKITCMD} nifi pg-enable-services -pgid "${PROCESS_GROUP_ID}" -verbose
-        RC=$?
-        if [ 0 != ${RC} ]; then
-            echo "[$(date)] nifi pg-enable-services failed (RC=${RC}). Services/processors may not be started."
-            # but continue
-        fi
-    done
-
-    echo "[$(date)] Waiting after service start."
-    sleep 30s
-
+    SVCSTART_PROCESS_GROUP_IDS=("${NEW_PROCESS_GROUP_IDS[@]}")
     START_PROCESS_GROUP_IDS=("${NEW_PROCESS_GROUP_IDS[@]}")
 
-    for i in {1..12} 
+    for i in {1..12}
     do
+        if [ 0 != ${#SVCSTART_PROCESS_GROUP_IDS[@]} ]; then
+            echo "[$(date)] Starting services in ProcessGroups: ${SVCSTART_PROCESS_GROUP_IDS[*]}."
+            for PROCESS_GROUP_INDEX in "${!SVCSTART_PROCESS_GROUP_IDS[@]}"
+            do
+                PROCESS_GROUP_ID=${SVCSTART_PROCESS_GROUP_IDS[${PROCESS_GROUP_INDEX}]}
+                echo "[$(date)] Starting services in ProcessGroup: ${PROCESS_GROUP_ID}."
+
+                set +e
+                ${NIFITOOLKITCMD} nifi pg-enable-services -pgid "${PROCESS_GROUP_ID}" -verbose
+                RC=$?
+                if [ 0 != ${RC} ]; then
+                    unset "SVCSTART_PROCESS_GROUP_IDS[${PROCESS_GROUP_INDEX}]"
+                    echo "[$(date)] ${#SVCSTART_PROCESS_GROUP_IDS[@]} Remaining ProcessGroups for Service Start: ${SVCSTART_PROCESS_GROUP_IDS[*]}."
+                    SERVICE_STARTED=1
+                else
+                    echo "[$(date)] nifi pg-enable-services failed (RC=${RC})."
+                fi
+            done
+
+            echo "[$(date)] Waiting after service start."
+            sleep 10s
+        fi
+
         echo "[$(date)] Starting processors in ProcessGroups: ${START_PROCESS_GROUP_IDS[*]}."
         for PROCESS_GROUP_ID in "${START_PROCESS_GROUP_IDS[@]}"
         do
