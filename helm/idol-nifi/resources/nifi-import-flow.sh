@@ -149,15 +149,17 @@ do
             # but continue
         else
             echo "[$(date)] PARAMCONTEXT=${PARAMCONTEXT}"
-            ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "LicenseServerHost" -pv "{{ (index .Values "idol-licenseserver").licenseServerService }}"
-            ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "LicenseServerACIPort" -pv "{{ (index .Values "idol-licenseserver").licenseServerPort }}"
-            ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "IndexHost" -pv "{{ .Values.indexserviceName }}"
+            if [ -n "${PARAMCONTEXT}"]; then
+                ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "LicenseServerHost" -pv "{{ (index .Values "idol-licenseserver").licenseServerService }}"
+                ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "LicenseServerACIPort" -pv "{{ (index .Values "idol-licenseserver").licenseServerPort }}"
+                ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "IndexHost" -pv "{{ .Values.indexserviceName }}"
 #{{- if .Values.postgresql.enabled }}
-            ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "PostgreSQLServer" -pv "{{ .Release.Name }}-postgresql-pgpool"
-            ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "PostgreSQLDatabase" -pv "{{ .Values.postgresql.postgresql.database }}"
-            ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "PostgreSQLUser" -pv "{{ .Values.postgresql.postgresql.username }}" -ps true
-            ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "PostgreSQLPassword" -pv "{{ .Values.postgresql.postgresql.password }}" -ps true
+                ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "PostgreSQLServer" -pv "{{ .Release.Name }}-postgresql-pgpool"
+                ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "PostgreSQLDatabase" -pv "{{ .Values.postgresql.postgresql.database }}"
+                ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "PostgreSQLUser" -pv "{{ .Values.postgresql.postgresql.username }}" -ps true
+                ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "PostgreSQLPassword" -pv "{{ .Values.postgresql.postgresql.password }}" -ps true
 #{{- end }}
+            fi
         fi
 
         echo "[$(date)] Flow '${FLOWNAME}' imported to ProcessGroup: ${PROCESSGROUP}."
