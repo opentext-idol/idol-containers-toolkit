@@ -184,7 +184,7 @@ if [ 0 != ${#NEW_PROCESS_GROUP_IDS[@]} ]; then
                 set +e
                 ${NIFITOOLKITCMD} nifi pg-enable-services -pgid "${PROCESS_GROUP_ID}" -verbose
                 RC=$?
-                if [ 0 != ${RC} ]; then
+                if [ 0 == ${RC} ]; then
                     unset "SVCSTART_PROCESS_GROUP_IDS[${PROCESS_GROUP_INDEX}]"
                     echo "[$(date)] ${#SVCSTART_PROCESS_GROUP_IDS[@]} Remaining ProcessGroups for Service Start: ${SVCSTART_PROCESS_GROUP_IDS[*]}."
                 else
