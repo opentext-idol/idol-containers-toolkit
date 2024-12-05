@@ -149,15 +149,17 @@ do
             # but continue
         else
             echo "[$(date)] PARAMCONTEXT=${PARAMCONTEXT}"
-            ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "LicenseServerHost" -pv "{{ (index .Values "idol-licenseserver").licenseServerService }}"
-            ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "LicenseServerACIPort" -pv "{{ (index .Values "idol-licenseserver").licenseServerPort }}"
-            ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "IndexHost" -pv "{{ .Values.indexserviceName }}"
+            if [ -n "${PARAMCONTEXT}" ]; then
+                ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "LicenseServerHost" -pv "{{ (index .Values "idol-licenseserver").licenseServerService }}"
+                ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "LicenseServerACIPort" -pv "{{ (index .Values "idol-licenseserver").licenseServerPort }}"
+                ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "IndexHost" -pv "{{ .Values.indexserviceName }}"
 #{{- if .Values.postgresql.enabled }}
-            ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "PostgreSQLServer" -pv "{{ .Release.Name }}-postgresql-pgpool"
-            ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "PostgreSQLDatabase" -pv "{{ .Values.postgresql.postgresql.database }}"
-            ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "PostgreSQLUser" -pv "{{ .Values.postgresql.postgresql.username }}" -ps true
-            ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "PostgreSQLPassword" -pv "{{ .Values.postgresql.postgresql.password }}" -ps true
+                ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "PostgreSQLServer" -pv "{{ .Release.Name }}-postgresql-pgpool"
+                ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "PostgreSQLDatabase" -pv "{{ .Values.postgresql.postgresql.database }}"
+                ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "PostgreSQLUser" -pv "{{ .Values.postgresql.postgresql.username }}" -ps true
+                ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "PostgreSQLPassword" -pv "{{ .Values.postgresql.postgresql.password }}" -ps true
 #{{- end }}
+            fi
         fi
 
         echo "[$(date)] Flow '${FLOWNAME}' imported to ProcessGroup: ${PROCESSGROUP}."
@@ -166,26 +168,34 @@ do
 done
 
 if [ 0 != ${#NEW_PROCESS_GROUP_IDS[@]} ]; then
-    for PROCESS_GROUP_ID in "${NEW_PROCESS_GROUP_IDS[@]}"
-    do
-        echo "[$(date)] Starting services in ProcessGroup: ${PROCESS_GROUP_ID}."
 
-        set +e
-        ${NIFITOOLKITCMD} nifi pg-enable-services -pgid "${PROCESS_GROUP_ID}" -verbose
-        RC=$?
-        if [ 0 != ${RC} ]; then
-            echo "[$(date)] nifi pg-enable-services failed (RC=${RC}). Services/processors may not be started."
-            # but continue
-        fi
-    done
-
-    echo "[$(date)] Waiting after service start."
-    sleep 30s
-
+    SVCSTART_PROCESS_GROUP_IDS=("${NEW_PROCESS_GROUP_IDS[@]}")
     START_PROCESS_GROUP_IDS=("${NEW_PROCESS_GROUP_IDS[@]}")
 
-    for i in {1..12} 
+    for i in {1..12}
     do
+        if [ 0 != ${#SVCSTART_PROCESS_GROUP_IDS[@]} ]; then
+            echo "[$(date)] Starting services in ProcessGroups: ${SVCSTART_PROCESS_GROUP_IDS[*]}."
+            for PROCESS_GROUP_INDEX in "${!SVCSTART_PROCESS_GROUP_IDS[@]}"
+            do
+                PROCESS_GROUP_ID=${SVCSTART_PROCESS_GROUP_IDS[${PROCESS_GROUP_INDEX}]}
+                echo "[$(date)] Starting services in ProcessGroup: ${PROCESS_GROUP_ID}."
+
+                set +e
+                ${NIFITOOLKITCMD} nifi pg-enable-services -pgid "${PROCESS_GROUP_ID}" -verbose
+                RC=$?
+                if [ 0 == ${RC} ]; then
+                    unset "SVCSTART_PROCESS_GROUP_IDS[${PROCESS_GROUP_INDEX}]"
+                    echo "[$(date)] ${#SVCSTART_PROCESS_GROUP_IDS[@]} Remaining ProcessGroups for Service Start: ${SVCSTART_PROCESS_GROUP_IDS[*]}."
+                else
+                    echo "[$(date)] nifi pg-enable-services failed (RC=${RC})."
+                fi
+            done
+
+            echo "[$(date)] Waiting after service start."
+            sleep 10s
+        fi
+
         echo "[$(date)] Starting processors in ProcessGroups: ${START_PROCESS_GROUP_IDS[*]}."
         for PROCESS_GROUP_ID in "${START_PROCESS_GROUP_IDS[@]}"
         do
