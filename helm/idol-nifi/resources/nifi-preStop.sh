@@ -14,7 +14,7 @@
 logfile=/opt/nifi/nifi-current/logs/pre-stop.log
 (
     statefulsetname=${POD_NAME%-*}
-    grep "${statefulsetname}-0." /etc/hostname
+    grep "${statefulsetname}-0" /etc/hostname
     notprimary=$?
     if [ 0 == ${notprimary} ]; then
         echo "[$(date)] Skipping pre-stop as primary instance."
