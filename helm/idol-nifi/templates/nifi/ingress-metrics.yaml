@@ -55,7 +55,7 @@ spec:
   rules:
   - http:
       paths:
-      - path: {{ print "/" (trimAll "/" (default ( len $.Values.nifiClusters | plural "" $nifiCluster.clusterId) $nifiCluster.ingress.proxyPath)) "/metrics" $pathSuffix | quote }}
+      - path: {{ print (len $.Values.nifiClusters | plural "" (print "/" $nifiCluster.clusterId)) "/metrics/" $pathSuffix | quote }}
         pathType: {{ $pathType }}
         backend:
           service:
