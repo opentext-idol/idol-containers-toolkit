@@ -32,7 +32,6 @@ spec:
       terminationGracePeriodSeconds: 90
       automountServiceAccountToken: false
       enableServiceLinks: false
-      setHostnameAsFQDN: true
       dnsPolicy: ClusterFirstWithHostNet
       restartPolicy: Always
       initContainers:

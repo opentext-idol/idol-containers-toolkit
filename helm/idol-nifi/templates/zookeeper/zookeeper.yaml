@@ -35,7 +35,6 @@ spec:
     spec:
       automountServiceAccountToken: false
       enableServiceLinks: false
-      setHostnameAsFQDN: true
       dnsPolicy: ClusterFirstWithHostNet
       restartPolicy: Always
 {{- if $.Values.podSecurityContext.enabled }}
