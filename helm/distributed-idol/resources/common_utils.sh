@@ -11,6 +11,8 @@
 #
 # END COPYRIGHT NOTICE
 
+set -u
+
 HTTP_REQ_PARAMS="-k --silent --show-error --retry 5 --retry-connrefused --retry-max-time 10"
 IDOL_CONTENT_ACI_PORT=${IDOL_CONTENT_SERVICE_PORT_ACI_PORT:-{{ .Values.content.aciPort | int }}}
 IDOL_CONTENT_INDEX_PORT={{ .Values.content.indexPort | int }}
@@ -18,6 +20,7 @@ IDOL_CONTENT_BASE_HOSTNAME={{ .Values.content.name }}
 IDOL_DAH_ACI_PORT=${IDOL_DAH_SERVICE_PORT_ACI_PORT:-{{ .Values.dah.aciPort | int }}}
 IDOL_DAH_HOSTNAME={{ .Values.dah.name }}
 IDOL_DIH_ACI_PORT=${IDOL_DIH_SERVICE_PORT_ACI_PORT:-{{ .Values.dih.aciPort | int }}}
+IDOL_DIH_INDEX_PORT=${IDOL_DIH_SERVICE_PORT_INDEX_PORT:-{{ .Values.dih.indexPort | int }}}
 IDOL_DIH_HOSTNAME={{ .Values.dih.name }}
 
 MAX_POD_ID=0
@@ -25,7 +28,7 @@ MAX_POD_ID=0
 SETUP_MAX_ID={{ (sub (.Values.content.initialEngineCount | int ) 1 | int) }}
 
 
-if [ -z ${IDOL_SSL} ]; then
+if [ -z ${IDOL_SSL:-} ]; then
     HTTP_SCHEME=http
 else
     HTTP_SCHEME=https
