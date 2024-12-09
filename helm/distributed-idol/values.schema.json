@@ -22,8 +22,14 @@
                 "custommetrics":{
                     "$ref": "#/$defs/custommetrics"
                 },
+                "metrics-server":{
+                    "$ref": "#/$defs/optional_subchart"
+                },
                 "prometheus":{
-                    "$ref": "#/$defs/prometheus"
+                    "$ref": "#/$defs/optional_subchart"
+                },
+                "prometheus-adapter":{
+                    "$ref": "#/$defs/optional_subchart"
                 },
                 "autoscaling":{
                     "$ref": "#/$defs/autoscaling"
@@ -39,7 +45,9 @@
                 "dih",
                 "dah",
                 "custommetrics",
+                "metrics-server",
                 "prometheus",
+                "prometheus-adapter",
                 "idol-licenseserver",
                 "setupMirrored"
             ],
@@ -470,45 +478,6 @@
                 "name",
                 "servicePort",
                 "containerPort"
-            ],
-            "unevaluatedProperties": false
-        },
-        "prometheus":{
-            "type":"object",
-            "properties":{
-                "name":{
-                    "$ref": "#/$defs/required_string"
-                },
-                "port":{
-                    "$ref": "#/$defs/port_number"
-                },
-                "envConfigMap":{
-                    "type": "string"
-                },
-                "usingTLS":{
-                    "type": "boolean"
-                },
-                "ingress": {
-                    "type":"object",
-                    "properties":{
-                        "prometheusPath": {
-                            "$ref": "#/$defs/required_string"
-                        }
-                    },
-                    "required":[
-                        "prometheusPath"
-                    ],
-                    "allOf":[
-                        {"$ref":"#/$defs/ingressBase"}
-                    ],
-                    "unevaluatedProperties": false
-                }
-            },
-            "required":[
-                "name",
-                "port",
-                "usingTLS",
-                "ingress"
             ],
             "unevaluatedProperties": false
         }

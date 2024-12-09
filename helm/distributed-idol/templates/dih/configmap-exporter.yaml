@@ -20,5 +20,7 @@ data:
   requirements.txt: |
     requests==2.22.0
     prometheus_client==0.7.1
+  dih_prometheus_exporter.sh: |
+{{ tpl (.Files.Get "resources/dih_prometheus_exporter.sh") . | indent 4 }}
 ---
 {{- end }}

@@ -48,7 +48,16 @@ function handleDIH() {
     if [ $engineid -gt -1 ]; then
       echo "[$(date)] Removing $hostname from DIH."
       echo "[$(date)] DIH returned id $engineid for this engine."
-      curl ${HTTP_REQ_PARAMS} "${HTTP_SCHEME}://${IDOL_DIH_HOSTNAME}:${IDOL_DIH_INDEX_PORT}/DREREDISTRIBUTE?RemoveGroup=$engineid"
+      local redistributeid=
+      redistributeid=$(curl ${HTTP_REQ_PARAMS} "${HTTP_SCHEME}://${IDOL_DIH_HOSTNAME}:${IDOL_DIH_INDEX_PORT}/DREREDISTRIBUTE?RemoveGroup=$engineid")
+      local rc=$?
+      until [ 0 == ${rc} ];
+      do
+          sleep 5s
+          redistributeid=$(curl ${HTTP_REQ_PARAMS} "${HTTP_SCHEME}://${IDOL_DIH_HOSTNAME}:${IDOL_DIH_INDEX_PORT}/DREREDISTRIBUTE?RemoveGroup=$engineid")
+          rc=$?
+      done
+      echo "[$(date)] Triggered engine removal ${redistributeid}"
       waitForDIHRemovedEngine ${IDOL_DIH_ACI_PORT} $hostname
       echo "[$(date)] Removed $hostname from DIH."
     else
@@ -79,6 +88,7 @@ function handleDAH() {
   fi
 }
 
+set -o pipefail
 logfile=/opt/idol/content/index/prestop.log
 (
   {{- if .Values.setupMirrored }}  

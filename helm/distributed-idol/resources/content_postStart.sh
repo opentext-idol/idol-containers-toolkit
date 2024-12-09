@@ -44,10 +44,10 @@ function getIndexerStatus() {
 }
 
 function doDreinitial() {
-  other_params=${1:-}
+  local other_params=${1:-}
   getInitialId
   echo "[$(date)] Previous initial id was $initial_id"
-  new_id=$(($initial_id+1))
+  local new_id=$(($initial_id+1))
   echo "[$(date)] Using initialid $new_id"
   curl ${HTTP_REQ_PARAMS} "${HTTP_SCHEME}://localhost:${IDOL_CONTENT_INDEX_PORT}/DREINITIAL?initialid=$new_id&${other_params}" 
   initial_id=0
@@ -56,7 +56,8 @@ function doDreinitial() {
     sleep 1
   done
   # Workaround DREINITIAL reporting as completing before replay of archived commands completes
-  index_id = $(curl -o- ${HTTP_REQ_PARAMS} "${HTTP_SCHEME}://localhost:${IDOL_CONTENT_INDEX_PORT}/DRESYNC?" | grep INDEXID | cut -d "=" -f2)
+  local index_id=0
+  index_id=$(curl -o- ${HTTP_REQ_PARAMS} "${HTTP_SCHEME}://localhost:${IDOL_CONTENT_INDEX_PORT}/DRESYNC?" | grep INDEXID | cut -d "=" -f2)
   index_status=-7
   while [ $index_status != -1 ]; do
     getIndexerStatus "$index_id"
@@ -177,6 +178,7 @@ function postStartNonPrimary() {
   fi
 }
 
+set -o pipefail
 logfile=/opt/idol/content/index/poststart.log
 (
   . "$( dirname "${BASH_SOURCE[0]}" )/common_utils.sh"
