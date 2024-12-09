@@ -97,7 +97,9 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
             self.assertEqual(objs['Ingress'][id]['spec']['rules'][0]['http']['paths'][0]['path'], f'/{id}/(.*)')
             self.assertIn(f'proxy_set_header X-ProxyContextPath "/{id}";',
                            objs['Ingress'][id]['metadata']['annotations']['nginx.ingress.kubernetes.io/configuration-snippet'])
+            self.assertEqual(objs['Ingress'][f'{id}-aci']['spec']['rules'][0]['http']['paths'][0]['path'], f'/{id}/connector-aci/(.*)')
         self.assertEqual(objs['Ingress']['nf3']['spec']['rules'][0]['http']['paths'][0]['path'], f'/(.*)')
+        self.assertEqual(objs['Ingress'][f'nf3-aci']['spec']['rules'][0]['http']['paths'][0]['path'], '/nf3/connector-aci/(.*)')
         self.assertNotIn('proxy_set_header X-ProxyContextPath',
                         objs['Ingress']['nf3']['metadata']['annotations']['nginx.ingress.kubernetes.io/configuration-snippet'])
 
@@ -200,6 +202,10 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
         }})
         self.assertEqual(objs['ConfigMap']['idol-nifi-env']['data']['NIFI_REGISTRY_HOSTS'], 'nifi-registry')
 
+    def test_default_ingress(self):
+        objs = self.render_chart()
+        self.assertEqual(objs['Ingress']['idol-nifi']['spec']['rules'][0]['http']['paths'][0]['path'], '/(.*)')
+        self.assertEqual(objs['Ingress']['idol-nifi-aci']['spec']['rules'][0]['http']['paths'][0]['path'], '/connector-aci/(.*)')
 
 if __name__ == '__main__':
     unittest.main()
