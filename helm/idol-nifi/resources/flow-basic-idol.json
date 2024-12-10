@@ -76,7 +76,7 @@
                             "TangibleCharacters": null,
                             "RedactedOutput": "false",
                             "TableCellValuePath": "\".\",\"region/text\"",
-                            "ResourceFiles": "/opt/nifi/nifi-current/eduction/pii/combined_*.ecr",
+                            "ResourceFiles": "/opt/nifi/nifi-current/eduction/pii/combined_name.ecr,/opt/nifi/nifi-current/eduction/pii/combined_date.ecr,/opt/nifi/nifi-current/eduction/pii/combined_driving.ecr,/opt/nifi/nifi-current/eduction/pii/combined_health.ecr,/opt/nifi/nifi-current/eduction/pii/combined_national_id.ecr,/opt/nifi/nifi-current/eduction/pii/combined_passport.ecr,/opt/nifi/nifi-current/eduction/pii/combined_telephone.ecr,/opt/nifi/nifi-current/eduction/pii/combined_tin.ecr",
                             "MatchCase": "true",
                             "RedactionReplacementCharacter": null,
                             "PostProcessingTask": null,
