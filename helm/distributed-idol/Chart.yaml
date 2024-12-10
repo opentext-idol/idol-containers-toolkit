@@ -15,6 +15,14 @@ dependencies:
   version: "0.4.0"
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 - name: metrics-server
-  condition: setupMirrored
+  condition: metrics-server.enabled
   version: "3.8.2"
   repository: "https://kubernetes-sigs.github.io/metrics-server"
+- name: prometheus
+  condition: prometheus.enabled
+  version: "25.0"
+  repository: "https://prometheus-community.github.io/helm-charts"
+- name: prometheus-adapter
+  condition: prometheus-adapter.enabled
+  version: "4.2.0"
+  repository: "https://prometheus-community.github.io/helm-charts"

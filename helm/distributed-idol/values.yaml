@@ -495,7 +495,7 @@ dih:
   # scheme for specifying these values in the templates can be followed.
 
   # -- used to name statefulset, service, ingress
-  name: "idol-dih"
+  name: &dih-name "idol-dih"
 
   # @ignore
   prometheusPort: "9118"
@@ -589,3 +589,73 @@ idol-licenseserver:
   enabled: false
   # -- IP address of LicenseServer instance
   licenseServerIp: this must be set to a valid IP address
+
+# -- `metrics-server` sub-chart configuration
+# Required if auto-scaling on system metrics (e.g. cpu)
+metrics-server:
+  # -- whether to deploy a metrics server instance
+  enabled: true
+  args:
+    - "--kubelet-insecure-tls"
+
+# -- `prometheus` sub-chart configuration
+# Required for auto-scaling on custom metrics (e.g. dih fullness)
+# See https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus
+# @default -- Default configuration to support `distributed-idol` autoscaling. See values.yaml for details.
+prometheus:
+  enabled: true
+  # so we can inject dih name into scrape config
+  dihName: *dih-name
+  server:
+    prefixURL: /prometheus
+    baseURL: /prometheus
+    ingress:
+      enabled: true
+      hosts:
+        - ""
+      pathType: Prefix
+      path: /prometheus
+    global:
+      scrape_interval: 15s
+  extraScrapeConfigs: |
+    - job_name: dih
+      static_configs:
+      - targets: [ '{{ .Values.dihName }}:9118' ]
+      scrape_interval: 15s
+      scrape_timeout: 15s
+  alertmanager:
+    enabled: false
+  prometheus-node-exporter:
+    enabled: false
+  prometheus-pushgateway:
+    enabled: false
+  kube-state-metrics:
+    enabled: false
+
+# -- `prometheus-adapter` sub-chart configuration
+# Required for auto-scaling on custom metrics (e.g. dih fullness
+# See https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-adapter
+# @default -- Default configuration to support `idol-nifi` autoscaling. See values.yaml for details.
+prometheus-adapter:
+  enabled: true
+  metricsRelistInterval: 30s
+  prometheus:
+    url: http://{{ .Release.Name }}-prometheus-server
+    port: 80
+    path: "/prometheus"
+  rules:
+    custom:
+    - seriesQuery: '{__name__="dih_full_ratio"}'
+      resources:
+        template: <<.Resource>>
+      name:
+        matches: "dih_full_ratio"
+        as: "dih_full_ratio"
+      metricsQuery: dih_full_ratio
+    - seriesQuery: '{__name__="full_ratio_latch"}'
+      resources:
+        template: <<.Resource>>
+      name:
+        matches: "full_ratio_latch"
+        as: "full_ratio_latch"
+      metricsQuery: full_ratio_latch

@@ -22,22 +22,10 @@ envFrom:
       name: http-proxy-config
 {{- end }}
 workingDir: /usr/src/app
-command: ["/bin/sh"]
-args:
-  - "-c"
-  - |
-    mkdir -p /usr/src/app &&
-    echo "Copying files" &&
-    cp /mnt/python/* /usr/src/app &&
-    cd /usr/src/app &&
-    echo "Installing" &&
-    pip install --no-cache-dir -r requirements.txt &&
-    echo "Running" &&
-    python dih_prometheus_exporter.py &
-    RUN_PID=$!
-    trap 'kill "${RUN_PID}"; wait "${RUN_PID}"' SIGINT SIGTERM
-    wait "${RUN_PID}"
-    echo "python exited"
+command: 
+  - /bin/bash
+  - /mnt/python/dih_prometheus_exporter.sh
+
 ports:
   - containerPort: {{ $component.prometheusPort| int }}
     name: metrics-port
