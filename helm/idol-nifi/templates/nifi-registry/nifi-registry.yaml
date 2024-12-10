@@ -44,7 +44,7 @@ spec:
 {{- end }}
       initContainers:
       - name: ensure-conf
-        image: docker.io/apache/nifi-registry:1.23.0
+        image: {{ .Values.nifiRegistry.image }}
         envFrom:
         - configMapRef:
             name: {{ .Values.name }}-reg-cm
@@ -69,7 +69,7 @@ spec:
           readOnly: false
       containers:
       - name: nifi-registry
-        image: docker.io/apache/nifi-registry:1.23.0
+        image: {{ .Values.nifiRegistry.image }}
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 18080

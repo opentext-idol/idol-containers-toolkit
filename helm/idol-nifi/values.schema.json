@@ -480,6 +480,9 @@
                 "enabled": {
                     "type": "boolean"
                 },
+                "image": {
+                    "type": "string"
+                },
                 "ingress": {
                     "$ref": "#/$defs/NifiRegistryIngress"
                 },
@@ -498,6 +501,7 @@
             },
             "required": [
                 "enabled",
+                "image",
                 "ingress",
                 "resources",
                 "buckets",
@@ -532,11 +536,14 @@
         "Zookeeper": {
             "type": "object",
             "properties": {
+                "image":{
+                    "type":"string"
+                },
                 "resources":{
                     "type": "object"
                 }
             },
-            "required": ["resources"],
+            "required": ["image","resources"],
             "title": "Zookeeper"
         },
         "port_number": {
