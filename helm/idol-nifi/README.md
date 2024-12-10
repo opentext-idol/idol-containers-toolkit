@@ -1,6 +1,6 @@
 # idol-nifi
 
-![Version: 0.11.1](https://img.shields.io/badge/Version-0.11.1-informational?style=flat-square) ![AppVersion: 24.4.0](https://img.shields.io/badge/AppVersion-24.4.0-informational?style=flat-square)
+![Version: 0.11.2](https://img.shields.io/badge/Version-0.11.2-informational?style=flat-square) ![AppVersion: 24.4.0](https://img.shields.io/badge/AppVersion-24.4.0-informational?style=flat-square)
 
 Provides a scaleable IDOL NiFi cluster instance (NiFi, NiFi Registry and ZooKeeper).
 
@@ -208,12 +208,15 @@ Each deployment will require a unique name, and ingress points should be manuall
 | nifi.resources.requests.memoryMi | int | `4096` | memory requested in mebibytes (value used in jvm memory calculation) |
 | nifi.sensitivePropsKey | string | `""` | optional nifi.sensitive.props.key value (see https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#nifi_sensitive_props_key) Setting this value is recommended. If it is not set, it will default to a generated value |
 | nifi.service.additionalPorts | object | `{}` | mapping of additional ports to expose on the nifi service (e.g. if flow includes a HandleHttpRequest processor). Can minimally specify as `--set nifi.service.additionalPorts.{name}.port=12345` |
+| nifi.serviceStartRetries | int | `12` | Maximum number of times to try starting services after flow import |
+| nifi.threadCount | int | `10` | Maximum timer driven thread count. |
 | nifi.truststorePassword | string | `""` | optional nifi.security.truststorePasswd value (see https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#security_properties) Setting this value is recommended. If it is not set, it will default to a generated value |
 | nifiClusters | list | `[{}]` | nifi cluster instances. Each cluster instance inherits values from the nifi section. When more than one cluster is specified, setting a clusterId is required |
 | nifiRegistry.buckets | list | `[{"flowfiles":["/scripts/flow-basic-idol.json"],"name":"default-bucket"}]` | Buckets to create. Specify the bucket name, and a list of flow files to populate the bucket with. Customized flows can be added via a custom NiFi Registry image or mounted into the pod (see `additionalVolumes` and `additionalVolumeMounts`) |
 | nifiRegistry.dataVolume.storageClass | string | `"idol-nifi-storage-class"` | Name of the storage class used to provision a PersistentVolume for the NiFi Registry instance. The associated PVCs are named statedata-{name}-reg-{pod number} |
 | nifiRegistry.dataVolume.volumeSize | string | `"2Gi"` | Size of the PersistentVolumeClaim that is created for the NiFi Registry instance. The size chosen here provides a hard limit on the size of the NiFi Registry data storage in the NiFi Registry instance. |
 | nifiRegistry.enabled | bool | `true` | whether to deploy a nifi registry instance |
+| nifiRegistry.image | string | `"docker.io/apache/nifi-registry:1.23.0"` | nifi-registry image to use |
 | nifiRegistry.ingress.annotations | object | `{}` | optional ingress annotations |
 | nifiRegistry.ingress.enabled | bool | `true` | whether to deploy ingress for nifi registry |
 | nifiRegistry.ingress.host | string | `""` | optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules |
@@ -229,6 +232,7 @@ Each deployment will require a unique name, and ingress points should be manuall
 | prometheus-adapter | object | Default configuration to support `idol-nifi` autoscaling. See values.yaml for details. | `prometheus-adapter` sub-chart configuration Required for auto-scaling.  See https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-adapter |
 | serviceAccountName | string | `""` | Optional serviceAccountName for the pods (https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account) |
 | usingTLS | bool | `false` | whether ports are configured to use TLS (https). |
+| zookeeper.image | string | `"docker.io/zookeeper:3.8"` | zookeeper image to use |
 | zookeeper.resources | object | `{"limits":{"cpu":"200m","memory":"500Mi"},"requests":{"cpu":"200m","memory":"500Mi"}}` | https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits |
 
 ----------------------------------------------
