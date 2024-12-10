@@ -266,6 +266,10 @@
                             }
                         }
                     }
+                },
+                "threadCount": {
+                    "type": "integer",
+                    "minimum": 1
                 }
             }
         },
@@ -281,7 +285,8 @@
                 "jvmMemoryRatio",
                 "resources",
                 "dataVolume",
-                "service"
+                "service",
+                "threadCount"
             ],
             "title": "Nifi"
         },

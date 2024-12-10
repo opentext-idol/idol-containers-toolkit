@@ -24,6 +24,9 @@ logfile=/opt/nifi/nifi-current/logs/post-start.log
     /scripts/nifiProperties.sh
     /scripts/security.sh
 
+    nifitoolkit_nifi_waitForCLI
+    nifitoolkit_configure_threads "${IDOL_NIFI_THREADS:-10}"
+
     statefulsetname=${POD_NAME%-*}
     grep "${statefulsetname}-0" /etc/hostname
     notprimary=$?
@@ -38,8 +41,6 @@ logfile=/opt/nifi/nifi-current/logs/post-start.log
         echo ["$(date)"] Skipping post-start checks as cluster is already running "( ${NODECOUNT} )"
         exit 0
     fi
-
-    nifitoolkit_nifi_waitForCLI
 
     /scripts/connect-registry.sh
     if [ -f /scripts/prometheous-reporting.sh ]; then
