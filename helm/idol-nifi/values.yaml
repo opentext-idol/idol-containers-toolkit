@@ -247,6 +247,9 @@ nifi:
   # -- Maximum timer driven thread count.
   threadCount: 10
 
+  # -- Maximum number of times to try starting services after flow import
+  serviceStartRetries: 12
+
 # -- nifi cluster instances. Each cluster instance inherits values from the nifi section.
 # When more than one cluster is specified, setting a clusterId is required
 nifiClusters:

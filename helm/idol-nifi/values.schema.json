@@ -270,6 +270,10 @@
                 "threadCount": {
                     "type": "integer",
                     "minimum": 1
+                },
+                "serviceStartRetries": {
+                    "type": "integer",
+                    "minimum": 0
                 }
             }
         },
@@ -286,7 +290,8 @@
                 "resources",
                 "dataVolume",
                 "service",
-                "threadCount"
+                "threadCount",
+                "serviceStartRetries"
             ],
             "title": "Nifi"
         },

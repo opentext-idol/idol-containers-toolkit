@@ -57,6 +57,7 @@ data:
   TRUSTSTORE_PATH: "${NIFI_HOME}/keytool/truststore.jks"
   TRUSTSTORE_TYPE: "jks"
   IDOL_NIFI_THREADS: "{{ $nifiCluster.threadCount }}"
+  IDOL_NIFI_SERVICE_START_RETRIES: "{{ $nifiCluster.serviceStartRetries }}"
   IDOL_NIFI_FLOW_COUNT: "{{ $nifiCluster.flows | len }}"
 {{- /* Maintains backwards compatibility for the old nifi.flowfile by using that if explicitly set, else using the newer nifi.flows */}}
 {{- range $i,$flow := (empty $nifiCluster.flowfile | ternary $nifiCluster.flows (list ( dict "file" $nifiCluster.flowfile "bucket" "default-bucket" "import" true ))) }}
