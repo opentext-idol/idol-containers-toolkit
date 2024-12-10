@@ -46,7 +46,7 @@ spec:
 {{- end }}
       containers:
       - name: zookeeper
-        image: docker.io/zookeeper:3.8
+        image: {{ $.Values.zookeeper.image }}
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 2181

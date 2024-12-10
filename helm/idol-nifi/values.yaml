@@ -244,6 +244,12 @@ nifi:
       # minimalFlowListenerExample:
       #   port: 14000
 
+  # -- Maximum timer driven thread count.
+  threadCount: 10
+
+  # -- Maximum number of times to try starting services after flow import
+  serviceStartRetries: 3
+
 # -- nifi cluster instances. Each cluster instance inherits values from the nifi section.
 # When more than one cluster is specified, setting a clusterId is required
 nifiClusters:
@@ -252,6 +258,8 @@ nifiClusters:
 nifiRegistry:
   # -- whether to deploy a nifi registry instance
   enabled: true
+  # -- nifi-registry image to use
+  image: docker.io/apache/nifi-registry:1.23.0
   ingress:
     # nifiRegistry.ingress.enabled -- whether to deploy ingress for nifi registry
     enabled: true
@@ -298,6 +306,8 @@ nifiRegistry:
     - /scripts/flow-basic-idol.json
 
 zookeeper:
+  # -- zookeeper image to use
+  image: docker.io/zookeeper:3.8
   # zookeeper.resources -- https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits
   resources:
     requests:

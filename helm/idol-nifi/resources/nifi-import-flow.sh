@@ -172,7 +172,7 @@ if [ 0 != ${#NEW_PROCESS_GROUP_IDS[@]} ]; then
     SVCSTART_PROCESS_GROUP_IDS=("${NEW_PROCESS_GROUP_IDS[@]}")
     START_PROCESS_GROUP_IDS=("${NEW_PROCESS_GROUP_IDS[@]}")
 
-    for i in {1..12}
+    for ((i=1; i <= ${IDOL_NIFI_SERVICE_START_RETRIES:-3}; i++))
     do
         if [ 0 != ${#SVCSTART_PROCESS_GROUP_IDS[@]} ]; then
             echo "[$(date)] Starting services in ProcessGroups: ${SVCSTART_PROCESS_GROUP_IDS[*]}."

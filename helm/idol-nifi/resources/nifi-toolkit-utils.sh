@@ -207,3 +207,20 @@ nifitoolkit_registry_findFlow (){
     declare -g "$OUT_FLOWID=${FLOWID}"
     declare -g "$OUT_FLOWVERSIONS=${FLOWVERSIONS}"
 }
+
+nifitoolkit_configure_threads(){
+    local THREADS=$1
+    local CONTROLLER_CFG=/opt/nifi/nifi-current/conf/update-controller-configuration.json
+    local CONFIGURATION=
+    CONFIGURATION=$(${NIFITOOLKITCMD} nifi get-controller-configuration)
+    RC=$?
+    until [ 0 == ${RC} ];
+    do
+        sleep 5s
+        CONFIGURATION=$(${NIFITOOLKITCMD} nifi get-controller-configuration)
+        RC=$?
+    done
+    echo "${CONFIGURATION}" | jq ".component.maxTimerDrivenThreadCount=${THREADS}" > ${CONTROLLER_CFG}
+    ${NIFITOOLKITCMD} nifi update-controller-configuration --input "${CONTROLLER_CFG}"
+    echo "[$(date)] Set maxTimerDrivenThreadCount=${THREADS}"
+}
