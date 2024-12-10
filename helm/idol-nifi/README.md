@@ -208,7 +208,7 @@ Each deployment will require a unique name, and ingress points should be manuall
 | nifi.resources.requests.memoryMi | int | `4096` | memory requested in mebibytes (value used in jvm memory calculation) |
 | nifi.sensitivePropsKey | string | `""` | optional nifi.sensitive.props.key value (see https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#nifi_sensitive_props_key) Setting this value is recommended. If it is not set, it will default to a generated value |
 | nifi.service.additionalPorts | object | `{}` | mapping of additional ports to expose on the nifi service (e.g. if flow includes a HandleHttpRequest processor). Can minimally specify as `--set nifi.service.additionalPorts.{name}.port=12345` |
-| nifi.serviceStartRetries | int | `12` | Maximum number of times to try starting services after flow import |
+| nifi.serviceStartRetries | int | `3` | Maximum number of times to try starting services after flow import |
 | nifi.threadCount | int | `10` | Maximum timer driven thread count. |
 | nifi.truststorePassword | string | `""` | optional nifi.security.truststorePasswd value (see https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#security_properties) Setting this value is recommended. If it is not set, it will default to a generated value |
 | nifiClusters | list | `[{}]` | nifi cluster instances. Each cluster instance inherits values from the nifi section. When more than one cluster is specified, setting a clusterId is required |
