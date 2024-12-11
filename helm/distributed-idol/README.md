@@ -8,7 +8,7 @@ END COPYRIGHT NOTICE
 # distributed-idol
 <!-- omit in toc -->
 
-![Version: 0.11.0](https://img.shields.io/badge/Version-0.11.0-informational?style=flat-square) ![AppVersion: 24.4.0](https://img.shields.io/badge/AppVersion-24.4.0-informational?style=flat-square)
+![Version: 0.12.0](https://img.shields.io/badge/Version-0.12.0-informational?style=flat-square) ![AppVersion: 24.4.0](https://img.shields.io/badge/AppVersion-24.4.0-informational?style=flat-square)
 
 - [Overview](#overview)
 - [Prerequisites](#prerequisites)
@@ -186,6 +186,8 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | Repository | Name | Version |
 |------------|------|---------|
 | https://kubernetes-sigs.github.io/metrics-server | metrics-server | 3.8.2 |
+| https://prometheus-community.github.io/helm-charts | prometheus | 25.0 |
+| https://prometheus-community.github.io/helm-charts | prometheus-adapter | 4.2.0 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.14.3 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | 0.4.0 |
 
@@ -321,6 +323,10 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | indexserviceName | string | `"idol-index-service"` | internal parameter to specify the index service name. |
 | licenseServerHostname | string | `"idol-licenseserver"` | maps to [License] LicenseServerHost in the IDOL cfg files Should point to a resolvable IDOL LicenseServer (or Kubernetes service abstraction - see the idol-licenseserver chart) |
 | licenseServerPort | string | `"20000"` | ACI port of the LicenseServer instance |
+| metrics-server | object | `{"args":["--kubelet-insecure-tls"],"enabled":true}` | `metrics-server` sub-chart configuration Required if auto-scaling on system metrics (e.g. cpu) |
+| metrics-server.enabled | bool | `true` | whether to deploy a metrics server instance |
+| prometheus | object | Default configuration to support `distributed-idol` autoscaling. See values.yaml for details. | `prometheus` sub-chart configuration Required for auto-scaling on custom metrics (e.g. dih fullness) See https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus |
+| prometheus-adapter | object | Default configuration to support `idol-nifi` autoscaling. See values.yaml for details. | `prometheus-adapter` sub-chart configuration Required for auto-scaling on custom metrics (e.g. dih fullness See https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-adapter |
 | queryserviceName | string | `"idol-query-service"` | internal parameter to specify the query service name. |
 | setupMirrored | bool | `false` | When `true` this will configure the  DAH and DIH in mirror-mode, meaning the Contents will all be mirrors of each other. When `false`, the DAH and DIH will be configured in non-mirror mode, meaning that documents will be distributed between the content engines. In mirror-mode, the Content engines will autoscale to fulfil query demand. In non-mirror-mode, Content engines will autoscale to fulfil index demand. See https://www.microfocus.com/documentation/idol/IDOL_12_12/DAH_12.12_Documentation/Help/#Configuration/Server/MirrorMode.htm?TocPath=Configuration%2520Parameters%257CServer%257C_____38 and https://www.microfocus.com/documentation/idol/IDOL_12_12/DIH_12.12_Documentation/Help/#Configuration/Server/MirrorMode.htm?TocPath=Configuration%2520Parameters%257CServer%257C_____38 |
 

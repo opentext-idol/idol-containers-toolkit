@@ -19,12 +19,14 @@ class TestDistributedIdol(unittest.TestCase, HelmChartTestBase):
         '''
         Check that the chart produces expected kinds/names
         '''
-        objs = self.render_chart( {'name': self._name } )
+        release = 'rel'
+        objs = self.render_chart( {'name': self._name }, name=release )
         expected_kinds = {
             'Deployment': [
-                           'custom-metrics-apiserver',
                            'idol-dah',
-                           'prometheus',
+                           f'{release}-metrics-server',
+                           f'{release}-prometheus-adapter',
+                           f'{release}-prometheus-server'
                           ],
             'StatefulSet': [
                             'idol-content',
@@ -34,28 +36,32 @@ class TestDistributedIdol(unittest.TestCase, HelmChartTestBase):
                         'idol-content',
                         'idol-dah',
                         'idol-dih',
-                        'prometheus'
+                        f'{release}-prometheus-server'
                        ],
             'ConfigMap': [
-                          'adapter-config',
                           'dih-prometheus-exporter-python',
                           'idol-content-default-cfg',
+                          'idol-content-scripts',
                           'idol-dah-default-cfg',
+                          'idol-dah-scripts',
                           'idol-dih-default-cfg',
-                          'prometheus-config'
+                          'idol-dih-scripts',
+                          f'{release}-prometheus-adapter',
+                          f'{release}-prometheus-server'
                          ],
             'Service': [
-                        'custom-metrics-apiserver',
                         'idol-content',
                         'idol-dah',
                         'idol-dih',
                         'idol-index-service',
                         'idol-query-service',
-                        'prometheus'
+                        f'{release}-metrics-server',
+                        f'{release}-prometheus-server'
                        ]
         }
         for kind,names in expected_kinds.items():
-            self.assertGreaterEqual(set(objs[kind].keys()), set(names))
+            with self.subTest(kind):
+                self.assertGreaterEqual(set(objs[kind].keys()), set(names))
 
     def test_multiple_content(self):
         '''
