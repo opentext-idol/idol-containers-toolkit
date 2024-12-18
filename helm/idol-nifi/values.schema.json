@@ -218,6 +218,10 @@
                     "minimum": 0.01,
                     "maximum": 0.99
                 },
+                "mallocArenaMax": {
+                    "type": "integer",
+                    "minimum": 0
+                },
                 "flowfile": {
                     "type":"string",
                     "minLength": 1,
@@ -287,6 +291,7 @@
                 "flows",
                 "ingress",
                 "jvmMemoryRatio",
+                "mallocArenaMax",
                 "resources",
                 "dataVolume",
                 "service",

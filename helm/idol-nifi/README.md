@@ -1,6 +1,6 @@
 # idol-nifi
 
-![Version: 0.12.0](https://img.shields.io/badge/Version-0.12.0-informational?style=flat-square) ![AppVersion: 24.4.0](https://img.shields.io/badge/AppVersion-24.4.0-informational?style=flat-square)
+![Version: 0.12.1](https://img.shields.io/badge/Version-0.12.1-informational?style=flat-square) ![AppVersion: 24.4.0](https://img.shields.io/badge/AppVersion-24.4.0-informational?style=flat-square)
 
 Provides a scaleable IDOL NiFi cluster instance (NiFi, NiFi Registry and ZooKeeper).
 
@@ -202,6 +202,7 @@ Each deployment will require a unique name, and ingress points should be manuall
 | nifi.ingress.tls.secretName | string | `""` | The name of the secret for ingress TLS. Leave empty if not using TLS.  If specified then either this secret must already exist, or crt and key values must be provided and secret will be created..  |
 | nifi.jvmMemoryRatio | float | `0.5` | What proportion of the pod memory to allocate for JVM usage |
 | nifi.keystorePassword | string | `""` | optional nifi.security.keystorePasswd value (see https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#security_properties) Setting this value is recommended. If it is not set, it will default to a generated value |
+| nifi.mallocArenaMax | int | `2` | MALLOC_ARENA_MAX environment variable controlling glibc memory pool tuning. Increasing this may improve performance, but at  potential cost of extra memory usage. See https://www.gnu.org/software/libc/manual/html_node/Malloc-Tunable-Parameters.html |
 | nifi.registryHost | string | `""` | optional hostname of an existing nifi registry instance. Defaults to the created registry instance when nifiRegistry.enabled=true |
 | nifi.resources | object | `{"limits":{"cpu":"4000m","memoryMi":10240},"requests":{"cpu":"2000m","memoryMi":4096}}` | https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits |
 | nifi.resources.limits.memoryMi | int | `10240` | memory limit in mebibytes (value used in jvm memory calculation) |
