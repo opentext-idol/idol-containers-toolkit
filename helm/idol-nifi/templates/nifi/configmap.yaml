@@ -21,6 +21,7 @@ data:
   JAVA_OPTS: "-XX:UseAVX=0 -Djavax.net.debug=ssl,handshake"
   KEYSTORE_PATH: "${NIFI_HOME}/keytool/keystore.p12"
   KEYSTORE_TYPE: "PKCS12"
+  MALLOC_ARENA_MAX: {{ $nifiCluster.mallocArenaMax | quote }}
   NIFI_ANALYTICS_PREDICT_ENABLED: "true"
   NIFI_CLUSTER_IS_NODE: "true"
   NIFI_CLUSTER_NODE_CONNECTION_TIMEOUT: "5 min"
