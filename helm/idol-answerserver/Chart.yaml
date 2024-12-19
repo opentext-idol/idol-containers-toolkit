@@ -10,7 +10,7 @@
 # END COPYRIGHT NOTICE
 apiVersion: v2
 name: idol-answerserver
-version: "0.4.2"
+version: "0.4.3"
 appVersion: "24.4"
 description: Adds IDOL AnswerServer
 dependencies:
