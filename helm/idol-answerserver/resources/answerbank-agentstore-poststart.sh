@@ -20,5 +20,5 @@ DBS="agent profile activated deactivated DataAdminDeleted"
 
 for DB in ${DBS};
 do
-    curl "http://localhost:{{ .Values.answerbankAgentstore.indexPort | int }}/DRECREATEDBASE?&DREDBNAME=${DB}"
+    curl -S -s --noproxy "*" --insecure -o /dev/null "${HTTP_SCHEME}://localhost:{{ .Values.answerbankAgentstore.indexPort | int }}/DRECREATEDBASE?&DREDBNAME=${DB}"
 done
