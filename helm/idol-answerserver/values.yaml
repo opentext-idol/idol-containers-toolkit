@@ -219,14 +219,11 @@ passageextractorAgentstore:
   existingConfigMap: "idol-passageextractor-agentstore-cfg"
 
   # -- Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
-  # N.B. QMS AgentStore creates required databases on startup via poststart script mount
+  # N.B. AgentStore creates required databases on startup via poststart script mount
   additionalVolumeMounts:
   - name: config-map
-    mountPath: /passageextractor-agentstore/poststart_scripts/passageextractor-agentstore-poststart.sh
+    mountPath: /passageextractor-agentstore/poststart_scripts/002_startup_tasks.sh 
     subPath: passageextractor-agentstore-poststart.sh
-  - name: config-map
-    mountPath: /passageextractor-agentstore/poststart_scripts/002_startup_tasks.sh
-    subPath: passageextractor-agentstore-poststart_2.sh
     
   idolImage:
     # -- overrides the default value for single-content.idolImage.repo ("content")
@@ -270,10 +267,10 @@ answerbankAgentstore:
   existingConfigMap: "idol-answerbank-agentstore-cfg"
 
   # -- Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
-  # N.B. QMS AgentStore creates required databases on startup via poststart script mount
+  # N.B. AgentStore creates required databases on startup via poststart script mount
   additionalVolumeMounts:
   - name: config-map
-    mountPath: /answerbank-agentstore/poststart_scripts/answerbank-agentstore-poststart.sh
+    mountPath: /answerbank-agentstore/poststart_scripts/002_startup_tasks.sh
     subPath: answerbank-agentstore-poststart.sh
     
   idolImage:

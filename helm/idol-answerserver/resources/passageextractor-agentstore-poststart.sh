@@ -11,14 +11,32 @@
 #
 # END COPYRIGHT NOTICE
 
-# Creates required databases for PassageExtractor AgentStore
-
 source /content/startup_utils.sh
 
-waitForAci "localhost:{{ .Values.passageextractorAgentstore.aciPort | int }}"
-DBS="agent profile activated deactivated DataAdminDeleted"
+ACI_PORT={{ .Values.passageextractorAgentstore.aciPort }}
+INDEX_PORT={{ .Values.passageextractorAgentstore.indexPort }}
 
-for DB in ${DBS};
-do
-    curl -S -s --noproxy "*" -o /dev/null --insecure "${HTTP_SCHEME}://localhost:{{ .Values.passageextractorAgentstore.indexPort | int }}/DRECREATEDBASE?&DREDBNAME=${DB}"
-done
+# Creates required databases
+function createDbs {
+    local DBS="companies people places teams organizations languages elements organisms"
+    for DB in ${DBS}
+    do
+        curl -S -s --noproxy "*" -o /dev/null --insecure "${HTTP_SCHEME}://localhost:${INDEX_PORT}/DRECREATEDBASE?&DREDBNAME=${DB}"
+    done
+}
+
+# Indexes idx
+function indexIdx {
+    for i in idx/*.idx.gz
+    do
+        if [ ! -e "${i}.indexed" ]
+        then
+            echo "Indexing ${i}"
+            curl -S -s --noproxy "*" --insecure -o "${i}.indexed" "${HTTP_SCHEME}://localhost:${INDEX_PORT}/DREADD?/content/${i}"
+        fi
+    done
+}
+
+waitForAci "localhost:${ACI_PORT}"
+createDbs
+indexIdx
