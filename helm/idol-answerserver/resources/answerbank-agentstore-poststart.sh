@@ -11,14 +11,19 @@
 #
 # END COPYRIGHT NOTICE
 
-# Creates required databases for QMS AgentStore
-
 source /content/startup_utils.sh
 
-waitForAci "localhost:{{ .Values.answerbankAgentstore.aciPort | int }}"
-DBS="agent profile activated deactivated DataAdminDeleted"
+ACI_PORT={{ .Values.answerbankAgentstore.aciPort }}
+INDEX_PORT={{ .Values.answerbankAgentstore.indexPort }}
 
-for DB in ${DBS};
-do
-    curl "http://localhost:{{ .Values.answerbankAgentstore.indexPort | int }}/DRECREATEDBASE?&DREDBNAME=${DB}"
-done
+# Creates required databases
+function createDbs {
+    local DBS="agent profile activated deactivated DataAdminDeleted"
+    for DB in ${DBS}
+    do
+        curl -S -s --noproxy "*" -o /dev/null --insecure "${HTTP_SCHEME}://localhost:${INDEX_PORT}/DRECREATEDBASE?&DREDBNAME=${DB}"
+    done
+}
+
+waitForAci "localhost:${ACI_PORT}"
+createDbs
