@@ -181,14 +181,14 @@ if [ 0 != ${#NEW_PROCESS_GROUP_IDS[@]} ]; then
                 PROCESS_GROUP_ID=${SVCSTART_PROCESS_GROUP_IDS[${PROCESS_GROUP_INDEX}]}
                 echo "[$(date)] Starting services in ProcessGroup: ${PROCESS_GROUP_ID}."
 
-                set +e
-                ${NIFITOOLKITCMD} nifi pg-enable-services -pgid "${PROCESS_GROUP_ID}" -verbose
-                RC=$?
+                RC=
+                nifitoolkit_nifi_enableProcessGroupServices "${PROCESS_GROUP_ID}" RC
+
                 if [ 0 == ${RC} ]; then
                     unset "SVCSTART_PROCESS_GROUP_IDS[${PROCESS_GROUP_INDEX}]"
                     echo "[$(date)] ${#SVCSTART_PROCESS_GROUP_IDS[@]} Remaining ProcessGroups for Service Start: ${SVCSTART_PROCESS_GROUP_IDS[*]}."
                 else
-                    echo "[$(date)] nifi pg-enable-services failed (RC=${RC})."
+                    echo "[$(date)] Service Start failed (RC=${RC})."
                 fi
             done
 
