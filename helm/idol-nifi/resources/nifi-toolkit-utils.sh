@@ -90,7 +90,6 @@ nifitoolkit_nifi_getChildProcessGroups() {
 nifitoolkit_nifi_enableProcessGroupServices() {
     local PGID=$1
     local OUT_RC=$2
-    local RESULT=
 
     set +e
     ${NIFITOOLKITCMD} nifi pg-enable-services -pgid "${PGID}" -verbose
@@ -98,11 +97,11 @@ nifitoolkit_nifi_enableProcessGroupServices() {
     if [ 0 == ${RC} ]; then
         CHILD_PGLIST=
         nifitoolkit_nifi_getChildProcessGroups "${PGID}" CHILD_PGLIST
-        for CHILD_PGID in $(echo $CHILD_PGLIST); do
+        for CHILD_PGID in $(echo "$CHILD_PGLIST"); do
             echo "[$(date)] Starting services in descendent ProcessGroup: ${CHILD_PGID}."
             CHILD_RC=
             nifitoolkit_nifi_enableProcessGroupServices "${CHILD_PGID}" CHILD_RC
-            if [ 0 != ${CHILD_RC} ]; then
+            if [ 0 != "${CHILD_RC}" ]; then
                 RC=1
             fi
         done
