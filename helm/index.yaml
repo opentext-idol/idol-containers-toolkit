@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2023-2024 Open Text.
+# Copyright 2023-2025 Open Text.
 #
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -1043,6 +1043,40 @@ entries:
     - release/idol-mediaserver-0.1.0.tgz
     version: 0.1.0
   idol-nifi:
+  - apiVersion: v2
+    appVersion: 24.4.0
+    created: "2025-01-08T09:56:01.570367003Z"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.14.3
+    - condition: idol-licenseserver.enabled
+      name: idol-licenseserver
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: 0.4.0
+    - condition: metrics-server.enabled
+      name: metrics-server
+      repository: https://kubernetes-sigs.github.io/metrics-server
+      version: 3.8.2
+    - condition: prometheus.enabled
+      name: prometheus
+      repository: https://prometheus-community.github.io/helm-charts
+      version: "25.0"
+    - condition: prometheus-adapter.enabled
+      name: prometheus-adapter
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 4.2.0
+    - alias: postgresql
+      condition: postgresql.enabled
+      name: postgresql-ha
+      repository: https://charts.bitnami.com/bitnami
+      version: 14.3.4
+    description: A configurable IDOL NiFi setup
+    digest: 755e05fe931e4ee5a95f0c86d2d152b5e29d77d5b2c3e126092b64ad45338892
+    name: idol-nifi
+    urls:
+    - release/idol-nifi-0.12.2.tgz
+    version: 0.12.2
   - apiVersion: v2
     appVersion: 24.4.0
     created: "2024-12-18T13:51:36.895609287Z"
@@ -2399,4 +2433,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2024-12-20T16:48:07.034842592Z"
+generated: "2025-01-08T09:56:01.526005787Z"

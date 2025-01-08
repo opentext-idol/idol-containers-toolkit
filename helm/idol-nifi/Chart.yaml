@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2023-2024 Open Text.
+# Copyright 2023-2025 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -10,7 +10,7 @@
 # END COPYRIGHT NOTICE
 apiVersion: v2
 name: idol-nifi
-version: 0.12.1
+version: 0.12.2
 appVersion: "24.4.0"
 description: A configurable IDOL NiFi setup
 dependencies:
