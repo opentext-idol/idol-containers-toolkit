@@ -135,16 +135,23 @@ do
         # Import the flow as a process group
         PROCESSGROUP=$(${NIFITOOLKITCMD} nifi pg-import -b "${BUCKETID}" -f "${FLOWID}" -fv "${FLOWVERSION}" -cto 60000 -rto 60000)
         RC=$?
-        if [ 0 != ${RC} ]; then
-            echo "[$(date)] nifi pg-import failed (RC=${RC}). Manual flow import may be required"
-            continue
+        if [ 0 != "${RC}" ]; then
+
+            nifitoolkit_nifi_findProcessGroup "${FLOWNAME}" EXISTINGPGID EXISTINGFLOWID EXISTINGFLOWVERSION EXISTINGFLOWSTATE
+            if [ -z "${EXISTINGPGID}" ]; then
+                echo "[$(date)] nifi pg-import failed (RC=${RC}). Manual flow import may be required"
+                continue
+            else
+                echo "[$(date)] nifi pg-import failed (RC=${RC}), but the imported flow now exists (${EXISTINGPGID})"
+                PROCESSGROUP="${EXISTINGPGID}"
+            fi
         fi
         echo "[$(date)] PROCESSGROUP=${PROCESSGROUP}"
 
         # Set any parameter values
         PARAMCONTEXT=$(${NIFITOOLKITCMD} nifi pg-get-param-context -pgid "${PROCESSGROUP}")
         RC=$?
-        if [ 0 != ${RC} ]; then
+        if [ 0 != "${RC}" ]; then
             echo "[$(date)] nifi pg-get-param-context failed (RC=${RC}). Manual flow setup may be required"
             # but continue
         else
@@ -184,7 +191,7 @@ if [ 0 != ${#NEW_PROCESS_GROUP_IDS[@]} ]; then
                 RC=
                 nifitoolkit_nifi_enableProcessGroupServices "${PROCESS_GROUP_ID}" RC
 
-                if [ 0 == ${RC} ]; then
+                if [ 0 == "${RC}" ]; then
                     unset "SVCSTART_PROCESS_GROUP_IDS[${PROCESS_GROUP_INDEX}]"
                     echo "[$(date)] ${#SVCSTART_PROCESS_GROUP_IDS[@]} Remaining ProcessGroups for Service Start: ${SVCSTART_PROCESS_GROUP_IDS[*]}."
                 else
