@@ -450,6 +450,10 @@
                 },
                 "limits": {
                     "$ref": "#/$defs/Limits"
+                },
+                "sharedMemory": {
+                    "type": "string",
+                    "pattern": "^\\d+(?:\\.\\d+)?(?:Ki|Mi|Gi|Ti|Pi|Ei|m|k|M|G|T|P|E)?$"
                 }
             },
             "required": [
