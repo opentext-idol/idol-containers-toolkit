@@ -147,7 +147,7 @@ spec:
   "containers" (list "idolnifi.container")
   "volumes" (list (dict "name" "data" "emptyDir" (dict "sizeLimit" "3Gi"))
                   (dict "name" "scripts" "configMap" (dict "name" (print $.Values.name "-scripts") "optional" false "defaultMode" 0755))
-                  (dict "name" "dshm" "emptyDir" (dict "medium" "Memory" "sizeLimit" "256Mi")))
+                  (dict "name" "dshm" "emptyDir" (dict "medium" "Memory" "sizeLimit" $nifiCluster.resources.sharedMemory)))
   "addConfigMap" false
 ) -}}
 {{- end -}}

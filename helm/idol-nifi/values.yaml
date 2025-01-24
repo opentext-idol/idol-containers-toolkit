@@ -145,6 +145,8 @@ nifi:
       cpu: 4000m
       # -- memory limit in mebibytes (value used in jvm memory calculation)
       memoryMi: 10240
+    # -- Size of /dev/shm (shared memory). Used by KeyView.
+    sharedMemory: 256Mi
   
   dataVolume:
     # -- Name of the storage class used to provision a PersistentVolume
