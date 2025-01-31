@@ -278,6 +278,9 @@
                 "serviceStartRetries": {
                     "type": "integer",
                     "minimum": 0
+                },
+                "image": {
+                    "type":"string"
                 }
             }
         },

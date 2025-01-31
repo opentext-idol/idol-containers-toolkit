@@ -68,6 +68,7 @@ envFrom:
       name: {{ $component.envConfigMap | quote }}
       optional: false
 {{- end }}
+image: {{ $nifiCluster.image }}
 lifecycle:
   postStart:
     exec:
