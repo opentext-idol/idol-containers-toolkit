@@ -313,6 +313,9 @@
                         "clusterId":{
                             "type": "string"
                             }
+                        },
+                        "image": {
+                            "$ref": "#/$defs/idolImage"
                         }
                     }
                 ],
