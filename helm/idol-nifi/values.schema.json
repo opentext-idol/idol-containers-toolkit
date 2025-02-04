@@ -278,9 +278,6 @@
                 "serviceStartRetries": {
                     "type": "integer",
                     "minimum": 0
-                },
-                "image": {
-                    "$ref": "#/$defs/idolImage"
                 }
             }
         },
@@ -316,6 +313,9 @@
                         "clusterId":{
                             "type": "string"
                             }
+                        },
+                        "image": {
+                            "$ref": "#/$defs/idolImage"
                         }
                     }
                 ],
