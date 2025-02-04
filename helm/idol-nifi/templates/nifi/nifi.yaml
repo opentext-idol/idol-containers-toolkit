@@ -36,7 +36,7 @@ spec:
       restartPolicy: Always
       initContainers:
       - name: ensure-conf
-        image: {{ $nifiCluster.image }}
+        image: {{ include "idol-library.idolImage" (dict "root" $root "idolImage" $nifiCluster.image ) }}
         envFrom:
         - configMapRef:
             name: {{ $component.name }}-env
@@ -136,7 +136,7 @@ spec:
 {{- end -}}
 
 {{- range $nifiClusterItem := .Values.nifiClusters }}
-{{ $nifiCluster := merge $nifiClusterItem $.Values.nifi (dict "clusterId" $.Values.name) ( dict "image" (include "idol-library.idolImage" (dict "root" $ "idolImage" $.Values.idolImage))) }}
+{{ $nifiCluster := merge $nifiClusterItem $.Values.nifi (dict "clusterId" $.Values.name) ( dict "image" $.Values.idolImage) }}
 ---
 {{ include "idol-library.util.merge" (dict
   "root" $

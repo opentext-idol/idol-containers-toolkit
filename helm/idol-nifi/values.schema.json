@@ -280,7 +280,7 @@
                     "minimum": 0
                 },
                 "image": {
-                    "type":"string"
+                    "$ref": "#/$defs/idolImage"
                 }
             }
         },

@@ -68,7 +68,7 @@ envFrom:
       name: {{ $component.envConfigMap | quote }}
       optional: false
 {{- end }}
-image: {{ $nifiCluster.image }}
+image: {{ include "idol-library.idolImage" (dict "root" $root "idolImage" $nifiCluster.image ) }}
 lifecycle:
   postStart:
     exec:
