@@ -12,6 +12,11 @@ class TestIdolLibraryExample(AciTestBase, StatefulSetTests, unittest.TestCase):
     chartpath = os.path.join('..','idol-library-example-test')
     _kinds = ['Deployment','StatefulSet','Ingress','ConfigMap','Service']
 
+    def test_oem(self):
+        objs = self.render_chart({'global':{'idolOemLicenseSecret':'oem-secret'}, 'workingDir':'/testoem'})
+        volumeMounts = objs['StatefulSet']['idol-aci-test']['spec']['template']['spec']['containers'][0]['volumeMounts']
+        self.assertTrue(any([ { 'name': 'oem-license','mountPath': '/testoem/licensekey.dat',
+            'subPath': 'licensekey.dat'}.items() <= x.items() for x in volumeMounts]))
 
 class TestIdolAnswerServer(AciTestBase, unittest.TestCase):
     chartpath = os.path.join('..','idol-answerserver')
