@@ -54,9 +54,7 @@ volumeMounts:
 {{- range $volumeMounts }}
 - {{ . | toYaml | nindent 10 }}
 {{- end }}
-{{- range $component.additionalVolumeMounts }}
-- {{ . | toYaml | nindent 10 }}
-{{- end }}
+{{- include "idol-library.util.range_array_or_map_values" (dict "root" $root "vals" $component.additionalVolumeMounts) }}
 {{- if $root.Values.global.idolOemLicenseSecret }}
 - name: oem-license
   mountPath: {{ printf "%s/licensekey.dat" $workingDir }}

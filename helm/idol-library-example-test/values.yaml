@@ -60,11 +60,13 @@ usingTLS: false
 #                      or content.cfg if $IDOL_COMPONENT is unavailable.
 existingConfigMap: ""
 
-# -- Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
-additionalVolumes: []
+# -- Additional PodSpec Volume(s) (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
+# Can be dict of (name, Volume), or list of (Volume). dict form allows for merging definitions from multiple values files.
+additionalVolumes: null
 
-# -- Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1)
-additionalVolumeMounts: []
+# -- Additional PodSpec VolumeMount(s) (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1)
+# Can be dict of (name, VolumeMount), or list of (VolumeMount). dict form allows for merging definitions from multiple values files.
+additionalVolumeMounts: null
 
 # -- Optional configMap name holding extra environnment variables for container
 envConfigMap: ""
