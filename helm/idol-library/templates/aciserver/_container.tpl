@@ -44,7 +44,7 @@ ports:
 {{- end }}
 {{- end }}
 {{- range $ports }}
-- {{ . | toYaml | nindent 10 }}
+- {{ . | toYaml | nindent 2 }}
 {{- end }}
 volumeMounts:
 {{- if $mountConfigMap }}
@@ -52,7 +52,7 @@ volumeMounts:
   mountPath: /etc/config/idol
 {{- end }}
 {{- range $volumeMounts }}
-- {{ . | toYaml | nindent 10 }}
+- {{ . | toYaml | nindent 2 }}
 {{- end }}
 {{- include "idol-library.util.range_array_or_map_values" (dict "root" $root "vals" $component.additionalVolumeMounts) }}
 {{- if $root.Values.global.idolOemLicenseSecret }}
@@ -77,7 +77,7 @@ env:
   value: {{ printf "/etc/config/idol/%s.cfg" (trimPrefix "idol-" $component.name) }}
 {{- end }}
 {{- range $env }}
-- {{ . | toYaml | nindent 10 }}
+- {{ . | toYaml | nindent 2 }}
 {{- end }}
 {{- if $component.usingTLS }}
 - name: IDOL_SSL
@@ -89,10 +89,10 @@ envFrom:
     name: {{ $component.envConfigMap | quote }}
 {{ end }}
 {{- if (dig "containerSecurityContext" "enabled" false ($component | merge (dict))) }}
-securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml | nindent 2 }}
 {{- end }}
 {{- if (dig "resources" "enabled" false ($component | merge (dict))) }}
-resources: {{- omit $component.resources "enabled" | toYaml | nindent 10 }}
+resources: {{- omit $component.resources "enabled" | toYaml | nindent 2 }}
 {{- end }}
 
 {{- end -}}

@@ -83,6 +83,8 @@ podSecurityContext:
 containerSecurityContext:
   # -- enable SecurityContext for container. Setting to false omits.
   enabled: false
+  privileged: false
+  runAsNonRoot: true
 
 # -- Optional resources for container (see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers)
 resources:

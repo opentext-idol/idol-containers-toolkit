@@ -32,7 +32,7 @@ class HelmChartTestBase():
                 continue
             for name, workload in objs[t].items():
                 if name in names:
-                        yield t, workload
+                    yield t, workload
 
     def check_tls(self, objs, names):
         '''
@@ -104,3 +104,16 @@ class HelmChartTestBase():
         ''' Chart renders successfully with default values '''
         objs = self.render_chart()
         self.assertNotEqual(0, len(objs))
+
+    def test_security_context(self):
+        ''' containerSecurityContext and podSecurityContext render '''
+        objs = self.render_chart({'podSecurityContext': { 'enabled': True, 'runAsGroup': 123}, 
+            'containerSecurityContext':{'enabled': True, 'runAsGroup': 123}, 
+            'name':'thing'})
+        workloads = { k:o for k,o in self.workloads(objs, 'thing')}
+        self.assertGreater(len(workloads), 0)
+        for kind,obj in workloads.items():
+            self.assertLessEqual({'runAsGroup':123}.items(), obj['spec']['template']['spec']['securityContext'].items())
+            self.assertNotIn('enabled', obj['spec']['template']['spec']['securityContext'].keys())
+            self.assertLessEqual({'runAsGroup':123}.items(), obj['spec']['template']['spec']['containers'][0]['securityContext'].items())
+            self.assertNotIn('enabled', obj['spec']['template']['spec']['containers'][0]['securityContext'].keys())
