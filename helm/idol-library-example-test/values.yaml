@@ -99,6 +99,10 @@ replicas: 1
 # -- Optional serviceAccountName for the pods (https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account)
 serviceAccountName: ""
 
+# -- Expected working directory for the container.
+# Should only need to change this for a heavily customized image.
+workingDir: "/content"
+
 ##### NETWORKING CONFIGURATION #####
 # This section contains parameters to configure various network-related
 # properties in this chart.

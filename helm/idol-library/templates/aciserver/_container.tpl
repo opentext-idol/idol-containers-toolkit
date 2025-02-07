@@ -19,6 +19,7 @@
 {{- $volumeMounts := get . "volumeMounts" | default list -}}
 {{- $ports := get . "ports" | default list -}}
 {{- $mountConfigMap := dig "mountConfigMap" true . -}}
+{{- $workingDir := get $component "workingDir" | default (printf "/%s" (trimPrefix "idol-" $component.name)) -}}
 name: {{ $component.name | quote }}
 image: {{ include "idol-library.idolImage" (dict "root" $root "idolImage" $component.idolImage) }}
 imagePullPolicy: {{ default (default "IfNotPresent" $component.idolImage.imagePullPolicy) $root.Values.global.imagePullPolicy | quote }}
@@ -58,11 +59,11 @@ volumeMounts:
 {{- end }}
 {{- if $root.Values.global.idolOemLicenseSecret }}
 - name: oem-license
-  mountPath: {{ printf "/%s/licensekey.dat" (trimPrefix "idol-" $component.name) }}
+  mountPath: {{ printf "%s/licensekey.dat" $workingDir }}
   subPath: licensekey.dat
   readOnly: true
 - name: oem-license
-  mountPath: {{ printf "/%s/versionkey.dat" (trimPrefix "idol-" $component.name) }}
+  mountPath: {{ printf "%s/versionkey.dat" $workingDir }}
   subPath: versionkey.dat
   readOnly: true
 {{- end }}
