@@ -102,5 +102,12 @@ class TestDistributedIdol(unittest.TestCase, HelmChartTestBase):
         objs = self.render_chart(custom_values)
         self.check_custom_data(objs, self._aci_workloads)
 
+    def test_security_context(self):
+        return self.check_security_context(['idol-dih','idol-dah','idol-content'], {
+            'dih':{t: self.security_context_value() for t in ['podSecurityContext','containerSecurityContext']},
+            'dah':{t: self.security_context_value() for t in ['podSecurityContext','containerSecurityContext']},
+            'content':{t: self.security_context_value() for t in ['podSecurityContext','containerSecurityContext']},
+        })
+
 if __name__ == '__main__':
     unittest.main()

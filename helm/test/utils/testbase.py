@@ -32,7 +32,7 @@ class HelmChartTestBase():
                 continue
             for name, workload in objs[t].items():
                 if name in names:
-                        yield t, workload
+                    yield t, workload
 
     def check_tls(self, objs, names):
         '''
@@ -104,3 +104,26 @@ class HelmChartTestBase():
         ''' Chart renders successfully with default values '''
         objs = self.render_chart()
         self.assertNotEqual(0, len(objs))
+
+    def security_context_value(self):
+        ''' A securityContext configuration  value to test with '''
+        return { 'enabled': True, 'runAsGroup': 123}
+
+    def check_security_context(self, names=['thing'], values=None):
+        if values is None:
+            values = {'podSecurityContext': self.security_context_value(),
+                'containerSecurityContext': self.security_context_value(),
+                'name':'thing'}
+        objs = self.render_chart(values)
+        for name in names:
+            workloads = { k:o for k,o in self.workloads(objs, [name])}
+            self.assertGreater(len(workloads), 0, f'no workloads found for {name}')
+            for kind,obj in workloads.items():
+                self.assertLessEqual({'runAsGroup':123}.items(), obj['spec']['template']['spec']['securityContext'].items())
+                self.assertNotIn('enabled', obj['spec']['template']['spec']['securityContext'].keys())
+                self.assertLessEqual({'runAsGroup':123}.items(), obj['spec']['template']['spec']['containers'][0]['securityContext'].items())
+                self.assertNotIn('enabled', obj['spec']['template']['spec']['containers'][0]['securityContext'].keys())
+    
+    def test_security_context(self):
+        ''' containerSecurityContext and podSecurityContext render correctly when used '''
+        self.check_security_context()

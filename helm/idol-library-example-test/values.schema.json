@@ -193,10 +193,10 @@
                     "$ref": "#/$defs/liveness_probe"
                 },
                 "additionalVolumes":{
-                    "type": "array"
+                    "type": ["array", "object", "null"]
                 },
                 "additionalVolumeMounts":{
-                    "type": "array"
+                   "type": ["array", "object", "null"]
                 },
                 "envConfigMap":{
                     "type": "string"

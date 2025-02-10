@@ -10,6 +10,9 @@ HelmChartTestBase.debug = False
 
 class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
     chartpath = os.path.join('..','idol-nifi')
+    
+    def setUp(self):
+        self._kinds = ['StatefulSet','Ingress','ConfigMap','Service']
 
     def test_multiple_nifi(self):
         clusterids = ['nf1','nf2','nf3','testnifi']
@@ -209,6 +212,11 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
         self.assertEqual(objs['Ingress']['idol-nifi']['spec']['rules'][0]['http']['paths'][0]['path'], '/(.*)')
         self.assertEqual(objs['Ingress']['idol-nifi-aci']['spec']['rules'][0]['http']['paths'][0]['path'], '/connector-aci/(.*)')
         self.assertEqual(objs['Ingress']['idol-nifi-metrics']['spec']['rules'][0]['http']['paths'][0]['path'], '/metrics/(.*)')
+
+    def test_security_context(self):
+        return self.check_security_context(['idol-nifi','idol-nifi-reg','idol-nifi-zk'],{
+            t: self.security_context_value() for t in ['podSecurityContext','containerSecurityContext']
+        })
 
 if __name__ == '__main__':
     unittest.main()
