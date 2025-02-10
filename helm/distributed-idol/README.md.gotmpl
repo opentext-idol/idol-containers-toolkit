@@ -1,6 +1,6 @@
 <!--
 BEGIN COPYRIGHT NOTICE
-Copyright 2022 - 2023 Open Text.
+Copyright 2022 - 2025 Open Text.
 
 The only warranties for products and services of Open Text and its affiliates and licensors (“Open Text”) are as may be set forth in the express warranty statements accompanying such products and services. Nothing herein should be construed as constituting an additional warranty. Open Text shall not be liable for technical or editorial errors or omissions contained herein. The information contained herein is subject to change without notice.
 END COPYRIGHT NOTICE
@@ -12,10 +12,11 @@ END COPYRIGHT NOTICE
 
 {{- $appVersion := .AppVersion }}
 {{- $versionList := slice (splitList "." $appVersion) 0 2 }}
+{{- $docsTmpl := "<https://www.microfocus.com/documentation/idol/knowledge-discovery-%s/%s_%s_Documentation/Help/>" }}
 
-{{- $contentDocsLink := printf "https://www.microfocus.com/documentation/idol/IDOL_%s/%s_%s_Documentation/Help/" (join "_" $versionList ) "Content" (join "." $versionList) }}
-{{- $dahDocsLink := printf "https://www.microfocus.com/documentation/idol/IDOL_%s/%s_%s_Documentation/Help/" (join "_" $versionList ) "DAH" (join "." $versionList) }}
-{{- $dihDocsLink := printf "https://www.microfocus.com/documentation/idol/IDOL_%s/%s_%s_Documentation/Help/" (join "_" $versionList ) "DIH" (join "." $versionList) }}
+{{- $contentDocsLink := printf $docsTmpl (join "." $versionList ) "Content" (join "." $versionList) }}
+{{- $dahDocsLink := printf $docsTmpl (join "." $versionList ) "DAH" (join "." $versionList) }}
+{{- $dihDocsLink := printf $docsTmpl (join "." $versionList ) "DIH" (join "." $versionList) }}
 
 - [Overview](#overview)
 - [Prerequisites](#prerequisites)
@@ -30,21 +31,20 @@ END COPYRIGHT NOTICE
   - [metrics-server](#metrics-server)
 - [Install](#install)
 - [Endpoints](#endpoints)
-- [Upgrading IDOL version](#upgrading-idol-version)
+- [Upgrading Knowledge Discovery version](#upgrading-knowledge-discovery-version)
 - [Uninstall](#uninstall)
-- [Requirements](#requirements)
-- [Values](#values)
 
 ## Overview
 
-A [Helm](https://helm.sh/) chart for managing deployments of distributed IDOL systems in a Kubernetes cluster.
+A [Helm](https://helm.sh/) chart for managing deployments of distributed Knowledge Discovery systems in a Kubernetes cluster.
 
-This chart deploys a DAH, DIH, and a set of Content engines that can autoscale with demand. 
-The chart can deploy in mirror-mode (autoscaling to fulfil query demand) or in non-mirror mode 
-(autoscaling to fulfil index demand) depending on the `setupMirrored` helm value. 
+This chart deploys a DAH, DIH, and a set of Content engines that can autoscale with demand.
+The chart can deploy in mirror-mode (autoscaling to fulfil query demand) or in non-mirror mode
+(autoscaling to fulfil index demand) depending on the `setupMirrored` helm value.
 The default is non-mirror mode.
 
-> Full documentation for the IDOL components is available from
+> Full documentation for the Knowledge Discovery components is available from
+>
 > - {{ $contentDocsLink }}
 > - {{ $dahDocsLink }}
 > - {{ $dihDocsLink }}
@@ -82,7 +82,7 @@ kubectl create secret docker-registry dockerhub-secret
     --docker-password=${DOCKERHUB_APITOKEN}
 ```
 
-In practice (at present), access to the IDOL images on dockerhub is restricted to the user `microfocusidolreadonly`, so this will be the
+In practice (at present), access to the Knowledge Discovery images on dockerhub is restricted to the user `microfocusidolreadonly`, so this will be the
 value of `${DOCKERHUB_USER}` in the example.
 
 If a different name is required for this Kubernetes secret, override the `global.imagePullSecrets` list value.
@@ -93,14 +93,14 @@ There are some values that are optional or sometimes overriden:
 
 - `global.http_proxy`/`global.https_proxy`: the URL of a proxy that the installation will have to use to access the external internet. If not set, no http proxying
   is configured.
-- If a private repository is specified for pulling the IDOL images (e.g. by overriding `global.idolImageRegistry`) then `global.imagePullSecrets` will also
+- If a private repository is specified for pulling the Knowledge Discovery images (e.g. by overriding `global.idolImageRegistry`) then `global.imagePullSecrets` will also
   require the name of a Kubernetes secret holding the credentials for pulling from this private repository.
 
 ## Cluster requirements
 
 ### Ingress Controller
 
-The cluster must provide an [IngressController](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/). For example on 
+The cluster must provide an [IngressController](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/). For example on
 a [minikube](https://minikube.sigs.k8s.io/docs/) cluster, you can [enable an NGINX controller](https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/)
 and see the exposed address using `kubectl get ingress`.
 
@@ -109,16 +109,16 @@ your `ingress.host`.
 
 ### Storage Classes and Persistent Volumes
 
-This system uses [Storage Classes](https://kubernetes.io/docs/concepts/storage/storage-classes/#introduction) to provide 
+This system uses [Storage Classes](https://kubernetes.io/docs/concepts/storage/storage-classes/#introduction) to provide
 [Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) as persistent storage for the DIH and Content components.
 
 > Note: uninstalling does not delete the PersistentVolumeClaims. If you redeploy the helm chart, it reuses any existing PV or PVCs.
 
 | [values.yaml](values.yaml)        | default value              | purpose
-| ---                               | ---                        | --- |
-| content.contentStorageClass       | idol-content-storage-class | Content component index and configuration |
-| dih.dihStorageClass               | idol-dih-storage-class     | DIH component data and configuration |
-| content.backupArchiveStorageClass | idol-backup-archive-sc     | mirror-mode Content backups. See [backupArchiveStorageClass](#backuparchivestorageclass) |
+| ---                               | ---                        | ---
+| content.contentStorageClass       | idol-content-storage-class | Content component index and configuration
+| dih.dihStorageClass               | idol-dih-storage-class     | DIH component data and configuration
+| content.backupArchiveStorageClass | idol-backup-archive-sc     | mirror-mode Content backups. See [backupArchiveStorageClass](#backuparchivestorageclass)
 
 #### backupArchiveStorageClass
 
@@ -156,9 +156,9 @@ After you have deployed the helm chart, you can access the following endpoints t
 You can optionally expose individual Content engine ACI ports at `http://<ingress address>/content-N/` - see `content.ingress.exposedContents` in
 [values.yaml](values.yaml)
 
-## Upgrading IDOL version
+## Upgrading Knowledge Discovery version
 
-To upgrade to a newer version of IDOL, use a `helm upgrade` command. Note that you must provide the number of Content engines currently
+To upgrade to a newer version of Knowledge Discovery, use a `helm upgrade` command. Note that you must provide the number of Content engines currently
 deployed. For example:
 
 ```sh

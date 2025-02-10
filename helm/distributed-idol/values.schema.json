@@ -220,6 +220,10 @@
                     "type": "string",
                     "enum": ["", "Always", "IfNotPresent", "Never"]
                 },
+                "idolOemLicenseSecret": {
+                    "type": "string",
+                    "description": "Optional Secret containing OEM licensekey.dat and versionkey.dat files for licensing."
+                },
                 "http_proxy":{
                     "type": "string"
                 },
@@ -259,10 +263,10 @@
                     "$ref": "#/$defs/liveness_probe"
                 },
                 "additionalVolumes":{
-                    "type": "array"
+                    "type": ["array", "object", "null"]
                 },
                 "additionalVolumeMounts":{
-                    "type": "array"
+                   "type": ["array", "object", "null"]
                 },
                 "envConfigMap":{
                     "type": "string"
@@ -278,6 +282,10 @@
                 },
                 "resources":{
                     "$ref": "#/$defs/optional_object"
+                },
+                "workingDir":{
+                    "type": "string",
+                    "description": "Expected working directory for the container. Should only need to change this for a heavily customized image."
                 }
             },
             "required":[
@@ -286,7 +294,8 @@
                 "name",
                 "aciPort",
                 "servicePort",
-                "usingTLS"
+                "usingTLS",
+                "workingDir"
             ]
         },
         "licensing":{

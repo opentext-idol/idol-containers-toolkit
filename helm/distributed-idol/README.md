@@ -1,6 +1,6 @@
 <!--
 BEGIN COPYRIGHT NOTICE
-Copyright 2022 - 2023 Open Text.
+Copyright 2022 - 2025 Open Text.
 
 The only warranties for products and services of Open Text and its affiliates and licensors (“Open Text”) are as may be set forth in the express warranty statements accompanying such products and services. Nothing herein should be construed as constituting an additional warranty. Open Text shall not be liable for technical or editorial errors or omissions contained herein. The information contained herein is subject to change without notice.
 END COPYRIGHT NOTICE
@@ -8,7 +8,7 @@ END COPYRIGHT NOTICE
 # distributed-idol
 <!-- omit in toc -->
 
-![Version: 0.12.0](https://img.shields.io/badge/Version-0.12.0-informational?style=flat-square) ![AppVersion: 24.4.0](https://img.shields.io/badge/AppVersion-24.4.0-informational?style=flat-square)
+![Version: 0.13.0](https://img.shields.io/badge/Version-0.13.0-informational?style=flat-square) ![AppVersion: 25.1](https://img.shields.io/badge/AppVersion-25.1-informational?style=flat-square)
 
 - [Overview](#overview)
 - [Prerequisites](#prerequisites)
@@ -23,24 +23,23 @@ END COPYRIGHT NOTICE
   - [metrics-server](#metrics-server)
 - [Install](#install)
 - [Endpoints](#endpoints)
-- [Upgrading IDOL version](#upgrading-idol-version)
+- [Upgrading Knowledge Discovery version](#upgrading-knowledge-discovery-version)
 - [Uninstall](#uninstall)
-- [Requirements](#requirements)
-- [Values](#values)
 
 ## Overview
 
-A [Helm](https://helm.sh/) chart for managing deployments of distributed IDOL systems in a Kubernetes cluster.
+A [Helm](https://helm.sh/) chart for managing deployments of distributed Knowledge Discovery systems in a Kubernetes cluster.
 
 This chart deploys a DAH, DIH, and a set of Content engines that can autoscale with demand.
 The chart can deploy in mirror-mode (autoscaling to fulfil query demand) or in non-mirror mode
 (autoscaling to fulfil index demand) depending on the `setupMirrored` helm value.
 The default is non-mirror mode.
 
-> Full documentation for the IDOL components is available from
-> - https://www.microfocus.com/documentation/idol/IDOL_24_4/Content_24.4_Documentation/Help/
-> - https://www.microfocus.com/documentation/idol/IDOL_24_4/DAH_24.4_Documentation/Help/
-> - https://www.microfocus.com/documentation/idol/IDOL_24_4/DIH_24.4_Documentation/Help/
+> Full documentation for the Knowledge Discovery components is available from
+>
+> - <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.1/Content_25.1_Documentation/Help/>
+> - <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.1/DAH_25.1_Documentation/Help/>
+> - <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.1/DIH_25.1_Documentation/Help/>
 
 ## Prerequisites
 
@@ -75,7 +74,7 @@ kubectl create secret docker-registry dockerhub-secret
     --docker-password=${DOCKERHUB_APITOKEN}
 ```
 
-In practice (at present), access to the IDOL images on dockerhub is restricted to the user `microfocusidolreadonly`, so this will be the
+In practice (at present), access to the Knowledge Discovery images on dockerhub is restricted to the user `microfocusidolreadonly`, so this will be the
 value of `${DOCKERHUB_USER}` in the example.
 
 If a different name is required for this Kubernetes secret, override the `global.imagePullSecrets` list value.
@@ -86,7 +85,7 @@ There are some values that are optional or sometimes overriden:
 
 - `global.http_proxy`/`global.https_proxy`: the URL of a proxy that the installation will have to use to access the external internet. If not set, no http proxying
   is configured.
-- If a private repository is specified for pulling the IDOL images (e.g. by overriding `global.idolImageRegistry`) then `global.imagePullSecrets` will also
+- If a private repository is specified for pulling the Knowledge Discovery images (e.g. by overriding `global.idolImageRegistry`) then `global.imagePullSecrets` will also
   require the name of a Kubernetes secret holding the credentials for pulling from this private repository.
 
 ## Cluster requirements
@@ -108,10 +107,10 @@ This system uses [Storage Classes](https://kubernetes.io/docs/concepts/storage/s
 > Note: uninstalling does not delete the PersistentVolumeClaims. If you redeploy the helm chart, it reuses any existing PV or PVCs.
 
 | [values.yaml](values.yaml)        | default value              | purpose
-| ---                               | ---                        | --- |
-| content.contentStorageClass       | idol-content-storage-class | Content component index and configuration |
-| dih.dihStorageClass               | idol-dih-storage-class     | DIH component data and configuration |
-| content.backupArchiveStorageClass | idol-backup-archive-sc     | mirror-mode Content backups. See [backupArchiveStorageClass](#backuparchivestorageclass) |
+| ---                               | ---                        | ---
+| content.contentStorageClass       | idol-content-storage-class | Content component index and configuration
+| dih.dihStorageClass               | idol-dih-storage-class     | DIH component data and configuration
+| content.backupArchiveStorageClass | idol-backup-archive-sc     | mirror-mode Content backups. See [backupArchiveStorageClass](#backuparchivestorageclass)
 
 #### backupArchiveStorageClass
 
@@ -149,9 +148,9 @@ After you have deployed the helm chart, you can access the following endpoints t
 You can optionally expose individual Content engine ACI ports at `http://<ingress address>/content-N/` - see `content.ingress.exposedContents` in
 [values.yaml](values.yaml)
 
-## Upgrading IDOL version
+## Upgrading Knowledge Discovery version
 
-To upgrade to a newer version of IDOL, use a `helm upgrade` command. Note that you must provide the number of Content engines currently
+To upgrade to a newer version of Knowledge Discovery, use a `helm upgrade` command. Note that you must provide the number of Content engines currently
 deployed. For example:
 
 ```sh
@@ -188,8 +187,8 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | https://kubernetes-sigs.github.io/metrics-server | metrics-server | 3.8.2 |
 | https://prometheus-community.github.io/helm-charts | prometheus | 25.0 |
 | https://prometheus-community.github.io/helm-charts | prometheus-adapter | 4.2.0 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.14.3 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | 0.4.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | ~0.15.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | ~0.4.0 |
 
 ## Values
 
@@ -216,10 +215,10 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | autoscaling.minReplicas | string | `"2"` | Minimum number of Content instances. Ignored in non-mirror-mode |
 | autoscaling.targetAverageCpuUse | string | `"500m"` | Target CPU use of the Content instances. See metrics.containerResource.target.averageValue in https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/horizontal-pod-autoscaler-v2beta2/#HorizontalPodAutoscalerSpec Used in mirror mode |
 | content.aciPort | string | `"9100"` | port service will serve ACI connections on |
-| content.additionalVolumeMounts | list | `[]` | Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1) |
-| content.additionalVolumes | list | `[]` | Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes) |
+| content.additionalVolumeMounts | string | `nil` | Additional PodSpec VolumeMount(s) (see <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1>) Can be dict of (name, VolumeMount), or list of (VolumeMount). dict form allows for merging definitions from multiple values files. |
+| content.additionalVolumes | string | `nil` | Additional PodSpec Volume(s) (see <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes>) Can be dict of (name, Volume), or list of (Volume). dict form allows for merging definitions from multiple values files. |
 | content.backupArchiveStorageClass | string | `"idol-backup-archive-sc"` | Name of the storage class used to provision the persistent volume for the mirror-mode Content engine backups and index command archive. It is available to all Content engines. It must support the ReadWriteMany AccessMode: https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes |
-| content.containerSecurityContext | object | `{"enabled":false}` | Optional SecurityContext for container (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#securitycontext-v1-core) |
+| content.containerSecurityContext | object | `{"enabled":false,"privileged":false,"runAsNonRoot":true}` | Optional SecurityContext for container (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#securitycontext-v1-core) |
 | content.containerSecurityContext.enabled | bool | `false` | enable SecurityContext for container. Setting to false omits. |
 | content.contentStorageClass | string | `"idol-content-storage-class"` | Name of the storage class used to provision a PersistentVolume for each Content instance. The associated PVCs are named index-{name}-{pod number} |
 | content.contentVolumeSize | string | `"16Gi"` | Size of the PersistentVolumeClaim that is created for each Content instance. The Kubernetes cluster will need to provide enough PersistentVolumes to satisfy the claims made for the desired number of Content instances. The size chosen here provides a hard limit on the size of the Content index in each Content instance. |
@@ -228,7 +227,7 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | content.idolImage.imagePullPolicy | string | `"IfNotPresent"` | used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) |
 | content.idolImage.registry | string | `"microfocusidolserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | content.idolImage.repo | string | `"content"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
-| content.idolImage.version | string | `"24.4"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
+| content.idolImage.version | string | `"25.1"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | content.indexPort | string | `"9101"` | port service will serve index connections on |
 | content.ingress.annotations | object | `{}` | Ingress controller specific annotations Some annotations are added automatically based on ingress.type and other values, but can  be overridden/augmented here e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations |
 | content.ingress.className | string | `""` | Optional parameter to override the default ingress class |
@@ -254,17 +253,18 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | content.resources.enabled | bool | `false` | enable resources for container. Setting to false omits. |
 | content.servicePort | string | `"9102"` | port service will serve service connections on |
 | content.usingTLS | bool | `false` | whether aci/service/index ports are configured to use TLS (https). If configuring for TLS, then consider setting IDOL_SSL_COMPONENT_CERT_PATH and IDOL_SSL_COMPONENT_KEY_PATH in envConfigMap to provide required TLS certificates |
+| content.workingDir | string | `"/content"` | Expected working directory for the container. Should only need to change this for a heavily customized image. |
 | dah.aciPort | string | `"9060"` | port service will serve ACI connections on |
-| dah.additionalVolumeMounts | list | `[]` | Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1) |
-| dah.additionalVolumes | list | `[]` | Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes) |
-| dah.containerSecurityContext | object | `{"enabled":false}` | Optional SecurityContext for container (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#securitycontext-v1-core) |
+| dah.additionalVolumeMounts | string | `nil` | Additional PodSpec VolumeMount(s) (see <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1>) Can be dict of (name, VolumeMount), or list of (VolumeMount). dict form allows for merging definitions from multiple values files. |
+| dah.additionalVolumes | string | `nil` | Additional PodSpec Volume(s) (see <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes>) Can be dict of (name, Volume), or list of (Volume). dict form allows for merging definitions from multiple values files. |
+| dah.containerSecurityContext | object | `{"enabled":false,"privileged":false,"runAsNonRoot":true}` | Optional SecurityContext for container (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#securitycontext-v1-core) |
 | dah.containerSecurityContext.enabled | bool | `false` | enable SecurityContext for container. Setting to false omits. |
 | dah.envConfigMap | string | `""` | Optional configMap name holding extra environment variables for dah container |
 | dah.existingConfigMap | string | `""` | Optional configMap expected to provide dah.cfg |
 | dah.idolImage.imagePullPolicy | string | `"IfNotPresent"` | used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) |
 | dah.idolImage.registry | string | `"microfocusidolserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | dah.idolImage.repo | string | `"dah"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
-| dah.idolImage.version | string | `"24.4"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
+| dah.idolImage.version | string | `"25.1"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | dah.ingress.annotations | object | `{}` | Ingress controller specific annotations Some annotations are added automatically based on ingress.type and other values, but can  be overridden/augmented here e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations |
 | dah.ingress.className | string | `""` | Optional parameter to override the default ingress class |
 | dah.ingress.enabled | bool | `true` | Create ingress resource |
@@ -285,10 +285,11 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | dah.resources.enabled | bool | `false` | enable resources for container. Setting to false omits. |
 | dah.servicePort | string | `"9062"` | port service will serve service connections on |
 | dah.usingTLS | bool | `false` | whether aci/service/index ports are configured to use TLS (https). If configuring for TLS, then consider setting IDOL_SSL_COMPONENT_CERT_PATH and IDOL_SSL_COMPONENT_KEY_PATH in envConfigMap to provide required TLS certificates |
+| dah.workingDir | string | `"/dah"` | Expected working directory for the container. Should only need to change this for a heavily customized image. |
 | dih.aciPort | string | `"9070"` | port service will serve ACI connections on |
-| dih.additionalVolumeMounts | list | `[]` | Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1) |
-| dih.additionalVolumes | list | `[]` | Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes) |
-| dih.containerSecurityContext | object | `{"enabled":false}` | Optional SecurityContext for container (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#securitycontext-v1-core) |
+| dih.additionalVolumeMounts | string | `nil` | Additional PodSpec VolumeMount(s) (see <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1>) Can be dict of (name, VolumeMount), or list of (VolumeMount). dict form allows for merging definitions from multiple values files. |
+| dih.additionalVolumes | string | `nil` | Additional PodSpec Volume(s) (see <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes>) Can be dict of (name, Volume), or list of (Volume). dict form allows for merging definitions from multiple values files. |
+| dih.containerSecurityContext | object | `{"enabled":false,"privileged":false,"runAsNonRoot":true}` | Optional SecurityContext for container (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#securitycontext-v1-core) |
 | dih.containerSecurityContext.enabled | bool | `false` | enable SecurityContext for container. Setting to false omits. |
 | dih.dihStorageClass | string | `"idol-dih-storage-class"` | Name of the storage class used to provision the persistent volume for the dih configuration and data The associated PVC is named dih-persistent-storage-<name>-0 |
 | dih.envConfigMap | string | `""` | Optional configMap name holding extra environment variables for dah container |
@@ -296,7 +297,7 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | dih.idolImage.imagePullPolicy | string | `"IfNotPresent"` | used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) |
 | dih.idolImage.registry | string | `"microfocusidolserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | dih.idolImage.repo | string | `"dih"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
-| dih.idolImage.version | string | `"24.4"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
+| dih.idolImage.version | string | `"25.1"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | dih.indexPort | string | `"9071"` | port service will serve index connections on |
 | dih.ingress.annotations | object | `{}` | Ingress controller specific annotations Some annotations are added automatically based on ingress.type and other values, but can  be overridden/augmented here e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations |
 | dih.ingress.className | string | `""` | Optional parameter to override the default ingress class |
@@ -318,6 +319,7 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | dih.resources.enabled | bool | `false` | enable resources for container. Setting to false omits. |
 | dih.servicePort | string | `"9072"` | port service will serve service connections on |
 | dih.usingTLS | bool | `false` | whether aci/service/index ports are configured to use TLS (https). If configuring for TLS, then consider setting IDOL_SSL_COMPONENT_CERT_PATH and IDOL_SSL_COMPONENT_KEY_PATH in envConfigMap to provide required TLS certificates |
+| dih.workingDir | string | `"/dih"` | Expected working directory for the container. Should only need to change this for a heavily customized image. |
 | idol-licenseserver.enabled | bool | `false` | create a cluster service proxying to a LicenseServer instance |
 | idol-licenseserver.licenseServerIp | string | `"this must be set to a valid IP address"` | IP address of LicenseServer instance |
 | indexserviceName | string | `"idol-index-service"` | internal parameter to specify the index service name. |
@@ -328,7 +330,7 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | prometheus | object | Default configuration to support `distributed-idol` autoscaling. See values.yaml for details. | `prometheus` sub-chart configuration Required for auto-scaling on custom metrics (e.g. dih fullness) See https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus |
 | prometheus-adapter | object | Default configuration to support `idol-nifi` autoscaling. See values.yaml for details. | `prometheus-adapter` sub-chart configuration Required for auto-scaling on custom metrics (e.g. dih fullness See https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-adapter |
 | queryserviceName | string | `"idol-query-service"` | internal parameter to specify the query service name. |
-| setupMirrored | bool | `false` | When `true` this will configure the  DAH and DIH in mirror-mode, meaning the Contents will all be mirrors of each other. When `false`, the DAH and DIH will be configured in non-mirror mode, meaning that documents will be distributed between the content engines. In mirror-mode, the Content engines will autoscale to fulfil query demand. In non-mirror-mode, Content engines will autoscale to fulfil index demand. See https://www.microfocus.com/documentation/idol/IDOL_12_12/DAH_12.12_Documentation/Help/#Configuration/Server/MirrorMode.htm?TocPath=Configuration%2520Parameters%257CServer%257C_____38 and https://www.microfocus.com/documentation/idol/IDOL_12_12/DIH_12.12_Documentation/Help/#Configuration/Server/MirrorMode.htm?TocPath=Configuration%2520Parameters%257CServer%257C_____38 |
+| setupMirrored | bool | `false` | When `true` this will configure the  DAH and DIH in mirror-mode, meaning the Contents will all be mirrors of each other. When `false`, the DAH and DIH will be configured in non-mirror mode, meaning that documents will be distributed between the content engines. In mirror-mode, the Content engines will autoscale to fulfil query demand. In non-mirror-mode, Content engines will autoscale to fulfil index demand. See <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.1/DAH_25.1_Documentation/Help/Content/Configuration/Server/MirrorMode.htm> and <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.1/DIH_25.1_Documentation/Help/Content/Configuration/Server/MirrorMode.htm> |
 
 ----------------------------------------------
 Autogenerated from chart metadata using [helm-docs v1.14.2](https://github.com/norwoodj/helm-docs/releases/v1.14.2)

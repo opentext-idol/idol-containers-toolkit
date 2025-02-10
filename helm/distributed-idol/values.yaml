@@ -1,5 +1,12 @@
 # BEGIN COPYRIGHT NOTICE
-# (c) Copyright 2022-2023 Micro Focus or one of its affiliates.
+# Copyright 2022-2025 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
 # END COPYRIGHT NOTICE
 
 # As per https://helm.sh/docs/topics/charts/#the-chart-file-structure
@@ -17,8 +24,8 @@
 # meaning that documents will be distributed between the content engines.
 # In mirror-mode, the Content engines will autoscale to fulfil query demand.
 # In non-mirror-mode, Content engines will autoscale to fulfil index demand.
-# See https://www.microfocus.com/documentation/idol/IDOL_12_12/DAH_12.12_Documentation/Help/#Configuration/Server/MirrorMode.htm?TocPath=Configuration%2520Parameters%257CServer%257C_____38
-# and https://www.microfocus.com/documentation/idol/IDOL_12_12/DIH_12.12_Documentation/Help/#Configuration/Server/MirrorMode.htm?TocPath=Configuration%2520Parameters%257CServer%257C_____38
+# See <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.1/DAH_25.1_Documentation/Help/Content/Configuration/Server/MirrorMode.htm>
+# and <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.1/DIH_25.1_Documentation/Help/Content/Configuration/Server/MirrorMode.htm>
 setupMirrored: false
 
 #############################################
@@ -88,7 +95,7 @@ content:
     # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
     registry: "microfocusidolserver"
     # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
-    version: "24.4"
+    version: "25.1"
     # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
     repo: "content"
     # -- used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy)
@@ -138,11 +145,13 @@ content:
   # -- Optional configMap mounted at /etc/config/idol and expected to provide content.cfg and content_primary.cfg
   existingConfigMap: ""
 
-  # -- Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
-  additionalVolumes: []
+  # -- Additional PodSpec Volume(s) (see <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes>)
+  # Can be dict of (name, Volume), or list of (Volume). dict form allows for merging definitions from multiple values files.
+  additionalVolumes: null
 
-  # -- Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1)
-  additionalVolumeMounts: []
+  # -- Additional PodSpec VolumeMount(s) (see <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1>)
+  # Can be dict of (name, VolumeMount), or list of (VolumeMount). dict form allows for merging definitions from multiple values files.
+  additionalVolumeMounts: null
 
   # -- Optional configMap name holding extra environment variables for content container
   envConfigMap: ""
@@ -159,6 +168,8 @@ content:
   containerSecurityContext:
     # -- enable SecurityContext for container. Setting to false omits.
     enabled: false
+    privileged: false
+    runAsNonRoot: true
 
   # -- Optional resources for container (see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers)
   resources:
@@ -244,12 +255,16 @@ content:
   # -- used to name statefulset, service, ingress
   name: "idol-content"
 
+  # -- Expected working directory for the container.
+  # Should only need to change this for a heavily customized image.
+  workingDir: "/content"
+
 dah:
   idolImage:
     # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
     registry: "microfocusidolserver"
     # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
-    version: "24.4"
+    version: "25.1"
     # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
     repo: "dah"
     # -- used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy)
@@ -263,11 +278,13 @@ dah:
   # -- Optional configMap expected to provide dah.cfg
   existingConfigMap: ""
 
-  # -- Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
-  additionalVolumes: []
+  # -- Additional PodSpec Volume(s) (see <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes>)
+  # Can be dict of (name, Volume), or list of (Volume). dict form allows for merging definitions from multiple values files.
+  additionalVolumes: null
 
-  # -- Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1)
-  additionalVolumeMounts: []
+  # -- Additional PodSpec VolumeMount(s) (see <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1>)
+  # Can be dict of (name, VolumeMount), or list of (VolumeMount). dict form allows for merging definitions from multiple values files.
+  additionalVolumeMounts: null
 
   # -- Optional configMap name holding extra environment variables for dah container
   envConfigMap: ""
@@ -284,6 +301,8 @@ dah:
   containerSecurityContext:
     # -- enable SecurityContext for container. Setting to false omits.
     enabled: false
+    privileged: false
+    runAsNonRoot: true
 
   # -- Optional resources for container (see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers)
   resources:
@@ -367,12 +386,16 @@ dah:
   # -- used to name statefulset, service, ingress
   name: "idol-dah"
 
+  # -- Expected working directory for the container.
+  # Should only need to change this for a heavily customized image.
+  workingDir: "/dah"
+
 dih:
   idolImage:
     # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
     registry: "microfocusidolserver"
     # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
-    version: "24.4"
+    version: "25.1"
     # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
     repo: "dih"
     # -- used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy)
@@ -388,11 +411,13 @@ dih:
   # -- Optional configMap expected to provide dih.cfg
   existingConfigMap: ""
 
-  # -- Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
-  additionalVolumes: []
+  # -- Additional PodSpec Volume(s) (see <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes>)
+  # Can be dict of (name, Volume), or list of (Volume). dict form allows for merging definitions from multiple values files.
+  additionalVolumes: null
 
-  # -- Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1)
-  additionalVolumeMounts: []
+  # -- Additional PodSpec VolumeMount(s) (see <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1>)
+  # Can be dict of (name, VolumeMount), or list of (VolumeMount). dict form allows for merging definitions from multiple values files.
+  additionalVolumeMounts: null
 
   # -- Optional configMap name holding extra environment variables for dah container
   envConfigMap: ""
@@ -409,6 +434,8 @@ dih:
   containerSecurityContext:
     # -- enable SecurityContext for container. Setting to false omits.
     enabled: false
+    privileged: false
+    runAsNonRoot: true
 
   # -- Optional resources for container (see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers)
   resources:
@@ -496,6 +523,10 @@ dih:
 
   # -- used to name statefulset, service, ingress
   name: &dih-name "idol-dih"
+
+  # -- Expected working directory for the container.
+  # Should only need to change this for a heavily customized image.
+  workingDir: "/dih"
 
   # @ignore
   prometheusPort: "9118"
