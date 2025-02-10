@@ -7,12 +7,13 @@
 {{- $appVersion := .AppVersion }}
 {{- $versionList := slice (splitList "." $appVersion) 0 2 }}
 
-{{- $docsLink := printf "https://www.microfocus.com/documentation/idol/IDOL_%s/%s_%s_Documentation/Help/" (join "_" $versionList ) $component (join "." $versionList) }}
+{{- $docsLink := printf "<https://www.microfocus.com/documentation/idol/knowledge-discovery-%s/%s_%s_Documentation/Help/>" 
+    (join "." $versionList ) $component (join "." $versionList) }}
 
-Provides an IDOL {{ $component }} statefulset.
+Provides a Knowledge Discovery {{ $component }} statefulset.
 
 Provides `idol-query-service` and `idol-index-service` Service objects, backed by
-a single IDOL Content instance. Intended as a much lighter-weight alternative to
+a single Knowledge Discovery Content instance. Intended as a much lighter-weight alternative to
 the `distributed-idol` chart, for use in testing charts that expect one or both
 of these endpoints to exist in the cluster.
 

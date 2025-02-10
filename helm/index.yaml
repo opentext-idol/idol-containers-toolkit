@@ -2256,6 +2256,23 @@ entries:
     version: 0.1.0
   single-content:
   - apiVersion: v2
+    appVersion: "25.1"
+    created: "2025-02-10T15:56:28.093489524Z"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: ~0.15.0
+    - condition: idol-licenseserver.enabled
+      name: idol-licenseserver
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: ~0.4.0
+    description: A configurable single-IDOL setup
+    digest: 516842ca15cfc65c787abdede36b18718dd172b399d799cec8b6ce9da6fe16ce
+    name: single-content
+    urls:
+    - release/single-content-0.11.0.tgz
+    version: 0.11.0
+  - apiVersion: v2
     appVersion: "24.4"
     created: "2024-10-09T11:59:10.556624375+01:00"
     dependencies:
@@ -2476,4 +2493,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2025-02-10T14:01:24.848135027Z"
+generated: "2025-02-10T15:56:28.090767116Z"
