@@ -3,7 +3,14 @@
 
 {{ template "chart.badgesSection" . }}
 
-Provides an IDOL OmniGroupServer deployment.
+{{- $component := "OmniGroupServer" }}
+{{- $appVersion := .AppVersion }}
+{{- $versionList := slice (splitList "." $appVersion) 0 2 }}
+
+{{- $docsLink := printf "https://www.microfocus.com/documentation/idol/knowledge-discovery-%s/%s_%s_Documentation/Help/"
+  (join "." $versionList ) $component (join "." $versionList) }}
+
+Provides an Knowledge Discovery OmniGroupServer deployment.
 
 Whilst this can be deployed 'as-is', it is expected that a real deployment will
 require configuration particular to the repositories the OGS instance needs to
@@ -12,7 +19,7 @@ provide user/group information for.
 Consumers of this chart are encouraged to use this as a subchart, providing an
 additional config-map with the OGS config file - see `.Values.existingConfigMap`
 
-> Full documentation for OmniGroupServer available from https://www.microfocus.com/documentation/idol/IDOL_23_4/OmniGroupServer_23.4_Documentation/Help/index.html
+> Full documentation for OmniGroupServer available from <{{ $docsLink }}>
 
 {{ template "chart.homepageLine" . }}
 
@@ -26,7 +33,8 @@ additional config-map with the OGS config file - see `.Values.existingConfigMap`
 
 If `oauthToolConfigMap` is set to a non-empty string, then the OmniGroupServer pod will
 attempt to automatically generate any missing OAuth configuration at Prestart.
-1. The Prestart script will detect any [External Configuration File Includes](https://www.microfocus.com/documentation/idol/IDOL_24_1/OmniGroupServer_24.1_Documentation/Help/Content/Configuration/_ACI_Config_Intro.htm#Include-an-Exter)
+
+1. The Prestart script will detect any [External Configuration File Includes]({{ $docsLink }}Content/Configuration/_ACI_Config_Intro.htm#Include-an-Exter)
    of the "Merge a section of an external configuration file into a specified section with a different name" form,
    where the `SharedSection` is "OAUTH".
 2. For each matching external configuration section include in the OmniGroupServer configuration, if the
@@ -36,6 +44,7 @@ attempt to automatically generate any missing OAuth configuration at Prestart.
    specified by `SectionName` in the external configuration section include.
 
 ### Constraints
+
 1. The required file path (referred to as `ConfigurationFile.cfg` in the linked documentation) MUST NOT
    be `/omnigroupserver/oauth.cfg`.
 2. The oauth_tool workflow MUST NOT require user interaction. Some OAuth providers require user interaction in
