@@ -3,18 +3,19 @@
 
 {{ template "chart.badgesSection" . }}
 
-{{- $component := "answerserver" }}
+{{- $component := "AnswerServer" }}
 {{- $appVersion := .AppVersion }}
 {{- $versionList := slice (splitList "." $appVersion) 0 2 }}
 
-{{- $docsLink := printf "https://www.microfocus.com/documentation/idol/IDOL_%s/%s_%s_Documentation/Help/" (join "_" $versionList ) $component (join "." $versionList) }}
+{{- $docsLink := printf "https://www.microfocus.com/documentation/idol/knowledge-discovery-%s/%s_%s_Documentation/Help/" 
+  (join "." $versionList ) $component (join "." $versionList) }}
 
-Provides an IDOL {{ $component }} deployment.
+Provides a Knowledge Discovery {{ $component }} deployment.
 
 Depends on connections to:
 
-- IDOL LicenseServer (`licenseServerHostname`)
-- IDOL Content/Agentstore (`answerBankAgentstoreHostname`, `answerBankAgentstorePort`, `passageExtractorHostname`, `passageExtractorPort`, `passageExtractorAgentstoreHostname`, `passageExtractorAgentstorePort`)
+- Knowledge Discovery LicenseServer (`licenseServerHostname`)
+- Knowledge Discovery Content/Agentstore (`answerBankAgentstoreHostname`, `answerBankAgentstorePort`, `passageExtractorHostname`, `passageExtractorPort`, `passageExtractorAgentstoreHostname`, `passageExtractorAgentstorePort`)
 
 The config file can be overridden via `existingConfigMap`.
 
@@ -25,7 +26,7 @@ and `idol-query-service` services. These systems are all optional and can be dis
 To use a passageextractorLLM system, you must first set up a persistent volume and index the appropriate model
 files, then redeploy the chart with LLM configuration information in your answerserver configuration file. 
 
-> Full documentation for answerserver available from {{ $docsLink }}
+> Full documentation for AnswerServer available from <{{ $docsLink }}>
 
 {{ template "chart.homepageLine" . }}
 

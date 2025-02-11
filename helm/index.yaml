@@ -268,6 +268,37 @@ entries:
     version: 0.2.0
   idol-answerserver:
   - apiVersion: v2
+    appVersion: "25.1"
+    created: "2025-02-11T15:22:55.668811957Z"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: ~0.15.0
+    - alias: passageextractorAgentstore
+      condition: passageextractorAgentstore.enabled
+      name: single-content
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: ~0.11.0
+    - alias: answerbankAgentstore
+      condition: answerbankAgentstore.enabled
+      name: single-content
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: ~0.11.0
+    - condition: single-content.enabled
+      name: single-content
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: ~0.11.0
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 13.2.3
+    description: Adds Knowledge Discovery AnswerServer
+    digest: 0abb09723a8e2364b3d7ce535cc4503bf2d350db7795c09128c9af4eddf2fd5f
+    name: idol-answerserver
+    urls:
+    - release/idol-answerserver-0.5.0.tgz
+    version: 0.5.0
+  - apiVersion: v2
     appVersion: "24.4"
     created: "2024-12-20T16:48:07.046721981Z"
     dependencies:
@@ -2595,4 +2626,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2025-02-11T15:05:06.776680146Z"
+generated: "2025-02-11T15:22:55.64941893Z"

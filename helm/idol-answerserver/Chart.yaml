@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2024 Open Text.
+# Copyright 2024-2025 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -10,26 +10,26 @@
 # END COPYRIGHT NOTICE
 apiVersion: v2
 name: idol-answerserver
-version: "0.4.3"
-appVersion: "24.4"
-description: Adds IDOL AnswerServer
+version: "0.5.0"
+appVersion: "25.1"
+description: Adds Knowledge Discovery AnswerServer
 dependencies:
 - name: idol-library
-  version: "0.14.2"
+  version: ~0.15.0
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 - name: single-content
   alias: "passageextractorAgentstore"
   condition: passageextractorAgentstore.enabled
-  version: "0.10.2"
+  version: ~0.11.0
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 - name: single-content
   alias: "answerbankAgentstore"
   condition: answerbankAgentstore.enabled
-  version: "0.10.2"
+  version: ~0.11.0
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 - name: single-content
   condition: single-content.enabled
-  version: "0.10.2"
+  version: ~0.11.0
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 - name: postgresql
   condition: postgresql.enabled
