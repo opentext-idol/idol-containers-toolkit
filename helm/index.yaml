@@ -2201,6 +2201,19 @@ entries:
     version: 0.1.0
   idol-view:
   - apiVersion: v2
+    appVersion: "25.1"
+    created: "2025-02-11T14:25:55.995028034Z"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: ~0.15.0
+    description: Adds Knowledge Discovery View
+    digest: 9da8070d235e30f57c6d600c457f54cf9f0c959ffd546ddb235c8d349a27713e
+    name: idol-view
+    urls:
+    - release/idol-view-0.7.0.tgz
+    version: 0.7.0
+  - apiVersion: v2
     appVersion: "24.4"
     created: "2024-10-09T13:51:12.374462084+01:00"
     dependencies:
@@ -2543,4 +2556,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2025-02-11T12:55:17.260595418Z"
+generated: "2025-02-11T14:25:55.992991286Z"
