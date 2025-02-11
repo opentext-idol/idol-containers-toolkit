@@ -707,6 +707,19 @@ entries:
     version: 0.1.0
   idol-eductionserver:
   - apiVersion: v2
+    appVersion: "25.1"
+    created: "2025-02-11T15:57:39.86408248Z"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: ~0.15.0
+    description: Adds Knowledge Discovery Eduction Server
+    digest: 806a73f9d6580ad26db459237b287a015c93bf09050d38e6335240716febba4c
+    name: idol-eductionserver
+    urls:
+    - release/idol-eductionserver-0.6.0.tgz
+    version: 0.6.0
+  - apiVersion: v2
     appVersion: "24.4"
     created: "2024-10-09T13:51:12.339646397+01:00"
     dependencies:
@@ -2639,4 +2652,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2025-02-11T15:43:31.306739997Z"
+generated: "2025-02-11T15:57:39.862089004Z"

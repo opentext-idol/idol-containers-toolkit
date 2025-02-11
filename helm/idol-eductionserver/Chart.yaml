@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2024 Open Text.
+# Copyright 2024-2025 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -10,10 +10,10 @@
 # END COPYRIGHT NOTICE
 apiVersion: v2
 name: idol-eductionserver
-version: "0.5.2"
-appVersion: "24.4"
-description: Adds IDOL Eduction Server
+version: "0.6.0"
+appVersion: "25.1"
+description: Adds Knowledge Discovery Eduction Server
 dependencies:
 - name: idol-library
-  version: "0.14.2"
+  version: ~0.15.0
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
