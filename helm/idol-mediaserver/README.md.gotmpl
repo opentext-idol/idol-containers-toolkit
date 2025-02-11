@@ -7,21 +7,22 @@
 {{- $appVersion := .AppVersion }}
 {{- $versionList := slice (splitList "." $appVersion) 0 2 }}
 
-{{- $docsLink := printf "https://www.microfocus.com/documentation/idol/IDOL_%s/%s_%s_Documentation/Help/" (join "_" $versionList ) $component (join "." $versionList) }}
+{{- $docsLink := printf "https://www.microfocus.com/documentation/idol/knowledge-discovery-%s/%s_%s_Documentation/Help/"
+  (join "." $versionList ) $component (join "." $versionList) }}
 
-Provides an IDOL {{ $component }} deployment.
+Provides a Knowledge Discovery {{ $component }} deployment.
 
 Default configuration is to provide OCR and STT functionality.
 
 Depends on connections to:
 
-- IDOL LicenseServer (`licenseServerHostname`)
+- Knowledge Discovery LicenseServer (`licenseServerHostname`)
 
 The config file can be overridden via `existingConfigMap`.
 
 This chart may be used to provide optical class recognition and speech-to-text functionality.
 
-> Full documentation for MediaServer available from {{ $docsLink }}
+> Full documentation for MediaServer available from <{{ $docsLink }}>
 
 {{ template "chart.homepageLine" . }}
 
