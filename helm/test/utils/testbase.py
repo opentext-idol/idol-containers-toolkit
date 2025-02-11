@@ -30,15 +30,15 @@ class HelmChartTestBase():
         return self.default_values()['name']
 
     def workloads(self, objs, names):
-        found = False
+        found = {}
         for t in ['Deployment','StatefulSet']:
             if t not in self.kinds:
                 continue
             for name, workload in objs[t].items():
                 if name in names:
-                    found = True
+                    found[name] = True
                     yield t, workload
-        self.assertTrue(found, f'No workload(s) found for {names}')
+        self.assertEqual(set(found.keys()), set(names), f'Workloads missing from {names}')
 
     def check_tls(self, objs, names):
         '''
@@ -134,9 +134,9 @@ class HelmChartTestBase():
         ''' containerSecurityContext and podSecurityContext render correctly when used '''
         self.check_security_context()
 
-    def check_additionalVolumes_array(self, name=None):
-        if None==name:
-            name = self.name()
+    def check_additionalVolumes_array(self, names=None):
+        if None==names:
+            names = [self.name()]
         vols = [
             { 'name': 'extra', 'configMap': {'name': 'extra'} }
         ]
@@ -144,9 +144,7 @@ class HelmChartTestBase():
             { 'name': 'extra', 'mountPath': 'extra' }
         ]
         objs = self.render_chart({'additionalVolumes': vols, 'additionalVolumeMounts': mounts })
-        workloads = [ o for k,o in self.workloads(objs, [name]) ]
-        self.assertGreater(len(workloads), 0, f'no workloads found for {name}')
-        for obj in workloads:
+        for k,obj in self.workloads(objs, names):
             volumeMounts = obj['spec']['template']['spec']['containers'][0]['volumeMounts']
             for mount in mounts:
                 self.assertIn(mount, volumeMounts)
@@ -154,9 +152,9 @@ class HelmChartTestBase():
             for vol in vols:
                 self.assertIn(vol, volumes)
 
-    def check_additionalVolumes_dict(self, name=None):
-        if None==name:
-            name = self.name()
+    def check_additionalVolumes_dict(self, names=None):
+        if None==names:
+            names = [self.name()]
         vols = {
             'extra': { 'name': 'extra', 'configMap': {'name': 'extra'} },
             'extraNull': None, # null ignored
@@ -171,9 +169,7 @@ class HelmChartTestBase():
             'extraDeleted': { 'name': 'extraDeleted', 'mountPath': 'extra', 'DELETE': True } # DELETE marks should be ignored
         }
         objs = self.render_chart({'additionalVolumes': vols, 'additionalVolumeMounts': mounts })
-        workloads = [ o for k,o in self.workloads(objs, [name]) ]
-        self.assertGreater(len(workloads), 0, f'no workloads found for {name}')
-        for obj in workloads:
+        for k,obj in self.workloads(objs, names):
             volumeMounts = obj['spec']['template']['spec']['containers'][0]['volumeMounts']
             self.assertIn(mounts['extra'], volumeMounts)
             for omit in ['extraNull','extraEmpty', 'extraDeleted']:

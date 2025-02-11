@@ -108,6 +108,35 @@ class TestDistributedIdol(unittest.TestCase, HelmChartTestBase):
             'dah':{t: self.security_context_value() for t in ['podSecurityContext','containerSecurityContext']},
             'content':{t: self.security_context_value() for t in ['podSecurityContext','containerSecurityContext']},
         })
+    
+    def check_additionalVolumes(self, use_dict):
+        vols = [
+            { 'name': 'extra', 'configMap': {'name': 'extra'} }
+        ]
+        mounts = [
+            { 'name': 'extra', 'mountPath': 'extra' }
+        ]
+        if use_dict:
+            objs = self.render_chart({x: {'additionalVolumes': {v['name']: v for v in vols}, 
+                                        'additionalVolumeMounts': {m['name']: m for m in mounts}
+                    } for x in ['dah','dih','content']})
+        else:
+            objs = self.render_chart({x: {'additionalVolumes': vols, 
+                                        'additionalVolumeMounts': mounts,
+                    } for x in ['dah','dih','content']})
+        for k,obj in self.workloads(objs, ['idol-dah','idol-dih','idol-content']):
+            volumeMounts = obj['spec']['template']['spec']['containers'][0]['volumeMounts']
+            for mount in mounts:
+                self.assertIn(mount, volumeMounts)
+            volumes = obj['spec']['template']['spec']['volumes']
+            for vol in vols:
+                self.assertIn(vol, volumes)
+            
+    def test_additionalVolumes_array(self):
+        self.check_additionalVolumes(False)
+
+    def test_additionalVolumes_dict(self):
+        self.check_additionalVolumes(True)
 
 if __name__ == '__main__':
     unittest.main()
