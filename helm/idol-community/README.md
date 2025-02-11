@@ -1,27 +1,27 @@
 # idol-community
 
-![Version: 0.6.2](https://img.shields.io/badge/Version-0.6.2-informational?style=flat-square) ![AppVersion: 24.4](https://img.shields.io/badge/AppVersion-24.4-informational?style=flat-square)
+![Version: 0.7.0](https://img.shields.io/badge/Version-0.7.0-informational?style=flat-square) ![AppVersion: 25.1](https://img.shields.io/badge/AppVersion-25.1-informational?style=flat-square)
 
-Provides an IDOL Community deployment. By default this will provide basic user
-setup suitable to be used to login to IDOL Find.
+Provides a Knowledge Discovery Community deployment. By default this will provide basic user
+setup suitable to be used to login to Knowledge Discovery Find.
 
 Depends on connections to:
 
-- IDOL LicenseServer (`licenseServerHostname`)
-- IDOL Content/Agentstore (`queryserviceName`, `queryserviceACIPort`, `agentStoreName`, `agentStoreACIPort`)
+- Knowledge Discovery LicenseServer (`licenseServerHostname`)
+- Knowledge Discovery Content/Agentstore (`queryserviceName`, `queryserviceACIPort`, `agentStoreName`, `agentStoreACIPort`)
 
 To setup document security you will need to provide your own configuration (see `existingConfigMap`)
 and may wish to deploy alongside the _idol-omnigroupserver_ chart.
 
-> Full documentation for Community available from https://www.microfocus.com/documentation/idol/IDOL_24_4/Community_24.4_Documentation/Help/
+> Full documentation for Community available from <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.1/Community_25.1_Documentation/Help/>
 
 ## Requirements
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | 0.14.2 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | 0.4.0 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | single-content | 0.10.2 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | ~0.15.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | ~0.4.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | single-content | ~0.11.0 |
 
 ## Values
 
@@ -57,12 +57,12 @@ and may wish to deploy alongside the _idol-omnigroupserver_ chart.
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | aciPort | string | `"9030"` | port service will serve ACI connections on |
-| additionalVolumeMounts | list | `[]` | Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1) |
-| additionalVolumes | list | `[]` | Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes) |
+| additionalVolumeMounts | string | `nil` | Additional PodSpec VolumeMount(s) (see <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1>) Can be dict of (name, VolumeMount), or list of (VolumeMount). dict form allows for merging definitions from multiple values files. |
+| additionalVolumes | string | `nil` | Additional PodSpec Volume(s) (see <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes>) Can be dict of (name, Volume), or list of (Volume). dict form allows for merging definitions from multiple values files. |
 | agentStoreACIPort | string | `"9050"` | agentstore service aci port (maps to Community AgentDRE configuration). |
 | agentStoreName | string | `"idol-agentstore"` | agentstore service/hostname (maps to Community AgentDRE configuration). |
 | annotations | object | `{}` | Additional annotations applied to deployment/statefulset (https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) |
-| containerSecurityContext | object | `{"enabled":false}` | Optional SecurityContext for container (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#securitycontext-v1-core) |
+| containerSecurityContext | object | `{"enabled":false,"privileged":false,"runAsNonRoot":true}` | Optional SecurityContext for container (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#securitycontext-v1-core) |
 | containerSecurityContext.enabled | bool | `false` | enable SecurityContext for container. Setting to false omits. |
 | envConfigMap | string | `""` | Optional configMap name holding extra environnment variables for container |
 | existingConfigMap | string | `""` | if specified, mounted at /etc/config/idol and expected to provide community.cfg |
@@ -70,7 +70,7 @@ and may wish to deploy alongside the _idol-omnigroupserver_ chart.
 | idolImage.imagePullPolicy | string | `"IfNotPresent"` | used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) |
 | idolImage.registry | string | `"microfocusidolserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | idolImage.repo | string | `"community"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}. |
-| idolImage.version | string | `"24.4"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
+| idolImage.version | string | `"25.1"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | labels | object | `{}` | Additional labels applied to all objects (https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/) |
 | licenseServerHostname | string | `"idol-licenseserver"` | maps to [License] LicenseServerHost in the IDOL cfg files Should point to a resolvable IDOL LicenseServer (or Kubernetes service abstraction - see the idol-licenseserver chart) |
 | licenseServerPort | string | `"20000"` | the ACI port of the IDOL LicenseServer (or abstraction) |
@@ -87,6 +87,7 @@ and may wish to deploy alongside the _idol-omnigroupserver_ chart.
 | servicePort | string | `"9032"` | port service will serve service connections on |
 | single-content.enabled | bool | `false` | whether to deploy the single-content sub-chart.  You may use this to get a basic Community running by setting the agentStoreName/agentStoreACIPort to the queryserviceName/queryserviceACIPort values. |
 | usingTLS | bool | `false` | whether aci/service/index ports are configured to use TLS (https). If configuring for TLS, then consider setting IDOL_SSL_COMPONENT_CERT_PATH and IDOL_SSL_COMPONENT_KEY_PATH in envConfigMap to provide required TLS certificates |
+| workingDir | string | `"/community"` | Expected working directory for the container. Should only need to change this for a heavily customized image. |
 
 ----------------------------------------------
 Autogenerated from chart metadata using [helm-docs v1.14.2](https://github.com/norwoodj/helm-docs/releases/v1.14.2)
