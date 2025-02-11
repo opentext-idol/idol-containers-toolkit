@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2024 Open Text.
+# Copyright 2024-2025 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -36,7 +36,7 @@ idolImage:
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
   registry: "microfocusidolserver"
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
-  version: "24.4"
+  version: "25.1"
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
   repo: "qms"
   # -- used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy)
@@ -61,11 +61,13 @@ usingTLS: false
 # -- if specified, mounted at /etc/config/idol and expected to provide qms.cfg
 existingConfigMap: ""
 
-# -- Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
-additionalVolumes: []
+# -- Additional PodSpec Volume(s) (see <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes>)
+# Can be dict of (name, Volume), or list of (Volume). dict form allows for merging definitions from multiple values files.
+additionalVolumes: null
 
-# -- Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1)
-additionalVolumeMounts: []
+# -- Additional PodSpec VolumeMount(s) (see <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1>)
+# Can be dict of (name, VolumeMount), or list of (VolumeMount). dict form allows for merging definitions from multiple values files.
+additionalVolumeMounts: null
 
 # -- Optional configMap name holding extra environnment variables for container
 envConfigMap: ""
@@ -82,6 +84,8 @@ podSecurityContext:
 containerSecurityContext:
   # -- enable SecurityContext for container. Setting to false omits.
   enabled: false
+  privileged: false
+  runAsNonRoot: true
 
 # -- Optional resources for container (see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers)
 resources:
@@ -94,7 +98,7 @@ resources:
     cpu: 1000m
     memory: 1Gi
 
-# replicas -- number of replica pods for this container (defaults to 1)
+# -- number of replica pods for this container (defaults to 1)
 replicas: 1
 
 # -- Optional serviceAccountName for the pods (https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account)
@@ -175,6 +179,11 @@ ingress:
 ##### INTERNAL VARIABLES #####
 # name -- used to name deployment, service, ingress
 name: "idol-qms"
+
+# -- Expected working directory for the container.
+# Should only need to change this for a heavily customized image.
+workingDir: "/qms"
+
 # aciPort -- port service will serve ACI connections on
 aciPort: "16000"
 # servicePort -- port service will serve service connections on
@@ -195,9 +204,10 @@ singleAgentstore:
   # -- Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
   # N.B. QMS AgentStore creates required databases on startup via poststart script mount
   additionalVolumeMounts:
-  - name: config-map
-    mountPath: /qms-agentstore/poststart_scripts/qms-agentstore-poststart.sh
-    subPath: qms-agentstore-poststart.sh
+    qms-agentstore-poststart:
+      name: config-map
+      mountPath: /qms-agentstore/poststart_scripts/qms-agentstore-poststart.sh
+      subPath: qms-agentstore-poststart.sh
     
   idolImage:
     # -- overrides the default value for single-content.idolImage.repo ("content")

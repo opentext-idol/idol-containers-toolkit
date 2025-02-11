@@ -7,20 +7,21 @@
 {{- $appVersion := .AppVersion }}
 {{- $versionList := slice (splitList "." $appVersion) 0 2 }}
 
-{{- $docsLink := printf "https://www.microfocus.com/documentation/idol/IDOL_%s/%s_%s_Documentation/Help/" (join "_" $versionList ) $component (join "." $versionList) }}
+{{- $docsLink := printf "https://www.microfocus.com/documentation/idol/knowledge-discovery-%s/%s_%s_Documentation/Help/" 
+  (join "." $versionList ) $component (join "." $versionList) }}
 
-Provides an IDOL {{ $component }} deployment.
+Provides a Knowledge Discovery {{ $component }} deployment.
 
 Depends on connections to:
 
-- IDOL LicenseServer (`licenseServerHostname`)
-- IDOL Content/Agentstore (`queryserviceName`, `queryserviceACIPort`, `agentStoreName`, `agentStoreACIPort`)
+- Knowledge Discovery LicenseServer (`licenseServerHostname`)
+- Knowledge Discovery Content/Agentstore (`queryserviceName`, `queryserviceACIPort`, `agentStoreName`, `agentStoreACIPort`)
 
 The config file can be overridden via `existingConfigMap`.
 
 This chart may be used to provide query & result modification and promotion management functionality.
 
-> Full documentation for QMS available from {{ $docsLink }}
+> Full documentation for QMS available from <{{ $docsLink }}>
 
 {{ template "chart.homepageLine" . }}
 
