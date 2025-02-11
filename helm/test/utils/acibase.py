@@ -15,13 +15,23 @@ class AciTestBase(HelmChartTestBase):
 
     def test_using_tls(self):
         ''' usingTLS sets IDOL_SSL environment variable '''
-        objs = self.render_chart({'name':'idol-aci-test', 'usingTLS':True})
-        self.check_tls(objs, ['idol-aci-test'])
+        objs = self.render_chart({'usingTLS':True})
+        self.check_tls(objs, [self.name()])
                     
     def test_custom_data(self):
         ''' annotations/labels etc. written to Deployments/StatefulSets '''
         objs = self.render_chart(self.get_test_custom_data())
-        self.check_custom_data(objs, ['idol-aci-test'])
+        self.check_custom_data(objs, [self.name()])
+
+    def test_oem(self):
+        objs = self.render_chart({'global':{'idolOemLicenseSecret':'oem-secret'}, 'workingDir':'/testoem'})
+        for k,obj in self.workloads(objs, [self.name()]):
+            volumeMounts = obj['spec']['template']['spec']['containers'][0]['volumeMounts']
+            self.assertTrue(any([ { 'name': 'oem-license','mountPath': '/testoem/licensekey.dat',
+                'subPath': 'licensekey.dat'}.items() <= x.items() for x in volumeMounts]))
+        
+    def test_additionalVolumes_dict(self):
+        self.check_additionalVolumes_dict()
                     
 class StatefulSetTests():
     def test_volume_claim_templates(self):

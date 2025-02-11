@@ -25,14 +25,20 @@ class HelmChartTestBase():
         if os.path.isdir(cls.chartpath) and cls.update_dependency:
             subprocess.check_output(['helm','dependency','update',cls.chartpath])
         return super().setUpClass()
+    
+    def name(self):
+        return self.default_values()['name']
 
     def workloads(self, objs, names):
+        found = False
         for t in ['Deployment','StatefulSet']:
             if t not in self.kinds:
                 continue
             for name, workload in objs[t].items():
                 if name in names:
+                    found = True
                     yield t, workload
+        self.assertTrue(found, f'No workload(s) found for {names}')
 
     def check_tls(self, objs, names):
         '''
@@ -127,3 +133,56 @@ class HelmChartTestBase():
     def test_security_context(self):
         ''' containerSecurityContext and podSecurityContext render correctly when used '''
         self.check_security_context()
+
+    def check_additionalVolumes_array(self, name=None):
+        if None==name:
+            name = self.name()
+        vols = [
+            { 'name': 'extra', 'configMap': {'name': 'extra'} }
+        ]
+        mounts = [
+            { 'name': 'extra', 'mountPath': 'extra' }
+        ]
+        objs = self.render_chart({'additionalVolumes': vols, 'additionalVolumeMounts': mounts })
+        workloads = [ o for k,o in self.workloads(objs, [name]) ]
+        self.assertGreater(len(workloads), 0, f'no workloads found for {name}')
+        for obj in workloads:
+            volumeMounts = obj['spec']['template']['spec']['containers'][0]['volumeMounts']
+            for mount in mounts:
+                self.assertIn(mount, volumeMounts)
+            volumes = obj['spec']['template']['spec']['volumes']
+            for vol in vols:
+                self.assertIn(vol, volumes)
+
+    def check_additionalVolumes_dict(self, name=None):
+        if None==name:
+            name = self.name()
+        vols = {
+            'extra': { 'name': 'extra', 'configMap': {'name': 'extra'} },
+            'extraNull': None, # null ignored
+            'extraEmpty': {}, # empty dict should be ignored
+            'extraDeleted': { 'DELETE': True, 'name': 'extra', 'configMap': {'name': 'extra'} },  # DELETE marks should be ignored
+            
+        }
+        mounts = {
+            'extra': { 'name': 'extra', 'mountPath': 'extra' },
+            'extraNull': None, # null ignored
+            'extraEmpty': {}, # empty dict should be ignored
+            'extraDeleted': { 'name': 'extraDeleted', 'mountPath': 'extra', 'DELETE': True } # DELETE marks should be ignored
+        }
+        objs = self.render_chart({'additionalVolumes': vols, 'additionalVolumeMounts': mounts })
+        workloads = [ o for k,o in self.workloads(objs, [name]) ]
+        self.assertGreater(len(workloads), 0, f'no workloads found for {name}')
+        for obj in workloads:
+            volumeMounts = obj['spec']['template']['spec']['containers'][0]['volumeMounts']
+            self.assertIn(mounts['extra'], volumeMounts)
+            for omit in ['extraNull','extraEmpty', 'extraDeleted']:
+                self.assertNotIn(mounts[omit], volumeMounts)
+            volumes = obj['spec']['template']['spec']['volumes']
+            self.assertIn(vols['extra'], volumes)
+            for omit in ['extraNull','extraEmpty', 'extraDeleted']:
+                self.assertNotIn(vols[omit], volumes)
+
+    def test_additionalVolumes_array(self):
+        ''' Can specify additionalVolumes in array form (legacy) '''
+        self.check_additionalVolumes_array()
