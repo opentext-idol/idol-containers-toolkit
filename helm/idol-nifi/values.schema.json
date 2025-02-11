@@ -62,10 +62,10 @@
                     "required": ["enabled"]
                 },
                 "additionalVolumes":{
-                    "type": "array"
+                    "type": ["array","object","null"]
                 },
                 "additionalVolumeMounts":{
-                    "type": "array"
+                    "type": ["array","object","null"]
                 },
                 "serviceAccountName":{
                     "type": "string",
@@ -228,7 +228,7 @@
                     "description": "Deprecated, prefer 'flows'"
                 },
                 "flows": {
-                    "type": "array",
+                    "type": ["object"],
                     "items": {
                         "$ref": "#/$defs/Flow"
                     }
@@ -278,6 +278,9 @@
                 "serviceStartRetries": {
                     "type": "integer",
                     "minimum": 0
+                },
+                "workingDir": {
+                    "type": "string"
                 }
             }
         },
@@ -515,7 +518,7 @@
                     "type": "object"
                 },
                 "buckets": {
-                    "type": "array",
+                    "type": ["object"],
                     "items": {
                         "$ref": "#/$defs/Bucket"
                     }

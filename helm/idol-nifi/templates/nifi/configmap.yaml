@@ -9,7 +9,11 @@
 #
 # END COPYRIGHT NOTICE
 {{- range $nifiClusterItem := .Values.nifiClusters }}
-{{ $nifiCluster := merge $nifiClusterItem $.Values.nifi (dict "clusterId" $.Values.name) }}
+{{- $nifiCluster := merge $nifiClusterItem $.Values.nifi (dict "clusterId" $.Values.name) }}
+{{- $flows := (empty $nifiCluster.flowfile | ternary 
+                (fromYamlArray (include "idol-library.util.range_array_or_map_values" (dict "root" . "vals" $nifiCluster.flows)))
+                (list ( dict "file" $nifiCluster.flowfile "bucket" "default-bucket" "import" true ))
+                ) }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -58,9 +62,9 @@ data:
   TRUSTSTORE_TYPE: "jks"
   IDOL_NIFI_THREADS: "{{ $nifiCluster.threadCount }}"
   IDOL_NIFI_SERVICE_START_RETRIES: "{{ $nifiCluster.serviceStartRetries }}"
-  IDOL_NIFI_FLOW_COUNT: "{{ $nifiCluster.flows | len }}"
+  IDOL_NIFI_FLOW_COUNT: "{{ $flows | len }}"
 {{- /* Maintains backwards compatibility for the old nifi.flowfile by using that if explicitly set, else using the newer nifi.flows */}}
-{{- range $i,$flow := (empty $nifiCluster.flowfile | ternary $nifiCluster.flows (list ( dict "file" $nifiCluster.flowfile "bucket" "default-bucket" "import" true ))) }}
+{{- range $i,$flow := $flows }}
   IDOL_NIFI_FLOW_FILE_{{ $i }}: {{ $flow.file | default "" | quote }}
   IDOL_NIFI_FLOW_NAME_{{ $i }}: {{ $flow.name | default "" | quote }}
   IDOL_NIFI_FLOW_VERSION_{{ $i }}: {{ $flow.version | default "" | quote }}

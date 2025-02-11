@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2023-2024 Open Text.
+# Copyright 2023-2025 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -53,11 +53,13 @@ labels: {}
 # -- Optional configMap name holding extra environnment variables for container
 envConfigMap: ""
 
-# -- Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
-additionalVolumes: []
+# -- Additional PodSpec Volume(s) (see <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes>)
+# Can be dict of (name, Volume), or list of (Volume). dict form allows for merging definitions from multiple values files.
+additionalVolumes: null
 
-# -- Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1)
-additionalVolumeMounts: []
+# -- Additional PodSpec VolumeMount(s) (see <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1>)
+# Can be dict of (name, VolumeMount), or list of (VolumeMount). dict form allows for merging definitions from multiple values files.
+additionalVolumeMounts: null
 
 # ingressClassName -- Optional, https://kubernetes.io/docs/concepts/services-networking/ingress/#the-ingress-resource, applied to all ingress objects
 ingressClassName: ""
@@ -171,10 +173,12 @@ nifi:
   # Specify the file, registry bucket name (will be created if not found), and whether to import the flow as a process group into NiFi,
   # or specify the name, bucket name (and optionally version, latest will be used if not specified) of an existing flow in NiFi Registry.
   # Customized flows can be added via a custom NiFi image or mounted into the pod (see `additionalVolumes` and `additionalVolumeMounts`)
+  # Helm value merging combines flows from multiple values sources. Use DELETE to remove an unwanted flow.
   flows:
-  - name: "Basic IDOL"
-    bucket: "default-bucket"
-    version: ""
+    basic-idol:
+      name: "Basic IDOL"
+      bucket: "default-bucket"
+      version: ""
 
   ingress:
     # -- whether to deploy ingress for nifi
@@ -256,6 +260,9 @@ nifi:
   # -- Maximum number of times to try starting services after flow import
   serviceStartRetries: 3
 
+  # -- For nifi this location is where any OEM license files will be placed (see global.idolOemLicenseSecret)
+  workingDir: "/nifi"
+
 # -- nifi cluster instances. Each cluster instance inherits values from the nifi section.
 # When more than one cluster is specified, setting a clusterId is required
 nifiClusters:
@@ -306,10 +313,12 @@ nifiRegistry:
 
   # -- Buckets to create. Specify the bucket name, and a list of flow files to populate the bucket with.
   # Customized flows can be added via a custom NiFi Registry image or mounted into the pod (see `additionalVolumes` and `additionalVolumeMounts`)
+  # Helm value merging combines buckets from multiple values sources. Use DELETE to remove an unwanted bucket.
   buckets:
-  - name: "default-bucket"
-    flowfiles:
-    - /scripts/flow-basic-idol.json
+    default-bucket:
+      name: "default-bucket"
+      flowfiles:
+      - /scripts/flow-basic-idol.json
 
 zookeeper:
   # -- zookeeper image to use

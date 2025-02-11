@@ -23,27 +23,30 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
                     { 'clusterId':'nf1' },
                     {
                         'clusterId':'nf2',
-                        'flows':[
-                            {
+                        'flows':{
+                            'f1':{
                                 'file':'/scripts/flow1.json',
                                 'bucket': 'default-bucket',
                                 'import':True
                             },
-                            {
+                            'f2':{
                                 'file':'/scripts/flow2.json',
                                 'bucket': 'other-bucket',
                                 'import':False
                             },
-                            {
+                            'f3':{
                                 'name':'Existing Flow',
                                 'bucket':'existing-bucket',
                                 'version':"123"
                             },
-                            {
+                            'f4':{
                                 'name':'Existing Flow2',
                                 'bucket':'existing-bucket'
+                            },
+                            'basic-idol':{
+                                'DELETE':True
                             }
-                        ],
+                        },
                         'service':{
                             'additionalPorts':{
                                 'commonPort': {
@@ -167,14 +170,15 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
         objs = self.render_chart(
             {
                 'nifiRegistry':{
-                    'buckets':[
-                        { "name": "default-bucket" },
-                        { "name": "my-bucket" },
-                        {
+                    'buckets':{
+                        'default-bucket': {'DELETE':True},
+                        'b1':{ "name": "default-bucket" },
+                        'b2':{ "name": "my-bucket" },
+                        'b3':{
                             "name": "some-bucket",
                             "flowfiles": [ "/some/flow/file1.json", "/some/flow/file2.json" ]
                         }
-                    ]
+                    }
                 }
             })
         self.assertEqual(objs['ConfigMap']['idol-nifi-reg-cm']['data']['NIFI_REGISTRY_BUCKET_COUNT'], '3')
@@ -217,6 +221,9 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
         return self.check_security_context(['idol-nifi','idol-nifi-reg','idol-nifi-zk'],{
             t: self.security_context_value() for t in ['podSecurityContext','containerSecurityContext']
         })
+    
+    def test_additionalVolumes_dict(self):
+        return self.check_additionalVolumes_dict()
 
 if __name__ == '__main__':
     unittest.main()
