@@ -9,6 +9,7 @@
 #
 # END COPYRIGHT NOTICE
 {{- if .Values.nifiRegistry.enabled }}
+{{- $buckets := fromYamlArray (include "idol-library.util.range_array_or_map_values" (dict "root" . "vals" .Values.nifiRegistry.buckets)) }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -17,8 +18,8 @@ metadata:
     app: {{ .Values.name }}-reg
 data:
   NIFI_REGISTRY_WEB_HTTP_PORT: "18080"
-  NIFI_REGISTRY_BUCKET_COUNT: "{{ .Values.nifiRegistry.buckets | len }}"
-{{- range $i,$bucket := .Values.nifiRegistry.buckets }}
+  NIFI_REGISTRY_BUCKET_COUNT: "{{ $buckets | len }}"
+{{- range $i,$bucket := $buckets }}
   NIFI_REGISTRY_BUCKET_FILES_{{ $i }}: {{ join "," $bucket.flowfiles | quote }}
   NIFI_REGISTRY_BUCKET_NAME_{{ $i }}: {{ $bucket.name | quote }}
 {{- end -}}

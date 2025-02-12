@@ -10,16 +10,16 @@
 # END COPYRIGHT NOTICE
 apiVersion: v2
 name: idol-nifi
-version: 0.12.3
-appVersion: "24.4.0"
+version: 0.13.0
+appVersion: "25.1"
 description: A configurable IDOL NiFi setup
 dependencies:
 - name: idol-library
-  version: "0.14.3"
+  version: ~0.15.0
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 - name: idol-licenseserver
   condition: idol-licenseserver.enabled
-  version: "0.4.0"
+  version: ~0.4.0
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 - name: metrics-server
   condition: metrics-server.enabled
