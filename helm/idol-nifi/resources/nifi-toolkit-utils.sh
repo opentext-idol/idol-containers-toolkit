@@ -78,6 +78,38 @@ nifitoolkit_nifi_changeProcessGroupVersion() {
     fi
 }
 
+nifitoolkit_nifi_getChildProcessGroups() {
+    local PGID=$1
+    local OUT_PGLIST=$2
+
+    PGLIST=$(${NIFITOOLKITCMD} nifi pg-list -pgid "${PGID}" -ot json | jq -r ".[].id")
+
+    declare -g "$OUT_PGLIST=${PGLIST}"
+}
+
+nifitoolkit_nifi_enableProcessGroupServices() {
+    local PGID=$1
+    local OUT_RC=$2
+
+    set +e
+    ${NIFITOOLKITCMD} nifi pg-enable-services -pgid "${PGID}" -verbose
+    RC=$?
+    if [ 0 == ${RC} ]; then
+        CHILD_PGLIST=
+        nifitoolkit_nifi_getChildProcessGroups "${PGID}" CHILD_PGLIST
+        for CHILD_PGID in $(echo "$CHILD_PGLIST"); do
+            echo "[$(date)] Starting services in descendent ProcessGroup: ${CHILD_PGID}."
+            CHILD_RC=
+            nifitoolkit_nifi_enableProcessGroupServices "${CHILD_PGID}" CHILD_RC
+            if [ 0 != "${CHILD_RC}" ]; then
+                RC=1
+            fi
+        done
+    else
+        echo "[$(date)] nifi pg-enable-services failed (RC=${RC})."
+    fi
+    declare -g "$OUT_RC=${RC}"
+}
 
 #Registry utilities
 nifitoolkit_registry_waitForCLI() {
@@ -148,7 +180,7 @@ nifitoolkit_registry_importFlow (){
             LATESTFLOWVERSION=$(${NIFITOOLKITCMD} registry list-flow-versions -u "${NIFI_REGISTRY_URL}" --flowIdentifier "${FLOWID}" -ot json | jq .[-1].version)
             if [ -n "${LATESTFLOWVERSION}" ]; then
                 #Sort, and remove fields added by the import-flow-version process
-                local JQ=(jq -S "del(.snapshotMetadata, .latest, ..|nulls)")
+                local JQ=(jq -S 'del(.snapshotMetadata,.latest) | del(..|nulls) | walk(if type=="array" then .|=sort_by(.name?) else . end)')
 
                 echo "[$(date)] Comparing flow ${FLOW_NAME} to latest version (${LATESTFLOWVERSION}) in registry..."
 
@@ -206,4 +238,21 @@ nifitoolkit_registry_findFlow (){
 
     declare -g "$OUT_FLOWID=${FLOWID}"
     declare -g "$OUT_FLOWVERSIONS=${FLOWVERSIONS}"
+}
+
+nifitoolkit_configure_threads(){
+    local THREADS=$1
+    local CONTROLLER_CFG=/opt/nifi/nifi-current/conf/update-controller-configuration.json
+    local CONFIGURATION=
+    CONFIGURATION=$(${NIFITOOLKITCMD} nifi get-controller-configuration)
+    RC=$?
+    until [ 0 == ${RC} ];
+    do
+        sleep 5s
+        CONFIGURATION=$(${NIFITOOLKITCMD} nifi get-controller-configuration)
+        RC=$?
+    done
+    echo "${CONFIGURATION}" | jq ".component.maxTimerDrivenThreadCount=${THREADS}" > ${CONTROLLER_CFG}
+    ${NIFITOOLKITCMD} nifi update-controller-configuration --input "${CONTROLLER_CFG}"
+    echo "[$(date)] Set maxTimerDrivenThreadCount=${THREADS}"
 }

@@ -7,22 +7,23 @@
 {{- $appVersion := .AppVersion }}
 {{- $versionList := slice (splitList "." $appVersion) 0 2 }}
 
-{{- $docsLink := printf "https://www.microfocus.com/documentation/idol/IDOL_%s/%s_%s_Documentation/Help/" (join "_" $versionList ) $component (join "." $versionList) }}
+{{- $docsLink := printf "<https://www.microfocus.com/documentation/idol/knowledge-discovery-%s/%s_%s_Documentation/Help/>"
+  (join "." $versionList ) $component (join "." $versionList) }}
 
-Provides an IDOL {{ $component }} deployment.
+Provides a Knowledge Discovery {{ $component }} deployment.
 
-Default configuration is to provide UniversalViewing against an IDOL NiFi instance. 
+Default configuration is to provide UniversalViewing against an Knowledge Discovery NiFi instance. 
 
 Depends on connections to:
 
-- IDOL LicenseServer (`licenseServerHostname`)
-- IDOL Content/Agentstore (`queryserviceName`, `queryserviceACIPort`, `agentStoreName`, `agentStoreACIPort`)
-- IDOL NiFi (`nifiserviceName`, `nifiserviceACIPort`) 
+- Knowledge Discovery LicenseServer (`licenseServerHostname`)
+- Knowledge Discovery Content/Agentstore (`queryserviceName`, `queryserviceACIPort`, `agentStoreName`, `agentStoreACIPort`)
+- Knowledge Discovery NiFi (`nifiserviceName`, `nifiserviceACIPort`) 
 
 The config file can be overridden via `existingConfigMap`.
 
 This chart may be used to provide document rendering functionality. For example, 
-as part of an IDOL Find set.
+as part of an Knowledge Discovery Find set.
 
 You may wish to deploy this chart alongside _idol-nifi_.
 

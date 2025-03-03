@@ -35,7 +35,6 @@ spec:
     spec:
       automountServiceAccountToken: false
       enableServiceLinks: false
-      setHostnameAsFQDN: true
       dnsPolicy: ClusterFirstWithHostNet
       restartPolicy: Always
 {{- if $.Values.podSecurityContext.enabled }}
@@ -47,7 +46,7 @@ spec:
 {{- end }}
       containers:
       - name: zookeeper
-        image: docker.io/zookeeper:3.8
+        image: {{ $.Values.zookeeper.image }}
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 2181

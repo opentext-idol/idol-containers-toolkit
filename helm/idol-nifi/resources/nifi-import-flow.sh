@@ -24,6 +24,8 @@ fi
 NIFI_REGISTRY_URL=http://${NIFI_REGISTRY_HOSTS}:18080
 NEW_PROCESS_GROUP_IDS=()
 
+nifitoolkit_registry_waitForCLI "${NIFI_REGISTRY_URL}"
+
 for i in $(seq 0 "${IDOL_NIFI_FLOW_COUNT}");
 do
     if [  "$i" -eq "${IDOL_NIFI_FLOW_COUNT}" ]; then
@@ -133,74 +135,110 @@ do
         # Import the flow as a process group
         PROCESSGROUP=$(${NIFITOOLKITCMD} nifi pg-import -b "${BUCKETID}" -f "${FLOWID}" -fv "${FLOWVERSION}" -cto 60000 -rto 60000)
         RC=$?
-        if [ 0 != ${RC} ]; then
-            echo "[$(date)] nifi pg-import failed (RC=${RC}). Manual flow import may be required"
-            continue
+        if [ 0 != "${RC}" ]; then
+
+            nifitoolkit_nifi_findProcessGroup "${FLOWNAME}" EXISTINGPGID EXISTINGFLOWID EXISTINGFLOWVERSION EXISTINGFLOWSTATE
+            if [ -z "${EXISTINGPGID}" ]; then
+                echo "[$(date)] nifi pg-import failed (RC=${RC}). Manual flow import may be required"
+                continue
+            else
+                echo "[$(date)] nifi pg-import failed (RC=${RC}), but the imported flow now exists (${EXISTINGPGID})"
+                PROCESSGROUP="${EXISTINGPGID}"
+            fi
         fi
         echo "[$(date)] PROCESSGROUP=${PROCESSGROUP}"
 
         # Set any parameter values
         PARAMCONTEXT=$(${NIFITOOLKITCMD} nifi pg-get-param-context -pgid "${PROCESSGROUP}")
         RC=$?
-        if [ 0 != ${RC} ]; then
+        if [ 0 != "${RC}" ]; then
             echo "[$(date)] nifi pg-get-param-context failed (RC=${RC}). Manual flow setup may be required"
             # but continue
         else
             echo "[$(date)] PARAMCONTEXT=${PARAMCONTEXT}"
-            ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "LicenseServerHost" -pv "{{ (index .Values "idol-licenseserver").licenseServerService }}"
-            ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "LicenseServerACIPort" -pv "{{ (index .Values "idol-licenseserver").licenseServerPort }}"
-            ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "IndexHost" -pv "{{ .Values.indexserviceName }}"
-            ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "IndexACIPort" -pv "{{ .Values.indexserviceACIPort }}"
+            if [ -n "${PARAMCONTEXT}" ]; then
+                ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "LicenseServerHost" -pv "{{ (index .Values "idol-licenseserver").licenseServerService }}"
+                ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "LicenseServerACIPort" -pv "{{ (index .Values "idol-licenseserver").licenseServerPort }}"
+                ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "IndexHost" -pv "{{ .Values.indexserviceName }}"
+#{{- if .Values.postgresql.enabled }}
+                ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "PostgreSQLServer" -pv "{{ .Release.Name }}-postgresql-pgpool"
+                ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "PostgreSQLDatabase" -pv "{{ .Values.postgresql.postgresql.database }}"
+                ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "PostgreSQLUser" -pv "{{ .Values.postgresql.postgresql.username }}" -ps true
+                ${NIFITOOLKITCMD} nifi set-param -pcid "${PARAMCONTEXT}" -pn "PostgreSQLPassword" -pv "{{ .Values.postgresql.postgresql.password }}" -ps true
+#{{- end }}
+            fi
         fi
 
-        echo "[$(date)] FLOWFILE ${FLOWFILE} imported to ProcessGroup: ${PROCESSGROUP}."
-    fi
-    NEW_PROCESS_GROUP_IDS+=("${PROCESSGROUP}")
-done
-
-for PROCESS_GROUP_ID in "${NEW_PROCESS_GROUP_IDS[@]}"
-do
-    echo "[$(date)] Starting services in ProcessGroup: ${PROCESS_GROUP_ID}."
-
-    echo "[$(date)] Enabling services"
-    # Some processors can be slow to start up, so be forgiving
-    set +e
-    ${NIFITOOLKITCMD} nifi pg-enable-services -pgid "${PROCESS_GROUP_ID}" -verbose
-    RC=$?
-    if [ 0 != ${RC} ]; then
-        echo "[$(date)] nifi pg-enable-services failed (RC=${RC}). Services/processors may not be started."
-        # but continue
+        echo "[$(date)] Flow '${FLOWNAME}' imported to ProcessGroup: ${PROCESSGROUP}."
+        NEW_PROCESS_GROUP_IDS+=("${PROCESSGROUP}")
     fi
 done
 
 if [ 0 != ${#NEW_PROCESS_GROUP_IDS[@]} ]; then
-    echo "[$(date)] Waiting after service start."
-    sleep 30s
-fi
 
-for PROCESS_GROUP_ID in "${NEW_PROCESS_GROUP_IDS[@]}"
-do
-    echo "[$(date)] Starting processors in ProcessGroup: ${PROCESS_GROUP_ID}."
-    for i in {1..12} 
-    do 
-        ${NIFITOOLKITCMD} nifi pg-start -pgid "${PROCESS_GROUP_ID}" -verbose
+    SVCSTART_PROCESS_GROUP_IDS=("${NEW_PROCESS_GROUP_IDS[@]}")
+    START_PROCESS_GROUP_IDS=("${NEW_PROCESS_GROUP_IDS[@]}")
+
+    for ((i=1; i <= ${IDOL_NIFI_SERVICE_START_RETRIES:-3}; i++))
+    do
+        if [ 0 != ${#SVCSTART_PROCESS_GROUP_IDS[@]} ]; then
+            echo "[$(date)] Starting services in ProcessGroups: ${SVCSTART_PROCESS_GROUP_IDS[*]}."
+            for PROCESS_GROUP_INDEX in "${!SVCSTART_PROCESS_GROUP_IDS[@]}"
+            do
+                PROCESS_GROUP_ID=${SVCSTART_PROCESS_GROUP_IDS[${PROCESS_GROUP_INDEX}]}
+                echo "[$(date)] Starting services in ProcessGroup: ${PROCESS_GROUP_ID}."
+
+                RC=
+                nifitoolkit_nifi_enableProcessGroupServices "${PROCESS_GROUP_ID}" RC
+
+                if [ 0 == "${RC}" ]; then
+                    unset "SVCSTART_PROCESS_GROUP_IDS[${PROCESS_GROUP_INDEX}]"
+                    echo "[$(date)] ${#SVCSTART_PROCESS_GROUP_IDS[@]} Remaining ProcessGroups for Service Start: ${SVCSTART_PROCESS_GROUP_IDS[*]}."
+                else
+                    echo "[$(date)] Service Start failed (RC=${RC})."
+                fi
+            done
+
+            echo "[$(date)] Waiting after service start."
+            sleep 10s
+        fi
+
+        echo "[$(date)] Starting processors in ProcessGroups: ${START_PROCESS_GROUP_IDS[*]}."
+        for PROCESS_GROUP_ID in "${START_PROCESS_GROUP_IDS[@]}"
+        do
+            ${NIFITOOLKITCMD} nifi pg-start -pgid "${PROCESS_GROUP_ID}" -verbose
+        done
         sleep 5s
-        NIFISTATUS=$(${NIFITOOLKITCMD} nifi pg-status -pgid "${PROCESS_GROUP_ID}" -ot json)
-        RC=$?
-        if [ 0 != ${RC} ]; then
-            sleep 5s
-            continue
+        for PROCESS_GROUP_INDEX in "${!START_PROCESS_GROUP_IDS[@]}"
+        do
+            PROCESS_GROUP_ID=${START_PROCESS_GROUP_IDS[${PROCESS_GROUP_INDEX}]}
+            echo "[$(date)] Checking processor status in ProcessGroup: ${PROCESS_GROUP_ID}."
+            NIFISTATUS=$(${NIFITOOLKITCMD} nifi pg-status -pgid "${PROCESS_GROUP_ID}" -ot json)
+            RC=$?
+            if [ 0 != ${RC} ]; then
+                continue
+            fi
+            INVALID=$(echo "${NIFISTATUS}" | jq .invalidCount)
+            STOPPED=$(echo "${NIFISTATUS}" | jq .stoppedCount)
+            RUNNING=$(echo "${NIFISTATUS}" | jq .runningCount)
+            echo "[$(date)] Processor status: ${RUNNING} running, ${STOPPED} stopped, ${INVALID} invalid"
+            if [ "0" == "$((STOPPED+INVALID))" ]; then
+                ${NIFITOOLKITCMD} nifi pg-status -pgid "${PROCESS_GROUP_ID}"
+                unset "START_PROCESS_GROUP_IDS[${PROCESS_GROUP_INDEX}]"
+                echo "[$(date)] ${#START_PROCESS_GROUP_IDS[@]} Remaining ProcessGroups: ${START_PROCESS_GROUP_IDS[*]}."
+            fi
+        done
+        if [ 0 == ${#START_PROCESS_GROUP_IDS[@]} ]; then
+            break;
         fi
-        INVALID=$(echo "${NIFISTATUS}" | jq .invalidCount)
-        STOPPED=$(echo "${NIFISTATUS}" | jq .stoppedCount)
-        RUNNING=$(echo "${NIFISTATUS}" | jq .runningCount)
-        echo "[$(date)] Processor status: ${RUNNING} running, ${STOPPED} stopped, ${INVALID} invalid"
-        if [ "0" == "$((STOPPED+INVALID))" ]; then
-            break
-        fi
+        sleep 5s
     done
-    ${NIFITOOLKITCMD} nifi pg-status -pgid "${PROCESS_GROUP_ID}" 
-done
+
+    for PROCESS_GROUP_ID in "${NEW_PROCESS_GROUP_IDS[@]}"
+    do
+        ${NIFITOOLKITCMD} nifi pg-status -pgid "${PROCESS_GROUP_ID}"
+    done
+fi
 
 echo "[$(date)] Flow import completed"
 

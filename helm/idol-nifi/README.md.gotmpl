@@ -7,16 +7,17 @@
 {{- $appVersion := .AppVersion }}
 {{- $versionList := slice (splitList "." $appVersion) 0 2 }}
 
-{{- $docsLink := printf "https://www.microfocus.com/documentation/idol/IDOL_%s/%s_%s_Documentation/Help/" (join "_" $versionList ) $component (join "." $versionList) }}
+{{- $docsLink := printf "<https://www.microfocus.com/documentation/idol/knowledge-discovery-%s/%s_%s_Documentation/Help/>"
+  (join "." $versionList ) $component (join "." $versionList) }}
 
-Provides a scaleable IDOL NiFi cluster instance (NiFi, NiFi Registry and ZooKeeper).
+Provides a scaleable Knowledge Discovery NiFi cluster instance (NiFi, NiFi Registry and ZooKeeper).
 
-> Full documentation for IDOL NiFi Ingest available from {{ $docsLink }}
+> Full documentation for Knowledge Discovery NiFi Ingest available from {{ $docsLink }}
 
 ## Related Documentation
 
-* https://nifi.apache.org/
-* https://zookeeper.apache.org/
+* <https://nifi.apache.org/>
+* <https://zookeeper.apache.org/>
 
 {{ template "chart.homepageLine" . }}
 
@@ -26,79 +27,120 @@ Provides a scaleable IDOL NiFi cluster instance (NiFi, NiFi Registry and ZooKeep
 
 {{ template "chart.requirementsSection" . }}
 
-## Deploying a flow into NiFi 
+## Deploying a flow into NiFi
 
 There are two methods for deploying a flow in a Nifi cluster:
 
 * Manually creating a flow once the NiFi cluster has been deployed by specifying no flows to be deployed in the NiFi cluster.
 
-```
+```yaml
 nifi:
-  flows: []
+  flows: 
+    # NOTE: helm values merging allows flows to be imported from multiple values files
+    # To remove the default packaged flow, explicitly opt-out by using chart-specific DELETE keyword
+    basic-idol:
+      DELETE: true
 ```
 
 * Naming an existing flow (or multiple flows) within NiFi Registry to deployed. Specify the name of the NiFi Registry bucket, and flow within that bucket, to create a version controlled process group within NiFi from. To deploy a specific version of the flow from NiFi Registry a version can optionally be specified. When not specified or the value is empty, the latest version of the flow is deployed.
 
-```
+```yaml
 nifi:
   flows:
-  - name: "My Flow"
-    bucket: "my-bucket"
-  - name: "My Other Flow"
-    bucket: "my-bucket"
-    version: "2"
+    basic-idol:
+      DELETE: true
+    my-flow: 
+      name: "My Flow"
+      bucket: "my-bucket"
+    my-other-flow:
+      name: "My Other Flow"
+      bucket: "my-bucket"
+      version: "2"
 ```
 
 To update the version of a flow deployed into NiFi, there are two methods:
 
-* Manually upload a new version of the flow into NiFi Registry, and then use the NiFi UI (https://nifi.apache.org/docs/nifi-docs/html/user-guide.html#change-version), APIs (https://nifi.apache.org/docs/nifi-docs/rest-api/index.html) or CLI (https://nifi.apache.org/docs/nifi-docs/html/toolkit-guide.html#nifi_CLI) to update the version of flow used by the deployed process group.
+* Manually upload a new version of the flow into NiFi Registry, and then use the NiFi UI (<https://nifi.apache.org/docs/nifi-docs/html/user-guide.html#change-version>), APIs (<https://nifi.apache.org/docs/nifi-docs/rest-api/index.html>) or CLI (<https://nifi.apache.org/docs/nifi-docs/html/toolkit-guide.html#nifi_CLI>) to update the version of flow used by the deployed process group.
 * Re-install the helm template for the NiFi cluster. Persistent Volume Claims are created for the NiFi and NiFi Registry instances deployed by the template, meaning that the template can be re-installed without losing its state. When a flow is deployed using the second method above, if there is an existing process group for the flow to be deployed, but the current version of that process group does not match the desired version, the version used by the process group is updated to the specified version.
 
 ## Pre-populating NiFi Registry with buckets and flows
 
 Specify names of the NiFi Registry buckets to be created, and optionally the location of JSON flow files to be imported into the bucket.
 
-```
+```yaml
 nifiRegistry:
   buckets:
-  - name: "my-bucket"
-    flowfiles: []
-  - name: "my-other-bucket"
-    flowfiles:
-    - "/flows/flow1.json"
-    - "/flows/flow2.json"
+    # NOTE: helm values merging allows buckets to be imported from multiple values files
+    # To remove the default packaged bucket, explicitly opt-out by using chart-specific DELETE keyword
+    default-bucket:
+      DELETE: true
+    my-bucket: 
+      name: "my-bucket"
+      flowfiles: []
+    my-other-bucket:
+      name: "my-other-bucket"
+      flowfiles:
+      - "/flows/flow1.json"
+      - "/flows/flow2.json"
 ```
+
+## Providing additional NiFi extension files
+
+Startup scripts matching the pattern `/opt/nifi/nifi-current/prestart_scripts/*.sh` will be run during pod startup, a directory containing any scripts to be run should be mounted to
+`/opt/nifi/nifi-current/prestart_scripts/`. Additional NiFi Archive (NAR) extension files can be provided by utilizing a prestart script that loads the required extension files into the `/opt/nifi/nifi-current/extensions` directory. If a startup script is used to download extensions from an external source, `nifi.allowedStartupSeconds` may need to be increased to allow time for the files to be downloaded. Files in the `/opt/nifi/nifi-current/extensions` directory are persited in the `state-data` persistent volume, allowing for repeated downloads on pod restarts to be avoided.
 
 ## Scaling NiFi
 
 When `nifi.autoScaling.enabled` is set to `true`, some considerations must be made in order for the NiFi cluster to usefully scale.
 
-* `Load Balance Strategy` on NiFi connections - When creating a NiFi flow, connections can be configured to load balance across the NiFi cluster (see https://nifi.apache.org/docs/nifi-docs/html/user-guide.html#Load_Balancing ). Some connections in the NiFi flow must be configured to a value other than `Do not load balance` to enable NiFi FlowFiles to be distributed across the cluster. Setting the `Load Balance Strategy` to `Round Robin` for some connections is recommended for even load balancing.
+* `Load Balance Strategy` on NiFi connections - When creating a NiFi flow, connections can be configured to load balance across the NiFi cluster (see <https://nifi.apache.org/docs/nifi-docs/html/user-guide.html#Load_Balancing> ). Some connections in the NiFi flow must be configured to a value other than `Do not load balance` to enable NiFi FlowFiles to be distributed across the cluster. Setting the `Load Balance Strategy` to `Round Robin` for some connections is recommended for even load balancing.
 
 * Scaling metrics specified in `nifi.autoScaling.metrics` - When autoscaling NiFi, appropriate metrics must be chosen for effective scaling. Values.yaml specifies two scaling metrics by default:
-    * Total number of FlowFiles queued, per NiFi cluster node - If there are more than 20,000 FlowFiles queued (on average) per NiFi cluster node, this will cause the NiFi cluster to scale up.
-    * Average queue utilization, per NiFi cluster node - If the queue utilization exceeds 25% (on average) per NiFi cluster node, this will cause the NiFi cluster to scale up.
+  * Total number of FlowFiles queued, per NiFi cluster node - If there are more than 20,000 FlowFiles queued (on average) per NiFi cluster node, this will cause the NiFi cluster to scale up.
+  * Average queue utilization, per NiFi cluster node - If the queue utilization exceeds 25% (on average) per NiFi cluster node, this will cause the NiFi cluster to scale up.
 
   These metrics can be used as is, with custom limits, or you can specify your own scaling metrics based upon any Prometheus metric(s).
 
-To run a NiFi cluster, you may need to use an external database for storing state information. Many NiFi Ingest processors need to store state information. For example, IDOL Connectors store information about what they have retrieved from a data repository. This information needs to be in an external database so that it is accessible to all of the nodes in the cluster. Configure the connection to your database server by creating a database service. When you configure the IDOL connectors in your data flow, set the property `State Database Service` to the name of the database service that you created.
+### State Data
+
+To run a NiFi cluster, you may need to use an external database for storing state information. Many NiFi Ingest processors need to store state information. For example, Knowledge Discovery Connectors store information about what they have retrieved from a data repository. This information needs to be in an external database so that it is accessible to all of the nodes in the cluster. Configure the connection to your database server by creating a database service. When you configure the Knowledge Discovery connectors in your data flow, set the property `State Database Service` to the name of the database service that you created. A PostgreSQL database will be deployed by default as a part of the helm install (which can be disabled in the provided values.yaml if not required by setting `postgresql.enabled=false`). When configuring the `State Database Service`, use the following values for the processor properties:
+
+Connection String: `Driver={PostgreSQL};Server=${PostgreSQLServer};Port=5432;Database=${PostgreSQLDatabase};Uid=${uid};Pwd=${pwd};`
+Uid: `${PostgreSQLUsername}`
+Pwd: `${PostgreSQLPassword}`
+
+When defining a flow (See: [Deploying a flow into NiFi](#deploying-a-flow-into-nifi)), define the following parameters in the Parameter Context for the root process group:
+
+| Name | Sensitive | Description |
+|------|-----------|-------------|
+|PostgreSQLServer|false|The hostname of the state database server|
+|PostgreSQLDatabase|false|The name of the database used to store state data|
+|PostgreSQLUser|true|The state database username|
+|PostgreSQLPassword|true|The state database password|
+
+These will be populated with the appropriate values, as per the definitions in the values.yaml, when the flow is deployed into the NiFi cluster.
+
+#### File Storage
 
 The files that your connectors download from your data repositories must also be accessible to all of the nodes in a cluster. When you configure your connectors, set the property `adv:IngestSharedPath` to a location, such as a shared folder, that is accessible from all of the nodes in the cluster. Alternatively, set the property `adv:FlowFileEmbedFiles` to `TRUE`, so that the binary file content is included in the FlowFiles created by the connector.
 
 ## Deploying multiple NiFi clusters
 
 Multiple NiFi clusters can be deployed from a single helm install command by specifying nifiClusters in the provided values.yaml, e.g.
-```
+
+```yaml
     nifiClusters:
     - clusterId: nf1
     - clusterId: nf2
 ```
-Each NiFi cluster will, by default, be accessible at [hostname]/[clusterId]/nifi and can communicate with each other by using http://[clusterId]:8080/nifi as the instance url when configuring remote process groups.
+
+Each NiFi cluster will, by default, be accessible at [hostname]/[clusterId]/nifi and can communicate with each other by using <http://[clusterId]:8080/nifi> as the instance url when configuring remote process groups.
 
 Each cluster will use parameters from the nifi section by default, but can be overridden in the nifiClusters entry.
 
 Alternatively, this helm chart can be installed multiple times. In this case, the first deployment should deploy nifi registry, prometheus, metrics-server etc, and any further deployments should specify:
-```
+
+```yaml
 nifi:
   registryHost: [existing-deployment-name]-reg
 nifiRegistry:
@@ -110,7 +152,8 @@ prometheus-adapter:
 metrics-server:
   enabled: false
 ```
-Each deployment will require a unique name, and ingress points should be manually specified such that they do not conflict. NiFi clusters can communicate with each other by using http://[name]:8080/nifi as the instance url when configuring remote process groups.
+
+Each deployment will require a unique name, and ingress points should be manually specified such that they do not conflict. NiFi clusters can communicate with each other by using <http://[name]:8080/nifi> as the instance url when configuring remote process groups.
 
 {{ template "chart.valuesSection" . }}
 

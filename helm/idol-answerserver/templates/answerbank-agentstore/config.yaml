@@ -18,7 +18,7 @@ metadata:
 
 data:
   answerbank-agentstore.cfg: |
-{{ tpl (print "resources/answerbank-agentstore.cfg" | .Files.Get) . | indent 4 }}
+{{ tpl (print "resources/answerbank-agentstore.cfg" | .Files.Get)  (dict "root" . "component" .Values.answerbankAgentstore) | indent 4 }}
 
   answerbank-agentstore-poststart.sh: |
 {{ tpl (print "resources/answerbank-agentstore-poststart.sh" | .Files.Get) . | indent 4 }}

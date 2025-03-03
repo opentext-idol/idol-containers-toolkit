@@ -11,7 +11,7 @@
 
 apiVersion: v2
 name: idol-stack
-version: 0.2.2
+version: 0.2.3
 appVersion: "24.4"
 description: An IDOL setup
 dependencies:
@@ -29,5 +29,5 @@ dependencies:
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 - name: idol-nifi
   condition: idol-nifi.enabled
-  version: "0.9.0"
+  version: "0.9.1"
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm

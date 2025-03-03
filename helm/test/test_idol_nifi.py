@@ -10,6 +10,9 @@ HelmChartTestBase.debug = False
 
 class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
     chartpath = os.path.join('..','idol-nifi')
+    
+    def setUp(self):
+        self._kinds = ['StatefulSet','Ingress','ConfigMap','Service']
 
     def test_multiple_nifi(self):
         clusterids = ['nf1','nf2','nf3','testnifi']
@@ -20,27 +23,37 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
                     { 'clusterId':'nf1' },
                     {
                         'clusterId':'nf2',
-                        'flows':[
-                            {
+                        'flows':{
+                            'f1':{
                                 'file':'/scripts/flow1.json',
                                 'bucket': 'default-bucket',
                                 'import':True
                             },
-                            {
+                            'f2':{
                                 'file':'/scripts/flow2.json',
                                 'bucket': 'other-bucket',
                                 'import':False
                             },
-                            {
+                            'f3':{
                                 'name':'Existing Flow',
                                 'bucket':'existing-bucket',
                                 'version':"123"
                             },
-                            {
+                            'f4':{
                                 'name':'Existing Flow2',
                                 'bucket':'existing-bucket'
+                            },
+                            'basic-idol':{
+                                'DELETE':True
                             }
-                        ]
+                        },
+                        'service':{
+                            'additionalPorts':{
+                                'commonPort': {
+                                    'port': -1
+                                }
+                            }
+                        }
                     },
                     {
                         'clusterId':'nf3',
@@ -53,10 +66,32 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
                            'metricsTLS':{
                              'secretName':''
                            }
+                        },
+                         'service':{
+                            'additionalPorts':{
+                                'commonPort': {
+                                    'protocol': 'UDP'
+                                },
+                                'extra-port': {
+                                    'name': 'extra',
+                                    'protocol': 'UDP',
+                                    'port': 2223,
+                                    'targetPort': 2224
+                                }
+                            }
                         }
                     },
                     {}
-                ]
+                ],
+                "nifi":{
+                    "service": {
+                        "additionalPorts":{
+                            "commonPort":{
+                                "port": 2222
+                            }
+                        }
+                    }
+                }
             })
         # expected manifests with multiple clusters
         self.assertGreaterEqual(set(objs['StatefulSet'].keys()),
@@ -68,7 +103,11 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
             self.assertEqual(objs['Ingress'][id]['spec']['rules'][0]['http']['paths'][0]['path'], f'/{id}/(.*)')
             self.assertIn(f'proxy_set_header X-ProxyContextPath "/{id}";',
                            objs['Ingress'][id]['metadata']['annotations']['nginx.ingress.kubernetes.io/configuration-snippet'])
+            self.assertEqual(objs['Ingress'][f'{id}-aci']['spec']['rules'][0]['http']['paths'][0]['path'], f'/{id}/connector-aci/(.*)')
+            self.assertEqual(objs['Ingress'][f'{id}-metrics']['spec']['rules'][0]['http']['paths'][0]['path'], f'/{id}/metrics/(.*)')
         self.assertEqual(objs['Ingress']['nf3']['spec']['rules'][0]['http']['paths'][0]['path'], f'/(.*)')
+        self.assertEqual(objs['Ingress'][f'nf3-aci']['spec']['rules'][0]['http']['paths'][0]['path'], '/nf3/connector-aci/(.*)')
+        self.assertEqual(objs['Ingress'][f'nf3-metrics']['spec']['rules'][0]['http']['paths'][0]['path'], '/nf3/metrics/(.*)')
         self.assertNotIn('proxy_set_header X-ProxyContextPath',
                         objs['Ingress']['nf3']['metadata']['annotations']['nginx.ingress.kubernetes.io/configuration-snippet'])
 
@@ -113,24 +152,33 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
         self.assertEqual(objs['ConfigMap']['nf2-env']['data']['IDOL_NIFI_FLOW_VERSION_0'], '')
         self.assertEqual(objs['ConfigMap']['nf3-env']['data']['IDOL_NIFI_FLOW_IMPORT_0'], 'true')
 
+        # Services
+        commonPortDef = {'name':'commonPort','port':2222}
+        self.assertIn(commonPortDef, objs['Service']['nf1']['spec']['ports'])
+        self.assertNotIn(commonPortDef, objs['Service']['nf2']['spec']['ports']) # -ve port number removes inherited def
+        self.assertIn({'name':'commonPort','port':2222, 'protocol':'UDP'}, objs['Service']['nf3']['spec']['ports'])
+        self.assertIn( {'name':'extra', 'protocol':'UDP', 'port':2223,'targetPort':2224,}, objs['Service']['nf3']['spec']['ports'])
+
     def test_default_registry_buckets(self):
         objs = self.render_chart({})
         self.assertEqual(objs['ConfigMap']['idol-nifi-reg-cm']['data']['NIFI_REGISTRY_BUCKET_COUNT'], '1')
         self.assertEqual(objs['ConfigMap']['idol-nifi-reg-cm']['data']['NIFI_REGISTRY_BUCKET_NAME_0'], 'default-bucket')
         self.assertEqual(objs['ConfigMap']['idol-nifi-reg-cm']['data']['NIFI_REGISTRY_BUCKET_FILES_0'], '/scripts/flow-basic-idol.json')
+        self.assertEqual(objs['ConfigMap']['idol-nifi-env']['data']['NIFI_REGISTRY_HOSTS'], 'idol-nifi-reg')
 
     def test_registry_buckets(self):
         objs = self.render_chart(
             {
                 'nifiRegistry':{
-                    'buckets':[
-                        { "name": "default-bucket" },
-                        { "name": "my-bucket" },
-                        {
+                    'buckets':{
+                        'default-bucket': {'DELETE':True},
+                        'b1':{ "name": "default-bucket" },
+                        'b2':{ "name": "my-bucket" },
+                        'b3':{
                             "name": "some-bucket",
                             "flowfiles": [ "/some/flow/file1.json", "/some/flow/file2.json" ]
                         }
-                    ]
+                    }
                 }
             })
         self.assertEqual(objs['ConfigMap']['idol-nifi-reg-cm']['data']['NIFI_REGISTRY_BUCKET_COUNT'], '3')
@@ -156,6 +204,26 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
 
         volumes = objs['StatefulSet']['idol-nifi-reg']['spec']['template']['spec']['volumes']
         self.assertTrue(any(volume["name"] == "test-nifi-files" and volume.get("configMap", {}).get("name") == "test-nifi-cfg-map" for volume in volumes))
+
+    def test_registry_name(self):
+        objs = self.render_chart({'nifi':{
+            'registryHost': 'nifi-registry'
+        }})
+        self.assertEqual(objs['ConfigMap']['idol-nifi-env']['data']['NIFI_REGISTRY_HOSTS'], 'nifi-registry')
+
+    def test_default_ingress(self):
+        objs = self.render_chart()
+        self.assertEqual(objs['Ingress']['idol-nifi']['spec']['rules'][0]['http']['paths'][0]['path'], '/(.*)')
+        self.assertEqual(objs['Ingress']['idol-nifi-aci']['spec']['rules'][0]['http']['paths'][0]['path'], '/connector-aci/(.*)')
+        self.assertEqual(objs['Ingress']['idol-nifi-metrics']['spec']['rules'][0]['http']['paths'][0]['path'], '/metrics/(.*)')
+
+    def test_security_context(self):
+        return self.check_security_context(['idol-nifi','idol-nifi-reg','idol-nifi-zk'],{
+            t: self.security_context_value() for t in ['podSecurityContext','containerSecurityContext']
+        })
+    
+    def test_additionalVolumes_dict(self):
+        return self.check_additionalVolumes_dict()
 
 if __name__ == '__main__':
     unittest.main()

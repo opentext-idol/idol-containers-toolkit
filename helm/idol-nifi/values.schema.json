@@ -62,10 +62,10 @@
                     "required": ["enabled"]
                 },
                 "additionalVolumes":{
-                    "type": "array"
+                    "type": ["array","object","null"]
                 },
                 "additionalVolumeMounts":{
-                    "type": "array"
+                    "type": ["array","object","null"]
                 },
                 "serviceAccountName":{
                     "type": "string",
@@ -218,13 +218,17 @@
                     "minimum": 0.01,
                     "maximum": 0.99
                 },
+                "mallocArenaMax": {
+                    "type": "integer",
+                    "minimum": 0
+                },
                 "flowfile": {
                     "type":"string",
                     "minLength": 1,
                     "description": "Deprecated, prefer 'flows'"
                 },
                 "flows": {
-                    "type": "array",
+                    "type": ["object"],
                     "items": {
                         "$ref": "#/$defs/Flow"
                     }
@@ -243,6 +247,40 @@
                 },
                 "registryHost": {
                     "type":"string"
+                },
+                "allowedStartupSeconds": {
+                    "type": "integer",
+                    "minimum": 10
+                },
+                "service":{
+                    "type": "object",
+                    "properties":{
+                        "additionalPorts":{
+                            "type": "object",
+                            "patternProperties":{
+                                "^[-a-zA-Z0-0]{0,63}$":{
+                                    "type": "object",
+                                    "description": "See ServicePort under https://kubernetes.io/docs/reference/kubernetes-api/service-resources/service-v1/#ServiceSpec",
+                                    "properties": {
+                                        "port":{
+                                            "type": "integer"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "threadCount": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "serviceStartRetries": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "workingDir": {
+                    "type": "string"
                 }
             }
         },
@@ -256,8 +294,12 @@
                 "flows",
                 "ingress",
                 "jvmMemoryRatio",
+                "mallocArenaMax",
                 "resources",
-                "dataVolume"
+                "dataVolume",
+                "service",
+                "threadCount",
+                "serviceStartRetries"
             ],
             "title": "Nifi"
         },
@@ -274,6 +316,9 @@
                         "clusterId":{
                             "type": "string"
                             }
+                        },
+                        "image": {
+                            "$ref": "#/$defs/idolImage"
                         }
                     }
                 ],
@@ -411,6 +456,10 @@
                 },
                 "limits": {
                     "$ref": "#/$defs/Limits"
+                },
+                "sharedMemory": {
+                    "type": "string",
+                    "pattern": "^\\d+(?:\\.\\d+)?(?:Ki|Mi|Gi|Ti|Pi|Ei|m|k|M|G|T|P|E)?$"
                 }
             },
             "required": [
@@ -456,6 +505,9 @@
                 "enabled": {
                     "type": "boolean"
                 },
+                "image": {
+                    "type": "string"
+                },
                 "ingress": {
                     "$ref": "#/$defs/NifiRegistryIngress"
                 },
@@ -466,7 +518,7 @@
                     "type": "object"
                 },
                 "buckets": {
-                    "type": "array",
+                    "type": ["object"],
                     "items": {
                         "$ref": "#/$defs/Bucket"
                     }
@@ -474,6 +526,7 @@
             },
             "required": [
                 "enabled",
+                "image",
                 "ingress",
                 "resources",
                 "buckets",
@@ -508,11 +561,14 @@
         "Zookeeper": {
             "type": "object",
             "properties": {
+                "image":{
+                    "type":"string"
+                },
                 "resources":{
                     "type": "object"
                 }
             },
-            "required": ["resources"],
+            "required": ["image","resources"],
             "title": "Zookeeper"
         },
         "port_number": {

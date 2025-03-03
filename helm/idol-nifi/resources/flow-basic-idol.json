@@ -76,7 +76,7 @@
                             "TangibleCharacters": null,
                             "RedactedOutput": "false",
                             "TableCellValuePath": "\".\",\"region/text\"",
-                            "ResourceFiles": "/opt/nifi/nifi-current/eduction/pii/combined_*.ecr",
+                            "ResourceFiles": "/opt/nifi/nifi-current/eduction/pii/combined_name.ecr,/opt/nifi/nifi-current/eduction/pii/combined_date.ecr,/opt/nifi/nifi-current/eduction/pii/combined_driving.ecr,/opt/nifi/nifi-current/eduction/pii/combined_health.ecr,/opt/nifi/nifi-current/eduction/pii/combined_national_id.ecr,/opt/nifi/nifi-current/eduction/pii/combined_passport.ecr,/opt/nifi/nifi-current/eduction/pii/combined_telephone.ecr,/opt/nifi/nifi-current/eduction/pii/combined_tin.ecr",
                             "MatchCase": "true",
                             "RedactionReplacementCharacter": null,
                             "PostProcessingTask": null,
@@ -2140,7 +2140,7 @@
                                 },
                                 "properties": {
                                     "Asynchronous Request Expiration": "1 day",
-                                    "DatabaseService": null,
+                                    "DatabaseService": {{ .Values.postgresql.enabled | ternary (quote "94ea6df1-d8ea-4243-8552-0b8c4936cb2a" ) "null" }},
                                     "Maximum Outstanding Asynchronous Requests": "5000",
                                     "Asynchronous Response Expiration": "30 days",
                                     "Maximum Outstanding Synchronous Requests": "500",
@@ -2277,7 +2277,7 @@
                                             "DirectoryFileSizeMinimum": null,
                                             "PathCrawlRegex": null,
                                             "DirectoryFileModifiedBefore": null,
-                                            "DatabaseService": null,
+                                            "DatabaseService": {{ .Values.postgresql.enabled | ternary (quote "94ea6df1-d8ea-4243-8552-0b8c4936cb2a" ) "null" }},
                                             "DirectoryFileCreatedSince": null,
                                             "DirectoryPathCSVs": "/idol-ingest",
                                             "MappedSecurity": "false",
@@ -2534,7 +2534,7 @@
                                             "version": "24.3.0"
                                         },
                                         "properties": {
-                                            "DatabaseService": null
+                                            "DatabaseService": {{ .Values.postgresql.enabled | ternary (quote "94ea6df1-d8ea-4243-8552-0b8c4936cb2a" ) "null" }}
                                         },
                                         "propertyDescriptors": {
                                             "DatabaseService": {
@@ -3480,7 +3480,7 @@
                         },
                         "properties": {
                             "FileSystemConnectorGroup": "FileSystem",
-                            "DatabaseService": null
+                            "DatabaseService": {{ .Values.postgresql.enabled | ternary (quote "94ea6df1-d8ea-4243-8552-0b8c4936cb2a" ) "null" }}
                         },
                         "propertyDescriptors": {
                             "FileSystemConnectorGroup": {
@@ -3845,7 +3845,7 @@
                     "version": "24.3.0"
                 },
                 "properties": {
-                    "DatabaseService": null,
+                    "DatabaseService": {{ .Values.postgresql.enabled | ternary (quote "94ea6df1-d8ea-4243-8552-0b8c4936cb2a" ) "null" }},
                     "DocumentRegistryDirectory": "idol_repository"
                 },
                 "propertyDescriptors": {
@@ -3927,7 +3927,46 @@
                 "bulletinLevel": "WARN",
                 "componentType": "CONTROLLER_SERVICE",
                 "groupIdentifier": "54ca51fb-63af-3ee2-b43f-4d3f980e3d28"
-            }
+            }{{- if .Values.postgresql.enabled }},
+            {
+                "identifier": "94ea6df1-d8ea-4243-8552-0b8c4936cb2a",
+                "instanceIdentifier": "09534cfd-038a-4200-9ebc-6a1abcc0fbe7",
+                "name": "PostgreSQL Database Service",
+                "comments": "",
+                "type": "idol.nifi.service.DatabaseServiceImpl",
+                "bundle": {
+                    "group": "idol.nifi",
+                    "artifact": "idol-nifi-framework",
+                    "version": "24.3.0"
+                },
+                "properties": {
+                    "ConnectionString": "Driver={PostgreSQL};Server=#{PostgreSQLServer};Port=5432;Database=#{PostgreSQLDatabase};Uid=${Uid};Pwd=${Pwd};",
+                    "Uid": "#{PostgreSQLUser}",
+                    "Pwd": "#{PostgreSQLPassword}"
+                },
+                "propertyDescriptors": {
+                    "ConnectionString": {
+                        "name": "ConnectionString",
+                        "displayName": "Connection String",
+                        "identifiesControllerService": false,
+                        "sensitive": false
+                    }
+                },
+                "controllerServiceApis": [
+                    {
+                        "type": "idol.nifi.service.DatabaseService",
+                        "bundle": {
+                            "group": "idol.nifi",
+                            "artifact": "idol-nifi-framework-api",
+                            "version": "24.3.0"
+                        }
+                    }
+                ],
+                "scheduledState": "DISABLED",
+                "bulletinLevel": "WARN",
+                "componentType": "CONTROLLER_SERVICE",
+                "groupIdentifier": "54ca51fb-63af-3ee2-b43f-4d3f980e3d28"
+            }{{- end }}
         ],
         "variables": {},
         "defaultFlowFileExpiration": "0 sec",
@@ -3946,33 +3985,61 @@
             "name": "IDOL NiFi Flow Parameters",
             "parameters": [
                 {
-                "description": "",
-                "name": "IndexHost",
-                "provided": false,
-                "sensitive": false,
-                "value": "idol-index-service"
+                    "description": "",
+                    "name": "IndexHost",
+                    "provided": false,
+                    "sensitive": false,
+                    "value": "idol-index-service"
                 },
                 {
-                "description": "",
-                "name": "LicenseServerHost",
-                "provided": false,
-                "sensitive": false,
-                "value": "idol-licenseserver"
+                    "description": "",
+                    "name": "LicenseServerHost",
+                    "provided": false,
+                    "sensitive": false,
+                    "value": "idol-licenseserver"
                 },
                 {
-                "description": "",
-                "name": "IndexACIPort",
-                "provided": false,
-                "sensitive": false,
-                "value": "9070"
+                    "description": "",
+                    "name": "IndexACIPort",
+                    "provided": false,
+                    "sensitive": false,
+                    "value": "9070"
                 },
                 {
-                "description": "",
-                "name": "LicenseServerACIPort",
-                "provided": false,
-                "sensitive": false,
-                "value": "20000"
-                }
+                    "description": "",
+                    "name": "LicenseServerACIPort",
+                    "provided": false,
+                    "sensitive": false,
+                    "value": "20000"
+                }{{- if .Values.postgresql.enabled }},
+                {
+                    "description": "",
+                    "name": "PostgreSQLServer",
+                    "provided": false,
+                    "sensitive": false,
+                    "value": "{{ .Release.Name  }}-postgresql-pgpool"
+                },
+                {
+                    "description": "",
+                    "name": "PostgreSQLDatabase",
+                    "provided": false,
+                    "sensitive": false,
+                    "value": "{{ .Values.postgresql.postgresql.database }}"
+                },
+                {
+                    "description": "",
+                    "name": "PostgreSQLUser",
+                    "provided": false,
+                    "sensitive": true,
+                    "value": "{{ .Values.postgresql.postgresql.username }}"
+                },
+                {
+                    "description": "",
+                    "name": "PostgreSQLPassword",
+                    "provided": false,
+                    "sensitive": true,
+                    "value": "{{ .Values.postgresql.postgresql.password }}"
+                }{{- end }}
             ]
         }
     },

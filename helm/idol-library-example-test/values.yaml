@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2023-2024 Open Text.
+# Copyright 2023-2025 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -31,7 +31,7 @@ idolImage:
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
   registry: "microfocusidolserver"
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
-  version: "24.4"
+  version: "25.1"
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}.
   repo: "content"
   # -- used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy)
@@ -60,11 +60,13 @@ usingTLS: false
 #                      or content.cfg if $IDOL_COMPONENT is unavailable.
 existingConfigMap: ""
 
-# -- Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
-additionalVolumes: []
+# -- Additional PodSpec Volume(s) (see <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes>)
+# Can be dict of (name, Volume), or list of (Volume). dict form allows for merging definitions from multiple values files.
+additionalVolumes: null
 
-# -- Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1)
-additionalVolumeMounts: []
+# -- Additional PodSpec VolumeMount(s) (see <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1>)
+# Can be dict of (name, VolumeMount), or list of (VolumeMount). dict form allows for merging definitions from multiple values files.
+additionalVolumeMounts: null
 
 # -- Optional configMap name holding extra environnment variables for container
 envConfigMap: ""
@@ -81,6 +83,8 @@ podSecurityContext:
 containerSecurityContext:
   # -- enable SecurityContext for container. Setting to false omits.
   enabled: false
+  privileged: false
+  runAsNonRoot: true
 
 # -- Optional resources for container (see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers)
 resources:
@@ -183,4 +187,8 @@ licenseServerPort: "20000"
 
 # name -- used to name statefulset, service, ingress
 name: "idol-aci-test"
+
+# -- Expected working directory for the container.
+# Should only need to change this for a heavily customized image.
+workingDir: "/content"
 

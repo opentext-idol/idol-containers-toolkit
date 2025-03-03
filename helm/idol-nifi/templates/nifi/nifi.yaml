@@ -32,12 +32,11 @@ spec:
       terminationGracePeriodSeconds: 90
       automountServiceAccountToken: false
       enableServiceLinks: false
-      setHostnameAsFQDN: true
       dnsPolicy: ClusterFirstWithHostNet
       restartPolicy: Always
       initContainers:
       - name: ensure-conf
-        image: {{ include "idol-library.idolImage" (dict "root" $root "idolImage" $component.idolImage) }}
+        image: {{ include "idol-library.idolImage" (dict "root" $root "idolImage" $nifiCluster.image ) }}
         envFrom:
         - configMapRef:
             name: {{ $component.name }}-env
@@ -55,13 +54,18 @@ spec:
         - |
           if [ -z "$(ls -A -- /mnt/store/nifi/conf)" ]; then
             echo Copying files into conf directory
-            cp -r /opt/nifi/nifi-current/conf/ /mnt/store/nifi/
+            cp -rv /opt/nifi/nifi-current/conf/ /mnt/store/nifi/
           fi
-
+          echo Copying files into extensions directory
+          cp -rnv /opt/nifi/nifi-current/extensions/ /mnt/store/nifi/
         volumeMounts:
         - name: statedata
           mountPath: /mnt/store/nifi/conf
           subPath: conf
+          readOnly: false
+        - name: statedata
+          mountPath: /mnt/store/nifi/extensions
+          subPath: extensions
           readOnly: false
       - name: wait-for-zookeeper
         image: docker.io/busybox:1.36
@@ -92,6 +96,30 @@ spec:
         securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml | nindent 10 }}
           readOnlyRootFilesystem: true
         {{- end }}
+      {{- if $root.Values.postgresql.enabled }}
+      - name: wait-for-postgres
+        image: docker.io/busybox:1.36
+        command:
+        - sh
+        - -c
+        - |
+          echo "Connecting to PostgreSQL pool {{ $root.Release.Name }}-postgresql-pgpool"
+          until nc -vzw 1 "{{ $root.Release.Name }}-postgresql-pgpool:5432" ; do
+            echo "Waiting for PostgreSQL pool to start"
+            sleep 3
+          done
+        resources:
+          requests:
+            cpu: 20m
+            memory: 50Mi
+          limits:
+            cpu: 20m
+            memory: 50Mi
+        {{- if $component.containerSecurityContext.enabled }}
+        securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+          readOnlyRootFilesystem: true
+        {{- end }}
+      {{- end }}
       {{- if $component.podSecurityContext.enabled }}
       securityContext: {{- omit $component.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
@@ -108,9 +136,9 @@ spec:
 {{- end -}}
 
 {{- range $nifiClusterItem := .Values.nifiClusters }}
-{{ $nifiCluster := merge $nifiClusterItem $.Values.nifi (dict "clusterId" $.Values.name) }}
+{{ $nifiCluster := merge $nifiClusterItem $.Values.nifi (dict "clusterId" $.Values.name) ( dict "image" $.Values.idolImage) }}
 ---
-{{- include "idol-library.util.merge" (dict
+{{ include "idol-library.util.merge" (dict
   "root" $
   "component" (merge (dict "name" $nifiCluster.clusterId) $.Values)
   "nifiCluster" $nifiCluster
@@ -119,7 +147,7 @@ spec:
   "containers" (list "idolnifi.container")
   "volumes" (list (dict "name" "data" "emptyDir" (dict "sizeLimit" "3Gi"))
                   (dict "name" "scripts" "configMap" (dict "name" (print $.Values.name "-scripts") "optional" false "defaultMode" 0755))
-                  (dict "name" "dshm" "emptyDir" (dict "medium" "Memory" "sizeLimit" "256Mi")))
+                  (dict "name" "dshm" "emptyDir" (dict "medium" "Memory" "sizeLimit" $nifiCluster.resources.sharedMemory)))
   "addConfigMap" false
 ) -}}
 {{- end -}}

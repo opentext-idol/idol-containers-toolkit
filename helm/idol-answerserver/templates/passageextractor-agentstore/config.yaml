@@ -18,11 +18,9 @@ metadata:
 
 data:
   passageextractor-agentstore.cfg: |
-{{ tpl (print "resources/passageextractor-agentstore.cfg" | .Files.Get) . | indent 4 }}
+{{ tpl (print "resources/passageextractor-agentstore.cfg" | .Files.Get) (dict "root" . "component" .Values.passageextractorAgentstore ) | indent 4 }}
 
   passageextractor-agentstore-poststart.sh: |
 {{ tpl (print "resources/passageextractor-agentstore-poststart.sh" | .Files.Get) . | indent 4 }}
 
-  passageextractor-agentstore-poststart_2.sh: |
-{{ tpl (print "resources/passageextractor-agentstore-poststart_2.sh" | .Files.Get) . | indent 4 }}
 {{- end }}

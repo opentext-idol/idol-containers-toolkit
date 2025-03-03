@@ -12,7 +12,6 @@ class TestIdolLibraryExample(AciTestBase, StatefulSetTests, unittest.TestCase):
     chartpath = os.path.join('..','idol-library-example-test')
     _kinds = ['Deployment','StatefulSet','Ingress','ConfigMap','Service']
 
-
 class TestIdolAnswerServer(AciTestBase, unittest.TestCase):
     chartpath = os.path.join('..','idol-answerserver')
     _kinds = ['StatefulSet','Ingress','ConfigMap','Service']
@@ -26,7 +25,7 @@ class TestIdolEductionServer(AciTestBase, unittest.TestCase):
 class TestIdolMediaServer(AciTestBase, unittest.TestCase):
     chartpath = os.path.join('..','idol-mediaserver')
 
-class TestIdolOmniGroupServer(AciTestBase, unittest.TestCase):
+class TestIdolOmniGroupServer(AciTestBase, StatefulSetTests, unittest.TestCase):
     chartpath = os.path.join('..','idol-omnigroupserver')
     _kinds = ['StatefulSet','Ingress','ConfigMap','Service']
 
@@ -35,8 +34,9 @@ class TestIdolQms(AciTestBase, unittest.TestCase):
 
 class TestIdolView(AciTestBase, unittest.TestCase):
     chartpath = os.path.join('..','idol-view')
+    _kinds = ['Deployment','Ingress','ConfigMap','Service']
 
-class TestSingleContent(AciTestBase, unittest.TestCase):
+class TestSingleContent(AciTestBase, StatefulSetTests, unittest.TestCase):
     chartpath = os.path.join('..','single-content')
     _kinds = ['StatefulSet','Ingress','ConfigMap','Service']
 

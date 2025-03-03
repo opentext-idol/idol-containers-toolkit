@@ -201,10 +201,10 @@
                     "$ref": "#/$defs/liveness_probe"
                 },
                 "additionalVolumes":{
-                    "type": "array"
+                    "type": ["array", "object", "null"]
                 },
                 "additionalVolumeMounts":{
-                    "type": "array"
+                   "type": ["array", "object", "null"]
                 },
                 "envConfigMap":{
                     "type": "string"
@@ -250,6 +250,10 @@
                 "serviceAccountName":{
                     "type": "string",
                     "description": "Optional serviceAccountName for the pods (https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account)"
+                },
+                "workingDir":{
+                    "type": "string",
+                    "description": "Expected working directory for the container. Should only need to change this for a heavily customized image."
                 }
             },
             "required":[
@@ -258,7 +262,8 @@
                 "name",
                 "aciPort",
                 "servicePort",
-                "usingTLS"
+                "usingTLS",
+                "workingDir"
             ]
         },
         "licensing":{

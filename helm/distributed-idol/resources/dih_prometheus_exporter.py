@@ -1,6 +1,14 @@
 # BEGIN COPYRIGHT NOTICE
-# (c) Copyright 2023 Micro Focus or one of its affiliates.
+# Copyright 2023-2024 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
 # END COPYRIGHT NOTICE
+
 import collections
 import json
 import logging
@@ -8,6 +16,9 @@ import os
 import re
 import requests
 import time
+import urllib3
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 from prometheus_client import start_http_server
 from prometheus_client.core import GaugeMetricFamily, REGISTRY
@@ -22,6 +33,8 @@ DIHChild = collections.namedtuple('DIHChild', ['group','host','port','status'])
 
 TEMP_STATUS_CODES = set([-7,-12,-13,-16,-17,-25,-34,-35,-36,-38])
 FINISHED_STATUS_CODES = set([x for x in filter(lambda y: y not in TEMP_STATUS_CODES, range(-1,-38,-1))])
+
+HTTP_SCHEME = 'http' if '0'==os.environ.get('IDOL_SSL','0') else 'https'
 
 logging.basicConfig(format='%(asctime)s [%(thread)d] %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S')
@@ -85,10 +98,11 @@ class Worker(object):
         def sort_children(c: DIHChild):
             # host string is of form pod-name-{id}.domain.blah - sort by pod id
             return int(c.host.split('.', 1)[0].split('-')[-1])
+        resp = None
         try:
-            resp = requests.get('&'.join([f'http://{self.host}:{self.aci_port}/action=getstatus',
+            resp = requests.get('&'.join([f'{HTTP_SCHEME}://{self.host}:{self.aci_port}/action=getstatus',
                 'responseformat=json',
-                'actionid=prometheus-exporter']), proxies=no_proxies)
+                'actionid=prometheus-exporter']), proxies=no_proxies, verify=False)
             responsedata = resp.json()['autnresponse']['responsedata']
             full_ratio = float(responsedata['full_ratio']['$'])
             children = [ DIHChild(e['group']['$'], e['host']['$'], e['port']['$'], e['status']['$']) for e in ensure_list(responsedata['engines']['engine']) ]
@@ -102,10 +116,10 @@ class Worker(object):
             return None
     
     def get_index_job_status(self, id: str):
-        resp = requests.get('&'.join([f'http://{self.host}:{self.aci_port}/action=indexerGetStatus',
+        resp = requests.get('&'.join([f'{HTTP_SCHEME}://{self.host}:{self.aci_port}/action=indexerGetStatus',
             f'index={id}',
             'responseformat=simplejson',
-            'actionid=prometheus-exporter']), proxies=no_proxies)
+            'actionid=prometheus-exporter']), proxies=no_proxies, verify=False)
         jresp = resp.json()['autnresponse']['responsedata']
         if 'item' not in jresp:
             log_and_raise(f'Item with id {id} not found in index queue.')
@@ -118,14 +132,14 @@ class Worker(object):
 
     def trigger_redistribution(self, to_remove: set[DIHChild]) -> Tuple[str,str]:
         tracking_id = f'pe-{self.redist_count}-{int(time.time()):0x}'
-        resp = requests.get('&'.join([f'http://{self.host}:{self.index_port}/DREREDISTRIBUTE?RemoveGroup={("+".join(to_remove))}',
+        resp = requests.get('&'.join([f'{HTTP_SCHEME}://{self.host}:{self.index_port}/DREREDISTRIBUTE?RemoveGroup={("+".join(to_remove))}',
             f'dahhost={os.environ["IDOL_DAH_SERVICE_HOST"]}',
             f'dahport={os.environ["IDOL_DAH_SERVICE_PORT"]}',
-            f'indexuid={tracking_id}']), proxies=no_proxies)
+            f'indexuid={tracking_id}']), proxies=no_proxies, verify=False)
         self.redist_count += 1
         id = extract_index_id(resp.text)
-        resp = requests.get(f'http://{self.host}:{self.index_port}/DRESYNC?&indexuid={tracking_id}-sync', 
-            proxies=no_proxies) 
+        resp = requests.get(f'{HTTP_SCHEME}://{self.host}:{self.index_port}/DRESYNC?&indexuid={tracking_id}-sync', 
+            proxies=no_proxies, verify=False) 
         return id, tracking_id
     
     def is_empty_enough(self, status: DIHStatus) -> bool:
@@ -154,9 +168,9 @@ class Worker(object):
 
     def is_engine_available(self, child: DIHChild) -> bool:
         try:
-            r = requests.get('&'.join([f'http://{child.host}:{child.port}/action=getpid',
+            r = requests.get('&'.join([f'{HTTP_SCHEME}://{child.host}:{child.port}/action=getpid',
                     'actionid=prometheus-exporter']), 
-                    proxies=no_proxies)
+                    proxies=no_proxies, verify=False)
             return True
         except:
             return False

@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2023-2024 Open Text.
+# Copyright 2023-2025 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -53,11 +53,13 @@ labels: {}
 # -- Optional configMap name holding extra environnment variables for container
 envConfigMap: ""
 
-# -- Additional PodSpec Volume (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes)
-additionalVolumes: []
+# -- Additional PodSpec Volume(s) (see <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes>)
+# Can be dict of (name, Volume), or list of (Volume). dict form allows for merging definitions from multiple values files.
+additionalVolumes: null
 
-# -- Additional PodSpec VolumeMount (see https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1)
-additionalVolumeMounts: []
+# -- Additional PodSpec VolumeMount(s) (see <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1>)
+# Can be dict of (name, VolumeMount), or list of (VolumeMount). dict form allows for merging definitions from multiple values files.
+additionalVolumeMounts: null
 
 # ingressClassName -- Optional, https://kubernetes.io/docs/concepts/services-networking/ingress/#the-ingress-resource, applied to all ingress objects
 ingressClassName: ""
@@ -145,6 +147,8 @@ nifi:
       cpu: 4000m
       # -- memory limit in mebibytes (value used in jvm memory calculation)
       memoryMi: 10240
+    # -- Size of /dev/shm (shared memory). Used by KeyView.
+    sharedMemory: 256Mi
   
   dataVolume:
     # -- Name of the storage class used to provision a PersistentVolume
@@ -161,14 +165,20 @@ nifi:
   # -- What proportion of the pod memory to allocate for JVM usage
   jvmMemoryRatio: 0.5
 
+  # -- MALLOC_ARENA_MAX environment variable controlling glibc memory pool tuning. Increasing this may improve performance, but at 
+  # potential cost of extra memory usage. See https://www.gnu.org/software/libc/manual/html_node/Malloc-Tunable-Parameters.html
+  mallocArenaMax: 2
+
   # -- The flow definitions to import into NiFi registry.
   # Specify the file, registry bucket name (will be created if not found), and whether to import the flow as a process group into NiFi,
   # or specify the name, bucket name (and optionally version, latest will be used if not specified) of an existing flow in NiFi Registry.
   # Customized flows can be added via a custom NiFi image or mounted into the pod (see `additionalVolumes` and `additionalVolumeMounts`)
+  # Helm value merging combines flows from multiple values sources. Use DELETE to remove an unwanted flow.
   flows:
-  - name: "Basic IDOL"
-    bucket: "default-bucket"
-    version: ""
+    basic-idol:
+      name: "Basic IDOL"
+      bucket: "default-bucket"
+      version: ""
 
   ingress:
     # -- whether to deploy ingress for nifi
@@ -229,6 +239,29 @@ nifi:
   # -- optional hostname of an existing nifi registry instance.
   # Defaults to the created registry instance when nifiRegistry.enabled=true
   registryHost: ""
+  # -- number of seconds to allow for prestart scripts (optionally mounted to /opt/nifi/nifi-current/prestart_scripts/) to run.
+  allowedStartupSeconds: 60
+
+  service:
+    # -- mapping of additional ports to expose on the nifi service (e.g. if flow includes a HandleHttpRequest processor).
+    # Can minimally specify as `--set nifi.service.additionalPorts.{name}.port=12345`
+    additionalPorts: {}
+      # detailedFlowListenerExample:
+      #   name: flowListener
+      #   protocol: TCP
+      #   port: 13000
+      #   targetPort: 13000
+      # minimalFlowListenerExample:
+      #   port: 14000
+
+  # -- Maximum timer driven thread count.
+  threadCount: 10
+
+  # -- Maximum number of times to try starting services after flow import
+  serviceStartRetries: 3
+
+  # -- For nifi this location is where any OEM license files will be placed (see global.idolOemLicenseSecret)
+  workingDir: "/nifi"
 
 # -- nifi cluster instances. Each cluster instance inherits values from the nifi section.
 # When more than one cluster is specified, setting a clusterId is required
@@ -238,6 +271,8 @@ nifiClusters:
 nifiRegistry:
   # -- whether to deploy a nifi registry instance
   enabled: true
+  # -- nifi-registry image to use
+  image: docker.io/apache/nifi-registry:1.23.0
   ingress:
     # nifiRegistry.ingress.enabled -- whether to deploy ingress for nifi registry
     enabled: true
@@ -278,12 +313,16 @@ nifiRegistry:
 
   # -- Buckets to create. Specify the bucket name, and a list of flow files to populate the bucket with.
   # Customized flows can be added via a custom NiFi Registry image or mounted into the pod (see `additionalVolumes` and `additionalVolumeMounts`)
+  # Helm value merging combines buckets from multiple values sources. Use DELETE to remove an unwanted bucket.
   buckets:
-  - name: "default-bucket"
-    flowfiles:
-    - /scripts/flow-basic-idol.json
+    default-bucket:
+      name: "default-bucket"
+      flowfiles:
+      - /scripts/flow-basic-idol.json
 
 zookeeper:
+  # -- zookeeper image to use
+  image: docker.io/zookeeper:3.8
   # zookeeper.resources -- https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits
   resources:
     requests:
@@ -375,3 +414,41 @@ prometheus-adapter:
         matches: ".*"
         as: "nifi_percent_used_count_avg"
       metricsQuery: 'avg(nifi_percent_used_count{component_type="Connection"}) by (pod,namespace)'
+
+# -- `postgresql` sub-chart configuration
+# Required for shared state data storage across the nifi cluster.
+# See https://github.com/bitnami/charts/tree/main/bitnami/postgresql-ha
+# @default -- Default configuration to support shared state data. See values.yaml for details.
+postgresql:
+  # -- whether to deploy the postgresql subchart
+  enabled: true
+  pgpool:
+    adminUsername: pgpool_admin
+    adminPassword: pgpool_admin
+  postgresql:
+    database: nifi-statedata
+    username: postgres
+    password: postgres
+    repmgrUsername: postgres_repmgr
+    repmgrPassword: postgres_repmgr
+    replicaCount: 1
+    resources:
+      requests:
+        cpu: 500m
+        memory: 500Mi
+      limits: 
+        cpu: 1000m
+        memory: 1Gi
+    extraVolumes:
+    - name: dshm
+      emptyDir:
+        medium: Memory
+        sizeLimit: 256Mi
+    extraVolumeMounts:
+    - name: dshm
+      mountPath: /dev/shm
+  persistence:
+    storageClass: "idol-nifi-storage-class"
+    size: 8Gi
+  metrics:
+    enabled: false

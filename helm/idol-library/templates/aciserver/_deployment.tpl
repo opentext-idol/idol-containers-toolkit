@@ -64,9 +64,7 @@ spec:
       {{- range $volumes }}
       - {{ . | toYaml | nindent 8 }}
       {{- end }}
-      {{- range $component.additionalVolumes }}
-      - {{ . | toYaml | nindent 8 }}
-      {{- end }}
+      {{- include "idol-library.util.range_array_or_map_values" (dict "root" $root "vals" $component.additionalVolumes) | indent 6 }}
       {{- if (dig "podSecurityContext" "enabled" false ($component | merge (dict))) }}
       securityContext: {{- omit $component.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}

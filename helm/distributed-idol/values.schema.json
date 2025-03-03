@@ -19,11 +19,14 @@
                 "idol-licenseserver":{
                     "$ref": "#/$defs/optional_subchart"
                 },
-                "custommetrics":{
-                    "$ref": "#/$defs/custommetrics"
+                "metrics-server":{
+                    "$ref": "#/$defs/optional_subchart"
                 },
                 "prometheus":{
-                    "$ref": "#/$defs/prometheus"
+                    "$ref": "#/$defs/optional_subchart"
+                },
+                "prometheus-adapter":{
+                    "$ref": "#/$defs/optional_subchart"
                 },
                 "autoscaling":{
                     "$ref": "#/$defs/autoscaling"
@@ -38,8 +41,9 @@
                 "content",
                 "dih",
                 "dah",
-                "custommetrics",
+                "metrics-server",
                 "prometheus",
+                "prometheus-adapter",
                 "idol-licenseserver",
                 "setupMirrored"
             ],
@@ -182,12 +186,17 @@
                 },
                 "repo": {
                     "$ref": "#/$defs/required_string"
+                },
+                "imagePullPolicy": {
+                    "type": "string",
+                    "enum": ["Always", "IfNotPresent", "Never"]
                 }
             },
             "required":[
                 "registry",
                 "version",
-                "repo"
+                "repo",
+                "imagePullPolicy"
             ],
             "unevaluatedProperties": false
         },
@@ -206,6 +215,14 @@
                     "items": {
                         "$ref": "#/$defs/required_string"
                     }
+                },
+                "imagePullPolicy": {
+                    "type": "string",
+                    "enum": ["", "Always", "IfNotPresent", "Never"]
+                },
+                "idolOemLicenseSecret": {
+                    "type": "string",
+                    "description": "Optional Secret containing OEM licensekey.dat and versionkey.dat files for licensing."
                 },
                 "http_proxy":{
                     "type": "string"
@@ -246,10 +263,10 @@
                     "$ref": "#/$defs/liveness_probe"
                 },
                 "additionalVolumes":{
-                    "type": "array"
+                    "type": ["array", "object", "null"]
                 },
                 "additionalVolumeMounts":{
-                    "type": "array"
+                   "type": ["array", "object", "null"]
                 },
                 "envConfigMap":{
                     "type": "string"
@@ -265,6 +282,10 @@
                 },
                 "resources":{
                     "$ref": "#/$defs/optional_object"
+                },
+                "workingDir":{
+                    "type": "string",
+                    "description": "Expected working directory for the container. Should only need to change this for a heavily customized image."
                 }
             },
             "required":[
@@ -273,7 +294,8 @@
                 "name",
                 "aciPort",
                 "servicePort",
-                "usingTLS"
+                "usingTLS",
+                "workingDir"
             ]
         },
         "licensing":{
@@ -340,8 +362,7 @@
             ],
             "allOf":[
                 { "$ref": "#/$defs/aciCommon" }
-            ],
-            "unevaluatedProperties": false
+            ]
         },
         "dah":{
             "type": "object",
@@ -366,8 +387,7 @@
             ],
             "allOf":[
                 { "$ref": "#/$defs/aciCommon" }
-            ],
-            "unevaluatedProperties": false
+            ]
         },
         "dih":{
             "type": "object",
@@ -401,8 +421,7 @@
             ],
             "allOf":[
                 { "$ref": "#/$defs/aciCommon" }
-            ],
-            "unevaluatedProperties": false
+            ]
         },
         "autoscaling":{
             "type": "object",
@@ -446,65 +465,6 @@
                 "queryserviceName",
                 "indexserviceName"
             ]
-        },
-        "custommetrics":{
-            "type":"object",
-            "properties":{
-                "name":{
-                    "$ref": "#/$defs/required_string"
-                },
-                "servicePort":{
-                    "$ref": "#/$defs/port_number"
-                },
-                "containerPort":{
-                    "$ref": "#/$defs/port_number"
-                }
-            },
-            "required":[
-                "name",
-                "servicePort",
-                "containerPort"
-            ],
-            "unevaluatedProperties": false
-        },
-        "prometheus":{
-            "type":"object",
-            "properties":{
-                "name":{
-                    "$ref": "#/$defs/required_string"
-                },
-                "port":{
-                    "$ref": "#/$defs/port_number"
-                },
-                "envConfigMap":{
-                    "type": "string"
-                },
-                "usingTLS":{
-                    "type": "boolean"
-                },
-                "ingress": {
-                    "type":"object",
-                    "properties":{
-                        "prometheusPath": {
-                            "$ref": "#/$defs/required_string"
-                        }
-                    },
-                    "required":[
-                        "prometheusPath"
-                    ],
-                    "allOf":[
-                        {"$ref":"#/$defs/ingressBase"}
-                    ],
-                    "unevaluatedProperties": false
-                }
-            },
-            "required":[
-                "name",
-                "port",
-                "usingTLS",
-                "ingress"
-            ],
-            "unevaluatedProperties": false
         }
     },
     "type": "object",

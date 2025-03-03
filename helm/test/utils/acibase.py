@@ -4,15 +4,6 @@ class AciTestBase(HelmChartTestBase):
     _kinds = ['Deployment','Ingress','Service','ConfigMap']
     version = '24.4'
 
-    @property
-    def kinds(self):
-        return self._kinds
-    
-    def workloads(self, objs, name):
-        for t in ['Deployment','StatefulSet']:
-            if t in self.kinds:
-                yield t, objs[t][name]
-
     def test_names(self):
         ''' Chart produces expected kinds/names '''
         name = 'test-name'
@@ -24,28 +15,23 @@ class AciTestBase(HelmChartTestBase):
 
     def test_using_tls(self):
         ''' usingTLS sets IDOL_SSL environment variable '''
-        objs = self.render_chart({'name':'idol-aci-test', 'usingTLS':True})
-        for kind,obj in self.workloads(objs, 'idol-aci-test'):
-            with self.subTest(kind):
-                self.assertIn({'name':'IDOL_SSL','value':'1'},
-                            obj['spec']['template']['spec']['containers'][0]['env'])
+        objs = self.render_chart({'usingTLS':True})
+        self.check_tls(objs, [self.name()])
                     
     def test_custom_data(self):
         ''' annotations/labels etc. written to Deployments/StatefulSets '''
-        labels = {'test-label':'test-label-value'}
-        annotations = {'test-annotation':'test-annotation-value'}
-        objs = self.render_chart({'name':'idol-aci-test', 
-                                  'labels':labels, 
-                                  'annotations': annotations,
-                                  'serviceAccountName': 'test-svc'})
-        for kind,obj in self.workloads(objs, 'idol-aci-test'):
-            with self.subTest(kind):
-                with self.subTest(f'{kind}-annotations'):
-                    self.assertEqual(annotations, obj['spec']['template']['metadata']['annotations'])
-                with self.subTest(f'{kind}-labels'):
-                    self.assertLessEqual(labels.items(), obj['spec']['template']['metadata']['labels'].items())
-                with self.subTest(f'{kind}-serviceAccountName'):
-                    self.assertEqual('test-svc', obj['spec']['template']['spec']['serviceAccountName'])
+        objs = self.render_chart(self.get_test_custom_data())
+        self.check_custom_data(objs, [self.name()])
+
+    def test_oem(self):
+        objs = self.render_chart({'global':{'idolOemLicenseSecret':'oem-secret'}, 'workingDir':'/testoem'})
+        for k,obj in self.workloads(objs, [self.name()]):
+            volumeMounts = obj['spec']['template']['spec']['containers'][0]['volumeMounts']
+            self.assertTrue(any([ { 'name': 'oem-license','mountPath': '/testoem/licensekey.dat',
+                'subPath': 'licensekey.dat'}.items() <= x.items() for x in volumeMounts]))
+        
+    def test_additionalVolumes_dict(self):
+        self.check_additionalVolumes_dict()
                     
 class StatefulSetTests():
     def test_volume_claim_templates(self):

@@ -9,7 +9,11 @@
 #
 # END COPYRIGHT NOTICE
 {{- range $nifiClusterItem := .Values.nifiClusters }}
-{{ $nifiCluster := merge $nifiClusterItem $.Values.nifi (dict "clusterId" $.Values.name) }}
+{{- $nifiCluster := merge $nifiClusterItem $.Values.nifi (dict "clusterId" $.Values.name) }}
+{{- $flows := (empty $nifiCluster.flowfile | ternary 
+                (fromYamlArray (include "idol-library.util.range_array_or_map_values" (dict "root" . "vals" $nifiCluster.flows)))
+                (list ( dict "file" $nifiCluster.flowfile "bucket" "default-bucket" "import" true ))
+                ) }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -21,17 +25,17 @@ data:
   JAVA_OPTS: "-XX:UseAVX=0 -Djavax.net.debug=ssl,handshake"
   KEYSTORE_PATH: "${NIFI_HOME}/keytool/keystore.p12"
   KEYSTORE_TYPE: "PKCS12"
+  MALLOC_ARENA_MAX: {{ $nifiCluster.mallocArenaMax | quote }}
   NIFI_ANALYTICS_PREDICT_ENABLED: "true"
   NIFI_CLUSTER_IS_NODE: "true"
-  NIFI_CLUSTER_NODE_CONNECTION_TIMEOUT: "5 min"
+  NIFI_CLUSTER_NODE_CONNECTION_TIMEOUT: "1 min"
   NIFI_CLUSTER_NODE_EVENT_HISTORY_SIZE: "25"
   NIFI_CLUSTER_NODE_LOAD_BALANCE_PORT: "6342"
   NIFI_CLUSTER_NODE_PROTOCOL_MAX_THREADS: "20"
   NIFI_CLUSTER_NODE_PROTOCOL_PORT: "11443"
   NIFI_CLUSTER_NODE_PROTOCOL_THREADS: "10"
-  NIFI_CLUSTER_NODE_READ_TIMEOUT: "5 min"
-  NIFI_CLUSTER_PROTOCOL_CONNECTION_HANDSHAKE_TIMEOUT: "3 min"
-  NIFI_CLUSTER_PROTOCOL_HEARTBEAT_INTERVAL: "2 min"
+  NIFI_CLUSTER_NODE_READ_TIMEOUT: "1 min"
+  NIFI_CLUSTER_PROTOCOL_HEARTBEAT_INTERVAL: "5 sec"
   NIFI_CLUSTER_PROTOCOL_IS_SECURE: "true"
   NIFI_CONTENT_REPOSITORY_ARCHIVE_ENABLED: "false"
   NIFI_ELECTION_MAX_CANDIDATES: "1"
@@ -53,12 +57,14 @@ data:
 {{- end }}
   NIFI_ZK_CONNECT_STRING: "{{ $nifiCluster.clusterId }}-zk:2181"
   NIFI_ZOOKEEPER_CONNECT_STRING: "{{ $nifiCluster.clusterId }}-zk:2181"
-  NIFI_REGISTRY_HOSTS: "{{ $.Values.nifiRegistry.enabled | ternary (print $.Values.name "-reg") $nifiCluster.registryHost }}"
+  NIFI_REGISTRY_HOSTS: "{{ coalesce $nifiCluster.registryHost (print $.Values.name "-reg")  }}"
   TRUSTSTORE_PATH: "${NIFI_HOME}/keytool/truststore.jks"
   TRUSTSTORE_TYPE: "jks"
-  IDOL_NIFI_FLOW_COUNT: "{{ $nifiCluster.flows | len }}"
+  IDOL_NIFI_THREADS: "{{ $nifiCluster.threadCount }}"
+  IDOL_NIFI_SERVICE_START_RETRIES: "{{ $nifiCluster.serviceStartRetries }}"
+  IDOL_NIFI_FLOW_COUNT: "{{ $flows | len }}"
 {{- /* Maintains backwards compatibility for the old nifi.flowfile by using that if explicitly set, else using the newer nifi.flows */}}
-{{- range $i,$flow := (empty $nifiCluster.flowfile | ternary $nifiCluster.flows (list ( dict "file" $nifiCluster.flowfile "bucket" "default-bucket" "import" true ))) }}
+{{- range $i,$flow := $flows }}
   IDOL_NIFI_FLOW_FILE_{{ $i }}: {{ $flow.file | default "" | quote }}
   IDOL_NIFI_FLOW_NAME_{{ $i }}: {{ $flow.name | default "" | quote }}
   IDOL_NIFI_FLOW_VERSION_{{ $i }}: {{ $flow.version | default "" | quote }}
