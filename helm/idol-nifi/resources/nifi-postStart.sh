@@ -21,8 +21,6 @@ logfile=/opt/nifi/nifi-current/logs/post-start.log
         export JAVA_HOME="$JAVA_HOME"
         echo ["$(date)"] Using auto-detected JAVA_HOME: "$JAVA_HOME"
     fi
-    /scripts/nifiProperties.sh
-    /scripts/security.sh
 
     nifitoolkit_nifi_waitForCLI
     nifitoolkit_configure_threads "${IDOL_NIFI_THREADS:-10}"

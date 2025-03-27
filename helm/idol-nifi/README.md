@@ -81,8 +81,8 @@ nifiRegistry:
 
 ## Providing additional NiFi extension files
 
-Startup scripts matching the pattern `/opt/nifi/nifi-current/prestart_scripts/*.sh` will be run during pod startup, a directory containing any scripts to be run should be mounted to
-`/opt/nifi/nifi-current/prestart_scripts/`. Additional NiFi Archive (NAR) extension files can be provided by utilizing a prestart script that loads the required extension files into the `/opt/nifi/nifi-current/extensions` directory. If a startup script is used to download extensions from an external source, `nifi.allowedStartupSeconds` may need to be increased to allow time for the files to be downloaded. Files in the `/opt/nifi/nifi-current/extensions` directory are persited in the `state-data` persistent volume, allowing for repeated downloads on pod restarts to be avoided.
+Startup scripts matching the pattern `/prestart_scripts/*.sh` will be run during pod startup, a directory containing any scripts to be run should be mounted to
+`/prestart_scripts/`. Additional NiFi Archive (NAR) extension files can be provided by utilizing a prestart script that loads the required extension files into the `/opt/nifi/nifi-current/extensions` directory. If a startup script is used to download extensions from an external source, `nifi.allowedStartupSeconds` may need to be increased to allow time for the files to be downloaded. Files in the `/opt/nifi/nifi-current/extensions` directory are persited in the `state-data` persistent volume, allowing for repeated downloads on pod restarts to be avoided.
 
 ## Scaling NiFi
 
