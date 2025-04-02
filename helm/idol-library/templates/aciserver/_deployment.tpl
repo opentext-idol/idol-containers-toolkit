@@ -26,7 +26,8 @@ metadata:
   name: {{ $component.name | quote }}
   labels: {{- include "idol-library.labels" . | nindent 4 }}
 spec:
-  replicas: {{ $component.replicas | default 1 | int }}
+  # workaround dig not working with .Values
+  replicas: {{ dig "replicas" 1 (unset $component "") | int }}
   selector:
     matchLabels:
       app: {{ $component.name | quote }}

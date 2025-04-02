@@ -11,6 +11,14 @@ HelmChartTestBase.debug = False
 class TestIdolLibraryExample(AciTestBase, StatefulSetTests, unittest.TestCase):
     chartpath = os.path.join('..','idol-library-example-test')
     _kinds = ['Deployment','StatefulSet','Ingress','ConfigMap','Service']
+    def test_replicas(self):
+        ''' replicas can be set '''
+        replicas = 0
+        objs = self.render_chart({'name': 'test', 'replicas': replicas})
+        for k in ['Deployment', 'StatefulSet']:
+            ss = objs.get(k, {}).get('test', None)
+            self.assertIsNotNone(ss)
+            self.assertEqual(ss['spec']['replicas'], replicas)
 
 class TestIdolAnswerServer(AciTestBase, unittest.TestCase):
     chartpath = os.path.join('..','idol-answerserver')
