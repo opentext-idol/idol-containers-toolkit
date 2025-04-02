@@ -137,6 +137,9 @@ nifi:
         target:
           type: AverageValue
           averageValue: 20000
+  # -- Initial replica count for nifi. See also nifi.autoScaling.minReplicas and nifi.autoScaling.maxReplicas
+  replicas: 1
+
   # -- https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits
   resources:
     requests:

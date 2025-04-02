@@ -245,6 +245,10 @@
                 "sensitivePropsKey": {
                     "type":"string"
                 },
+                "replicas": {
+                    "type":"integer",
+                    "minimum": 0
+                },
                 "registryHost": {
                     "type":"string"
                 },
