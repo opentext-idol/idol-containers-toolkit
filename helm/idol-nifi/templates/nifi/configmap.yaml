@@ -9,7 +9,7 @@
 #
 # END COPYRIGHT NOTICE
 {{- range $nifiClusterItem := .Values.nifiClusters }}
-{{- $nifiCluster := merge $nifiClusterItem $.Values.nifi (dict "clusterId" $.Values.name) }}
+{{ $nifiCluster := (include "idolnifi.clusterItem" (dict "root" $ "item" $nifiClusterItem) | fromYaml) }}
 {{- $flows := (empty $nifiCluster.flowfile | ternary 
                 (fromYamlArray (include "idol-library.util.range_array_or_map_values" (dict "root" . "vals" $nifiCluster.flows)))
                 (list ( dict "file" $nifiCluster.flowfile "bucket" "default-bucket" "import" true ))

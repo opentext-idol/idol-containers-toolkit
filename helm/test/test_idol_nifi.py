@@ -20,7 +20,8 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
             {
                 'name':'testnifi',
                 'nifiClusters':[
-                    { 'clusterId':'nf1' },
+                    { 'clusterId':'nf1',
+                      'replicas': 1 },
                     {
                         'clusterId':'nf2',
                         'flows':{
@@ -58,6 +59,7 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
                     {
                         'clusterId':'nf3',
                         'flowfile':'flow3.json',
+                        'replicas': 0,
                         'ingress':{
                            'enabled':True,
                            'proxyPath':'/',
@@ -84,6 +86,7 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
                     {}
                 ],
                 "nifi":{
+                    "replicas": 2,
                     "service": {
                         "additionalPorts":{
                             "commonPort":{
@@ -158,6 +161,10 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
         self.assertNotIn(commonPortDef, objs['Service']['nf2']['spec']['ports']) # -ve port number removes inherited def
         self.assertIn({'name':'commonPort','port':2222, 'protocol':'UDP'}, objs['Service']['nf3']['spec']['ports'])
         self.assertIn( {'name':'extra', 'protocol':'UDP', 'port':2223,'targetPort':2224,}, objs['Service']['nf3']['spec']['ports'])
+
+        for k,v in {'nf1':1, 'nf2':2, 'nf3': 0 }.items():
+            with self.subTest(f'{k} replicas'):
+                self.assertEqual(objs['StatefulSet'][k]['spec']['replicas'], v)
 
     def test_default_registry_buckets(self):
         objs = self.render_chart({})
