@@ -136,11 +136,11 @@ spec:
 {{- end -}}
 
 {{- range $nifiClusterItem := .Values.nifiClusters }}
-{{ $nifiCluster := merge $nifiClusterItem $.Values.nifi (dict "clusterId" $.Values.name) ( dict "image" $.Values.idolImage) }}
+{{- $nifiCluster := (include "idolnifi.clusterItem" (dict "root" $ "item" $nifiClusterItem) | fromYaml) }}
 ---
 {{ include "idol-library.util.merge" (dict
   "root" $
-  "component" (merge (dict "name" $nifiCluster.clusterId) $.Values)
+  "component" $nifiCluster
   "nifiCluster" $nifiCluster
   "source" "idol-library.aciserver.statefulset.base.v1"
   "destination" "idolnifi.statefulset.base" 

@@ -9,7 +9,7 @@
 #
 # END COPYRIGHT NOTICE
 {{- range $nifiClusterItem := .Values.nifiClusters }}
-{{ $nifiCluster := merge $nifiClusterItem $.Values.nifi (dict "clusterId" $.Values.name) }}
+{{ $nifiCluster := (include "idolnifi.clusterItem" (dict "root" $ "item" $nifiClusterItem) | fromYaml) }}
 ---
 apiVersion: v1
 kind: Service
