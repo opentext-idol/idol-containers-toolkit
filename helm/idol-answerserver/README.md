@@ -1,6 +1,6 @@
 # idol-answerserver
 
-![Version: 0.5.0](https://img.shields.io/badge/Version-0.5.0-informational?style=flat-square) ![AppVersion: 25.1](https://img.shields.io/badge/AppVersion-25.1-informational?style=flat-square)
+![Version: 0.5.1](https://img.shields.io/badge/Version-0.5.1-informational?style=flat-square) ![AppVersion: 25.1](https://img.shields.io/badge/AppVersion-25.1-informational?style=flat-square)
 
 Provides a Knowledge Discovery AnswerServer deployment.
 
@@ -18,7 +18,7 @@ and `idol-query-service` services. These systems are all optional and can be dis
 To use a passageextractorLLM system, you must first set up a persistent volume and index the appropriate model
 files, then redeploy the chart with LLM configuration information in your answerserver configuration file.
 
-> Full documentation for answerserver available from <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.1/AnswerServer_25.1_Documentation/Help/>
+> Full documentation for AnswerServer available from <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.1/AnswerServer_25.1_Documentation/Help/>
 
 ## Requirements
 
