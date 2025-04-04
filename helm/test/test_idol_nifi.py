@@ -14,24 +14,8 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
     def setUp(self):
         self._kinds = ['StatefulSet','Ingress','ConfigMap','Service']
 
-    def _multiple_nifi_values(self, nifiClusters):
-        return {
-                'name':'testnifi',
-                'nifiClusters': nifiClusters,
-                "nifi":{
-                    "replicas": 2,
-                    "service": {
-                        "additionalPorts":{
-                            "commonPort":{
-                                "port": 2222
-                            }
-                        }
-                    }
-                }
-            }
-
-    def _multiple_nifi_clusters(self):
-        return {
+    def _multiple_nifi_values(self, use_dict):
+        clusters = {
             'nf1': { 'clusterId':'nf1',
                       'replicas': 1 },
             'nf2': {
@@ -95,8 +79,27 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
                     }
                 }
             },
-            '_unnamed_': {}
-           }
+            '_unnamed_': { 'dummy': None },
+        }
+        if use_dict:
+            clusters['ignored'] = {'DELETE': True}
+        return {
+                'name':'testnifi',
+                'nifiClusters': clusters if use_dict else list(clusters.values()),
+                "nifi":{
+                    "replicas": 2,
+                    "service": {
+                        "additionalPorts":{
+                            "commonPort":{
+                                "port": 2222
+                            }
+                        }
+                    }
+                }
+            }
+
+    def _multiple_nifi_clusters(self):
+        return 
 
     def _check_multiple_nifi(self, objs):
         clusterids = ['nf1','nf2','nf3','testnifi']
@@ -173,13 +176,13 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
     
     def test_multiple_nifi_array(self):
         ''' Test multiple nifiClusters specified in array form '''
-        self._check_multiple_nifi(self.render_chart(
-            self._multiple_nifi_values(list(self._multiple_nifi_clusters().values()))))
+        self._check_multiple_nifi(self.render_chart(self._multiple_nifi_values(use_dict=False)))
         
     def test_multiple_nifi_dict(self):
         ''' Test multiple nifiClusters specified in dict form '''
-        self._check_multiple_nifi(self.render_chart(
-            self._multiple_nifi_values(self._multiple_nifi_clusters())))
+        objs = self.render_chart(self._multiple_nifi_values(use_dict=True))
+        self._check_multiple_nifi(objs)
+        self.assertNotIn('ignored', objs['StatefulSet'].keys())
 
     def test_default_registry_buckets(self):
         objs = self.render_chart({})

@@ -36,7 +36,8 @@ The template will be called with a copy of the same args plus:
 {{- define "idolnifi.forEachCluster" }}
 {{- $root := get . "root" | required "idolnifi.forEachCluster: missing root" }}
 {{- $tpl := get . "tpl" | required "idolnifi.forEachCluster: missing tpl" }}
-{{- range $nifiClusterItem := default (list dict) $root.Values.nifiClusters }}
+{{- range $nifiClusterItem := default (list dict) 
+      (include "idol-library.util.range_array_or_map_values" (dict "root" $root "vals" $root.Values.nifiClusters) | fromYamlArray) }}
 {{ $nifiCluster := (include "idolnifi.clusterItem" (dict "root" $.root "item" $nifiClusterItem) | fromYaml) }}
 {{ $args := merge (dict "nifiCluster" $nifiCluster 
                         "nifiClustersLen" (default (list dict) ($.root.Values.nifiClusters) | len ))
