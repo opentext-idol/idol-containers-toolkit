@@ -119,6 +119,10 @@ resources:
     cpu: 1000m
     memory: 1Gi
 
+# -- number of replica pods for this workload (defaults to 1). Consider distributed-idol chart instead if setting a value
+# greater than 1.
+replicas: 1
+
 # -- Optional serviceAccountName for the pods (https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account)
 serviceAccountName: ""
 

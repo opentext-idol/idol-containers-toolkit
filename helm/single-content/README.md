@@ -1,6 +1,6 @@
 # single-content
 
-![Version: 0.11.0](https://img.shields.io/badge/Version-0.11.0-informational?style=flat-square) ![AppVersion: 25.1](https://img.shields.io/badge/AppVersion-25.1-informational?style=flat-square)
+![Version: 0.11.1](https://img.shields.io/badge/Version-0.11.1-informational?style=flat-square) ![AppVersion: 25.1](https://img.shields.io/badge/AppVersion-25.1-informational?style=flat-square)
 
 Provides a Knowledge Discovery Content statefulset.
 
@@ -78,6 +78,7 @@ of these endpoints to exist in the cluster.
 | podSecurityContext.enabled | bool | `false` | enable PodSecurityContext. Setting to false omits. |
 | queryserviceACIPort | string | `"9060"` | port idol-query-service will serve ACI connections on. |
 | queryserviceName | string | `"idol-query-service"` | internal parameter to specify the query service name, if this is empty then no                     additional service will be provisioned. |
+| replicas | int | `1` | number of replica pods for this workload (defaults to 1). Consider distributed-idol chart instead if setting a value greater than 1. |
 | resources | object | `{"enabled":false,"limits":{"cpu":"1000m","memory":"1Gi"},"requests":{"cpu":"1000m","memory":"1Gi"}}` | Optional resources for container (see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers) |
 | resources.enabled | bool | `false` | enable resources for container. Setting to false omits. |
 | serviceAccountName | string | `""` | Optional serviceAccountName for the pods (https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account) |
