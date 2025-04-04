@@ -8,15 +8,17 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-{{- range $nifiClusterItem := .Values.nifiClusters }}
-{{ $nifiCluster := (include "idolnifi.clusterItem" (dict "root" $ "item" $nifiClusterItem) | fromYaml) }}
-{{- if and $.Values.prometheus.enabled $nifiCluster.ingress.enabled }}
+{{- define "idolnifi.nifi.ingress-metrics" }}
+{{ $root := get . "root" | required "idolnifi.nifi.ingress-metrics: missing nifiCluster" }}
+{{ $nifiCluster := get . "nifiCluster" | required "idolnifi.nifi.ingress-metrics: missing nifiCluster" }}
+{{ $nifiClustersLen := get . "nifiClustersLen" | required "idolniif.nifi.ingress-metrics: missing nifiClustersLen" }}
+{{- if and $root.Values.prometheus.enabled $nifiCluster.ingress.enabled }}
 {{- /*
  nginx ingress needs path capture to achieve prefix type routing
 */}}
 {{- $pathSuffix := "" }}
 {{- $pathType := "Prefix" }}
-{{- if eq $.Values.ingressType "nginx" }}
+{{- if eq $root.Values.ingressType "nginx" }}
 {{- $pathSuffix = "(.*)"}}
 {{- $pathType = "ImplementationSpecific" }}
 {{- end }}
@@ -25,26 +27,26 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $nifiCluster.clusterId }}-metrics
-  labels: {{- include "idol-library.labels" (dict "root" $ "component" $nifiCluster) | nindent 4 -}}
+  labels: {{- include "idol-library.labels" (dict "root" $root "component" $nifiCluster) | nindent 4 -}}
   annotations:
     app.kubernetes.io/name: nifi-metrics
     app.kubernetes.io/part-of: {{ $nifiCluster.clusterId }}
-{{- if eq $.Values.ingressType "nginx" }}
+{{- if eq $root.Values.ingressType "nginx" }}
     nginx.ingress.kubernetes.io/rewrite-target: /metrics$1
-    nginx.ingress.kubernetes.io/proxy-body-size: {{ $.Values.ingressProxyBodySize }}
+    nginx.ingress.kubernetes.io/proxy-body-size: {{ $root.Values.ingressProxyBodySize }}
     nginx.ingress.kubernetes.io/affinity: cookie
     nginx.ingress.kubernetes.io/affinity-mode: persistent
-{{- else if eq $.Values.ingressType "haproxy" }}
+{{- else if eq $root.Values.ingressType "haproxy" }}
     haproxy.router.openshift.io/rewrite-target: /metrics
-    haproxy.router.openshift.io/proxy-body-size: {{ $.Values.ingressProxyBodySize }}
+    haproxy.router.openshift.io/proxy-body-size: {{ $root.Values.ingressProxyBodySize }}
 {{- end }}
 {{/* ingress setup is very dependent on cluster ingress controller so allow user value annotations */ -}}
 {{ with $nifiCluster.ingress.annotations }}
 {{- toYaml . | trim | indent 4 }}
 {{- end }}
 spec:
-{{- if $.Values.ingressClassName }}
-  ingressClassName: {{ $.Values.ingressClassName | quote }}
+{{- if $root.Values.ingressClassName }}
+  ingressClassName: {{ $root.Values.ingressClassName | quote }}
 {{- end }}
 {{- if $nifiCluster.ingress.metricsTLS.secretName }}
   tls:
@@ -55,7 +57,7 @@ spec:
   rules:
   - http:
       paths:
-      - path: {{ print (len $.Values.nifiClusters | plural "" (print "/" $nifiCluster.clusterId)) "/metrics/" $pathSuffix | quote }}
+      - path: {{ print ($nifiClustersLen | plural "" (print "/" $nifiCluster.clusterId)) "/metrics/" $pathSuffix | quote }}
         pathType: {{ $pathType }}
         backend:
           service:
@@ -71,3 +73,5 @@ spec:
 {{- end -}}
 {{- end -}}
 {{- end -}}
+
+{{- include "idolnifi.forEachCluster" (dict "root" . "tpl" "idolnifi.nifi.ingress-metrics") }}

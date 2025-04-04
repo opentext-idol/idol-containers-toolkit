@@ -268,8 +268,8 @@ nifi:
 
 # -- nifi cluster instances. Each cluster instance inherits values from the nifi section.
 # When more than one cluster is specified, setting a clusterId is required
-nifiClusters:
- - {}
+nifiClusters: null
+ 
 
 nifiRegistry:
   # -- whether to deploy a nifi registry instance

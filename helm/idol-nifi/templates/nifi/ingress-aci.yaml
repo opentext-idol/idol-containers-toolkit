@@ -8,15 +8,17 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-{{- range $nifiClusterItem := .Values.nifiClusters }}
-{{ $nifiCluster := (include "idolnifi.clusterItem" (dict "root" $ "item" $nifiClusterItem) | fromYaml) }}
+{{- define "idolnifi.nifi.ingress-aci" }}
+{{ $root := get . "root" | required "idolnifi.nifi.ingress-aci: missing nifiCluster" }}
+{{ $nifiCluster := get . "nifiCluster" | required "idolnifi.nifi.ingress-aci: missing nifiCluster" }}
+{{ $nifiClustersLen := get . "nifiClustersLen" | required "idolniif.nifi.ingress-aci: missing nifiClustersLen" }}
 {{- if $nifiCluster.ingress.enabled -}}
 {{- /*
  nginx ingress needs path capture to achieve prefix type routing
 */}}
 {{- $pathSuffix := "" }}
 {{- $pathType := "Prefix" }}
-{{- if eq $.Values.ingressType "nginx" }}
+{{- if eq $root.Values.ingressType "nginx" }}
 {{- $pathSuffix = "(.*)"}}
 {{- $pathType = "ImplementationSpecific" }}
 {{- end }}
@@ -25,18 +27,18 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $nifiCluster.clusterId }}-aci
-  labels: {{- include "idol-library.labels" (dict "root" $ "component" $nifiCluster) | nindent 4 -}}
+  labels: {{- include "idol-library.labels" (dict "root" $root "component" $nifiCluster) | nindent 4 -}}
   annotations:
-{{- if eq $.Values.ingressType "nginx" }}
+{{- if eq $root.Values.ingressType "nginx" }}
     nginx.ingress.kubernetes.io/rewrite-target: /$1
-    nginx.ingress.kubernetes.io/proxy-body-size: {{ $.Values.ingressProxyBodySize }}
-{{- else if eq $.Values.ingressType "haproxy" }}
+    nginx.ingress.kubernetes.io/proxy-body-size: {{ $root.Values.ingressProxyBodySize }}
+{{- else if eq $root.Values.ingressType "haproxy" }}
     haproxy.router.openshift.io/rewrite-target: / 
-    haproxy.router.openshift.io/proxy-body-size: {{ $.Values.ingressProxyBodySize }}
+    haproxy.router.openshift.io/proxy-body-size: {{ $root.Values.ingressProxyBodySize }}
 {{- end }}
 spec:
-{{- if $.Values.ingressClassName }}
-  ingressClassName: {{ $.Values.ingressClassName }}
+{{- if $root.Values.ingressClassName }}
+  ingressClassName: {{ $root.Values.ingressClassName }}
 {{- end }}
 {{- if $nifiCluster.ingress.aciTLS.secretName }}
   tls:
@@ -47,7 +49,7 @@ spec:
   rules:
   - http:
       paths:
-      - path: {{ print (len $.Values.nifiClusters | plural "" (print "/" $nifiCluster.clusterId)) "/connector-aci/" $pathSuffix | quote }}
+      - path: {{ print ($nifiClustersLen | plural "" (print "/" $nifiCluster.clusterId)) "/connector-aci/" $pathSuffix | quote }}
         pathType: {{ $pathType }}
         backend:
           service:
@@ -63,3 +65,5 @@ spec:
 {{- end -}}
 {{- end -}}
 {{- end -}}
+
+{{ include "idolnifi.forEachCluster" (dict "root" . "tpl" "idolnifi.nifi.ingress-aci" ) }}

@@ -25,3 +25,23 @@
         $item }} 
 {{ toYaml $mergedItem }}
 {{- end }}
+
+{{/* Calls a named template for each nifi cluster defined in .Values.nifiClusters
+@param .root The root context
+@param .tpl The name of the template to include
+The template will be called with a copy of the same args plus:
+ nifiCluster: the merged object for this cluster instance
+ nifiClustersLen: the number of clusters total
+*/}}
+{{- define "idolnifi.forEachCluster" }}
+{{- $root := get . "root" | required "idolnifi.forEachCluster: missing root" }}
+{{- $tpl := get . "tpl" | required "idolnifi.forEachCluster: missing tpl" }}
+{{- range $nifiClusterItem := default (list dict) 
+      (include "idol-library.util.range_array_or_map_values" (dict "root" $root "vals" $root.Values.nifiClusters) | fromYamlArray) }}
+{{ $nifiCluster := (include "idolnifi.clusterItem" (dict "root" $.root "item" $nifiClusterItem) | fromYaml) }}
+{{ $args := merge (dict "nifiCluster" $nifiCluster 
+                        "nifiClustersLen" (default (list dict) ($.root.Values.nifiClusters) | len ))
+                  ($) }}
+{{ include $.tpl $args }}
+{{- end }}
+{{- end }}

@@ -8,8 +8,10 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-{{- range $nifiClusterItem := .Values.nifiClusters }}
-{{ $nifiCluster := (include "idolnifi.clusterItem" (dict "root" $ "item" $nifiClusterItem) | fromYaml) }}
+{{- define "idolnifi.nifi.configmap" }}
+{{ $root := get . "root" | required "idolnifi.nifi.configmap: missing nifiCluster" }}
+{{ $nifiCluster := get . "nifiCluster" | required "idolnifi.nifi.configmap: missing nifiCluster" }}
+{{ $nifiClustersLen := get . "nifiClustersLen" | required "idolniif.nifi.configmap: missing nifiClustersLen" }}
 {{- $flows := (empty $nifiCluster.flowfile | ternary 
                 (fromYamlArray (include "idol-library.util.range_array_or_map_values" (dict "root" . "vals" $nifiCluster.flows)))
                 (list ( dict "file" $nifiCluster.flowfile "bucket" "default-bucket" "import" true ))
@@ -19,7 +21,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ $nifiCluster.clusterId }}-env
-  labels: {{- include "idol-library.labels" (dict "root" $ "component" $nifiCluster) | nindent 4 -}}
+  labels: {{- include "idol-library.labels" (dict "root" $root "component" $nifiCluster) | nindent 4 -}}
     app: {{ $nifiCluster.clusterId }}
 data:
   JAVA_OPTS: "-XX:UseAVX=0 -Djavax.net.debug=ssl,handshake"
@@ -49,7 +51,7 @@ data:
   NIFI_WEB_HTTPS_PORT: "8443"
 {{- if $nifiCluster.ingress.proxyPath }}
   NIFI_WEB_PROXY_CONTEXT_PATH: {{ $nifiCluster.ingress.proxyPath | quote }}
-{{- else if gt (len $.Values.nifiClusters) 1 }}
+{{- else if gt $nifiClustersLen 1 }}
   NIFI_WEB_PROXY_CONTEXT_PATH: "/{{ $nifiCluster.clusterId }}"
 {{- end }}
 {{- if $nifiCluster.ingress.proxyHost }}
@@ -57,7 +59,7 @@ data:
 {{- end }}
   NIFI_ZK_CONNECT_STRING: "{{ $nifiCluster.clusterId }}-zk:2181"
   NIFI_ZOOKEEPER_CONNECT_STRING: "{{ $nifiCluster.clusterId }}-zk:2181"
-  NIFI_REGISTRY_HOSTS: "{{ coalesce $nifiCluster.registryHost (print $.Values.name "-reg")  }}"
+  NIFI_REGISTRY_HOSTS: "{{ coalesce $nifiCluster.registryHost (print $root.Values.name "-reg")  }}"
   TRUSTSTORE_PATH: "${NIFI_HOME}/keytool/truststore.jks"
   TRUSTSTORE_TYPE: "jks"
   IDOL_NIFI_THREADS: "{{ $nifiCluster.threadCount }}"
@@ -72,3 +74,5 @@ data:
   IDOL_NIFI_FLOW_IMPORT_{{ $i }}: {{ hasKey $flow "import" | ternary $flow.import "true" | quote }}
 {{- end }}
 {{- end -}}
+
+{{- include "idolnifi.forEachCluster" (dict "root" . "tpl" "idolnifi.nifi.configmap") }}
