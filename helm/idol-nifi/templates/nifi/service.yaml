@@ -8,18 +8,19 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-{{- range $nifiClusterItem := .Values.nifiClusters }}
-{{ $nifiCluster := (include "idolnifi.clusterItem" (dict "root" $ "item" $nifiClusterItem) | fromYaml) }}
+{{- define "idolnifi.nifi.service" }}
+{{ $root := get . "root" | required "idolnifi.nifi.service: missing nifiCluster" }}
+{{ $nifiCluster := get . "nifiCluster" | required "idolnifi.nifi.service: missing nifiCluster" }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ $nifiCluster.clusterId }}
-  labels: {{- include "idol-library.labels" (dict "root" $ "component" $nifiCluster) | nindent 4 -}}
+  labels: {{- include "idol-library.labels" (dict "root" $root "component" $nifiCluster) | nindent 4 -}}
     app: {{ $nifiCluster.clusterId }}
   annotations:
     app.kubernetes.io/name: {{ $nifiCluster.clusterId }}
-    app.kubernetes.io/part-of: {{ $.Values.name }}
+    app.kubernetes.io/part-of: {{ $root.Values.name }}
 spec:
   type: ClusterIP
   selector:
@@ -60,3 +61,5 @@ spec:
   {{- end }}
   {{- end }}
 {{- end }}
+
+{{- include "idolnifi.forEachCluster" (dict "root" . "tpl" "idolnifi.nifi.service") }}

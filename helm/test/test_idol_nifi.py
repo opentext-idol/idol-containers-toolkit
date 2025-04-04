@@ -172,10 +172,12 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
                 self.assertEqual(objs['StatefulSet'][k]['spec']['replicas'], v)
     
     def test_multiple_nifi_array(self):
+        ''' Test multiple nifiClusters specified in array form '''
         self._check_multiple_nifi(self.render_chart(
             self._multiple_nifi_values(list(self._multiple_nifi_clusters().values()))))
         
-    def test_multiple_nifi_map(self):
+    def test_multiple_nifi_dict(self):
+        ''' Test multiple nifiClusters specified in dict form '''
         self._check_multiple_nifi(self.render_chart(
             self._multiple_nifi_values(self._multiple_nifi_clusters())))
 
