@@ -1143,6 +1143,19 @@ entries:
   idol-mediaserver:
   - apiVersion: v2
     appVersion: "25.1"
+    created: "2025-04-07T10:05:36.473457682+01:00"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: ~0.15.0
+    description: Adds Knowledge Discovery MediaServer
+    digest: 37a54b5b0a92a668da80699ef713d8e9b3edda922bc8c502b8144ed1bbb73a28
+    name: idol-mediaserver
+    urls:
+    - release/idol-mediaserver-0.5.1.tgz
+    version: 0.5.1
+  - apiVersion: v2
+    appVersion: "25.1"
     created: "2025-02-11T15:43:31.310298745Z"
     dependencies:
     - name: idol-library
@@ -2812,4 +2825,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2025-04-07T10:03:45.283924633+01:00"
+generated: "2025-04-07T10:05:36.471449353+01:00"
