@@ -130,8 +130,10 @@ Multiple NiFi clusters can be deployed from a single helm install command by spe
 
 ```yaml
     nifiClusters:
-    - clusterId: nf1
-    - clusterId: nf2
+      nf1:
+        clusterId: nf1
+      nf2: 
+        clusterId: nf2
 ```
 
 Each NiFi cluster will, by default, be accessible at [hostname]/[clusterId]/nifi and can communicate with each other by using <http://[clusterId]:8080/nifi> as the instance url when configuring remote process groups.
