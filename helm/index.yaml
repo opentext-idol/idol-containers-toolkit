@@ -1863,6 +1863,23 @@ entries:
   idol-omnigroupserver:
   - apiVersion: v2
     appVersion: "25.1"
+    created: "2025-04-07T10:11:38.099582276+01:00"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: ~0.15.0
+    - condition: idol-licenseserver.enabled
+      name: idol-licenseserver
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: ~0.4.0
+    description: Adds Knowledge Discovery OmniGroupServer
+    digest: d35480e4a03ae8d0dc1546590b904296ddedb7b3c1840e192ad45277ef68f0b6
+    name: idol-omnigroupserver
+    urls:
+    - release/idol-omnigroupserver-0.8.1.tgz
+    version: 0.8.1
+  - apiVersion: v2
+    appVersion: "25.1"
     created: "2025-02-11T14:36:47.395571168Z"
     dependencies:
     - name: idol-library
@@ -2825,4 +2842,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2025-04-07T10:05:36.471449353+01:00"
+generated: "2025-04-07T10:11:38.097134874+01:00"
