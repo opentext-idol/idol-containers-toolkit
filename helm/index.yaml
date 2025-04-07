@@ -13,6 +13,35 @@ entries:
   distributed-idol:
   - apiVersion: v2
     appVersion: "25.1"
+    created: "2025-04-07T12:43:33.095778946+01:00"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: ~0.15.0
+    - condition: idol-licenseserver.enabled
+      name: idol-licenseserver
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: ~0.4.0
+    - condition: metrics-server.enabled
+      name: metrics-server
+      repository: https://kubernetes-sigs.github.io/metrics-server
+      version: 3.8.2
+    - condition: prometheus.enabled
+      name: prometheus
+      repository: https://prometheus-community.github.io/helm-charts
+      version: "25.0"
+    - condition: prometheus-adapter.enabled
+      name: prometheus-adapter
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 4.2.0
+    description: A configurable distributed IDOL setup
+    digest: fc104eab450c995f6c18fc76b2b7a8dff7ef3196e53c711f40ec9f165279baa0
+    name: distributed-idol
+    urls:
+    - release/distributed-idol-0.13.1.tgz
+    version: 0.13.1
+  - apiVersion: v2
+    appVersion: "25.1"
     created: "2025-02-10T16:02:11.565201396Z"
     dependencies:
     - name: idol-library
@@ -2842,4 +2871,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2025-04-07T10:11:38.097134874+01:00"
+generated: "2025-04-07T12:43:33.067605488+01:00"

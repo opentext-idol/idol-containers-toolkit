@@ -10,7 +10,7 @@
 # END COPYRIGHT NOTICE
 apiVersion: v2
 name: distributed-idol
-version: 0.13.0
+version: 0.13.1
 appVersion: "25.1"
 description: A configurable distributed IDOL setup
 dependencies:

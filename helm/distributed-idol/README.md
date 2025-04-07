@@ -8,7 +8,7 @@ END COPYRIGHT NOTICE
 # distributed-idol
 <!-- omit in toc -->
 
-![Version: 0.13.0](https://img.shields.io/badge/Version-0.13.0-informational?style=flat-square) ![AppVersion: 25.1](https://img.shields.io/badge/AppVersion-25.1-informational?style=flat-square)
+![Version: 0.13.1](https://img.shields.io/badge/Version-0.13.1-informational?style=flat-square) ![AppVersion: 25.1](https://img.shields.io/badge/AppVersion-25.1-informational?style=flat-square)
 
 - [Overview](#overview)
 - [Prerequisites](#prerequisites)
