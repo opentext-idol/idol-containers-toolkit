@@ -1,6 +1,6 @@
 # idol-nifi
 
-![Version: 0.13.0](https://img.shields.io/badge/Version-0.13.0-informational?style=flat-square) ![AppVersion: 25.1](https://img.shields.io/badge/AppVersion-25.1-informational?style=flat-square)
+![Version: 0.14.0](https://img.shields.io/badge/Version-0.14.0-informational?style=flat-square) ![AppVersion: 25.1](https://img.shields.io/badge/AppVersion-25.1-informational?style=flat-square)
 
 Provides a scaleable Knowledge Discovery NiFi cluster instance (NiFi, NiFi Registry and ZooKeeper).
 
@@ -81,8 +81,8 @@ nifiRegistry:
 
 ## Providing additional NiFi extension files
 
-Startup scripts matching the pattern `/opt/nifi/nifi-current/prestart_scripts/*.sh` will be run during pod startup, a directory containing any scripts to be run should be mounted to
-`/opt/nifi/nifi-current/prestart_scripts/`. Additional NiFi Archive (NAR) extension files can be provided by utilizing a prestart script that loads the required extension files into the `/opt/nifi/nifi-current/extensions` directory. If a startup script is used to download extensions from an external source, `nifi.allowedStartupSeconds` may need to be increased to allow time for the files to be downloaded. Files in the `/opt/nifi/nifi-current/extensions` directory are persited in the `state-data` persistent volume, allowing for repeated downloads on pod restarts to be avoided.
+Startup scripts matching the pattern `/prestart_scripts/*.sh` will be run during pod startup, a directory containing any scripts to be run should be mounted to
+`/prestart_scripts/`. Additional NiFi Archive (NAR) extension files can be provided by utilizing a prestart script that loads the required extension files into the `/opt/nifi/nifi-current/extensions` directory. If a startup script is used to download extensions from an external source, `nifi.allowedStartupSeconds` may need to be increased to allow time for the files to be downloaded. Files in the `/opt/nifi/nifi-current/extensions` directory are persited in the `state-data` persistent volume, allowing for repeated downloads on pod restarts to be avoided.
 
 ## Scaling NiFi
 
@@ -125,8 +125,10 @@ Multiple NiFi clusters can be deployed from a single helm install command by spe
 
 ```yaml
     nifiClusters:
-    - clusterId: nf1
-    - clusterId: nf2
+      nf1:
+        clusterId: nf1
+      nf2:
+        clusterId: nf2
 ```
 
 Each NiFi cluster will, by default, be accessible at [hostname]/[clusterId]/nifi and can communicate with each other by using <http://[clusterId]:8080/nifi> as the instance url when configuring remote process groups.
@@ -222,6 +224,7 @@ Each deployment will require a unique name, and ingress points should be manuall
 | nifi.keystorePassword | string | `""` | optional nifi.security.keystorePasswd value (see https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#security_properties) Setting this value is recommended. If it is not set, it will default to a generated value |
 | nifi.mallocArenaMax | int | `2` | MALLOC_ARENA_MAX environment variable controlling glibc memory pool tuning. Increasing this may improve performance, but at  potential cost of extra memory usage. See https://www.gnu.org/software/libc/manual/html_node/Malloc-Tunable-Parameters.html |
 | nifi.registryHost | string | `""` | optional hostname of an existing nifi registry instance. Defaults to the created registry instance when nifiRegistry.enabled=true |
+| nifi.replicas | int | `1` | Initial replica count for nifi. See also nifi.autoScaling.minReplicas and nifi.autoScaling.maxReplicas |
 | nifi.resources | object | `{"limits":{"cpu":"4000m","memoryMi":10240},"requests":{"cpu":"2000m","memoryMi":4096},"sharedMemory":"256Mi"}` | https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits |
 | nifi.resources.limits.memoryMi | int | `10240` | memory limit in mebibytes (value used in jvm memory calculation) |
 | nifi.resources.requests.memoryMi | int | `4096` | memory requested in mebibytes (value used in jvm memory calculation) |
@@ -232,7 +235,7 @@ Each deployment will require a unique name, and ingress points should be manuall
 | nifi.threadCount | int | `10` | Maximum timer driven thread count. |
 | nifi.truststorePassword | string | `""` | optional nifi.security.truststorePasswd value (see https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#security_properties) Setting this value is recommended. If it is not set, it will default to a generated value |
 | nifi.workingDir | string | `"/nifi"` | For nifi this location is where any OEM license files will be placed (see global.idolOemLicenseSecret) |
-| nifiClusters | list | `[{}]` | nifi cluster instances. Each cluster instance inherits values from the nifi section. When more than one cluster is specified, setting a clusterId is required |
+| nifiClusters | string | `nil` | nifi cluster instances. Each cluster instance inherits values from the nifi section. When more than one cluster is specified, setting a clusterId is required Can be dict of (name, cluster), or list of (cluster). dict form allows for merging definitions from multiple values files. |
 | nifiRegistry.buckets | object | `{"default-bucket":{"flowfiles":["/scripts/flow-basic-idol.json"],"name":"default-bucket"}}` | Buckets to create. Specify the bucket name, and a list of flow files to populate the bucket with. Customized flows can be added via a custom NiFi Registry image or mounted into the pod (see `additionalVolumes` and `additionalVolumeMounts`) Helm value merging combines buckets from multiple values sources. Use DELETE to remove an unwanted bucket. |
 | nifiRegistry.dataVolume.storageClass | string | `"idol-nifi-storage-class"` | Name of the storage class used to provision a PersistentVolume for the NiFi Registry instance. The associated PVCs are named statedata-{name}-reg-{pod number} |
 | nifiRegistry.dataVolume.volumeSize | string | `"2Gi"` | Size of the PersistentVolumeClaim that is created for the NiFi Registry instance. The size chosen here provides a hard limit on the size of the NiFi Registry data storage in the NiFi Registry instance. |

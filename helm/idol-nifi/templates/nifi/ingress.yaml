@@ -8,15 +8,17 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-{{- range $nifiClusterItem := .Values.nifiClusters }}
-{{ $nifiCluster := merge $nifiClusterItem $.Values.nifi (dict "clusterId" $.Values.name) }}
+{{- define "idolnifi.nifi.ingress" }}
+{{ $root := get . "root" | required "idolnifi.nifi.ingress: missing nifiCluster" }}
+{{ $nifiCluster := get . "nifiCluster" | required "idolnifi.nifi.ingress: missing nifiCluster" }}
+{{ $nifiClustersLen := get . "nifiClustersLen" | required "idolniif.nifi.ingress: missing nifiClustersLen" }}
 {{- if $nifiCluster.ingress.enabled -}}
 {{- /*
  nginx ingress needs path capture to achieve prefix type routing
 */}}
 {{- $pathSuffix := "" }}
 {{- $pathType := "Prefix" }}
-{{- if eq $.Values.ingressType "nginx" }}
+{{- if eq $root.Values.ingressType "nginx" }}
 {{- $pathSuffix = "(.*)"}}
 {{- $pathType = "ImplementationSpecific" }}
 {{- end }}
@@ -25,37 +27,37 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $nifiCluster.clusterId }}
-  labels: {{- include "idol-library.labels" (dict "root" $ "component" $nifiCluster) | nindent 4 -}}
+  labels: {{- include "idol-library.labels" (dict "root" $root "component" $nifiCluster) | nindent 4 -}}
     app: {{ $nifiCluster.clusterId }}
   annotations: 
     app.kubernetes.io/name: {{ $nifiCluster.clusterId }}
     app.kubernetes.io/part-of: {{ $nifiCluster.clusterId }}
-{{- if eq $.Values.ingressType "nginx" }}
+{{- if eq $root.Values.ingressType "nginx" }}
     nginx.ingress.kubernetes.io/rewrite-target: /$1
-    nginx.ingress.kubernetes.io/proxy-body-size: {{ $.Values.ingressProxyBodySize }}
+    nginx.ingress.kubernetes.io/proxy-body-size: {{ $root.Values.ingressProxyBodySize }}
     nginx.ingress.kubernetes.io/affinity: cookie
     nginx.ingress.kubernetes.io/affinity-mode: persistent
     nginx.ingress.kubernetes.io/auth-type: basic
-    nginx.ingress.kubernetes.io/auth-secret: {{ $.Values.name }}-basic-auth
+    nginx.ingress.kubernetes.io/auth-secret: {{ $root.Values.name }}-basic-auth
     nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
     nginx.ingress.kubernetes.io/configuration-snippet: |
       server_tokens off;
       proxy_pass_header Authorization;
       proxy_set_header Authorization $http_authorization;
-{{- if (trimAll "/" (default ( len $.Values.nifiClusters | plural "" $nifiCluster.clusterId) $nifiCluster.ingress.proxyPath)) }}
-      proxy_set_header X-ProxyContextPath {{ print "/" (trimAll "/" (default ( len $.Values.nifiClusters | plural "" $nifiCluster.clusterId) $nifiCluster.ingress.proxyPath)) | quote }};
+{{- if (trimAll "/" (default ( $nifiClustersLen | plural "" $nifiCluster.clusterId) $nifiCluster.ingress.proxyPath)) }}
+      proxy_set_header X-ProxyContextPath {{ print "/" (trimAll "/" (default ( $nifiClustersLen | plural "" $nifiCluster.clusterId) $nifiCluster.ingress.proxyPath)) | quote }};
 {{- end }}
-{{- else if eq $.Values.ingressType "haproxy" }}
+{{- else if eq $root.Values.ingressType "haproxy" }}
     haproxy.router.openshift.io/rewrite-target: / 
-    haproxy.router.openshift.io/proxy-body-size: {{ $.Values.ingressProxyBodySize }}
+    haproxy.router.openshift.io/proxy-body-size: {{ $root.Values.ingressProxyBodySize }}
 {{- end }}
 {{/* ingress setup is very dependent on cluster ingress controller so allow user value annotations */ -}}
 {{ with $nifiCluster.ingress.annotations }}
 {{- toYaml . | trim | indent 4 }}
 {{- end }}
 spec:
-{{- if $.Values.ingressClassName }}
-  ingressClassName: {{ $.Values.ingressClassName | quote }}
+{{- if $root.Values.ingressClassName }}
+  ingressClassName: {{ $root.Values.ingressClassName | quote }}
 {{- end }}
 {{- if $nifiCluster.ingress.tls.secretName }}
   tls:
@@ -66,7 +68,7 @@ spec:
   rules:
   - http:
       paths:
-      - path: {{ print (default ( len $.Values.nifiClusters | plural "/" (print "/" $nifiCluster.clusterId "/")) $nifiCluster.ingress.proxyPath) $pathSuffix | quote }}
+      - path: {{ print (default ( $nifiClustersLen | plural "/" (print "/" $nifiCluster.clusterId "/")) $nifiCluster.ingress.proxyPath) $pathSuffix | quote }}
         pathType: {{ $pathType }}
         backend:
           service:
@@ -82,3 +84,5 @@ spec:
 {{- end -}}
 {{- end -}}
 {{- end -}}
+
+{{- include "idolnifi.forEachCluster" (dict "root" . "tpl" "idolnifi.nifi.ingress") }}

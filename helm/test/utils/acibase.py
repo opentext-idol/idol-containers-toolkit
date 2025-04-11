@@ -29,10 +29,19 @@ class AciTestBase(HelmChartTestBase):
             volumeMounts = obj['spec']['template']['spec']['containers'][0]['volumeMounts']
             self.assertTrue(any([ { 'name': 'oem-license','mountPath': '/testoem/licensekey.dat',
                 'subPath': 'licensekey.dat'}.items() <= x.items() for x in volumeMounts]))
-        
+
     def test_additionalVolumes_dict(self):
         self.check_additionalVolumes_dict()
-                    
+
+    def test_replicas(self):
+        ''' replicas can be set '''
+        replicas = 0
+        objs = self.render_chart({'name': 'test', 'replicas': replicas})
+        for k in set(self._kinds).intersection(['Deployment', 'StatefulSet']):
+            ss = objs.get(k, {}).get('test', None)
+            self.assertIsNotNone(ss)
+            self.assertEqual(ss['spec']['replicas'], 0)
+
 class StatefulSetTests():
     def test_volume_claim_templates(self):
         ''' Any StatefulSets do not contain chart version in volumeClaimTemplate labels '''

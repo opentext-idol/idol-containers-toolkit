@@ -14,76 +14,80 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
     def setUp(self):
         self._kinds = ['StatefulSet','Ingress','ConfigMap','Service']
 
-    def test_multiple_nifi(self):
-        clusterids = ['nf1','nf2','nf3','testnifi']
-        objs = self.render_chart(
-            {
+    def _multiple_nifi_values(self, use_dict):
+        clusters = {
+            'nf1': { 'clusterId':'nf1',
+                      'replicas': 1 },
+            'nf2': {
+                'clusterId':'nf2',
+                'flows':{
+                    'f1':{
+                        'file':'/scripts/flow1.json',
+                        'bucket': 'default-bucket',
+                        'import':True
+                    },
+                    'f2':{
+                        'file':'/scripts/flow2.json',
+                        'bucket': 'other-bucket',
+                        'import':False
+                    },
+                    'f3':{
+                        'name':'Existing Flow',
+                        'bucket':'existing-bucket',
+                        'version':"123"
+                    },
+                    'f4':{
+                        'name':'Existing Flow2',
+                        'bucket':'existing-bucket'
+                    },
+                    'basic-idol':{
+                        'DELETE':True
+                    }
+                },
+                'service':{
+                    'additionalPorts':{
+                        'commonPort': {
+                            'port': -1
+                        }
+                    }
+                }
+            },
+            'nf3': {
+                'clusterId':'nf3',
+                'flowfile':'flow3.json',
+                'replicas': 0,
+                'ingress':{
+                    'enabled':True,
+                    'proxyPath':'/',
+                    'tls':{ 'secretName':'' },
+                    'aciTLS':{ 'secretName':'' },
+                    'metricsTLS':{
+                        'secretName':''
+                    }
+                },
+                    'service':{
+                    'additionalPorts':{
+                        'commonPort': {
+                            'protocol': 'UDP'
+                        },
+                        'extra-port': {
+                            'name': 'extra',
+                            'protocol': 'UDP',
+                            'port': 2223,
+                            'targetPort': 2224
+                        }
+                    }
+                }
+            },
+            '_unnamed_': { 'dummy': None },
+        }
+        if use_dict:
+            clusters['ignored'] = {'DELETE': True}
+        return {
                 'name':'testnifi',
-                'nifiClusters':[
-                    { 'clusterId':'nf1' },
-                    {
-                        'clusterId':'nf2',
-                        'flows':{
-                            'f1':{
-                                'file':'/scripts/flow1.json',
-                                'bucket': 'default-bucket',
-                                'import':True
-                            },
-                            'f2':{
-                                'file':'/scripts/flow2.json',
-                                'bucket': 'other-bucket',
-                                'import':False
-                            },
-                            'f3':{
-                                'name':'Existing Flow',
-                                'bucket':'existing-bucket',
-                                'version':"123"
-                            },
-                            'f4':{
-                                'name':'Existing Flow2',
-                                'bucket':'existing-bucket'
-                            },
-                            'basic-idol':{
-                                'DELETE':True
-                            }
-                        },
-                        'service':{
-                            'additionalPorts':{
-                                'commonPort': {
-                                    'port': -1
-                                }
-                            }
-                        }
-                    },
-                    {
-                        'clusterId':'nf3',
-                        'flowfile':'flow3.json',
-                        'ingress':{
-                           'enabled':True,
-                           'proxyPath':'/',
-                           'tls':{ 'secretName':'' },
-                           'aciTLS':{ 'secretName':'' },
-                           'metricsTLS':{
-                             'secretName':''
-                           }
-                        },
-                         'service':{
-                            'additionalPorts':{
-                                'commonPort': {
-                                    'protocol': 'UDP'
-                                },
-                                'extra-port': {
-                                    'name': 'extra',
-                                    'protocol': 'UDP',
-                                    'port': 2223,
-                                    'targetPort': 2224
-                                }
-                            }
-                        }
-                    },
-                    {}
-                ],
+                'nifiClusters': clusters if use_dict else list(clusters.values()),
                 "nifi":{
+                    "replicas": 2,
                     "service": {
                         "additionalPorts":{
                             "commonPort":{
@@ -92,7 +96,14 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
                         }
                     }
                 }
-            })
+            }
+
+    def _multiple_nifi_clusters(self):
+        return 
+
+    def _check_multiple_nifi(self, objs):
+        clusterids = ['nf1','nf2','nf3','testnifi']
+        
         # expected manifests with multiple clusters
         self.assertGreaterEqual(set(objs['StatefulSet'].keys()),
                                 set(['testnifi-reg']+list(chain.from_iterable([[id,f'{id}-zk'] for id in clusterids]))))
@@ -158,6 +169,20 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
         self.assertNotIn(commonPortDef, objs['Service']['nf2']['spec']['ports']) # -ve port number removes inherited def
         self.assertIn({'name':'commonPort','port':2222, 'protocol':'UDP'}, objs['Service']['nf3']['spec']['ports'])
         self.assertIn( {'name':'extra', 'protocol':'UDP', 'port':2223,'targetPort':2224,}, objs['Service']['nf3']['spec']['ports'])
+
+        for k,v in {'nf1':1, 'nf2':2, 'nf3': 0 }.items():
+            with self.subTest(f'{k} replicas'):
+                self.assertEqual(objs['StatefulSet'][k]['spec']['replicas'], v)
+    
+    def test_multiple_nifi_array(self):
+        ''' Test multiple nifiClusters specified in array form '''
+        self._check_multiple_nifi(self.render_chart(self._multiple_nifi_values(use_dict=False)))
+        
+    def test_multiple_nifi_dict(self):
+        ''' Test multiple nifiClusters specified in dict form '''
+        objs = self.render_chart(self._multiple_nifi_values(use_dict=True))
+        self._check_multiple_nifi(objs)
+        self.assertNotIn('ignored', objs['StatefulSet'].keys())
 
     def test_default_registry_buckets(self):
         objs = self.render_chart({})

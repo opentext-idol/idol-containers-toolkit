@@ -245,6 +245,10 @@
                 "sensitivePropsKey": {
                     "type":"string"
                 },
+                "replicas": {
+                    "type":"integer",
+                    "minimum": 0
+                },
                 "registryHost": {
                     "type":"string"
                 },
@@ -304,26 +308,56 @@
             "title": "Nifi"
         },
         "NifiCluster": {
-            "type": "array",
-            "minItems": 1,
-            "items": {
-                "type": "object",
-                "unevaluatedProperties": false,
-                "allOf": [
-                    {"$ref":"#/$defs/NifiProperties"},
-                    {
-                        "properties": {
-                        "clusterId":{
-                            "type": "string"
+            "oneOf": [
+             {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                    "type": "object",
+                    "unevaluatedProperties": false,
+                    "allOf": [
+                        {"$ref":"#/$defs/NifiProperties"},
+                        {
+                            "properties": {
+                            "clusterId":{
+                                "type": "string"
+                                }
+                            },
+                            "image": {
+                                "$ref": "#/$defs/idolImage"
                             }
-                        },
-                        "image": {
-                            "$ref": "#/$defs/idolImage"
+                        }
+                    ],
+                    "title": "NifiCluster"
+                }
+            },
+            {
+                "type": "object",
+                "patternProperties":{
+                    "^[-a-zA-Z0-0]{0,63}$":{
+                            "type": "object",
+                            "unevaluatedProperties": false,
+                            "allOf": [
+                                {"$ref":"#/$defs/NifiProperties"},
+                                {
+                                    "properties": {
+                                    "clusterId":{
+                                        "type": "string"
+                                        }
+                                    },
+                                    "image": {
+                                        "$ref": "#/$defs/idolImage"
+                                    }
+                                }
+                            ],
+                            "title": "NifiCluster"
                         }
                     }
-                ],
-                "title": "NifiCluster"
+            },
+            {
+                "type": "null"
             }
+            ]
         },
         "Global":{
             "type": "object",

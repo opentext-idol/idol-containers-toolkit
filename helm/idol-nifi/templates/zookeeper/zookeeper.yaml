@@ -8,14 +8,15 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-{{- range $nifiClusterItem := .Values.nifiClusters }}
-{{ $nifiCluster := merge $nifiClusterItem $.Values.nifi (dict "clusterId" $.Values.name) }}
+{{- define "idolnifi.zookeeper.statefulset" }}
+{{ $root := get . "root" | required "idolnifi.zookeeper.statefulset: missing root" }}
+{{ $nifiCluster := get . "nifiCluster" | required "idolnifi.zookeeper.statefulset: missing nifiCluster" }}
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ $nifiCluster.clusterId }}-zk
-  labels: {{- include "idol-library.labels" (dict "root" $ "component" $.Values.zookeeper) | nindent 4 -}}
+  labels: {{- include "idol-library.labels" (dict "root" $root "component" $root.Values.zookeeper) | nindent 4 -}}
     name: {{ $nifiCluster.clusterId }}-zk
     app: {{ $nifiCluster.clusterId }}-zk
   annotations:
@@ -30,23 +31,23 @@ spec:
       app: {{ $nifiCluster.clusterId }}-zk
   template:
     metadata:
-      labels: {{- include "idol-library.labels" (dict "root" $ "component" $.Values.zookeeper) | nindent 8 -}}
+      labels: {{- include "idol-library.labels" (dict "root" $root "component" $root.Values.zookeeper) | nindent 8 -}}
         app: {{ $nifiCluster.clusterId }}-zk
     spec:
       automountServiceAccountToken: false
       enableServiceLinks: false
       dnsPolicy: ClusterFirstWithHostNet
       restartPolicy: Always
-{{- if $.Values.podSecurityContext.enabled }}
-      securityContext: {{- omit $.Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
+{{- if $root.Values.podSecurityContext.enabled }}
+      securityContext: {{- omit $root.Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
 {{- end }}
       imagePullSecrets:
-{{- range $.Values.global.imagePullSecrets }}
+{{- range $root.Values.global.imagePullSecrets }}
       - name: {{ . }}
 {{- end }}
       containers:
       - name: zookeeper
-        image: {{ $.Values.zookeeper.image }}
+        image: {{ $root.Values.zookeeper.image }}
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 2181
@@ -64,7 +65,7 @@ spec:
             value: "server.1=$(POD_IP):2888:3888;2181"
         envFrom:
           - configMapRef:
-              name: {{ $.Values.name }}-zk-cm
+              name: {{ $root.Values.name }}-zk-cm
               optional: false
         livenessProbe:
           exec:
@@ -84,11 +85,11 @@ spec:
           timeoutSeconds: 10
           failureThreshold: 3
           successThreshold: 1
-        {{- if $.Values.zookeeper.resources }}
-        resources: {{ toYaml $.Values.zookeeper.resources | nindent 10 }}
+        {{- if $root.Values.zookeeper.resources }}
+        resources: {{ toYaml $root.Values.zookeeper.resources | nindent 10 }}
         {{- end }}
-        {{- if $.Values.containerSecurityContext.enabled }}
-        securityContext: {{- omit $.Values.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+        {{- if $root.Values.containerSecurityContext.enabled }}
+        securityContext: {{- omit $root.Values.containerSecurityContext "enabled" | toYaml | nindent 10 }}
           readOnlyRootFilesystem: true
         {{- end }}
         volumeMounts:
@@ -106,3 +107,5 @@ spec:
           emptyDir:
             sizeLimit: 2Gi
 {{- end -}}
+
+{{- include "idolnifi.forEachCluster" (dict "root" . "tpl" "idolnifi.zookeeper.statefulset")}}

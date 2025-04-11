@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2022-2025 Open Text.
+# Copyright 2023 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -8,16 +8,12 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-apiVersion: v2
-name: single-content
-version: 0.11.1
-appVersion: "25.1"
-description: A configurable single-IDOL setup
-dependencies:
-- name: idol-library
-  version: ~0.15.0
-  repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
-- name: idol-licenseserver
-  condition: idol-licenseserver.enabled
-  version: ~0.4.0
-  repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $.Values.name }}-prestart-scripts
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifi) | nindent 4 -}}
+    app: {{ $.Values.name }}
+data:
+  preStart.sh: |
+{{ tpl (.Files.Get "resources/nifi-preStart.sh") . | indent 4 }}

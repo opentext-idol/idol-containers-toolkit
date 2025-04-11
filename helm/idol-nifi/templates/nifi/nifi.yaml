@@ -135,21 +135,24 @@ spec:
           storage: {{ $nifiCluster.dataVolume.volumeSize }}
 {{- end -}}
 
-{{- range $nifiClusterItem := .Values.nifiClusters }}
-{{ $nifiCluster := merge $nifiClusterItem $.Values.nifi (dict "clusterId" $.Values.name) ( dict "image" $.Values.idolImage) }}
+{{- define "idolnifi.statefulset" }}
+{{- $root := get . "root" | required "idolnifi.statefulset: missing root" }}
+{{- $nifiCluster := get . "nifiCluster" | required "idolnifi.statefulset: missing nifiCluster" }}
 ---
 {{ include "idol-library.util.merge" (dict
-  "root" $
-  "component" (merge (dict "name" $nifiCluster.clusterId) $.Values)
+  "root" $root
+  "component" $nifiCluster
   "nifiCluster" $nifiCluster
   "source" "idol-library.aciserver.statefulset.base.v1"
   "destination" "idolnifi.statefulset.base" 
   "containers" (list "idolnifi.container")
   "volumes" (list (dict "name" "data" "emptyDir" (dict "sizeLimit" "3Gi"))
-                  (dict "name" "scripts" "configMap" (dict "name" (print $.Values.name "-scripts") "optional" false "defaultMode" 0755))
+                  (dict "name" "scripts" "configMap" (dict "name" (print $root.Values.name "-scripts") "optional" false "defaultMode" 0755))
+                  (dict "name" "prestart-scripts" "configMap" (dict "name" (print $root.Values.name "-prestart-scripts") "optional" false "defaultMode" 0755))
                   (dict "name" "dshm" "emptyDir" (dict "medium" "Memory" "sizeLimit" $nifiCluster.resources.sharedMemory)))
   "addConfigMap" false
 ) -}}
 {{- end -}}
 
+{{- include "idolnifi.forEachCluster" (dict "root" . "tpl" "idolnifi.statefulset") }}
 

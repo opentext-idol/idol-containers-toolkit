@@ -137,6 +137,9 @@ nifi:
         target:
           type: AverageValue
           averageValue: 20000
+  # -- Initial replica count for nifi. See also nifi.autoScaling.minReplicas and nifi.autoScaling.maxReplicas
+  replicas: 1
+
   # -- https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits
   resources:
     requests:
@@ -265,8 +268,14 @@ nifi:
 
 # -- nifi cluster instances. Each cluster instance inherits values from the nifi section.
 # When more than one cluster is specified, setting a clusterId is required
-nifiClusters:
- - {}
+# Can be dict of (name, cluster), or list of (cluster). dict form allows for merging definitions from multiple values files.
+nifiClusters: null
+# (e.g. dict form)
+#  clusterA:
+#    clusterId: clusterA
+# (e.g. list form)
+#  - clusterId: clusterA
+# 
 
 nifiRegistry:
   # -- whether to deploy a nifi registry instance

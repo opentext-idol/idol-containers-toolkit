@@ -20,4 +20,4 @@ type: library
 
 # This is the chart version. This version number should be incremented each time you publish changes
 # to the chart and its templates, including the app version.
-version: 0.15.0
+version: 0.15.1

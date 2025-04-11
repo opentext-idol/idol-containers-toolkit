@@ -40,5 +40,6 @@ class TestSingleContent(AciTestBase, StatefulSetTests, unittest.TestCase):
     chartpath = os.path.join('..','single-content')
     _kinds = ['StatefulSet','Ingress','ConfigMap','Service']
 
+
 if __name__ == '__main__':
     unittest.main()

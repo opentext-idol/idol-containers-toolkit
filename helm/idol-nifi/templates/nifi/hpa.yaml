@@ -8,15 +8,16 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-{{- range $nifiClusterItem := .Values.nifiClusters }}
-{{ $nifiCluster := merge $nifiClusterItem $.Values.nifi (dict "clusterId" $.Values.name) }}
+{{- define "idolnifi.nifi.hpa" }}
+{{ $root := get . "root" | required "idolnifi.nifi.hpa: missing nifiCluster" }}
+{{ $nifiCluster := get . "nifiCluster" | required "idolnifi.nifi.hpa: missing nifiCluster" }}
 {{- if $nifiCluster.autoScaling.enabled }}
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ $nifiCluster.clusterId }}
-  labels: {{- include "idol-library.labels" (dict "root" $ "component" $nifiCluster) | nindent 4 -}}
+  labels: {{- include "idol-library.labels" (dict "root" $root "component" $nifiCluster) | nindent 4 -}}
     app.kubernetes.io/name: {{ $nifiCluster.clusterId }}
 spec:
   scaleTargetRef:
@@ -37,3 +38,5 @@ spec:
 
 {{- end -}}
 {{- end -}}
+
+{{- include "idolnifi.forEachCluster" (dict "root" . "tpl" "idolnifi.nifi.hpa") }}

@@ -8,14 +8,15 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-{{- range $nifiClusterItem := .Values.nifiClusters }}
-{{ $nifiCluster := merge $nifiClusterItem $.Values.nifi (dict "clusterId" $.Values.name) }}
+{{- define "idolnifi.zookeeper.service" }}
+{{ $root := get . "root" | required "idolnifi.zookeeper.service: missing root" }}
+{{ $nifiCluster := get . "nifiCluster" | required "idolnifi.zookeeper.service: missing nifiCluster" }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ $nifiCluster.clusterId }}-zk
-  labels: {{- include "idol-library.labels" (dict "root" $ "component" $.Values.zookeeper) | nindent 4 -}}
+  labels: {{- include "idol-library.labels" (dict "root" $root "component" $root.Values.zookeeper) | nindent 4 -}}
     app: {{ $nifiCluster.clusterId }}-zk
   annotations:
     app.kubernetes.io/name: {{ $nifiCluster.clusterId }}-zk
@@ -38,3 +39,5 @@ spec:
     targetPort: 7070
     name: metrics
 {{- end -}}
+
+{{- include "idolnifi.forEachCluster" (dict "root" . "tpl" "idolnifi.zookeeper.service")}}
