@@ -10,7 +10,7 @@
 # END COPYRIGHT NOTICE
 apiVersion: v2
 name: idol-nifi
-version: 0.14.0
+version: 0.14.1
 appVersion: "25.1"
 description: A configurable IDOL NiFi setup
 dependencies:
@@ -24,17 +24,17 @@ dependencies:
 - name: metrics-server
   condition: metrics-server.enabled
   version: "3.8.2"
-  repository: "https://kubernetes-sigs.github.io/metrics-server"
+  repository: "https://artifactory.otxlab.net/artifactory/api/helm/kubernetes-sigs.github.io-metrics-server"
 - name: prometheus
   condition: prometheus.enabled
-  version: "25.0"
-  repository: "https://prometheus-community.github.io/helm-charts"
+  version: "25.0.0"
+  repository: "https://artifactory.otxlab.net/artifactory/prometheus-community-remote"
 - name: prometheus-adapter
   condition: prometheus-adapter.enabled
   version: "4.2.0"
-  repository: "https://prometheus-community.github.io/helm-charts"
+  repository: "https://artifactory.otxlab.net/artifactory/api/helm/prometheus-community-remote"
 - name: postgresql-ha
   alias: postgresql
   condition: postgresql.enabled
   version: "14.3.4"
-  repository: https://charts.bitnami.com/bitnami
+  repository: https://artifactory.otxlab.net/artifactory/charts.bitnami.com/
