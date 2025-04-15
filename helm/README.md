@@ -20,6 +20,11 @@ Helm charts for IDOL
 helm repo add idol-containers-toolkit https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 # List available charts
 helm search repo idol-containers-toolkit
+# Add supplementary repositories as needed
+helm repo add bitnami-charts https://charts.bitnami.com/bitnami
+helm repo add kubernetes-sigs https://kubernetes-sigs.github.io/metrics-server
+helm repo add prometheus https://prometheus-community.github.io/helm-charts
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 ```
 
 Refer to individual chart `README.md` files for configuration details.

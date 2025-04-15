@@ -23,10 +23,10 @@ Provides a scaleable Knowledge Discovery NiFi cluster instance (NiFi, NiFi Regis
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://artifactory.otxlab.net/artifactory/api/helm/kubernetes-sigs.github.io-metrics-server | metrics-server | 3.8.2 |
-| https://artifactory.otxlab.net/artifactory/api/helm/prometheus-community-remote | prometheus-adapter | 4.2.0 |
-| https://artifactory.otxlab.net/artifactory/charts.bitnami.com/ | postgresql(postgresql-ha) | 14.3.4 |
-| https://artifactory.otxlab.net/artifactory/prometheus-community-remote | prometheus | 25.0.0 |
+| @bitnami-charts | postgresql(postgresql-ha) | 14.3.4 |
+| @kubernetes-sigs | metrics-server | 3.8.2 |
+| @prometheus-community | prometheus-adapter | 4.2.0 |
+| @prometheus | prometheus | 25.0.0 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | ~0.15.0 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | ~0.4.0 |
 

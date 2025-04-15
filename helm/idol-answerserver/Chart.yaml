@@ -34,4 +34,4 @@ dependencies:
 - name: postgresql
   condition: postgresql.enabled
   version: "13.4.3"
-  repository: https://artifactory.otxlab.net/artifactory/charts.bitnami.com/
+  repository: "@bitnami-charts"

@@ -32,7 +32,7 @@ files, then redeploy the chart with LLM configuration information in your answer
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://artifactory.otxlab.net/artifactory/charts.bitnami.com/ | postgresql | 13.4.3 |
+| @bitnami-charts | postgresql | 13.4.3 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | ~0.15.0 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | passageextractorAgentstore(single-content) | ~0.11.0 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | answerbankAgentstore(single-content) | ~0.11.0 |

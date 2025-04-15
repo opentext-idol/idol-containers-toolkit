@@ -41,6 +41,7 @@ UPDATE_VERSIONS_DECREMENT?=
 .PHONY: clean-all ${CLEAN_CHARTS} 
 .PHONY: validate-all ${VALIDATE_SCHEMA_CHARTS}
 .PHONY: update-versions
+.PHONY: ensure-repos
 
 default: package-all index.yaml
 
@@ -55,8 +56,14 @@ index.yaml: $(wildcard staging/release/*) ot_copyright_notice.stl
 	rm staging/index.yaml
 	mv index.yaml.nxt index.yaml
 
+ensure-repos:
+	helm repo add bitnami-charts https://artifactory.otxlab.net/artifactory/charts.bitnami.com/
+	helm repo add kubernetes-sigs https://artifactory.otxlab.net/artifactory/api/helm/kubernetes-sigs.github.io-metrics-server
+	helm repo add prometheus https://artifactory.otxlab.net/artifactory/prometheus-community-remote
+	helm repo add prometheus-community https://artifactory.otxlab.net/artifactory/api/helm/prometheus-community-remote
+
 # packages releases to staging directory
-${PACKAGE_CHARTS}: package-% : %/README.md 
+${PACKAGE_CHARTS}: package-% : %/README.md ensure-repos
 	if [ -z `git ls-files --other --exclude-standard $*` ]; then \
 		helm package ${UPDATE_DEPENDENCIES} -d staging/release $*/ ; \
 	else \
