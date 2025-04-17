@@ -41,6 +41,7 @@ UPDATE_VERSIONS_DECREMENT?=
 .PHONY: clean-all ${CLEAN_CHARTS} 
 .PHONY: validate-all ${VALIDATE_SCHEMA_CHARTS}
 .PHONY: update-versions
+.PHONY: ensure-repos
 
 default: package-all index.yaml
 
@@ -55,8 +56,21 @@ index.yaml: $(wildcard staging/release/*) ot_copyright_notice.stl
 	rm staging/index.yaml
 	mv index.yaml.nxt index.yaml
 
+# Third Party Repository chart URLs
+# Use internal URLs if building for public release
+BITNAMI_CHARTS_URL?=https://charts.bitnami.com/bitnami
+KUBERNETES_SIGS_URL?=https://kubernetes-sigs.github.io/metrics-server
+PROMETHEUS_URL?=https://prometheus-community.github.io/helm-charts
+PROMETHEUS_COMMUNITY_URL?=https://prometheus-community.github.io/helm-charts
+
+ensure-repos:
+	helm repo add bitnami-charts ${BITNAMI_CHARTS_URL}
+	helm repo add kubernetes-sigs ${KUBERNETES_SIGS_URL}
+	helm repo add prometheus ${PROMETHEUS_URL}
+	helm repo add prometheus-community ${PROMETHEUS_COMMUNITY_URL}
+
 # packages releases to staging directory
-${PACKAGE_CHARTS}: package-% : %/README.md 
+${PACKAGE_CHARTS}: package-% : %/README.md ensure-repos
 	if [ -z `git ls-files --other --exclude-standard $*` ]; then \
 		helm package ${UPDATE_DEPENDENCIES} -d staging/release $*/ ; \
 	else \
