@@ -298,6 +298,37 @@ entries:
   idol-answerserver:
   - apiVersion: v2
     appVersion: "25.1"
+    created: "2025-04-17T14:39:32.386860384+01:00"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: ~0.15.0
+    - alias: passageextractorAgentstore
+      condition: passageextractorAgentstore.enabled
+      name: single-content
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: ~0.11.0
+    - alias: answerbankAgentstore
+      condition: answerbankAgentstore.enabled
+      name: single-content
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: ~0.11.0
+    - condition: single-content.enabled
+      name: single-content
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: ~0.11.0
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: '@bitnami-charts'
+      version: 13.4.3
+    description: Adds Knowledge Discovery AnswerServer
+    digest: 7f5740e804f20c491b53cd830f151990bee6fb9950e6d64c327098c366cc9520
+    name: idol-answerserver
+    urls:
+    - release/idol-answerserver-0.5.2.tgz
+    version: 0.5.2
+  - apiVersion: v2
+    appVersion: "25.1"
     created: "2025-04-04T17:19:10.183280109+01:00"
     dependencies:
     - name: idol-library
@@ -1275,6 +1306,40 @@ entries:
     - release/idol-mediaserver-0.1.0.tgz
     version: 0.1.0
   idol-nifi:
+  - apiVersion: v2
+    appVersion: "25.1"
+    created: "2025-04-17T14:39:32.473006349+01:00"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: ~0.15.0
+    - condition: idol-licenseserver.enabled
+      name: idol-licenseserver
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: ~0.4.0
+    - condition: metrics-server.enabled
+      name: metrics-server
+      repository: '@kubernetes-sigs'
+      version: 3.8.2
+    - condition: prometheus.enabled
+      name: prometheus
+      repository: '@prometheus'
+      version: 25.0.0
+    - condition: prometheus-adapter.enabled
+      name: prometheus-adapter
+      repository: '@prometheus-community'
+      version: 4.2.0
+    - alias: postgresql
+      condition: postgresql.enabled
+      name: postgresql-ha
+      repository: '@bitnami-charts'
+      version: 14.3.4
+    description: A configurable IDOL NiFi setup
+    digest: b7ceb72f14bf05d5d65a826bec511d4ab29f27d49a0b950e23ac3f0dde296153
+    name: idol-nifi
+    urls:
+    - release/idol-nifi-0.14.1.tgz
+    version: 0.14.1
   - apiVersion: v2
     appVersion: "25.1"
     created: "2025-04-07T14:03:32.731721135+01:00"
@@ -2905,4 +2970,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2025-04-07T14:03:32.68591655+01:00"
+generated: "2025-04-17T14:39:32.362707121+01:00"
