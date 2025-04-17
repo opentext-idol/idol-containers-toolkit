@@ -56,11 +56,18 @@ index.yaml: $(wildcard staging/release/*) ot_copyright_notice.stl
 	rm staging/index.yaml
 	mv index.yaml.nxt index.yaml
 
+# Third Party Repository chart URLs
+# Use internal URLs if building for public release
+BITNAMI_CHARTS_URL?=https://charts.bitnami.com/bitnami
+KUBERNETES_SIGS_URL?=https://kubernetes-sigs.github.io/metrics-server
+PROMETHEUS_URL?=https://prometheus-community.github.io/helm-charts
+PROMETHEUS_COMMUNITY_URL?=https://prometheus-community.github.io/helm-charts
+
 ensure-repos:
-	helm repo add bitnami-charts https://artifactory.otxlab.net/artifactory/charts.bitnami.com/
-	helm repo add kubernetes-sigs https://artifactory.otxlab.net/artifactory/api/helm/kubernetes-sigs.github.io-metrics-server
-	helm repo add prometheus https://artifactory.otxlab.net/artifactory/prometheus-community-remote
-	helm repo add prometheus-community https://artifactory.otxlab.net/artifactory/api/helm/prometheus-community-remote
+	helm repo add bitnami-charts ${BITNAMI_CHARTS_URL}
+	helm repo add kubernetes-sigs ${KUBERNETES_SIGS_URL}
+	helm repo add prometheus ${PROMETHEUS_URL}
+	helm repo add prometheus-community ${PROMETHEUS_COMMUNITY_URL}
 
 # packages releases to staging directory
 ${PACKAGE_CHARTS}: package-% : %/README.md ensure-repos
