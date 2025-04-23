@@ -1153,6 +1153,15 @@ entries:
     version: 0.1.0
   idol-licenseserver:
   - apiVersion: v2
+    created: "2025-04-23T13:58:21.819785169+01:00"
+    description: Creates an IDOL LicenseServer proxy service accessible to other elements
+      of the cluster
+    digest: 356cc6b1ff08fa4b6e47a062125cb43cf05c07e78e786acac15a86436c524049
+    name: idol-licenseserver
+    urls:
+    - release/idol-licenseserver-0.4.1.tgz
+    version: 0.4.1
+  - apiVersion: v2
     created: "2024-04-25T11:59:29.325705719+01:00"
     description: Creates an IDOL LicenseServer proxy service accessible to other elements
       of the cluster
@@ -2970,4 +2979,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2025-04-17T14:39:32.362707121+01:00"
+generated: "2025-04-23T13:58:21.819130489+01:00"
