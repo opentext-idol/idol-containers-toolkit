@@ -8,7 +8,7 @@ END COPYRIGHT NOTICE
 # distributed-idol
 <!-- omit in toc -->
 
-![Version: 0.13.1](https://img.shields.io/badge/Version-0.13.1-informational?style=flat-square) ![AppVersion: 25.1](https://img.shields.io/badge/AppVersion-25.1-informational?style=flat-square)
+![Version: 0.13.2](https://img.shields.io/badge/Version-0.13.2-informational?style=flat-square) ![AppVersion: 25.1](https://img.shields.io/badge/AppVersion-25.1-informational?style=flat-square)
 
 - [Overview](#overview)
 - [Prerequisites](#prerequisites)
@@ -184,9 +184,9 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://kubernetes-sigs.github.io/metrics-server | metrics-server | 3.8.2 |
-| https://prometheus-community.github.io/helm-charts | prometheus | 25.0 |
-| https://prometheus-community.github.io/helm-charts | prometheus-adapter | 4.2.0 |
+| @kubernetes-sigs | metrics-server | 3.8.2 |
+| @prometheus | prometheus | 25.0 |
+| @prometheus | prometheus-adapter | 4.2.0 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | ~0.15.0 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | ~0.4.0 |
 

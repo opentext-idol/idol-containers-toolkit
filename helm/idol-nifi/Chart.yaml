@@ -10,7 +10,7 @@
 # END COPYRIGHT NOTICE
 apiVersion: v2
 name: idol-nifi
-version: 0.14.1
+version: 0.14.2
 appVersion: "25.1"
 description: A configurable IDOL NiFi setup
 dependencies:
