@@ -67,6 +67,8 @@ To update the version of a flow deployed into NiFi, there are two methods:
 
 Specify names of the NiFi Registry buckets to be created, and optionally the location of JSON flow files to be imported into the bucket.
 
+If `envsubst` is available in the NiFi registry image used, then flows will have environment variables expanded before import.
+
 ```yaml
 nifiRegistry:
   buckets:

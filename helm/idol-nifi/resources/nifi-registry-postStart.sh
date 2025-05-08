@@ -37,15 +37,29 @@ logfile=${logdir}/post-start.log
         nifitoolkit_registry_findOrCreateBucket "${NIFI_REGISTRY_URL}" "${BUCKET_NAME}" BUCKETID
         echo "[$(date)] Got bucket ${BUCKET_NAME}: ${BUCKETID}"
 
-        # Import any flows
-        for FLOWFILE in ${FLOWFILES//,/ }
-        do
-            echo "[$(date)] Processing FLOWFILE ${FLOWFILE}"
+        # Check for envsubst support
+        ENVSUBST=$(which envsubst)
+        TMPDIR=$(mktemp -d)
 
-            if [ ! -f "${FLOWFILE}" ]; then
-                echo "[$(date)] FLOWFILE ${FLOWFILE} does not exist"
+        # Import any flows
+        for ORIG_FLOWFILE in ${FLOWFILES//,/ }
+        do
+            echo "[$(date)] Processing FLOWFILE ${ORIG_FLOWFILE}"
+
+            if [ ! -f "${ORIG_FLOWFILE}" ]; then
+                echo "[$(date)] FLOWFILE ${ORIG_FLOWFILE} does not exist"
                 echo "[$(date)] Flow import skipped"
                 continue
+            fi
+
+            if [[ -z "${ENVSUBST}" ]]; then
+                FLOWFILE="${ORIG_FLOWFILE}"
+            else
+                # Run flow through environment substitutions
+                # This will only replace variables with exported values
+                FLOWFILE="${TMPDIR}/$(basename "${ORIG_FLOWFILE}")"
+                envsubst "$(compgen -e | awk '$0="${"$0"}"')" < "${ORIG_FLOWFILE}" > "${FLOWFILE}"
+                echo "[$(date)] Expanded FLOWFILE: ${FLOWFILE}"
             fi
 
             FLOWID=

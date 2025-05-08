@@ -1,10 +1,10 @@
 # idol-nifi
 
-![Version: 0.14.2](https://img.shields.io/badge/Version-0.14.2-informational?style=flat-square) ![AppVersion: 25.1](https://img.shields.io/badge/AppVersion-25.1-informational?style=flat-square)
+![Version: 0.15.0](https://img.shields.io/badge/Version-0.15.0-informational?style=flat-square) ![AppVersion: 25.2](https://img.shields.io/badge/AppVersion-25.2-informational?style=flat-square)
 
 Provides a scaleable Knowledge Discovery NiFi cluster instance (NiFi, NiFi Registry and ZooKeeper).
 
-> Full documentation for Knowledge Discovery NiFi Ingest available from <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.1/NiFiIngest_25.1_Documentation/Help/>
+> Full documentation for Knowledge Discovery NiFi Ingest available from <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.2/NiFiIngest_25.2_Documentation/Help/>
 
 ## Related Documentation
 
@@ -61,6 +61,8 @@ To update the version of a flow deployed into NiFi, there are two methods:
 ## Pre-populating NiFi Registry with buckets and flows
 
 Specify names of the NiFi Registry buckets to be created, and optionally the location of JSON flow files to be imported into the bucket.
+
+If `envsubst` is available in the NiFi registry image used, then flows will have environment variables expanded before import.
 
 ```yaml
 nifiRegistry:
@@ -178,8 +180,8 @@ Each deployment will require a unique name, and ingress points should be manuall
 | idol-licenseserver.licenseServerService | string | `"idol-licenseserver"` | the hostname of the IDOL LicenseServer (or abstraction) |
 | idolImage.imagePullPolicy | string | `"IfNotPresent"` | used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) |
 | idolImage.registry | string | `"microfocusidolserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
-| idolImage.repo | string | `"nifi-full"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
-| idolImage.version | string | `"24.4"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
+| idolImage.repo | string | `"nifi-ver2-full"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
+| idolImage.version | string | `"25.2"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | indexserviceACIPort | string | `"9070"` | the ACI port of the indexing IDOL component |
 | indexserviceName | string | `"idol-index-service"` | the hostname of the indexing IDOL component |
 | ingressBasicAuthData | string | `"YWRtaW46JGFwcjEkSDY1dnBkTU8kMXAxOGMxN3BuZVFUT2ZjVC9TZkZzMQo="` | base64 encoded htpasswd https://httpd.apache.org/docs/2.4/misc/password_encryptions.html. Default is admin/admin |
@@ -240,7 +242,8 @@ Each deployment will require a unique name, and ingress points should be manuall
 | nifiRegistry.dataVolume.storageClass | string | `"idol-nifi-storage-class"` | Name of the storage class used to provision a PersistentVolume for the NiFi Registry instance. The associated PVCs are named statedata-{name}-reg-{pod number} |
 | nifiRegistry.dataVolume.volumeSize | string | `"2Gi"` | Size of the PersistentVolumeClaim that is created for the NiFi Registry instance. The size chosen here provides a hard limit on the size of the NiFi Registry data storage in the NiFi Registry instance. |
 | nifiRegistry.enabled | bool | `true` | whether to deploy a nifi registry instance |
-| nifiRegistry.image | string | `"docker.io/apache/nifi-registry:1.23.0"` | nifi-registry image to use |
+| nifiRegistry.env | object | `{}` | Additional environment variables to export in nifi registry |
+| nifiRegistry.image | string | `"docker.io/apache/nifi-registry:2.3.0"` | nifi-registry image to use |
 | nifiRegistry.ingress.annotations | object | `{}` | optional ingress annotations |
 | nifiRegistry.ingress.enabled | bool | `true` | whether to deploy ingress for nifi registry |
 | nifiRegistry.ingress.host | string | `""` | optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules |
