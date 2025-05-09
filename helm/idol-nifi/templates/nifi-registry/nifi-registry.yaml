@@ -85,6 +85,11 @@ spec:
           - configMapRef:
               name: {{ .Values.name }}-reg-cm
               optional: false
+          {{- range .Values.nifiRegistry.envSecretRef }}
+          - secretRef:
+              name: {{ . }}
+              optional: false
+          {{- end }}
         livenessProbe:
           exec:
             command:

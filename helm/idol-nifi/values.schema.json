@@ -559,6 +559,12 @@
                 },
                 "env": {
                     "type": "object"
+                },
+                "envSecretRef": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             },
             "required": [
