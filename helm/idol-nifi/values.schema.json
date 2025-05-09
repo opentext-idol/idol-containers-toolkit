@@ -556,6 +556,15 @@
                     "items": {
                         "$ref": "#/$defs/Bucket"
                     }
+                },
+                "env": {
+                    "type": "object"
+                },
+                "envSecretRef": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             },
             "required": [
@@ -564,7 +573,8 @@
                 "ingress",
                 "resources",
                 "buckets",
-                "dataVolume"
+                "dataVolume",
+                "env"
             ],
             "title": "NifiRegistry"
         },
