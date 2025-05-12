@@ -19,15 +19,18 @@ echo "[$(date)] Checking/registering registry ${NIFI_REGISTRY_HOSTS}"
 REG_URI=http://${NIFI_REGISTRY_HOSTS}:18080/
 
 REG_CLIENTS=$("${NIFI_TOOLKIT_HOME}/bin/cli.sh" nifi list-reg-clients -ot json)
-REG_CLIENT_ID=$(echo "${REG_CLIENTS}" | jq -r '.registries[0].registry.id // ""')
-REG_CLIENT_URI=$(echo "${REG_CLIENTS}" | jq -r '.registries[0].registry.uri // ""')
+REG_CLIENT_ID=$(echo "${REG_CLIENTS}" | jq -r '.registries[0].id // ""')
+REG_CLIENT_URI=$(echo "${REG_CLIENTS}" | jq -r '.registries[0].uri // ""')
 
 if [ -z "${REG_CLIENT_ID}" ]; then
     echo "[$(date)] No existing registry client, will create one"
-    "${NIFI_TOOLKIT_HOME}/bin/cli.sh" nifi create-reg-client -rcn "${NIFI_REGISTRY_HOSTS}" -rcu "${REG_URI}"
+    "${NIFI_TOOLKIT_HOME}/bin/cli.sh" nifi create-reg-client -rcn "${NIFI_REGISTRY_HOSTS}" -rct org.apache.nifi.registry.flow.NifiRegistryFlowRegistryClient
     REG_CLIENTS=$("${NIFI_TOOLKIT_HOME}/bin/cli.sh" nifi list-reg-clients -ot json)
-    REG_CLIENT_ID=$(echo "${REG_CLIENTS}" | jq -r ".registries[0].registry.id")
-    REG_CLIENT_URI=$(echo "${REG_CLIENTS}" | jq -r ".registries[0].registry.uri")
+    REG_CLIENT_ID=$(echo "${REG_CLIENTS}" | jq -r ".registries[0].id")
+    REG_CLIENT_URI=$(echo "${REG_CLIENTS}" | jq -r ".registries[0].uri")
+    REG_CLIENT_API_URL=http://${HOSTNAME}:8080/nifi-api/controller/registry-clients/${REG_CLIENT_ID}
+    UPDATE_REG_CLIENT_DEF=$(curl -s "${REG_CLIENT_API_URL}" | jq  ".component.properties.url = \"${REG_URI}\"")
+    NEW_REG_CLIENT_DEF=$(curl -X PUT "${REG_CLIENT_API_URL}" -H "Content-Type: application/json" -d "${UPDATE_REG_CLIENT_DEF}")
 elif [ "${REG_CLIENT_URI}" != "${REG_URI}" ]; then
     echo "[$(date)] Existing registry client ${REG_CLIENT_ID} requires URL update: ${REG_CLIENT_URI} -> ${REG_URI}"
     #Updates to the registry client cannot be done via CLI, so use the rest API instead

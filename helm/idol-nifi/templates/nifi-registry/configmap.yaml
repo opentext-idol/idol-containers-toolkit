@@ -22,6 +22,9 @@ data:
 {{- range $i,$bucket := $buckets }}
   NIFI_REGISTRY_BUCKET_FILES_{{ $i }}: {{ join "," $bucket.flowfiles | quote }}
   NIFI_REGISTRY_BUCKET_NAME_{{ $i }}: {{ $bucket.name | quote }}
+{{- end }}
+{{- range $k,$v := .Values.nifiRegistry.env }}
+  {{ $k }}: {{ $v | quote }}
 {{- end -}}
 {{- end -}}
 

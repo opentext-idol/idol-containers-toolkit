@@ -32,9 +32,9 @@ idolImage:
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
   registry: "microfocusidolserver"
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
-  version: "24.4"
+  version: "25.2"
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
-  repo: "nifi-full"
+  repo: "nifi-ver2-full"
   # -- used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy)
   imagePullPolicy: "IfNotPresent"
 
@@ -281,7 +281,7 @@ nifiRegistry:
   # -- whether to deploy a nifi registry instance
   enabled: true
   # -- nifi-registry image to use
-  image: docker.io/apache/nifi-registry:1.23.0
+  image: docker.io/apache/nifi-registry:2.3.0
   ingress:
     # nifiRegistry.ingress.enabled -- whether to deploy ingress for nifi registry
     enabled: true
@@ -328,6 +328,12 @@ nifiRegistry:
       name: "default-bucket"
       flowfiles:
       - /scripts/flow-basic-idol.json
+  
+  # -- Additional environment variables to export in nifi registry
+  env: {}
+
+  # -- Kubernetes Secret(s) to populate environment variables with (list of Secret names)
+  envSecretRef: []
 
 zookeeper:
   # -- zookeeper image to use
