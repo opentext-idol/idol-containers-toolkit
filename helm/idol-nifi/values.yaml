@@ -280,8 +280,10 @@ nifiClusters: null
 nifiRegistry:
   # -- whether to deploy a nifi registry instance
   enabled: true
-  # -- nifi-registry image to use
+  # -- nifi registry image to use
   image: docker.io/apache/nifi-registry:2.3.0
+  # -- used to determine whether to pull the specified nifi registry image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy)
+  imagePullPolicy: IfNotPresent
   ingress:
     # nifiRegistry.ingress.enabled -- whether to deploy ingress for nifi registry
     enabled: true

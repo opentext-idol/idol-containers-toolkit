@@ -244,7 +244,8 @@ Each deployment will require a unique name, and ingress points should be manuall
 | nifiRegistry.enabled | bool | `true` | whether to deploy a nifi registry instance |
 | nifiRegistry.env | object | `{}` | Additional environment variables to export in nifi registry |
 | nifiRegistry.envSecretRef | list | `[]` | Kubernetes Secret(s) to populate environment variables with (list of Secret names) |
-| nifiRegistry.image | string | `"docker.io/apache/nifi-registry:2.3.0"` | nifi-registry image to use |
+| nifiRegistry.image | string | `"docker.io/apache/nifi-registry:2.3.0"` | nifi registry image to use |
+| nifiRegistry.imagePullPolicy | string | `"IfNotPresent"` | used to determine whether to pull the specified nifi registry image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) |
 | nifiRegistry.ingress.annotations | object | `{}` | optional ingress annotations |
 | nifiRegistry.ingress.enabled | bool | `true` | whether to deploy ingress for nifi registry |
 | nifiRegistry.ingress.host | string | `""` | optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules |
