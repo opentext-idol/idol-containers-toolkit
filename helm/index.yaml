@@ -1398,7 +1398,7 @@ entries:
   idol-nifi:
   - apiVersion: v2
     appVersion: "25.2"
-    created: "2025-05-14T17:01:26.017988634+01:00"
+    created: "2025-05-15T15:44:01.863883438+01:00"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
@@ -1425,7 +1425,7 @@ entries:
       repository: '@bitnami-charts'
       version: 14.3.4
     description: A configurable IDOL NiFi setup
-    digest: 5f54106af3d6e56ebf41642eb6adf0a3b52edaa51e5824e620650a42177dfbbd
+    digest: d5b2d876cf59006bd9575de940a21a18ecbe3a1ca6eb8f6e2e3d2632c8afc7c1
     name: idol-nifi
     urls:
     - release/idol-nifi-0.15.0.tgz
@@ -3184,4 +3184,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2025-05-14T17:01:25.978399603+01:00"
+generated: "2025-05-15T15:44:01.817186828+01:00"
