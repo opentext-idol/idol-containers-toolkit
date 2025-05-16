@@ -243,7 +243,7 @@ Each deployment will require a unique name, and ingress points should be manuall
 | nifiRegistry.dataVolume.volumeSize | string | `"2Gi"` | Size of the PersistentVolumeClaim that is created for the NiFi Registry instance. The size chosen here provides a hard limit on the size of the NiFi Registry data storage in the NiFi Registry instance. |
 | nifiRegistry.enabled | bool | `true` | whether to deploy a nifi registry instance |
 | nifiRegistry.env | object | `{}` | Additional environment variables to export in nifi registry |
-| nifiRegistry.envSecretRef | list | `[]` | Kubernetes Secret(s) to populate environment variables with (list of Secret names) |
+| nifiRegistry.envFrom | object | `{}` | Additional sources for environment variables to export in nifi registry  See EnvFromSource https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#environment-variables-1 but allows merge on key names |
 | nifiRegistry.image | string | `"docker.io/apache/nifi-registry:2.3.0"` | nifi registry image to use |
 | nifiRegistry.imagePullPolicy | string | `"IfNotPresent"` | used to determine whether to pull the specified nifi registry image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) |
 | nifiRegistry.ingress.annotations | object | `{}` | optional ingress annotations |
