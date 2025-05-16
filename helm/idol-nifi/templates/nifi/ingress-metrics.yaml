@@ -27,7 +27,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $nifiCluster.clusterId }}-metrics
-  labels: {{- include "idol-library.labels" (dict "root" $root "component" $nifiCluster) | nindent 4 -}}
+  labels: {{- include "idol-library.labels" (dict "root" $root "component" $nifiCluster) | nindent 4 }}
   annotations:
     app.kubernetes.io/name: nifi-metrics
     app.kubernetes.io/part-of: {{ $nifiCluster.clusterId }}

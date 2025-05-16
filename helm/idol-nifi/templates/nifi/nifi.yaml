@@ -37,6 +37,7 @@ spec:
       initContainers:
       - name: ensure-conf
         image: {{ include "idol-library.idolImage" (dict "root" $root "idolImage" $nifiCluster.image ) }}
+        imagePullPolicy: {{ default (default "IfNotPresent" $nifiCluster.image.imagePullPolicy) $root.Values.global.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: {{ $component.name }}-env

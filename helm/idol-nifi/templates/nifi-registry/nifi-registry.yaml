@@ -45,6 +45,7 @@ spec:
       initContainers:
       - name: ensure-conf
         image: {{ .Values.nifiRegistry.image }}
+        imagePullPolicy: {{ .Values.nifiRegistry.imagePullPolicy }}
         envFrom:
         - configMapRef:
             name: {{ .Values.name }}-reg-cm
@@ -70,7 +71,7 @@ spec:
       containers:
       - name: nifi-registry
         image: {{ .Values.nifiRegistry.image }}
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: {{ .Values.nifiRegistry.imagePullPolicy }}
         ports:
         - containerPort: 18080
           name: http
@@ -85,11 +86,7 @@ spec:
           - configMapRef:
               name: {{ .Values.name }}-reg-cm
               optional: false
-          {{- range .Values.nifiRegistry.envSecretRef }}
-          - secretRef:
-              name: {{ . }}
-              optional: false
-          {{- end }}
+{{- include "idol-library.util.range_array_or_map_values" (dict "root" . "vals" .Values.nifiRegistry.envFrom) | nindent 10 }}
         livenessProbe:
           exec:
             command:

@@ -27,7 +27,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $nifiCluster.clusterId }}-aci
-  labels: {{- include "idol-library.labels" (dict "root" $root "component" $nifiCluster) | nindent 4 -}}
+  labels: {{- include "idol-library.labels" (dict "root" $root "component" $nifiCluster) | nindent 4 }}
   annotations:
 {{- if eq $root.Values.ingressType "nginx" }}
     nginx.ingress.kubernetes.io/rewrite-target: /$1

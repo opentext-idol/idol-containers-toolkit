@@ -280,8 +280,10 @@ nifiClusters: null
 nifiRegistry:
   # -- whether to deploy a nifi registry instance
   enabled: true
-  # -- nifi-registry image to use
+  # -- nifi registry image to use
   image: docker.io/apache/nifi-registry:2.3.0
+  # -- used to determine whether to pull the specified nifi registry image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy)
+  imagePullPolicy: IfNotPresent
   ingress:
     # nifiRegistry.ingress.enabled -- whether to deploy ingress for nifi registry
     enabled: true
@@ -332,8 +334,18 @@ nifiRegistry:
   # -- Additional environment variables to export in nifi registry
   env: {}
 
-  # -- Kubernetes Secret(s) to populate environment variables with (list of Secret names)
-  envSecretRef: []
+  # -- Additional sources for environment variables to export in nifi registry 
+  # See EnvFromSource https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#environment-variables-1
+  # but allows merge on key names
+  envFrom: {}
+    # # Example values
+    # merge-key-name:
+    #   configMapRef:
+    #     name: config-map-name
+    # another-key:
+    #   secretRef:
+    #     name: secret-name
+    #     optional: false
 
 zookeeper:
   # -- zookeeper image to use
