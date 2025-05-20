@@ -560,11 +560,8 @@
                 "env": {
                     "type": "object"
                 },
-                "envSecretRef": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                "envFrom": {
+                    "type": "object"
                 }
             },
             "required": [
