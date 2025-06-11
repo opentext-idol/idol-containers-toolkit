@@ -2,7 +2,7 @@
 
 # BEGIN COPYRIGHT NOTICE
 # Copyright 2023 Open Text.
-# 
+#
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
 # products and services. Nothing herein should be construed as constituting an additional warranty.
@@ -69,7 +69,7 @@ do
         echo "[$(date)] No exising flow found"
     else
         echo "[$(date)] Found exising flow: ${EXISTINGPGID} (FlowId: ${EXISTINGFLOWID}, Version: ${EXISTINGFLOWVERSION}, State: ${EXISTINGFLOWSTATE})"
-        
+
         if [ -z "${EXISTINGFLOWID}" ]; then
             echo "[$(date)] Existing flow is not versioned "
             echo "[$(date)] Flow import skipped"
@@ -110,7 +110,7 @@ do
         nifitoolkit_registry_importFlow "${NIFI_REGISTRY_URL}" "${BUCKETID}" "${FLOWFILE}" FLOWID FLOWVERSION
         echo "[$(date)] Imported Flow ${FLOWID} (version ${FLOWVERSION})"
     fi
-    
+
     if [ -n "${EXISTINGFLOWID}" ] && [ "${EXISTINGFLOWID}" != "${FLOWID}" ]; then
         echo "[$(date)] Flow Id mismatch: Process Group: ${EXISTINGFLOWID}, Registry: ${FLOWID}"
         echo "[$(date)] Flow import skipped"
@@ -123,7 +123,7 @@ do
     fi
 
     if [ -n "${EXISTINGFLOWID}" ]; then
-        
+
         if [ "${EXISTINGFLOWVERSION}" == "${FLOWVERSION}" ]; then
             echo "[$(date)] Not importing flow as existing process group is the desired version"
             continue

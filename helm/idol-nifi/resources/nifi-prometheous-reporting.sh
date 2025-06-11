@@ -2,7 +2,7 @@
 
 # BEGIN COPYRIGHT NOTICE
 # Copyright 2024 Open Text.
-# 
+#
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
 # products and services. Nothing herein should be construed as constituting an additional warranty.

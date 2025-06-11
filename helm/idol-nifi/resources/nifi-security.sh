@@ -2,7 +2,7 @@
 
 # BEGIN COPYRIGHT NOTICE
 # Copyright 2023 Open Text.
-# 
+#
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
 # products and services. Nothing herein should be construed as constituting an additional warranty.
@@ -55,5 +55,5 @@ then
     -KeySize 2048
 fi
 
-#/usr/bin/bash ${NIFI_HOME}/../scripts/secure.sh 
-#eval ${NIFI_HOME}/../scripts/secure.sh 
+#/usr/bin/bash ${NIFI_HOME}/../scripts/secure.sh
+#eval ${NIFI_HOME}/../scripts/secure.sh

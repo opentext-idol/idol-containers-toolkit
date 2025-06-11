@@ -2,7 +2,7 @@
 
 # BEGIN COPYRIGHT NOTICE
 # Copyright 2023 Open Text.
-# 
+#
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
 # products and services. Nothing herein should be construed as constituting an additional warranty.
@@ -23,7 +23,7 @@ logfile=/opt/nifi/nifi-current/logs/pre-start.log
     /scripts/security.sh
 
     for script in /prestart_scripts/*.sh
-    do 
+    do
         [ -f "$script" ] && source "$script"
     done
 
