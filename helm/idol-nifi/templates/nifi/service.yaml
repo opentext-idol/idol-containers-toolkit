@@ -23,6 +23,7 @@ metadata:
     app.kubernetes.io/part-of: {{ $root.Values.name }}
 spec:
   type: ClusterIP
+  clusterIP: None
   selector:
     app: {{ $nifiCluster.clusterId }}
   ports:
