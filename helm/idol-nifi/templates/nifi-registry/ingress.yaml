@@ -9,65 +9,67 @@
 #
 # END COPYRIGHT NOTICE
 {{- if and .Values.nifiRegistry.enabled .Values.nifiRegistry.ingress.enabled }}
+{{- $pathSuffix := "" }}
+{{- $pathType := "Prefix" }}
+{{- $endpointSuffixes := (tuple "" "-api" "-docs") }}
+{{- if eq .Values.ingressType "nginx" }}
+{{- $pathSuffix = "(.*)"}}
+{{- $pathType = "ImplementationSpecific" }}
+{{- $endpointSuffixes := (tuple "") }}
+{{- end }}
+{{ $root := . }}
+{{- range $endpointSuffix := $endpointSuffixes }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ $.Values.name }}-reg
-  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifiRegistry) | nindent 4 -}}
-    app: {{ $.Values.name }}-reg
+  name: {{ $.Values.name }}-reg{{ $endpointSuffix }}
+  labels: {{- include "idol-library.labels" (dict "root" $root "component" $root.Values.nifiRegistry) | nindent 4 -}}
+    app: {{ $root.Values.name }}-reg
   annotations:
-    app.kubernetes.io/name: {{ .Values.name }}-reg
-    app.kubernetes.io/part-of: {{ .Values.name }}
-{{- if eq .Values.ingressType "nginx" }}
+    app.kubernetes.io/name: {{ $root.Values.name }}-reg{{ $endpointSuffix }}
+    app.kubernetes.io/part-of: {{ $root.Values.name }}
+{{- if eq $root.Values.ingressType "nginx" }}
+    nginx.ingress.kubernetes.io/rewrite-target: /nifi-registry{{ $endpointSuffix }}$1
     nginx.ingress.kubernetes.io/affinity: cookie
     nginx.ingress.kubernetes.io/affinity-mode: persistent
     nginx.ingress.kubernetes.io/auth-type: basic
-    nginx.ingress.kubernetes.io/auth-secret: {{ .Values.name }}-basic-auth
+    nginx.ingress.kubernetes.io/auth-secret: {{ $root.Values.name }}-basic-auth
     nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
+{{- else if eq $root.Values.ingressType "haproxy" }}
+    haproxy.router.openshift.io/rewrite-target: /nifi-registry{{ $endpointSuffix }}
+    haproxy.router.openshift.io/proxy-body-size: {{ $root.Values.ingressProxyBodySize }}
 {{- end }}
 {{/* ingress setup is very dependent on cluster ingress controller so allow user value annotations */ -}}
-{{ with .Values.nifiRegistry.ingress.annotations }}
+{{ with $root.Values.nifiRegistry.ingress.annotations }}
 {{- toYaml . | trim | indent 4 }}
 {{- end }}
 spec:
-{{- if .Values.ingressClassName }}
-  ingressClassName: {{ .Values.ingressClassName | quote }}
+{{- if $root.Values.ingressClassName }}
+  ingressClassName: {{ $root.Values.ingressClassName | quote }}
 {{- end }}
-  {{- if .Values.nifiRegistry.ingress.tls.secretName }}
+  {{- if $root.Values.nifiRegistry.ingress.tls.secretName }}
   tls:
   - hosts:
-      - {{ .Values.nifiRegistry.ingress.host }}
-    secretName: {{ .Values.nifiRegistry.ingress.tls.secretName }}
+      - {{ $root.Values.nifiRegistry.ingress.host }}
+    secretName: {{ $root.Values.nifiRegistry.ingress.tls.secretName }}
   {{- end }}
   rules:
   - http:
       paths:
-      - path: /nifi-registry
-        pathType: Prefix
+      - path: {{ print ($root.Values.nifiRegistry.ingress.contextPath | default "") "/nifi-registry" $endpointSuffix $pathSuffix | quote }}
+        pathType: {{ $pathType }}
         backend:
           service:
-            name: {{ .Values.name }}-reg
+            name: {{ $root.Values.name }}-reg
             port:
               name: http
-      - path: /nifi-registry-api
-        pathType: Prefix
-        backend:
-          service:
-            name: {{ .Values.name }}-reg
-            port:
-              name: http
-      - path: /nifi-registry-docs
-        pathType: Prefix
-        backend:
-          service:
-            name: {{ .Values.name }}-reg
-            port:
-              name: http
-{{- if .Values.nifiRegistry.ingress.host }}
-    host: {{ .Values.nifiRegistry.ingress.host | quote }}
+{{- if $root.Values.nifiRegistry.ingress.host }}
+    host: {{ $root.Values.nifiRegistry.ingress.host | quote }}
+{{- end }}
+---
 {{- end }}
 {{ if .Values.nifiRegistry.ingress.tls.secretName -}}
 ---
-{{ include "idol-library.ingress.secret" (dict "tls" .Values.nifiRegistry.ingress.tls) -}}
+{{ include "idol-library.ingress.secret" (dict "tls" $root.Values.nifiRegistry.ingress.tls) -}}
 {{- end -}}
 {{- end -}}

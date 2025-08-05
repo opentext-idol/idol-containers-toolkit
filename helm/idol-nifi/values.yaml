@@ -291,6 +291,8 @@ nifiRegistry:
     annotations: {}
     # nifiRegistry.ingress.host -- optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules
     host: ""
+    # nifiRegistry.ingress.contextPath -- optional ingress context path
+    contextPath: ""
 
     # -- Whether ingress uses TLS. You must set an ingress host to use this. 
     # See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls

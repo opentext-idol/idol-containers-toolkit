@@ -247,6 +247,7 @@ Each deployment will require a unique name, and ingress points should be manuall
 | nifiRegistry.image | string | `"docker.io/apache/nifi-registry:2.3.0"` | nifi registry image to use |
 | nifiRegistry.imagePullPolicy | string | `"IfNotPresent"` | used to determine whether to pull the specified nifi registry image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) |
 | nifiRegistry.ingress.annotations | object | `{}` | optional ingress annotations |
+| nifiRegistry.ingress.contextPath | string | `""` | optional ingress context path |
 | nifiRegistry.ingress.enabled | bool | `true` | whether to deploy ingress for nifi registry |
 | nifiRegistry.ingress.host | string | `""` | optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules |
 | nifiRegistry.ingress.tls | object | `{"crt":"","key":"","secretName":""}` | Whether ingress uses TLS. You must set an ingress host to use this.  See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls |

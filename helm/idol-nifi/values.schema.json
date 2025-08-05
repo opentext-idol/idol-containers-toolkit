@@ -588,6 +588,9 @@
                 "host": {
                     "type": "string"
                 },
+                "contextPath": {
+                    "type": "string"
+                },
                 "tls": {
                     "$ref": "#/$defs/NifiIngressTLS"   
                 }
@@ -595,6 +598,7 @@
             "required": [
                 "enabled",
                 "host",
+                "contextPath",
                 "tls"
             ],
             "title": "NifiRegistryIngress"
