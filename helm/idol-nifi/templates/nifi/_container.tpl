@@ -29,6 +29,8 @@ ports:
   name: metrics
 - containerPort: 10000
   name: remote-input
+- containerPort: 8081
+  name: tomcat
 env:
   - name: POD_IP
     valueFrom:
@@ -141,6 +143,8 @@ securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml
                        (dict "name" "statedata" "mountPath" "/opt/nifi/nifi-current/flowfile_repository" "subPath" "flowfile_repository" "readOnly" false)
                        (dict "name" "statedata" "mountPath" "/opt/nifi/nifi-current/idol_repository" "subPath" "idol_repository" "readOnly" false)
                        (dict "name" "statedata" "mountPath" "/opt/nifi/nifi-current/provenance_repository" "subPath" "provenance_repository" "readOnly" false)
+                       (dict "name" "statedata" "mountPath" "/opt/nifi/nifi-current/nar_repository" "subPath" "nar_repository" "readOnly" false)
+                       (dict "name" "statedata" "mountPath" "/opt/tomcat/webapps" "subPath" "webapps" "readOnly" false)
                        (dict "name" "data" "mountPath" "/idol-ingest" "subPath" "idol-ingest" "readOnly" false)
                        (dict "name" "scripts" "mountPath" "/scripts" "readOnly" false)
                        (dict "name" "prestart-scripts" "mountPath" "/opt/nifi/nifi-current/prestart_scripts" "readOnly" false)

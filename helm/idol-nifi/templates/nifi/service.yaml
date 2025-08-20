@@ -55,6 +55,10 @@ spec:
     port: 10000
     targetPort: 10000
     name: remote-input
+  - protocol: TCP
+    port: 8081
+    targetPort: 8081
+    name: tomcat
   {{- range $portname,$portcfg := $nifiCluster.service.additionalPorts }}
   {{- /* allow setting negative port to invalidate a configuration */}}
   {{- if (gt (int $portcfg.port) 0) }}

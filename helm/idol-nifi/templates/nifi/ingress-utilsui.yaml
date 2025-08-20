@@ -1,0 +1,81 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+{{- define "idolnifi.nifi.ingress-utilsui" }}
+{{ $root := get . "root" | required "idolnifi.nifi.ingress-utilsui: missing nifiCluster" }}
+{{ $nifiCluster := get . "nifiCluster" | required "idolnifi.nifi.ingress-utilsui: missing nifiCluster" }}
+{{ $nifiClustersLen := get . "nifiClustersLen" | required "idolniif.nifi.ingress-utilsui: missing nifiClustersLen" }}
+{{- if $nifiCluster.ingress.enabled -}}
+{{- /*
+ nginx ingress needs path capture to achieve prefix type routing
+*/}}
+{{- $pathSuffix := "" }}
+{{- $pathType := "Prefix" }}
+{{- if eq $root.Values.ingressType "nginx" }}
+{{- $pathSuffix = "(.*)"}}
+{{- $pathType = "ImplementationSpecific" }}
+{{- end }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $nifiCluster.clusterId }}-utilsui
+  labels: {{- include "idol-library.labels" (dict "root" $root "component" $nifiCluster) | nindent 4 }}
+  annotations:
+{{- if eq $root.Values.ingressType "nginx" }}
+    nginx.ingress.kubernetes.io/rewrite-target: /utils/$1
+    nginx.ingress.kubernetes.io/proxy-body-size: {{ $root.Values.ingressProxyBodySize }}
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/affinity-mode: persistent
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: {{ $root.Values.name }}-basic-auth
+    nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      server_tokens off;
+      proxy_pass_header Authorization;
+      proxy_set_header Authorization $http_authorization;
+{{- if (trimAll "/" (default ( $nifiClustersLen | plural "" $nifiCluster.clusterId) $nifiCluster.ingress.proxyPath)) }}
+      proxy_set_header X-ProxyContextPath {{ print "/" (trimAll "/" (default ( $nifiClustersLen | plural "" $nifiCluster.clusterId) $nifiCluster.ingress.proxyPath)) "utilities" | quote }};
+{{- end }}
+{{- else if eq $root.Values.ingressType "haproxy" }}
+    haproxy.router.openshift.io/rewrite-target: /utils/
+    haproxy.router.openshift.io/proxy-body-size: {{ $root.Values.ingressProxyBodySize }}
+{{- end }}
+spec:
+{{- if $root.Values.ingressClassName }}
+  ingressClassName: {{ $root.Values.ingressClassName }}
+{{- end }}
+{{- if $nifiCluster.ingress.tls.secretName }}
+  tls:
+  - hosts:
+      - {{ $nifiCluster.ingress.host }}
+    secretName: {{ $nifiCluster.ingress.tls.secretName }}
+{{- end }}
+  rules:
+  - http:
+      paths:
+      - path: {{ print (trimSuffix "/" (default ( $nifiClustersLen | plural "/" (print "/" $nifiCluster.clusterId "/")) $nifiCluster.ingress.proxyPath)) "/utilities/" $pathSuffix | quote }}
+        pathType: {{ $pathType }}
+        backend:
+          service:
+            name: {{ $nifiCluster.clusterId }}
+            port:
+              name: tomcat
+{{- if $nifiCluster.ingress.host }}
+    host: {{ $nifiCluster.ingress.host | quote }}
+{{- end }}
+{{ if $nifiCluster.ingress.tls.secretName -}}
+---
+{{ include "idol-library.ingress.secret" (dict "tls" $nifiCluster.ingress.tls) -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{ include "idolnifi.forEachCluster" (dict "root" . "tpl" "idolnifi.nifi.ingress-utilsui" ) }}
