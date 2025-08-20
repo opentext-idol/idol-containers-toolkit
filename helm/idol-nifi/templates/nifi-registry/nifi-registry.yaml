@@ -90,8 +90,10 @@ spec:
         livenessProbe:
           exec:
             command:
-              - pgrep
-              - java
+              #Registry image doesn't have pgrep or ps
+              - sh
+              - -c
+              - ls -l /proc/*/exe | grep java
           initialDelaySeconds: 60
           periodSeconds: 30
           timeoutSeconds: 10
