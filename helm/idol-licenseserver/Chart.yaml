@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2022-2024 Open Text.
+# Copyright 2022-2025 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -10,5 +10,5 @@
 # END COPYRIGHT NOTICE
 apiVersion: v2
 name: idol-licenseserver
-version: 0.4.1
+version: 0.5.0
 description: Creates an IDOL LicenseServer proxy service accessible to other elements of the cluster
