@@ -7,15 +7,15 @@ Provides an IDOL LicenseServer service abstraction for use within a Kubernetes c
 
 Note this _does not_ install an instance of a LicenseServer container.
 
-One of licenseServerIp or licenseServerExternalName should be specified e.g.
+One of licenseServerExternalName or licenseServerIp should be specified e.g.
 
 ```
-helm install --set licenseServerIp=1.2.3.4 idol-licenseserver opentext-idol/idol-licenseserver
+helm install --set licenseServerExternalName=my.licenseserver.hostname idol-licenseserver opentext-idol/idol-licenseserver
 ```
 
 ```
-helm install --set licenseServerIp=null \
-    --set licenseServerExternalName=my.license.server.instance \
+helm install --set licenseServerIp=1.2.3.4 \
+    --set licenseServerExternalName="" \
     idol-licenseserver opentext-idol/idol-licenseserver
 ```
 

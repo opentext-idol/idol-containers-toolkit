@@ -73,6 +73,7 @@ ensure-repos:
 ${PACKAGE_CHARTS}: package-% : %/README.md ensure-repos
 	if [ -z `git ls-files --other --exclude-standard $*` ]; then \
 		helm package ${UPDATE_DEPENDENCIES} -d staging/release $*/ ; \
+		helm lint $*/ ; \
 	else \
 		echo "Untracked files exist in $*" ; \
 	fi

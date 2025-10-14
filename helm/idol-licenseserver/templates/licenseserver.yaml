@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2022-2024 Open Text.
+# Copyright 2022-2025 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -8,6 +8,15 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
+{{/* 
+Only one of licenseServerExternalName or licenseServerIp should be used 
+*/}}
+{{- if and .Values.licenseServerExternalName .Values.licenseServerIp -}}
+{{- fail "Only one of licenseServerExternalName or licenseServerIp should be set" -}}
+{{- end -}}
+{{- if and (not .Values.licenseServerExternalName) (not .Values.licenseServerIp) -}}
+{{- fail "One of licenseServerExternalName or licenseServerIp must be set" -}}
+{{- end }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -26,10 +35,10 @@ spec:
   type: ExternalName
   externalName: {{ .Values.licenseServerExternalName | quote }}
   {{- else }}
-  # no selector, create endpoint manually
+  clusterIP: None
 ---
-apiVersion: v1
-kind: Endpoints
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
 metadata:
   name: {{ .Values.licenseServerService }}
   labels:
@@ -37,10 +46,13 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
-subsets:
+    kubernetes.io/service-name: {{ .Values.licenseServerService }}
+addressType: IPv4
+endpoints:
   - addresses:
-      - ip: {{ .Values.licenseServerIp | quote }}
-    ports:
-      - port: {{ .Values.licenseServerPort | int }}
-        name: aci-port
+      - {{ .Values.licenseServerIp | quote }}
+ports:
+  - name: aci-port
+    port: {{ .Values.licenseServerPort | int }}
+    protocol: TCP
   {{- end }}
