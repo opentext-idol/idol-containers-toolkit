@@ -181,4 +181,4 @@ findUILivenessProbe:
 idol-licenseserver:
 # create a cluster service proxying to a LicenseServer instance
   enabled: true
-  licenseServerIp: this must be set to a valid IP address
+  licenseServerExternalName: "example.licenseserver.host"
