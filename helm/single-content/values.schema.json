@@ -9,6 +9,9 @@
                 },
                 "idol-licenseserver":{
                     "$ref": "#/$defs/optional_object"
+                },
+                "idol-library": {
+                    "type": "object"
                 }
             },
             "required": [
