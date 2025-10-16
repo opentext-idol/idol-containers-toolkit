@@ -73,9 +73,38 @@ additionalVolumes:
 # -- Additional PodSpec VolumeMount(s) (see <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1>)
 # Can be dict of (name, VolumeMount), or list of (VolumeMount). dict form allows for merging definitions from multiple values files.
 additionalVolumeMounts:
-  grammar-config:
+  grammar-config-gov:
     name: grammar-config
-    mountPath: /eductionserver/cfg
+    mountPath: /eductionserver/cfg/gov.cfg
+    subPath: gov.cfg
+  grammar-config-pci:
+    name: grammar-config
+    mountPath: /eductionserver/cfg/pci.cfg
+    subPath: pci.cfg
+  grammar-config-phi:
+    name: grammar-config
+    mountPath: /eductionserver/cfg/phi.cfg
+    subPath: phi.cfg
+  grammar-config-phi-internet:
+    name: grammar-config
+    mountPath: /eductionserver/cfg/phi_internet.cfg
+    subPath: phi_internet.cfg
+  grammar-config-phi-telephone:
+    name: grammar-config
+    mountPath: /eductionserver/cfg/phi_telephone.cfg
+    subPath: phi_telephone.cfg
+  grammar-config-pii:
+    name: grammar-config
+    mountPath: /eductionserver/cfg/pii.cfg
+    subPath: pii.cfg
+  grammar-config-pii-telephone:
+    name: grammar-config
+    mountPath: /eductionserver/cfg/pii_telephone.cfg
+    subPath: pii_telephone.cfg
+  grammar-config-psi:
+    name: grammar-config
+    mountPath: /eductionserver/cfg/psi.cfg
+    subPath: psi.cfg
 
 # -- Optional configMap name holding extra environnment variables for container
 envConfigMap: ""
