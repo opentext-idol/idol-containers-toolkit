@@ -12,6 +12,10 @@
                 },
                 "single-content":{
                     "$ref": "#/$defs/optional_object"
+                },
+                "idol-library": {
+                    "type": "object",
+                    "additionalProperties": true
                 }
 
             },

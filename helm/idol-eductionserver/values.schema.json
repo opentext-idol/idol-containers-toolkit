@@ -6,6 +6,10 @@
             "properties": {
                 "global": {
                     "$ref": "#/$defs/global"
+                },
+                "idol-library": {
+                    "type": "object",
+                    "additionalProperties": true
                 }
             },
             "required": [
