@@ -69,14 +69,16 @@ ensure-repos:
 	helm repo add prometheus ${PROMETHEUS_URL}
 	helm repo add prometheus-community ${PROMETHEUS_COMMUNITY_URL}
 
-# packages releases to staging directory
-${PACKAGE_CHARTS}: package-% : %/README.md ensure-repos
-	if [ -z `git ls-files --other --exclude-standard $*` ]; then \
-		helm package ${UPDATE_DEPENDENCIES} -d staging/release $*/ ; \
-		helm lint $*/ ; \
-	else \
-		echo "Untracked files exist in $*" ; \
+# Check there are no untracked files in the chart directories
+$(addprefix ensure-untracked-,${CHARTS}): ensure-untracked-%:
+	if [ ! -z `git ls-files --other --exclude-standard $*` ]; then \
+		echo "Untracked files exist in $*" ; exit 1; \
 	fi
+
+# packages releases to staging directory
+${PACKAGE_CHARTS}: package-% : %/README.md ensure-repos ensure-untracked-%
+	helm package ${UPDATE_DEPENDENCIES} -d staging/release $*/
+	helm lint $*/
 
 # generated README.md files
 ${README_CHARTS}: %/README.md: %/values.yaml %/Chart.yaml %/README.md.gotmpl

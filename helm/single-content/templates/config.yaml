@@ -11,5 +11,5 @@
 {{- include "idol-library.aciserver.defaultcfg" (dict 
     "root" .
     "component" .Values
-    "componentName" (trimPrefix "idol-" .Values.name)
+    "componentName" "content"
 ) -}}
