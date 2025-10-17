@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2023-2024 Open Text.
+# Copyright 2023 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -8,8 +8,12 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-{{- include "idol-library.aciserver.defaultcfg" (dict 
-    "root" .
-    "component" .Values
-    "componentName" "view"
-) -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $.Values.name }}-scripts
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values) | nindent 4 }}
+    app: {{ $.Values.name }}
+data:
+  view_prestart.sh: |
+{{ tpl (.Files.Get "resources/view_prestart.sh") . | indent 4 }}

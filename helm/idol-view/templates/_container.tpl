@@ -24,6 +24,9 @@
   "component" $component
   "source" "idol-library.aciserver.container.base.v1"
   "destination" "idolviewserver.container.base" 
+  "volumeMounts" (list (dict "name" "view-scripts" 
+                             "subPath" "view_prestart.sh"
+                             "mountPath" "/view/prestart_scripts/010_view_prestart.sh" "readOnly" true))
 ) -}}
 {{- /* END of idolacitest.container */ -}}
 {{- end -}}

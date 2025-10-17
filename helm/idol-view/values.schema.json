@@ -6,6 +6,9 @@
             "properties": {
                 "global": {
                     "$ref": "#/$defs/global"
+                },
+                "idol-library": {
+                    "type": "object"
                 }
             },
             "required": [
@@ -306,13 +309,24 @@
                 },
                 "queryserviceACIPort":{
                     "$ref": "#/$defs/port_number"
+                },
+                "queryserviceSSLMethod":{
+                    "type": "string"
+                },
+                "enablePdf2": {
+                    "type": "boolean"
+                },
+                "legacyRendering": {
+                    "type": "boolean"
                 }
             },
             "required":[
                 "agentStoreName",
                 "agentStoreACIPort",
                 "queryserviceName",
-                "queryserviceACIPort"
+                "queryserviceACIPort",
+                "enablePdf2",
+                "legacyRendering"
             ]
         }
     },
