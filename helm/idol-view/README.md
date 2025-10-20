@@ -1,6 +1,6 @@
 # idol-view
 
-![Version: 0.7.1](https://img.shields.io/badge/Version-0.7.1-informational?style=flat-square) ![AppVersion: 25.1](https://img.shields.io/badge/AppVersion-25.1-informational?style=flat-square)
+![Version: 0.8.0](https://img.shields.io/badge/Version-0.8.0-informational?style=flat-square) ![AppVersion: 25.4](https://img.shields.io/badge/AppVersion-25.4-informational?style=flat-square)
 
 Provides a Knowledge Discovery View deployment.
 
@@ -19,7 +19,7 @@ as part of an Knowledge Discovery Find set.
 
 You may wish to deploy this chart alongside _idol-nifi_.
 
-> Full documentation for View available from <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.1/View_25.1_Documentation/Help/>
+> Full documentation for View available from <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.4/View_25.4_Documentation/Help/>
 
 ## Requirements
 
@@ -60,7 +60,6 @@ You may wish to deploy this chart alongside _idol-nifi_.
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| aciPort | string | `"10000"` | port service will serve ACI connections on |
 | aciPort | string | `"9080"` | port service will serve ACI connections on |
 | additionalVolumeMounts | string | `nil` | Additional PodSpec VolumeMount(s) (see <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1>) Can be dict of (name, VolumeMount), or list of (VolumeMount). dict form allows for merging definitions from multiple values files. |
 | additionalVolumes | string | `nil` | Additional PodSpec Volume(s) (see <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes>) Can be dict of (name, Volume), or list of (Volume). dict form allows for merging definitions from multiple values files. |
@@ -69,13 +68,15 @@ You may wish to deploy this chart alongside _idol-nifi_.
 | annotations | object | `{}` | Additional annotations applied to deployment/statefulset (https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) |
 | containerSecurityContext | object | `{"enabled":false,"privileged":false,"runAsNonRoot":true}` | Optional SecurityContext for container (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#securitycontext-v1-core) |
 | containerSecurityContext.enabled | bool | `false` | enable SecurityContext for container. Setting to false omits. |
+| enablePdf2 | bool | `false` | Whether to enable PDF2 KeyView option |
 | envConfigMap | string | `""` | Optional configMap name holding extra environnment variables for container |
 | existingConfigMap | string | `""` | if specified, mounted at /etc/config/idol and expected to provide view.cfg |
 | idolImage.imagePullPolicy | string | `"IfNotPresent"` | used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) |
 | idolImage.registry | string | `"microfocusidolserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | idolImage.repo | string | `"view"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
-| idolImage.version | string | `"25.1"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
+| idolImage.version | string | `"25.4"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | labels | object | `{}` | Additional labels applied to all objects (https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/) |
+| legacyRendering | bool | `true` | Default configuration for [Viewing]::LegacyRendering |
 | licenseServerHostname | string | `"idol-licenseserver"` | maps to [License] LicenseServerHost in the IDOL cfg files Should point to a resolvable IDOL LicenseServer (or Kubernetes service abstraction - see the idol-licenseserver chart) |
 | licenseServerPort | string | `"20000"` | the ACI port of the IDOL LicenseServer (or abstraction) |
 | livenessProbe | object | `{"initialDelaySeconds":30}` | container livenessProbe settings |
@@ -86,12 +87,12 @@ You may wish to deploy this chart alongside _idol-nifi_.
 | podSecurityContext.enabled | bool | `false` | enable PodSecurityContext. Setting to false omits. |
 | queryserviceACIPort | string | `"9060"` | Default configuration for [UniversalViewing]::DocumentStorePort |
 | queryserviceName | string | `"idol-query-service"` | Default configuration for [UniversalViewing]::DocumentStoreHost |
+| queryserviceSSLMethod | string | `"None"` | SSLMethod for accessing queryservice. Typically None or Negotiate (see SSLMethod in IDOL documentation) |
 | replicas | int | `1` | number of replica pods for this container (defaults to 1) |
 | resources | object | `{"enabled":false,"limits":{"cpu":"1000m","memory":"1Gi"},"requests":{"cpu":"1000m","memory":"1Gi"}}` | Optional resources for container (see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers) |
 | resources.enabled | bool | `false` | enable resources for container. Setting to false omits. |
 | serviceAccountName | string | `""` | Optional serviceAccountName for the pods (https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account) |
 | servicePort | string | `"9082"` | port service will serve service connections on |
-| servicePort | string | `"10002"` | port service will serve service connections on |
 | usingTLS | bool | `false` | whether aci/service/index ports are configured to use TLS (https). If configuring for TLS, then consider setting IDOL_SSL_COMPONENT_CERT_PATH and IDOL_SSL_COMPONENT_KEY_PATH in envConfigMap to provide required TLS certificates |
 | workingDir | string | `"/view"` | Expected working directory for the container. Should only need to change this for a heavily customized image. |
 

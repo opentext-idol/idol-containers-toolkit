@@ -17,5 +17,7 @@
   "source" "idol-library.aciserver.deployment.base.v1"
   "destination" "idolviewserver.deployment.base" 
   "containers" (list "idolviewserver.container")
+  "volumes" (list (dict "name" "view-scripts" 
+                        "configMap" (dict "name" (print .Values.name "-scripts") "defaultMode" 0755)))
 ) }}
 
