@@ -44,8 +44,11 @@ metadata:
       server_tokens off;
       proxy_pass_header Authorization;
       proxy_set_header Authorization $http_authorization;
-{{- if (trimAll "/" (default ( $nifiClustersLen | plural "" $nifiCluster.clusterId) $nifiCluster.ingress.proxyPath)) }}
-      proxy_set_header X-ProxyContextPath {{ print "/" (trimAll "/" (default ( $nifiClustersLen | plural "" $nifiCluster.clusterId) $nifiCluster.ingress.proxyPath)) | quote }};
+{{- $contextPath := (trimAll "/" (default ( $nifiClustersLen | plural "" $nifiCluster.clusterId) $nifiCluster.ingress.proxyPath)) }}
+{{- if $contextPath }}
+      proxy_set_header X-ProxyContextPath {{ print "/" $contextPath | quote }};
+    nginx.ingress.kubernetes.io/proxy-redirect-from: ~^/(.*)
+    nginx.ingress.kubernetes.io/proxy-redirect-to: /{{ $contextPath }}/$1
 {{- end }}
 {{- else if eq $root.Values.ingressType "haproxy" }}
     haproxy.router.openshift.io/rewrite-target: / 
