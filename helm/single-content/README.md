@@ -1,6 +1,6 @@
 # single-content
 
-![Version: 0.11.3](https://img.shields.io/badge/Version-0.11.3-informational?style=flat-square) ![AppVersion: 25.4](https://img.shields.io/badge/AppVersion-25.4-informational?style=flat-square)
+![Version: 0.11.4](https://img.shields.io/badge/Version-0.11.4-informational?style=flat-square) ![AppVersion: 25.4](https://img.shields.io/badge/AppVersion-25.4-informational?style=flat-square)
 
 Provides a Knowledge Discovery Content statefulset.
 
