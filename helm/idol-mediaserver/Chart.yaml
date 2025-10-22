@@ -11,7 +11,7 @@
 apiVersion: v2
 name: idol-mediaserver
 version: "0.5.2"
-appVersion: "25.1"
+appVersion: "25.4"
 description: Adds Knowledge Discovery MediaServer
 dependencies:
 - name: idol-library
