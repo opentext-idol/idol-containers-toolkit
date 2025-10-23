@@ -14,7 +14,6 @@
 
 # The incantation to use this is
 # docker-compose -f docker-compose.yml -f docker-compose.add-mmap.yml up
-version: "3.7"
 
 x-common-labels: &common-labels
   docker-compose/instance: ${INSTANCE:-basic-idol}

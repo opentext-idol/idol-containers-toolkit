@@ -18,8 +18,6 @@
 # Default admin user is created for find in the community service
 #  - see community/run_community.sh for details
 
-version: "3.7"
-
 x-common-labels: &common-labels
   docker-compose/instance: ${INSTANCE:-basic-idol}
 
@@ -40,6 +38,10 @@ services:
   idol-content: 
     <<: *common-server
     image: ${IDOL_REGISTRY}/content:${IDOL_SERVER_VERSION}
+    # Example volume mounts to persist cfg and index data
+    # volumes:
+    #   - ./content/cfg:/content/cfg
+    #   - ./content/index:/content/index
   idol-agentstore:
     <<: *common-server
     image: ${IDOL_REGISTRY}/agentstore:${IDOL_SERVER_VERSION}
@@ -59,18 +61,34 @@ services:
       - idol-agentstore
   idol-nifi:
     <<: *common-server
-    image: ${IDOL_REGISTRY}/nifi-minimal:${IDOL_SERVER_VERSION} # choose nifi-minimal or nifi-full
+    image: ${IDOL_REGISTRY}/nifi-ver2-minimal:${IDOL_SERVER_VERSION} # choose nifi-ver2-minimal or nifi-ver2-full
     shm_size: 256m
     environment:
-      - NIFI_WEB_PROXY_CONTEXT_PATH=/idol-nifi
-      - NIFI_WEB_HTTP_PORT=8081
-      - NIFI_SENSITIVE_PROPS_KEY=my_nifi_sensitive_props_key
-      - IDOL_NIFI_FLOWFILE=/opt/nifi/scripts/flow-basic-idol.json
+      NIFI_WEB_PROXY_CONTEXT_PATH: /idol-nifi
+      NIFI_WEB_HTTP_PORT: 8081
+      NIFI_SENSITIVE_PROPS_KEY: my_nifi_sensitive_props_key
+      IDOL_NIFI_FLOWFILE: /opt/nifi/scripts/flow-basic-idol.json
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
     volumes:
       - idol-ingest-volume:/idol-ingest
       - ./nifi/resources/import-flow.sh:/opt/nifi/scripts/import-flow.sh
       - ./nifi/resources/basic-idol-entrypoint.sh:/opt/nifi/scripts/basic-idol-entrypoint.sh
       - ./nifi/flow/basic.json:/opt/nifi/scripts/flow-basic-idol.json
+      # Example volume mounts to persist nifi data
+      ## These need to be copied from the container initially
+      # ./nifi/data/conf:/opt/nifi/nifi-current/conf
+      # ./nifi/data/extensions:/opt/nifi/nifi-current/extensions
+      # ./nifi/data/idol_repository:/opt/nifi/nifi-current/idol_repository
+      ## The following entries are all initially empty directories that nifi will populate
+      # ./nifi/data/data:/opt/nifi/nifi-current/data
+      # ./nifi/data/run:/opt/nifi/nifi-current/run
+      # ./nifi/data/state:/opt/nifi/nifi-current/state
+      # ./nifi/data/keytool:/opt/nifi/nifi-current/keytool
+      # ./nifi/data/content_repository:/opt/nifi/nifi-current/content_repository
+      # ./nifi/data/database_repository:/opt/nifi/nifi-current/database_repository
+      # ./nifi/data/flowfile_repository:/opt/nifi/nifi-current/flowfile_repository
+      # ./nifi/data/provenance_repository:/opt/nifi/nifi-current/provenance_repository
     entrypoint:
       - sh
       - -c
@@ -84,6 +102,9 @@ services:
     depends_on:
       - idol-community
       - idol-view
+    # Example volume mount to persist find home data
+    # volumes:
+    #  - ./find/home:/opt/find/home
   httpd-reverse-proxy:
     image: httpd:2.4
     labels:
