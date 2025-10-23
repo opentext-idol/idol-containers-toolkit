@@ -45,6 +45,13 @@ spec:
         - configMapRef:
             name: {{ $component.name }}-keys-env
             optional: false
+        resources:
+          requests:
+            cpu: {{ $nifiCluster.resources.requests.cpu }}
+            memory: {{ printf "%dMi" ( $nifiCluster.resources.requests.memoryMi | int) }}
+          limits:
+            cpu: {{ $nifiCluster.resources.limits.cpu }}
+            memory: {{ printf "%dMi" ( $nifiCluster.resources.limits.memoryMi | int) }}
         {{- if $component.containerSecurityContext.enabled }}
         securityContext: {{- omit $component.containerSecurityContext "enabled" | toYaml | nindent 10 }}
           readOnlyRootFilesystem: true
