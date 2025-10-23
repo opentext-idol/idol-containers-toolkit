@@ -73,7 +73,7 @@ This chart may be used to provide entity extraction, entity redaction and sentim
 | idolImage.imagePullPolicy | string | `"IfNotPresent"` | used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) |
 | idolImage.registry | string | `"microfocusidolserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | idolImage.repo | string | `"eductionserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
-| idolImage.version | string | `"25.1"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
+| idolImage.version | string | `"25.4"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | labels | object | `{}` | Additional labels applied to all objects (https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/) |
 | licenseServerHostname | string | `"idol-licenseserver"` | the hostname of the IDOL LicenseServer (or abstraction) |
 | licenseServerPort | string | `"20000"` | the ACI port of the IDOL LicenseServer (or abstraction) |

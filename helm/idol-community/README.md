@@ -29,9 +29,9 @@ and may wish to deploy alongside the _idol-omnigroupserver_ chart.
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../single-content | single-content | ~0.11.0 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | ~0.15.0 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | ~0.5.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | single-content | ~0.11.0 |
 
 ## Values
 
@@ -80,7 +80,7 @@ and may wish to deploy alongside the _idol-omnigroupserver_ chart.
 | idolImage.imagePullPolicy | string | `"IfNotPresent"` | used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) |
 | idolImage.registry | string | `"microfocusidolserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | idolImage.repo | string | `"community"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}. |
-| idolImage.version | string | `"25.1"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
+| idolImage.version | string | `"25.4"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | labels | object | `{}` | Additional labels applied to all objects (https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/) |
 | licenseServerHostname | string | `"idol-licenseserver"` | maps to [License] LicenseServerHost in the IDOL cfg files Should point to a resolvable IDOL LicenseServer (or Kubernetes service abstraction - see the idol-licenseserver chart) |
 | licenseServerPort | string | `"20000"` | the ACI port of the IDOL LicenseServer (or abstraction) |

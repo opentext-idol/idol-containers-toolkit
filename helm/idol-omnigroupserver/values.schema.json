@@ -13,6 +13,15 @@
                 "idol-library": {
                     "type": "object",
                     "additionalProperties": true
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "cfg": {
+                    "type": "object"
+                },
+                "ext": {
+                    "type": "object"
                 }
             },
             "required": [
@@ -311,6 +320,8 @@
         }
     },
     "type": "object",
-    "$ref": "#/$defs/base",
+    "allOf": [
+        { "$ref": "#/$defs/base" }
+    ],
     "unevaluatedProperties": false
 }

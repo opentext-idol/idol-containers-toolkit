@@ -10,8 +10,8 @@
 # END COPYRIGHT NOTICE
 apiVersion: v2
 name: idol-answerserver
-version: "0.5.3"
-appVersion: "25.1"
+version: "0.5.4"
+appVersion: "25.4"
 description: Adds Knowledge Discovery AnswerServer
 dependencies:
 - name: idol-library
