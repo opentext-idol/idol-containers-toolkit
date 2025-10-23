@@ -54,6 +54,9 @@ spec:
         securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 10 }}
           readOnlyRootFilesystem: true
         {{- end }}
+        {{- if .Values.nifiRegistry.resources }}
+        resources: {{ toYaml .Values.nifiRegistry.resources | nindent 10 }}
+        {{- end }}
         command:
         - sh
         - "-c"

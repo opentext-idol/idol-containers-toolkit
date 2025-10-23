@@ -16,7 +16,6 @@
 # mount the idol-ingest volume rather than 
 # using a standard named volume
 
-version: "3.7"
 
 volumes:
   idol-ingest-volume:
