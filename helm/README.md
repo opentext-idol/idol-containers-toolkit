@@ -6,6 +6,7 @@ Helm charts for IDOL
 
 - [Usage](#usage)
 - [Common Setup](#common-setup)
+  - [Pull Secrets](#pull-secrets)
   - [IDOL Licensing](#idol-licensing)
     - [LicenseServer based](#licenseserver-based)
     - [OEM based](#oem-based)
@@ -20,7 +21,7 @@ Helm charts for IDOL
 helm repo add idol-containers-toolkit https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 # List available charts
 helm search repo idol-containers-toolkit
-# Add supplementary repositories as needed
+# Add supplementary repositories as needed. Not required if you are using the released charts.
 helm repo add bitnami-charts https://charts.bitnami.com/bitnami
 helm repo add kubernetes-sigs https://kubernetes-sigs.github.io/metrics-server
 helm repo add prometheus https://prometheus-community.github.io/helm-charts
@@ -28,6 +29,8 @@ helm repo add prometheus-community https://prometheus-community.github.io/helm-c
 ```
 
 Refer to individual chart `README.md` files for configuration details.
+
+If you are unfamiliar with Kubernetes/Helm, it is recommended you first try installing the [single-content](single-content/README.md) chart as a good test of your environment.
 
 ## Common Setup
 
@@ -37,6 +40,18 @@ handling of Helm values across the charts.
 [idol-library-example-test](idol-library-example-test/README.md) shows these common values.
 
 > N.B. The examples shown below use Helm's `--set` to configure values for clarity. It is recommended that these settings should be provided via a file e.g. `--set-file custom.values.yaml`
+
+### Pull Secrets
+
+To pull the container images from the `microfocusidolserver` repository, you need a preexisting `kubernetes.io/dockerconfigjson` Secret with your credentials.
+
+You can create an appropriate secret (for example called `dockerhub-secret`) by using the following command:
+
+```bash
+kubectl create secret docker-registry dockerhub-secret --docker-server=https://index.docker.io/v1/ --docker-username=microfocusidolreadonly --docker-password=<your-apikey>
+```
+
+For more details, see the [Kubernetes documentation](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-secret-by-providing-credentials-on-the-command-line).
 
 ### IDOL Licensing
 
