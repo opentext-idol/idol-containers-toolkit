@@ -16,7 +16,6 @@
 # Therefore the incantation to use this is something like
 # docker-compose -f docker-compose.yml -f docker-compose.ssl.yml up 
 
-version: "3.7"
 
 # bind mount holding certificates
 x-ssl-volume: &ssl-volume

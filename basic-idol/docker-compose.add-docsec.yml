@@ -15,7 +15,6 @@
 # This is designed to be used atop of docker-compose.yml
 # Therefore the incantation to use this is something like
 # docker-compose -f docker-compose.yml -f docker-compose.add-docsec.yml up 
-version: "3.7"
 
 x-args-security:
   # Put configuration details for the ldap server here

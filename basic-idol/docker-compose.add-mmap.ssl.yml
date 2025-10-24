@@ -18,7 +18,6 @@
 #  -f docker-compose.add-mmap.yml 
 #  -f docker-compose.add-mmap.ssl.yml up 
 
-version: "3.7"
 
 # bind mount holding certificates
 x-ssl-volume: &ssl-volume

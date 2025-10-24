@@ -14,7 +14,6 @@
 
 # expose internal service ports that don't necessarily
 # need to be exposed to the outside world
-version: "3.7"
 
 services:
   idol-content:
