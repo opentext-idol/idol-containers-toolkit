@@ -7,6 +7,9 @@
                 "global": {
                     "$ref": "#/$defs/global"
                 },
+                "idol-library": {
+                    "type": "object"
+                },
                 "content": {
                     "$ref": "#/$defs/content"
                 },
@@ -33,6 +36,12 @@
                 },
                 "setupMirrored": {
                     "type": "boolean"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "ext": {
+                    "type": "object"
                 }
             },
             "required": [
