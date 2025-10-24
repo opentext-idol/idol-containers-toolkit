@@ -18,6 +18,25 @@
                 },
                 "single-content":{
                     "$ref": "#/$defs/optional_object"
+                },
+                "idol-library": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "cfg": {
+                    "type": "object"
+                },
+                "ext": {
+                    "type": "object"
+                },
+                "factbank": {
+                    "type": "object"
+                },
+                "answerbank": {
+                    "type": "object"
                 }
             },
             "required": [

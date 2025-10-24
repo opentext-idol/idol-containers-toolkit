@@ -12,8 +12,20 @@
                 },
                 "single-content":{
                     "$ref": "#/$defs/optional_object"
+                },
+                "idol-library": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "cfg": {
+                    "type": "object"
+                },
+                "ext": {
+                    "type": "object"
                 }
-
             },
             "required": [
                 "global"
@@ -290,6 +302,9 @@
                 "queryserviceACIPort": {
                     "$ref": "#/$defs/port_number"
                 },
+                "queryserviceSSLMethod":{
+                    "type": "string"
+                },
                 "agentStoreName": {
                     "$ref": "#/$defs/required_string"
                 },
@@ -321,6 +336,8 @@
         }
     },
     "type": "object",
-    "$ref": "#/$defs/base",
+    "allOf": [
+        { "$ref": "#/$defs/base" }
+    ],
     "unevaluatedProperties": false
 }

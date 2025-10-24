@@ -10,8 +10,8 @@
 # END COPYRIGHT NOTICE
 apiVersion: v2
 name: idol-eductionserver
-version: "0.6.1"
-appVersion: "25.1"
+version: "0.6.2"
+appVersion: "25.4"
 description: Adds Knowledge Discovery Eduction Server
 dependencies:
 - name: idol-library
