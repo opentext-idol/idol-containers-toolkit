@@ -8,7 +8,7 @@ END COPYRIGHT NOTICE
 # distributed-idol
 <!-- omit in toc -->
 
-![Version: 0.13.2](https://img.shields.io/badge/Version-0.13.2-informational?style=flat-square) ![AppVersion: 25.1](https://img.shields.io/badge/AppVersion-25.1-informational?style=flat-square)
+![Version: 0.13.3](https://img.shields.io/badge/Version-0.13.3-informational?style=flat-square) ![AppVersion: 25.4](https://img.shields.io/badge/AppVersion-25.4-informational?style=flat-square)
 
 - [Overview](#overview)
 - [Prerequisites](#prerequisites)
@@ -37,9 +37,9 @@ The default is non-mirror mode.
 
 > Full documentation for the Knowledge Discovery components is available from
 >
-> - <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.1/Content_25.1_Documentation/Help/>
-> - <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.1/DAH_25.1_Documentation/Help/>
-> - <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.1/DIH_25.1_Documentation/Help/>
+> - <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.4/Content_25.4_Documentation/Help/>
+> - <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.4/DAH_25.4_Documentation/Help/>
+> - <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.4/DIH_25.4_Documentation/Help/>
 
 ## Prerequisites
 
@@ -188,7 +188,7 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | @prometheus | prometheus | 25.0 |
 | @prometheus | prometheus-adapter | 4.2.0 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | ~0.15.0 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | ~0.4.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | ~0.5.0 |
 
 ## Values
 
@@ -227,7 +227,7 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | content.idolImage.imagePullPolicy | string | `"IfNotPresent"` | used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) |
 | content.idolImage.registry | string | `"microfocusidolserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | content.idolImage.repo | string | `"content"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
-| content.idolImage.version | string | `"25.1"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
+| content.idolImage.version | string | `"25.4"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | content.indexPort | string | `"9101"` | port service will serve index connections on |
 | content.ingress.annotations | object | `{}` | Ingress controller specific annotations Some annotations are added automatically based on ingress.type and other values, but can  be overridden/augmented here e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations |
 | content.ingress.className | string | `""` | Optional parameter to override the default ingress class |
@@ -264,7 +264,7 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | dah.idolImage.imagePullPolicy | string | `"IfNotPresent"` | used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) |
 | dah.idolImage.registry | string | `"microfocusidolserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | dah.idolImage.repo | string | `"dah"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
-| dah.idolImage.version | string | `"25.1"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
+| dah.idolImage.version | string | `"25.4"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | dah.ingress.annotations | object | `{}` | Ingress controller specific annotations Some annotations are added automatically based on ingress.type and other values, but can  be overridden/augmented here e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations |
 | dah.ingress.className | string | `""` | Optional parameter to override the default ingress class |
 | dah.ingress.enabled | bool | `true` | Create ingress resource |
@@ -297,7 +297,7 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | dih.idolImage.imagePullPolicy | string | `"IfNotPresent"` | used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) |
 | dih.idolImage.registry | string | `"microfocusidolserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | dih.idolImage.repo | string | `"dih"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
-| dih.idolImage.version | string | `"25.1"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
+| dih.idolImage.version | string | `"25.4"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | dih.indexPort | string | `"9071"` | port service will serve index connections on |
 | dih.ingress.annotations | object | `{}` | Ingress controller specific annotations Some annotations are added automatically based on ingress.type and other values, but can  be overridden/augmented here e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations |
 | dih.ingress.className | string | `""` | Optional parameter to override the default ingress class |
@@ -325,12 +325,12 @@ kubectl delete pvc --selector app.kubernetes.io/instance=<release_name>
 | indexserviceName | string | `"idol-index-service"` | internal parameter to specify the index service name. |
 | licenseServerHostname | string | `"idol-licenseserver"` | maps to [License] LicenseServerHost in the IDOL cfg files Should point to a resolvable IDOL LicenseServer (or Kubernetes service abstraction - see the idol-licenseserver chart) |
 | licenseServerPort | string | `"20000"` | ACI port of the LicenseServer instance |
-| metrics-server | object | `{"args":["--kubelet-insecure-tls"],"enabled":true}` | `metrics-server` sub-chart configuration Required if auto-scaling on system metrics (e.g. cpu) |
+| metrics-server | object | `{"args":["--kubelet-insecure-tls"],"enabled":true}` | `metrics-server` sub-chart configuration Required if auto-scaling on system metrics (e.g. cpu) Note a cluster can typically only have one metrics-server installed |
 | metrics-server.enabled | bool | `true` | whether to deploy a metrics server instance |
-| prometheus | object | Default configuration to support `distributed-idol` autoscaling. See values.yaml for details. | `prometheus` sub-chart configuration Required for auto-scaling on custom metrics (e.g. dih fullness) See https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus |
-| prometheus-adapter | object | Default configuration to support `idol-nifi` autoscaling. See values.yaml for details. | `prometheus-adapter` sub-chart configuration Required for auto-scaling on custom metrics (e.g. dih fullness See https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-adapter |
+| prometheus | object | Default configuration to support `distributed-idol` autoscaling based on DIH fullness ratio. See values.yaml for details. | `prometheus` sub-chart configuration Required for auto-scaling on custom metrics (e.g. DIH fullness) See https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus |
+| prometheus-adapter | object | Default configuration to support `distributed-idol` autoscaling based on DIH fullness ratio. See values.yaml for details. | `prometheus-adapter` sub-chart configuration Required for auto-scaling on custom metrics (e.g. DIH fullness) See https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-adapter |
 | queryserviceName | string | `"idol-query-service"` | internal parameter to specify the query service name. |
-| setupMirrored | bool | `false` | When `true` this will configure the  DAH and DIH in mirror-mode, meaning the Contents will all be mirrors of each other. When `false`, the DAH and DIH will be configured in non-mirror mode, meaning that documents will be distributed between the content engines. In mirror-mode, the Content engines will autoscale to fulfil query demand. In non-mirror-mode, Content engines will autoscale to fulfil index demand. See <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.1/DAH_25.1_Documentation/Help/Content/Configuration/Server/MirrorMode.htm> and <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.1/DIH_25.1_Documentation/Help/Content/Configuration/Server/MirrorMode.htm> |
+| setupMirrored | bool | `false` | When `true` this will configure the  DAH and DIH in mirror-mode, meaning the Contents will all be mirrors of each other. When `false`, the DAH and DIH will be configured in non-mirror mode, meaning that documents will be distributed between the content engines. In mirror-mode, the Content engines will autoscale to fulfil query demand. In non-mirror-mode, Content engines will autoscale to fulfil index demand. See <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.4/DAH_25.4_Documentation/Help/Content/Configuration/Server/MirrorMode.htm> and <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.4/DIH_25.4_Documentation/Help/Content/Configuration/Server/MirrorMode.htm> |
 
 ----------------------------------------------
 Autogenerated from chart metadata using [helm-docs v1.14.2](https://github.com/norwoodj/helm-docs/releases/v1.14.2)

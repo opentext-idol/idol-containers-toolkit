@@ -24,8 +24,8 @@
 # meaning that documents will be distributed between the content engines.
 # In mirror-mode, the Content engines will autoscale to fulfil query demand.
 # In non-mirror-mode, Content engines will autoscale to fulfil index demand.
-# See <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.1/DAH_25.1_Documentation/Help/Content/Configuration/Server/MirrorMode.htm>
-# and <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.1/DIH_25.1_Documentation/Help/Content/Configuration/Server/MirrorMode.htm>
+# See <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.4/DAH_25.4_Documentation/Help/Content/Configuration/Server/MirrorMode.htm>
+# and <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.4/DIH_25.4_Documentation/Help/Content/Configuration/Server/MirrorMode.htm>
 setupMirrored: false
 
 #############################################
@@ -95,7 +95,7 @@ content:
     # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
     registry: "microfocusidolserver"
     # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
-    version: "25.1"
+    version: "25.4"
     # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
     repo: "content"
     # -- used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy)
@@ -264,7 +264,7 @@ dah:
     # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
     registry: "microfocusidolserver"
     # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
-    version: "25.1"
+    version: "25.4"
     # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
     repo: "dah"
     # -- used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy)
@@ -395,7 +395,7 @@ dih:
     # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
     registry: "microfocusidolserver"
     # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
-    version: "25.1"
+    version: "25.4"
     # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
     repo: "dih"
     # -- used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy)
@@ -556,6 +556,7 @@ idol-licenseserver:
 
 # -- `metrics-server` sub-chart configuration
 # Required if auto-scaling on system metrics (e.g. cpu)
+# Note a cluster can typically only have one metrics-server installed
 metrics-server:
   # -- whether to deploy a metrics server instance
   enabled: true
@@ -563,9 +564,9 @@ metrics-server:
     - "--kubelet-insecure-tls"
 
 # -- `prometheus` sub-chart configuration
-# Required for auto-scaling on custom metrics (e.g. dih fullness)
+# Required for auto-scaling on custom metrics (e.g. DIH fullness)
 # See https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus
-# @default -- Default configuration to support `distributed-idol` autoscaling. See values.yaml for details.
+# @default -- Default configuration to support `distributed-idol` autoscaling based on DIH fullness ratio. See values.yaml for details.
 prometheus:
   enabled: true
   # so we can inject dih name into scrape config
@@ -597,9 +598,9 @@ prometheus:
     enabled: false
 
 # -- `prometheus-adapter` sub-chart configuration
-# Required for auto-scaling on custom metrics (e.g. dih fullness
+# Required for auto-scaling on custom metrics (e.g. DIH fullness)
 # See https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-adapter
-# @default -- Default configuration to support `idol-nifi` autoscaling. See values.yaml for details.
+# @default -- Default configuration to support `distributed-idol` autoscaling based on DIH fullness ratio. See values.yaml for details.
 prometheus-adapter:
   enabled: true
   metricsRelistInterval: 30s
