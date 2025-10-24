@@ -113,6 +113,8 @@ agentStoreACIPort: &agentstoreACIPort "9150"
 queryserviceName: &queryServiceName "idol-query-service"
 # -- Default configuration for [IDOL]::Port
 queryserviceACIPort: &queryServiceACIPort "9100"
+# -- Default configuration for [IDOL]::SSLMethod
+queryserviceSSLMethod: None
 
 ##### INGRESS VARIABLES #####
 

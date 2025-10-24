@@ -87,6 +87,7 @@ This chart may be used to provide query & result modification and promotion mana
 | podSecurityContext.enabled | bool | `false` | enable PodSecurityContext. Setting to false omits. |
 | queryserviceACIPort | string | `"9100"` | Default configuration for [IDOL]::Port |
 | queryserviceName | string | `"idol-query-service"` | Default configuration for [IDOL]::Host |
+| queryserviceSSLMethod | string | `"None"` | Default configuration for [IDOL]::SSLMethod |
 | replicas | int | `1` | number of replica pods for this container (defaults to 1) |
 | resources | object | `{"enabled":false,"limits":{"cpu":"1000m","memory":"1Gi"},"requests":{"cpu":"1000m","memory":"1Gi"}}` | Optional resources for container (see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers) |
 | resources.enabled | bool | `false` | enable resources for container. Setting to false omits. |

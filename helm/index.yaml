@@ -700,7 +700,7 @@ entries:
   idol-community:
   - apiVersion: v2
     appVersion: "25.4"
-    created: "2025-10-23T16:15:33.143118367+01:00"
+    created: "2025-10-24T12:51:44.832016986+01:00"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
@@ -714,7 +714,7 @@ entries:
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
       version: ~0.11.0
     description: Adds IDOL Community
-    digest: 78731861f8d97f255908349aae0f3631f8b91d4f2f46f58d5a72a24e1310f377
+    digest: 6b6e7f84597af796a838bb7b0764e5677f6e9000fca613d8e139ec2ed3bfd6d5
     name: idol-community
     urls:
     - release/idol-community-0.7.3.tgz
@@ -953,13 +953,13 @@ entries:
   idol-eductionserver:
   - apiVersion: v2
     appVersion: "25.4"
-    created: "2025-10-23T16:15:33.151417267+01:00"
+    created: "2025-10-24T12:51:44.84082419+01:00"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
       version: ~0.15.0
     description: Adds Knowledge Discovery Eduction Server
-    digest: 9f30b9a8c96695375d96b3cd2c3af19aba513b899210f6d82e6beda5da1ee7e1
+    digest: 6a4f4012eabcf26ff134286949da887c9b1529bf3555d2df146d8022c9426811
     name: idol-eductionserver
     urls:
     - release/idol-eductionserver-0.6.2.tgz
@@ -2560,7 +2560,7 @@ entries:
   idol-qms:
   - apiVersion: v2
     appVersion: "25.4"
-    created: "2025-10-23T16:15:33.188207369+01:00"
+    created: "2025-10-24T12:51:44.851778495+01:00"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
@@ -2575,7 +2575,7 @@ entries:
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
       version: ~0.11.0
     description: Adds Knowledge Discovery QMS
-    digest: a4307e0ff0fd781d1c876e11c5ca0993f12be988eaea8d6c36f5611e44e8b1a1
+    digest: 529d272cbcb9d03cd753e286e36ce1e37707d20aed789fea5578126d215b7787
     name: idol-qms
     urls:
     - release/idol-qms-0.7.3.tgz
@@ -3408,4 +3408,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2025-10-23T16:15:33.112318366+01:00"
+generated: "2025-10-24T12:51:44.820262981+01:00"

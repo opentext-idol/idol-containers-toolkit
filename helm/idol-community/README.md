@@ -90,6 +90,7 @@ and may wish to deploy alongside the _idol-omnigroupserver_ chart.
 | podSecurityContext.enabled | bool | `false` | enable PodSecurityContext. Setting to false omits. |
 | queryserviceACIPort | string | `"9060"` | query service aci port (maps to Community DataDRE configuration). |
 | queryserviceName | string | `"idol-query-service"` | query service/hostname (maps to Community DataDRE configuration). |
+| queryserviceSSLMethod | string | `"None"` | query service SSL method (maps to Community DataDRE configuration). |
 | replicas | int | `1` | number of replica pods for this container (defaults to 1) |
 | resources | object | `{"enabled":false,"limits":{"cpu":"1000m","memory":"1Gi"},"requests":{"cpu":"1000m","memory":"1Gi"}}` | Optional resources for container (see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers) |
 | resources.enabled | bool | `false` | enable resources for container. Setting to false omits. |

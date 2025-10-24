@@ -106,6 +106,8 @@ serviceAccountName: ""
 queryserviceName: "idol-query-service"
 # queryserviceACIPort -- query service aci port (maps to Community DataDRE configuration).
 queryserviceACIPort: "9060"
+# queryserviceSSLMethod -- query service SSL method (maps to Community DataDRE configuration).
+queryserviceSSLMethod: None
 # agentStoreName -- agentstore service/hostname (maps to Community AgentDRE configuration).
 agentStoreName: "idol-agentstore"
 # agentStoreACIPort -- agentstore service aci port (maps to Community AgentDRE configuration).

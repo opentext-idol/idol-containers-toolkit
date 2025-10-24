@@ -105,12 +105,16 @@ additionalVolumeMounts:
     name: grammar-config
     mountPath: /eductionserver/cfg/psi.cfg
     subPath: psi.cfg
+  grammar-config-pbi:
+    name: grammar-config
+    mountPath: /eductionserver/cfg/pbi.cfg
+    subPath: pbi.cfg
 
 # -- Optional configMap name holding extra environnment variables for container
 envConfigMap: ""
 
 # -- the grammar package configuration file to use, must be one of:
-# 'gov', 'pci', 'phi', 'phi_telephone', 'phi_internet', 'pii', 'pii_telephone' or 'psi'.
+# 'gov', 'pci', 'phi', 'phi_telephone', 'phi_internet', 'pii', 'pii_telephone', 'psi' or 'pbi'.
 grammarPackage: "pii"
 
 # -- Optional PodSecurityContext (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podsecuritycontext-v1-core)
