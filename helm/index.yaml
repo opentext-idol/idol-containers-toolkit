@@ -700,7 +700,7 @@ entries:
   idol-community:
   - apiVersion: v2
     appVersion: "25.4"
-    created: "2025-10-24T12:51:44.832016986+01:00"
+    created: "2025-10-27T09:47:03.527148645Z"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
@@ -714,7 +714,7 @@ entries:
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
       version: ~0.11.0
     description: Adds IDOL Community
-    digest: 6b6e7f84597af796a838bb7b0764e5677f6e9000fca613d8e139ec2ed3bfd6d5
+    digest: 30002987b06c1a3a0eb2117927f09fcbdcefda31ea2888b802445b45b3e61287
     name: idol-community
     urls:
     - release/idol-community-0.7.3.tgz
@@ -3442,4 +3442,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2025-10-24T12:51:44.820262981+01:00"
+generated: "2025-10-27T09:47:03.516119345Z"
