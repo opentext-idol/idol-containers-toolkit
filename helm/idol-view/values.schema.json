@@ -9,6 +9,9 @@
                 },
                 "idol-library": {
                     "type": "object"
+                },
+                "enabled": {
+                    "type": "boolean"
                 }
             },
             "required": [

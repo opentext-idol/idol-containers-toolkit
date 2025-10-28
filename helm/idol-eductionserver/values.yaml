@@ -42,7 +42,7 @@ idolImage:
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
   registry: "microfocusidolserver"
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
-  version: "25.1"
+  version: "25.4"
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
   repo: "eductionserver"
   # -- used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy)
@@ -73,15 +73,48 @@ additionalVolumes:
 # -- Additional PodSpec VolumeMount(s) (see <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1>)
 # Can be dict of (name, VolumeMount), or list of (VolumeMount). dict form allows for merging definitions from multiple values files.
 additionalVolumeMounts:
-  grammar-config:
+  grammar-config-gov:
     name: grammar-config
-    mountPath: /eductionserver/cfg
+    mountPath: /eductionserver/cfg/gov.cfg
+    subPath: gov.cfg
+  grammar-config-pci:
+    name: grammar-config
+    mountPath: /eductionserver/cfg/pci.cfg
+    subPath: pci.cfg
+  grammar-config-phi:
+    name: grammar-config
+    mountPath: /eductionserver/cfg/phi.cfg
+    subPath: phi.cfg
+  grammar-config-phi-internet:
+    name: grammar-config
+    mountPath: /eductionserver/cfg/phi_internet.cfg
+    subPath: phi_internet.cfg
+  grammar-config-phi-telephone:
+    name: grammar-config
+    mountPath: /eductionserver/cfg/phi_telephone.cfg
+    subPath: phi_telephone.cfg
+  grammar-config-pii:
+    name: grammar-config
+    mountPath: /eductionserver/cfg/pii.cfg
+    subPath: pii.cfg
+  grammar-config-pii-telephone:
+    name: grammar-config
+    mountPath: /eductionserver/cfg/pii_telephone.cfg
+    subPath: pii_telephone.cfg
+  grammar-config-psi:
+    name: grammar-config
+    mountPath: /eductionserver/cfg/psi.cfg
+    subPath: psi.cfg
+  grammar-config-pbi:
+    name: grammar-config
+    mountPath: /eductionserver/cfg/pbi.cfg
+    subPath: pbi.cfg
 
 # -- Optional configMap name holding extra environnment variables for container
 envConfigMap: ""
 
 # -- the grammar package configuration file to use, must be one of:
-# 'gov', 'pci', 'phi', 'phi_telephone', 'phi_internet', 'pii', 'pii_telephone' or 'psi'.
+# 'gov', 'pci', 'phi', 'phi_telephone', 'phi_internet', 'pii', 'pii_telephone', 'psi' or 'pbi'.
 grammarPackage: "pii"
 
 # -- Optional PodSecurityContext (see https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podsecuritycontext-v1-core)

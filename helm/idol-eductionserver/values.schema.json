@@ -6,6 +6,19 @@
             "properties": {
                 "global": {
                     "$ref": "#/$defs/global"
+                },
+                "idol-library": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "cfg": {
+                    "type": "object"
+                },
+                "ext": {
+                    "type": "object"
                 }
             },
             "required": [
@@ -271,7 +284,7 @@
             "properties":{
                 "grammarPackage": {
                     "type": "string",
-                    "enum": ["gov", "pci", "phi", "phi_internet", "phi_telephone", "pii", "pii_telephone", "psi"]
+                    "enum": ["gov", "pci", "phi", "phi_internet", "phi_telephone", "pii", "pii_telephone", "psi", "pbi"]
                 },
                 "ingress": {
                     "type":"object",
@@ -298,6 +311,8 @@
         }
     },
     "type": "object",
-    "$ref": "#/$defs/base",
+    "allOf": [
+        { "$ref": "#/$defs/base" }
+    ],
     "unevaluatedProperties": false
 }
