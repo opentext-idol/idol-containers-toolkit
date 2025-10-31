@@ -13,7 +13,7 @@ entries:
   distributed-idol:
   - apiVersion: v2
     appVersion: "25.4"
-    created: "2025-10-31T15:10:22.286398436Z"
+    created: "2025-10-31T15:57:38.907594415Z"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
@@ -35,7 +35,7 @@ entries:
       repository: '@prometheus'
       version: 4.2.0
     description: A configurable distributed IDOL setup
-    digest: 189747fcec171d7279171955fb3df950932e9f9cf6fc5e1746fa10c003c352b5
+    digest: 00eb6d87c85f8900bf1a8409a1e83ceccf43228c9d7fbfd41a831106a7eccf9a
     name: distributed-idol
     urls:
     - release/distributed-idol-0.13.3.tgz
@@ -3471,4 +3471,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2025-10-31T15:10:22.26786891Z"
+generated: "2025-10-31T15:57:38.88465006Z"

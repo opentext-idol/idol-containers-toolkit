@@ -477,6 +477,8 @@
         }
     },
     "type": "object",
-    "$ref": "#/$defs/base",
+    "allOf": [
+        {"$ref": "#/$defs/base"}
+    ],
     "unevaluatedProperties": false
 }
