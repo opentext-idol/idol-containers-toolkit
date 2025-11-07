@@ -11,23 +11,30 @@
 
 apiVersion: v2
 name: idol-stack
-version: 0.2.3
-appVersion: "24.4"
-description: An IDOL setup
+version: 0.2.4
+appVersion: "25.4"
+description: An IDOL setup for ingesting, processing and serving document content using Apache NiFi and the Find interface
 dependencies:
+- name: idol-library
+  version: ~0.15.0
+  repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 - name: idol-licenseserver
   condition: idol-licenseserver.enabled
-  version: "0.4.0"
+  version: "~0.5.0"
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 - name: single-content
   condition: single-content.enabled
-  version: "0.10.2"
+  version: "~0.11.0"
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 - name: distributed-idol
   condition: distributed-idol.enabled
-  version: "0.10.0"
+  version: "~0.13.0"
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 - name: idol-nifi
   condition: idol-nifi.enabled
-  version: "0.9.1"
+  version: "~0.15.0"
+  repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+- name: idol-find
+  condition: idol-find.enabled
+  version: "~0.3.0"
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
