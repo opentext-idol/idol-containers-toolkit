@@ -81,7 +81,7 @@ class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
                     }
                 }
             },
-            '_unnamed_': { 'dummy': None },
+            '_unnamed_': { "allowedStartupSeconds": 10 }, # this should give a cluster inheriting the top level name property as its clusterId
         }
         if use_dict:
             clusters['ignored'] = {'DELETE': True}
