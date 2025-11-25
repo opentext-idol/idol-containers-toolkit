@@ -19,6 +19,7 @@ metadata:
   labels: {{- include "idol-library.labels" (dict "root" $root "component" $root.Values.zookeeper) | nindent 4 -}}
     name: {{ $nifiCluster.clusterId }}-zk
     app: {{ $nifiCluster.clusterId }}-zk
+    app.framework/openjdk: "17"
   annotations:
     app.kubernetes.io/name: {{ $nifiCluster.clusterId }}-zk
     app.kubernetes.io/part-of: {{ $nifiCluster.clusterId }}
@@ -33,6 +34,7 @@ spec:
     metadata:
       labels: {{- include "idol-library.labels" (dict "root" $root "component" $root.Values.zookeeper) | nindent 8 -}}
         app: {{ $nifiCluster.clusterId }}-zk
+        app.framework/openjdk: "17"
     spec:
       automountServiceAccountToken: false
       enableServiceLinks: false
