@@ -8,9 +8,83 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
+
+{{- define "idol-library.ingress.gateway" -}}
+{{- $root := get . "root" | required "missing root" -}}
+{{- $component := get . "component" | required "missing component" -}}
+{{- $ingress := get . "ingress" | required "missing ingress" -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: {{ $component.name | quote }}
+  labels: {{- include "idol-library.labels" . | nindent 4 }}
+spec:
+  gatewayClassName: {{ $ingress.className | required "Must specify ingress.className for gateway" }}
+  listeners:
+  - name: http
+    hostname: {{ $ingress.host | quote }}
+    port: 80
+    protocol: HTTP
+    allowedRoutes:
+      namespaces:
+        from: All
+  {{- if $ingress.tls.secretName }}
+  - name: https
+    hostname: {{ $ingress.host | quote }}
+    port: 443
+    protocol: HTTPS
+    allowedRoutes:
+      namespaces:
+        from: All
+    tls:
+      certificateRefs:
+      - group: ""
+        kind: Secret
+        name: {{ $ingress.tls.secretName }}
+      mode: Terminate
+  {{- end }}
+{{- end -}}
+
+{{- define "idol-library.ingress.httproute" -}}
+{{- $root := get . "root" | required "missing root" -}}
+{{- $component := get . "component" | required "missing component" -}}
+{{- $ingress := get . "ingress" | required "missing ingress" -}}
+{{- $portmapping := get . "portmapping" | default (dict 
+    $component.aciPort $ingress.path
+    $component.servicePort $ingress.servicePath
+    $component.indexPort $ingress.indexPath) -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: http
+  labels: {{- include "idol-library.labels" . | nindent 4 }}
+spec:
+  parentRefs:
+  - name: {{ $component.name | quote }}
+  hostnames: [{{ $ingress.host | quote }}]
+  rules:
+{{- range $port, $pathKey := $portmapping -}}
+  {{- if $pathKey }}
+  - matches:
+    - path:
+        type: PathPrefix
+        value: {{ include "idol-library.ingress.path" (dict "ingress" $ingress "path" $pathKey) }}
+    backendRefs:
+    - name: {{ $component.name | quote }}
+      port: {{ $port }}
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        path:
+          type: ReplacePrefixMatch
+          replacePrefixMatch: /
+  {{- end -}}
+{{- end -}}
+{{- end -}}
+
 {{- define "idol-library.ingress.base" -}}
 {{/*
-    Common ingress template
+    Classic Ingress (non-gateway) template
 */}}
 {{- $root := get . "root" | required "missing root" -}}
 {{- $component := get . "component" | required "missing component" -}}
@@ -116,8 +190,14 @@ Generates ingress
 {{- $component := get . "component" | required "missing component" -}}
 {{- $ingress := get . "ingress" | required "missing ingress" -}}
 {{- if $ingress.enabled }}
+  {{- if eq $ingress.type "gateway" }}
+{{ include "idol-library.ingress.gateway" (dict "root" $root "component" $component "ingress" $ingress) }}
+---
+{{ include "idol-library.ingress.httproute" (dict "root" $root "component" $component "ingress" $ingress) }}
+  {{- else }}
 {{- $_ := set . "source" "idol-library.ingress.base" -}}
 {{- include "idol-library.util.merge" $_ -}}
+  {{- end }}
 {{- end }}
 {{ if $ingress.tls.secretName -}}
 ---
