@@ -9,42 +9,6 @@
 #
 # END COPYRIGHT NOTICE
 
-{{- define "idol-library.ingress.gateway" -}}
-{{- $root := get . "root" | required "missing root" -}}
-{{- $component := get . "component" | required "missing component" -}}
-{{- $ingress := get . "ingress" | required "missing ingress" -}}
-apiVersion: gateway.networking.k8s.io/v1
-kind: Gateway
-metadata:
-  name: {{ $component.name | quote }}
-  labels: {{- include "idol-library.labels" . | nindent 4 }}
-spec:
-  gatewayClassName: {{ $ingress.className | required "Must specify ingress.className for gateway" }}
-  listeners:
-  - name: http
-    hostname: {{ $ingress.host | quote }}
-    port: 80
-    protocol: HTTP
-    allowedRoutes:
-      namespaces:
-        from: All
-  {{- if $ingress.tls.secretName }}
-  - name: https
-    hostname: {{ $ingress.host | quote }}
-    port: 443
-    protocol: HTTPS
-    allowedRoutes:
-      namespaces:
-        from: All
-    tls:
-      certificateRefs:
-      - group: ""
-        kind: Secret
-        name: {{ $ingress.tls.secretName }}
-      mode: Terminate
-  {{- end }}
-{{- end -}}
-
 {{- define "idol-library.ingress.httproute" -}}
 {{- $root := get . "root" | required "missing root" -}}
 {{- $component := get . "component" | required "missing component" -}}
@@ -56,11 +20,14 @@ spec:
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: http
+  name: {{ $component.name }}-http
   labels: {{- include "idol-library.labels" . | nindent 4 }}
 spec:
   parentRefs:
-  - name: {{ $component.name | quote }}
+  - name: {{ $ingress.gatewayName | required "Must specify ingress.gatewayName, having set ingress.type=gateway" }}
+  {{- if $ingress.gatewayNamespace }}
+    namespace: {{ $ingress.gatewayNamespace }}
+  {{- end }}
   hostnames: [{{ $ingress.host | quote }}]
   rules:
 {{- range $port, $pathKey := $portmapping -}}
@@ -191,8 +158,6 @@ Generates ingress
 {{- $ingress := get . "ingress" | required "missing ingress" -}}
 {{- if $ingress.enabled }}
   {{- if eq $ingress.type "gateway" }}
-{{ include "idol-library.ingress.gateway" (dict "root" $root "component" $component "ingress" $ingress) }}
----
 {{ include "idol-library.ingress.httproute" (dict "root" $root "component" $component "ingress" $ingress) }}
   {{- else }}
 {{- $_ := set . "source" "idol-library.ingress.base" -}}

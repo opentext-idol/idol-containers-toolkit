@@ -91,6 +91,12 @@
                 "className": {
                     "type": "string"
                 },
+                "gatewayName": {
+                    "type": "string"
+                },
+                "gatewayNamespace": {
+                    "type": "string"
+                },
                 "host": {
                     "type": "string"
                 },

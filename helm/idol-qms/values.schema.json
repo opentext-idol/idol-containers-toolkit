@@ -89,9 +89,15 @@
                 },
                 "type": {
                     "type": "string",
-                    "enum": ["nginx","haproxy"]
+                    "enum": ["nginx","haproxy","gateway"]
                 },
                 "className": {
+                    "type": "string"
+                },
+                "gatewayName": {
+                    "type": "string"
+                },
+                "gatewayNamespace": {
                     "type": "string"
                 },
                 "host": {
