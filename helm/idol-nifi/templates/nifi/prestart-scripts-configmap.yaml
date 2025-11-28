@@ -12,7 +12,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ $.Values.name }}-prestart-scripts
-  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifi) | nindent 4 -}}
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifi) | nindent 4 }}
     app: {{ $.Values.name }}
 data:
   preStart.sh: |

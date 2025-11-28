@@ -16,7 +16,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ $nifiCluster.clusterId }}-zk
-  labels: {{- include "idol-library.labels" (dict "root" $root "component" $root.Values.zookeeper) | nindent 4 -}}
+  labels: {{- include "idol-library.labels" (dict "root" $root "component" $root.Values.zookeeper) | nindent 4 }}
     name: {{ $nifiCluster.clusterId }}-zk
     app: {{ $nifiCluster.clusterId }}-zk
   annotations:
@@ -31,7 +31,7 @@ spec:
       app: {{ $nifiCluster.clusterId }}-zk
   template:
     metadata:
-      labels: {{- include "idol-library.labels" (dict "root" $root "component" $root.Values.zookeeper) | nindent 8 -}}
+      labels: {{- include "idol-library.labels" (dict "root" $root "component" $root.Values.zookeeper) | nindent 8 }}
         app: {{ $nifiCluster.clusterId }}-zk
     spec:
       automountServiceAccountToken: false

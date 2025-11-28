@@ -236,6 +236,9 @@
                 "ingress": {
                     "$ref": "#/$defs/NifiIngress"
                 },
+                "labels": {
+                    "type": "object"
+                },
                 "keystorePassword": {
                     "type":"string"
                 },

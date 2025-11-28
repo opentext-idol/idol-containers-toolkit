@@ -266,6 +266,9 @@ nifi:
   # -- For nifi this location is where any OEM license files will be placed (see global.idolOemLicenseSecret)
   workingDir: "/nifi"
 
+  labels:
+    app.framework/openjdk: "21"
+
 # -- nifi cluster instances. Each cluster instance inherits values from the nifi section.
 # When more than one cluster is specified, setting a clusterId is required
 # Can be dict of (name, cluster), or list of (cluster). dict form allows for merging definitions from multiple values files.
@@ -333,6 +336,9 @@ nifiRegistry:
       flowfiles:
       - /scripts/flow-basic-idol.json
   
+  labels:
+    app.framework/openjdk: "21"
+
   # -- Additional environment variables to export in nifi registry
   env: {}
 
@@ -360,6 +366,8 @@ zookeeper:
     limits:
       cpu: 200m
       memory: 500Mi
+  labels:
+    app.framework/openjdk: "17"
 
 # sub-chart values
 idol-licenseserver:

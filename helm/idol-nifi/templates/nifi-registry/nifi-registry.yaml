@@ -13,7 +13,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ .Values.name }}-reg
-  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifiRegistry) | nindent 4 -}}
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifiRegistry) | nindent 4 }}
     name: {{ .Values.name }}-reg
     app: {{ .Values.name }}-reg
   annotations:
@@ -28,7 +28,7 @@ spec:
       app: {{ .Values.name }}-reg
   template:
     metadata:
-      labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifiRegistry) | nindent 8 -}}
+      labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifiRegistry) | nindent 8 }}
         app: {{ .Values.name }}-reg
     spec:
       automountServiceAccountToken: false
