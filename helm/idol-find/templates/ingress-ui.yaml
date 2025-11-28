@@ -18,6 +18,35 @@
 {{- $portSuffix = printf ":%d" ($ingress.port | int) }}
 {{- end }}
 
+{{- if eq $ingress.type "gateway" }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ .Values.findIngressName }}
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values) | nindent 4 }}
+spec:
+  parentRefs:
+  - name: {{ $ingress.gatewayName | required "Must specify ingress.gatewayName, having set ingress.type=gateway" }}
+  {{- if $ingress.gatewayNamespace }}
+    namespace: {{ $ingress.gatewayNamespace }}
+  {{- end }}
+  hostnames: [{{ $ingress.host | quote }}]
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: {{ printf "/%s" .Values.findEndpointName }}
+    backendRefs:
+    - name: {{ .Values.findUIName }}
+      port: {{ .Values.findUIPort }}
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        path:
+          type: ReplacePrefixMatch
+          replacePrefixMatch: /
+{{- else }}
+
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -59,4 +88,5 @@ spec:
 {{ if $ingress.tls.secretName -}}
 ---
 {{ include "idol-library.ingress.secret" (dict "tls" $ingress.tls) -}}
+{{- end }}
 {{- end }}
