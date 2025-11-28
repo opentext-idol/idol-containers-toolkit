@@ -21,9 +21,8 @@ metadata:
 spec:
   serviceName: {{ $nifiCluster.clusterId }}
   template:
-    metadata:
-      labels:
 {{- if $component.prometheus.enabled }}
+    metadata:
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/path: /metrics
