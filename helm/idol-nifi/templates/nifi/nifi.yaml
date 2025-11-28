@@ -18,13 +18,11 @@ metadata:
   labels:
     app: {{ $nifiCluster.clusterId }}
     name: {{ $nifiCluster.clusterId }}
-    app.framework/openjdk: "21"
 spec:
   serviceName: {{ $nifiCluster.clusterId }}
   template:
     metadata:
       labels:
-        app.framework/openjdk: "21"
 {{- if $component.prometheus.enabled }}
       annotations:
         prometheus.io/scrape: "true"

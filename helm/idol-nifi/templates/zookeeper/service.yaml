@@ -16,7 +16,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ $nifiCluster.clusterId }}-zk
-  labels: {{- include "idol-library.labels" (dict "root" $root "component" $root.Values.zookeeper) | nindent 4 -}}
+  labels: {{- include "idol-library.labels" (dict "root" $root "component" $root.Values.zookeeper) | nindent 4 }}
     app: {{ $nifiCluster.clusterId }}-zk
   annotations:
     app.kubernetes.io/name: {{ $nifiCluster.clusterId }}-zk

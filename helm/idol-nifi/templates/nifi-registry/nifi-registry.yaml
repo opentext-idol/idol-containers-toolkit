@@ -13,10 +13,9 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ .Values.name }}-reg
-  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifiRegistry) | nindent 4 -}}
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifiRegistry) | nindent 4 }}
     name: {{ .Values.name }}-reg
     app: {{ .Values.name }}-reg
-    app.framework/openjdk: "21"
   annotations:
     app.kubernetes.io/name: {{ .Values.name }}-reg
     app.kubernetes.io/part-of: {{ .Values.name }}
@@ -29,9 +28,8 @@ spec:
       app: {{ .Values.name }}-reg
   template:
     metadata:
-      labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifiRegistry) | nindent 8 -}}
+      labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifiRegistry) | nindent 8 }}
         app: {{ .Values.name }}-reg
-        app.framework/openjdk: "21"
     spec:
       automountServiceAccountToken: false
       enableServiceLinks: false

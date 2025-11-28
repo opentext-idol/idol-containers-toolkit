@@ -23,7 +23,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $.Values.name }}-reg{{ $endpointSuffix }}
-  labels: {{- include "idol-library.labels" (dict "root" $root "component" $root.Values.nifiRegistry) | nindent 4 -}}
+  labels: {{- include "idol-library.labels" (dict "root" $root "component" $root.Values.nifiRegistry) | nindent 4 }}
     app: {{ $root.Values.name }}-reg
   annotations:
     app.kubernetes.io/name: {{ $root.Values.name }}-reg{{ $endpointSuffix }}

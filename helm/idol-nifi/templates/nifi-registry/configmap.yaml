@@ -14,7 +14,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ .Values.name }}-reg-cm
-  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifiRegistry) | nindent 4 -}}
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifiRegistry) | nindent 4 }}
     app: {{ .Values.name }}-reg
 data:
   NIFI_REGISTRY_WEB_HTTP_PORT: "18080"

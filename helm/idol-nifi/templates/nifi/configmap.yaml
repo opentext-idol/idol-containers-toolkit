@@ -21,7 +21,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ $nifiCluster.clusterId }}-env
-  labels: {{- include "idol-library.labels" (dict "root" $root "component" $nifiCluster) | nindent 4 -}}
+  labels: {{- include "idol-library.labels" (dict "root" $root "component" $nifiCluster) | nindent 4 }}
     app: {{ $nifiCluster.clusterId }}
 data:
   JAVA_OPTS: "-XX:UseAVX=0 -Djavax.net.debug=ssl,handshake"

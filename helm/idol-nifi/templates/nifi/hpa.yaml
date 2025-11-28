@@ -17,7 +17,7 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ $nifiCluster.clusterId }}
-  labels: {{- include "idol-library.labels" (dict "root" $root "component" $nifiCluster) | nindent 4 -}}
+  labels: {{- include "idol-library.labels" (dict "root" $root "component" $nifiCluster) | nindent 4 }}
     app.kubernetes.io/name: {{ $nifiCluster.clusterId }}
 spec:
   scaleTargetRef:
