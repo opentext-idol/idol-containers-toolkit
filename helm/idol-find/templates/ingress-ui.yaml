@@ -45,6 +45,22 @@ spec:
         path:
           type: ReplacePrefixMatch
           replacePrefixMatch: /
+    - type: RequestHeaderModifier
+      requestHeaderModifier:
+        add:
+        - name: X-Forwarded-Prefix
+          value: /{{ .Values.findEndpointName }}
+        - name: X-Forwarded-Proto
+          value: {{ ternary "http" "https" (eq $ingress.tls.secretName "") }}
+        - name: X-Forwarded-Host
+          value: {{ $ingress.host }}
+        - name: X-Forwarded-Port
+          value: {{ $ingress.port | quote }}
+    - type: ResponseHeaderModifier
+      responseHeaderModifier:
+        set:
+        - name: Location
+          value: "/{{ .Values.findEndpointName }}%RESP(Location)%"
 {{- else }}
 
 apiVersion: networking.k8s.io/v1
