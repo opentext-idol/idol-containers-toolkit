@@ -56,11 +56,6 @@ spec:
           value: {{ $ingress.host }}
         - name: X-Forwarded-Port
           value: {{ $ingress.port | quote }}
-    - type: ResponseHeaderModifier
-      responseHeaderModifier:
-        set:
-        - name: Location
-          value: "/{{ .Values.findEndpointName }}%RESP(Location)%"
 {{- else }}
 
 apiVersion: networking.k8s.io/v1
