@@ -24,7 +24,7 @@
                 },
                 "ingressType": {
                     "type": "string",
-                    "enum": ["nginx","haproxy","custom"]
+                    "enum": ["nginx","haproxy","custom","gateway"]
                 },
                 "usingTLS":{
                     "type": "boolean"
@@ -431,8 +431,17 @@
                 "annotations": {
                     "type": "object"
                 },
+                "gatewayName": {
+                    "type": "string"
+                },
+                "gatewayNamespace": {
+                    "type": "string"
+                },
                 "host": {
                     "type": "string"
+                },
+                "port": {
+                    "$ref": "#/$defs/port_number"
                 },
                 "proxyPath": {
                     "type": "string"
@@ -585,8 +594,17 @@
                 "annotations": {
                     "type": "object"
                 },
+                "gatewayName": {
+                    "type": "string"
+                },
+                "gatewayNamespace": {
+                    "type": "string"
+                },
                 "host": {
                     "type": "string"
+                },
+                "port": {
+                    "$ref": "#/$defs/port_number"
                 },
                 "contextPath": {
                     "type": "string"

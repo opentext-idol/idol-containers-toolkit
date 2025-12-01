@@ -23,6 +23,39 @@
 {{- $pathType = "ImplementationSpecific" }}
 {{- end }}
 ---
+{{- if eq $root.Values.ingressType "gateway" }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $nifiCluster.clusterId }}
+  labels: {{- include "idol-library.labels" (dict "root" $root "component" $nifiCluster) | nindent 4 -}}
+    app: {{ $nifiCluster.clusterId }}
+spec:
+  parentRefs:
+  - name: {{ $nifiCluster.ingress.gatewayName | required "Must specify ingress.gatewayName, having set ingressType=gateway" }}
+  {{- if $nifiCluster.ingress.gatewayNamespace }}
+    namespace: {{ $nifiCluster.ingress.gatewayNamespace }}
+  {{- end }}
+  hostnames: [{{ $nifiCluster.ingress.host | quote }}]
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value:  {{ print (default ( $nifiClustersLen | plural "/" (print "/" $nifiCluster.clusterId "/")) $nifiCluster.ingress.proxyPath) | quote }}
+    backendRefs:
+    - name: {{ $nifiCluster.clusterId }}
+      port: 8080
+    filters:
+    - type: RequestHeaderModifier
+      requestHeaderModifier:
+        add:
+        - name: X-Forwarded-Proto
+          value: {{ ternary "http" "https" (eq $nifiCluster.ingress.tls.secretName "") }}
+        - name: X-Forwarded-Host
+          value: {{ $nifiCluster.ingress.host }}
+        - name: X-Forwarded-Port
+          value: {{ $nifiCluster.ingress.port | quote }}
+{{- else }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -84,6 +117,7 @@ spec:
 {{ if $nifiCluster.ingress.tls.secretName -}}
 ---
 {{ include "idol-library.ingress.secret" (dict "tls" $nifiCluster.ingress.tls) -}}
+{{- end -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}
