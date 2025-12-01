@@ -187,6 +187,12 @@ ingress:
   # @section -- Ingress
   annotations: {}
 
+  # -- Name of the gateway to use for ingress (only applies if type is 'gateway')
+  gatewayName: ""
+
+  # -- Optional, namespace of the gateway to use for ingress (only applies if type is 'gateway')
+  gatewayNamespace: ""
+
   # -- Whether ingress uses TLS. You must set an ingress host to use this. 
   # See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls 
   # @section -- Ingress
