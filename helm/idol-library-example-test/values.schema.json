@@ -6,6 +6,10 @@
             "properties": {
                 "global": {
                     "$ref": "#/$defs/global"
+                },
+                "idol-library": {
+                    "type": "object",
+                    "additionalProperties": true
                 }
             },
             "required": [
@@ -69,9 +73,15 @@
                 },
                 "type": {
                     "type": "string",
-                    "enum": ["nginx","haproxy"]
+                    "enum": ["nginx","haproxy","gateway"]
                 },
                 "className": {
+                    "type": "string"
+                },
+                "gatewayName": {
+                    "type": "string"
+                },
+                "gatewayNamespace": {
                     "type": "string"
                 },
                 "host": {

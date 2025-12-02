@@ -114,6 +114,9 @@ resources:
 # -- Optional serviceAccountName for the pods (https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account)
 serviceAccountName: ""
 
+# -- number of replica pods for this workload (defaults to 1).
+replicas: 1
+
 ##### INGRESS VARIABLES #####
 
 ingress:
