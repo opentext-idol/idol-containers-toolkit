@@ -207,6 +207,8 @@ ingress:
 licenseServerHostname: "idol-licenseserver"
 # licenseServerPort -- the ACI port of the IDOL LicenseServer (or abstraction)
 licenseServerPort: "20000"
+# licenseServerSSLMethod -- SSL method for license server connection (None, Negotiate, etc.)
+licenseServerSSLMethod: "None"
 
 # queryserviceName -- internal parameter to specify the query service name, if this is empty then no
 #                     additional service will be provisioned.
