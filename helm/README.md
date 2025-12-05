@@ -97,6 +97,12 @@ helm install --set ingress.className=nginx \
 # i.e. services within cluster can access but not external
 helm install --set ingress.enabled=false \
     my-deployment idol-containers-toolkit/single-content
+
+# Example using a Gateway for ingress (must be already set up in the cluster)
+helm install --set ingress.type=gateway \
+    --set ingress.gateway.name=test-gateway \
+    --set ingress.host=my-external-hostname \
+    my-deployment idol-containers-toolkit/single-content
 ```
 
 ### StorageClass

@@ -10,7 +10,7 @@ HelmChartTestBase.debug = False
 
 class TestIdolNifi(unittest.TestCase, HelmChartTestBase):
     chartpath = os.path.join('..','idol-nifi')
-    _gateway_data = {'ingressType': 'gateway', 'nifi': {'ingress': {'host': 'component.example.12-34-56-78.nip.io', 'gatewayName': 'test-gateway'}}, 'nifiRegistry': {'ingress': {'host': 'component.example.12-34-56-78.nip.io', 'gatewayName': 'test-gateway'}}}
+    _gateway_data = {'ingressType': 'gateway', 'nifi': {'ingress': {'host': 'component.example.12-34-56-78.nip.io', 'gateway': {'name': 'test-gateway'}}}, 'nifiRegistry': {'ingress': {'host': 'component.example.12-34-56-78.nip.io', 'gateway': {'name': 'test-gateway'}}}}
     _gateway_bad_data = {'ingressType': 'gateway', 'nifi': {'ingress': {'host': 'component.example.12-34-56-78.nip.io'}}, 'nifiRegistry': {'ingress': {'host': 'component.example.12-34-56-78.nip.io'}}}
     
     def setUp(self):

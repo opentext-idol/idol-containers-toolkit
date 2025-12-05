@@ -24,11 +24,11 @@ metadata:
   labels: {{- include "idol-library.labels" . | nindent 4 }}
 spec:
   parentRefs:
-  - name: {{ $ingress.gatewayName | required "Must specify ingress.gatewayName, having set ingress.type=gateway" }}
-  {{- if $ingress.gatewayNamespace }}
-    namespace: {{ $ingress.gatewayNamespace }}
+  - name: {{ $ingress.gateway.name | required "Must specify ingress.gateway.name, having set ingress.type=gateway" }}
+  {{- if $ingress.gateway.namespace }}
+    namespace: {{ $ingress.gateway.namespace }}
   {{- end }}
-  hostnames: [{{ $ingress.host | quote }}]
+  hostnames: [{{ $ingress.host }}]
   rules:
 {{- range $port, $pathKey := $portmapping -}}
   {{- if $pathKey }}
@@ -45,6 +45,15 @@ spec:
         path:
           type: ReplacePrefixMatch
           replacePrefixMatch: /
+    {{- if (or $ingress.gateway.requestTimeout $ingress.gateway.backendTimeout) }}
+    timeouts:
+      {{- if $ingress.gateway.requestTimeout }}
+      request: {{ $ingress.gateway.requestTimeout }}
+      {{- end -}}
+      {{- if $ingress.gateway.backendTimeout }}
+      backendRequest: {{ $ingress.gateway.backendTimeout }}
+      {{- end -}}
+    {{- end -}}
   {{- end -}}
 {{- end -}}
 {{- end -}}

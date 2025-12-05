@@ -31,11 +31,11 @@ metadata:
   labels: {{- include "idol-library.labels" (dict "root" $root "component" $nifiCluster) | nindent 4 }}
 spec:
   parentRefs:
-  - name: {{ $nifiCluster.ingress.gatewayName | required "Must specify ingress.gatewayName, having set ingressType=gateway" }}
-  {{- if $nifiCluster.ingress.gatewayNamespace }}
-    namespace: {{ $nifiCluster.ingress.gatewayNamespace }}
+  - name: {{ $nifiCluster.ingress.gateway.name | required "Must specify ingress.gateway.name, having set ingressType=gateway" }}
+  {{- if $nifiCluster.ingress.gateway.namespace }}
+    namespace: {{ $nifiCluster.ingress.gateway.namespace }}
   {{- end }}
-  hostnames: [{{ $nifiCluster.ingress.host | quote }}]
+  hostnames: [{{ $nifiCluster.ingress.host }}]
   rules:
   - matches:
     - path:
@@ -51,11 +51,20 @@ spec:
         - name: X-Forwarded-Prefix
           value: {{ print ($nifiClustersLen | plural "" (print "/" $nifiCluster.clusterId)) "/connector-aci/" }}
         - name: X-Forwarded-Proto
-          value: {{ ternary "http" "https" (eq $nifiCluster.ingress.aciTLS.secretName "") }}
+          value: {{ ternary "https" "http" (eq $nifiCluster.ingress.gateway.protocol "https") }}
         - name: X-Forwarded-Host
           value: {{ $nifiCluster.ingress.host }}
         - name: X-Forwarded-Port
           value: {{ $nifiCluster.ingress.port | quote }}
+    {{- if (or $nifiCluster.ingress.gateway.requestTimeout $nifiCluster.ingress.gateway.backendTimeout) }}
+    timeouts:
+      {{- if $nifiCluster.ingress.gateway.requestTimeout }}
+      request: {{ $nifiCluster.ingress.gateway.requestTimeout }}
+      {{- end -}}
+      {{- if $nifiCluster.ingress.gateway.backendTimeout }}
+      backendRequest: {{ $nifiCluster.ingress.gateway.backendTimeout }}
+      {{- end -}}
+    {{- end -}}
 {{- else }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress

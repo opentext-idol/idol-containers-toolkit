@@ -28,11 +28,11 @@ metadata:
     app: {{ $root.Values.name }}-reg
 spec:
   parentRefs:
-  - name: {{ $root.Values.nifiRegistry.ingress.gatewayName | required "Must specify nifiRegistry.ingress.gatewayName, having set ingressType=gateway" }}
-  {{- if $root.Values.nifiRegistry.ingress.gatewayNamespace }}
-    namespace: {{ $root.Values.nifiRegistry.ingress.gatewayNamespace }}
+  - name: {{ $root.Values.nifiRegistry.ingress.gateway.name | required "Must specify nifiRegistry.ingress.gateway.name, having set ingressType=gateway" }}
+  {{- if $root.Values.nifiRegistry.ingress.gateway.namespace }}
+    namespace: {{ $root.Values.nifiRegistry.ingress.gateway.namespace }}
   {{- end }}
-  hostnames: [{{ $root.Values.nifiRegistry.ingress.host | quote }}]
+  hostnames: [{{ $root.Values.nifiRegistry.ingress.host }}]
   rules:
   - matches:
     - path:
@@ -48,11 +48,20 @@ spec:
         - name: X-Forwarded-Prefix
           value: {{ print ($root.Values.nifiRegistry.ingress.contextPath | default "") "/nifi-registry" $endpointSuffix }}
         - name: X-Forwarded-Proto
-          value: {{ ternary "http" "https" (eq $root.Values.nifiRegistry.ingress.tls.secretName "") }}
+          value: {{ ternary "https" "http" (eq $root.Values.nifiRegistry.ingress.gateway.protocol "https") }}
         - name: X-Forwarded-Host
           value: {{ $root.Values.nifiRegistry.ingress.host }}
         - name: X-Forwarded-Port
           value: {{ $root.Values.nifiRegistry.ingress.port | quote }}
+    {{- if (or $root.Values.nifiRegistry.ingress.gateway.requestTimeout $root.Values.nifiRegistry.ingress.gateway.backendTimeout) }}
+    timeouts:
+      {{- if $root.Values.nifiRegistry.ingress.gateway.requestTimeout }}
+      request: {{ $root.Values.nifiRegistry.ingress.gateway.requestTimeout }}
+      {{- end -}}
+      {{- if $root.Values.nifiRegistry.ingress.gateway.backendTimeout }}
+      backendRequest: {{ $root.Values.nifiRegistry.ingress.gateway.backendTimeout }}
+      {{- end -}}
+    {{- end -}}
 {{- else }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress

@@ -187,7 +187,7 @@ class HelmChartTestBase():
 
     def test_gateway_ingress(self):
         ''' Gateway ingress configuration renders HTTPRoute correctly '''
-        gateway_spec = self._gateway_data or {'ingress': {'host': 'component.example.12-34-56-78.nip.io', 'type': 'gateway', 'gatewayName': 'test-gateway'}}
+        gateway_spec = self._gateway_data or {'ingress': {'host': 'component.example.12-34-56-78.nip.io', 'type': 'gateway', 'gateway': {'name': 'test-gateway'}}}
         objs = self.render_chart(gateway_spec)
         http_route = objs.get('HTTPRoute')
         if not http_route:
@@ -203,4 +203,4 @@ class HelmChartTestBase():
         with self.assertRaises(subprocess.CalledProcessError) as raiser:
             gateway_bad_spec = self._gateway_bad_data or {'ingress': {'host': 'component.example.12-34-56-78.nip.io', 'type': 'gateway'}}
             self.render_chart(gateway_bad_spec, capture_output=True)
-        self.assertIn('Must specify ingress.gatewayName', raiser.exception.output.decode('utf8'))
+        self.assertIn('Must specify ingress.gateway.name', raiser.exception.output.decode('utf8'))
