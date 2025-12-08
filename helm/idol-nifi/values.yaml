@@ -198,6 +198,8 @@ nifi:
     aciHost: ""
     # -- optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules
     metricsHost: ""
+    # -- optional ingress port to forward in ingress rules
+    port: ""
 
     # Gateway settings (only applies if type is 'gateway')
     gateway:
@@ -213,7 +215,7 @@ nifi:
       # -- Optional, backend timeout for ingress route
       backendTimeout: ""
 
-      # -- Forwarded protocol for ingress
+      # -- Forwarded protocol for ingress (http|https)
       protocol: "http"
     
     # -- Whether ingress uses TLS. You must set an ingress host to use this. 

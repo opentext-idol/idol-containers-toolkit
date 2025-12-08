@@ -87,6 +87,13 @@ to cluster.
 
 Most of the charts present a common set of ingress control values under the `ingress:` values.yaml key.
 
+The Gateway API is the new standard for implementing ingresses in a Kubernetes cluster. If you choose
+to use this, be aware that the charts will not install a Gateway as part of the deployment process;
+you must set one up yourself beforehand. In the first instance, try using the Istio implementation:
+see https://istio.io/latest/docs/tasks/traffic-management/ingress/ingress-control/ for further details.
+
+See https://gateway-api.sigs.k8s.io/ for more information about using Gateway for your cluster.
+
 ```sh
 # Example configuring some ingress settings
 helm install --set ingress.className=nginx \
@@ -101,6 +108,7 @@ helm install --set ingress.enabled=false \
 # Example using a Gateway for ingress (must be already set up in the cluster)
 helm install --set ingress.type=gateway \
     --set ingress.gateway.name=test-gateway \
+    --set ingress.gateway.namespace=gateway-ns \
     --set ingress.host=my-external-hostname \
     my-deployment idol-containers-toolkit/single-content
 ```
