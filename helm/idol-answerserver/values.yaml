@@ -68,6 +68,8 @@ usingTLS: false
 licenseServerHostname: "idol-licenseserver"
 # licenseServerPort -- the ACI port of the IDOL LicenseServer (or abstraction)
 licenseServerPort: "20000"
+# licenseServerSSLMethod -- SSL method for license server connection (None, Negotiate, etc.)
+licenseServerSSLMethod: "None"
 
 # existingConfigMap -- if specified, mounted at /etc/config/idol and expected to provide answerserver.cfg
 existingConfigMap: ""
@@ -262,6 +264,15 @@ passageextractorAgentstore:
   # -- the agentstore engine's index service name
   indexserviceName: ""
 
+  # -- license server hostname
+  licenseServerHostname: "idol-licenseserver"
+
+  # -- the ACI port of the IDOL LicenseServer (or abstraction)
+  licenseServerPort: "20000"
+
+  # -- SSL method for license server connection (None, Negotiate, etc.)
+  licenseServerSSLMethod: "None"
+
   # -- used to name deployment, service, ingress
   name: *passageExtractorAgentstoreHostname
 
@@ -311,6 +322,15 @@ answerbankAgentstore:
   # -- the agentstore engine's index service name
   indexserviceName: ""
 
+  # -- license server hostname
+  licenseServerHostname: "idol-licenseserver"
+
+  # -- the ACI port of the IDOL LicenseServer (or abstraction)
+  licenseServerPort: "20000"
+
+  # -- SSL method for license server connection (None, Negotiate, etc.)
+  licenseServerSSLMethod: "None"
+
   # -- used to name deployment, service, ingress
   name: *answerBankAgentstoreHostname
 
@@ -333,6 +353,15 @@ single-content:
 
   indexserviceName: "idol-index-service"
   indexserviceACIPort: "9070"
+
+  # -- license server hostname
+  licenseServerHostname: "idol-licenseserver"
+
+  # -- the ACI port of the IDOL LicenseServer (or abstraction)
+  licenseServerPort: "20000"
+
+  # -- SSL method for license server connection (None, Negotiate, etc.)
+  licenseServerSSLMethod: "None"
 
   idol-licenseserver:
     # -- whether to deploy the idol-licenseserver sub-chart

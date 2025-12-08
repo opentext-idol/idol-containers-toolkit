@@ -541,6 +541,8 @@ dih:
 licenseServerHostname: "idol-licenseserver"
 # -- ACI port of the LicenseServer instance
 licenseServerPort: "20000"
+# licenseServerSSLMethod -- SSL method for license server connection (None, Negotiate, etc.)
+licenseServerSSLMethod: "None"
 
 # -- internal parameter to specify the query service name.
 queryserviceName: "idol-query-service"
