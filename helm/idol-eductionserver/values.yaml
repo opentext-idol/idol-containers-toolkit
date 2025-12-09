@@ -58,6 +58,8 @@ labels: {}
 licenseServerHostname: "idol-licenseserver"
 # licenseServerPort -- the ACI port of the IDOL LicenseServer (or abstraction)
 licenseServerPort: "20000"
+# licenseServerSSLMethod -- SSL method for license server connection (None, Negotiate, etc.)
+licenseServerSSLMethod: "None"
 
 # -- if specified, mounted at /etc/config/idol and expected to provide eductionserver.cfg
 existingConfigMap: ""

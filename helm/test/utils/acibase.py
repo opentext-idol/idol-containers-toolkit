@@ -42,6 +42,14 @@ class AciTestBase(HelmChartTestBase):
             self.assertIsNotNone(ss)
             self.assertEqual(ss['spec']['replicas'], 0)
 
+    def test_license_server_ssl_method(self):
+        ''' licenseServerSSLMethod sets SSLMethod in ConfigMap '''
+        ssl_method = 'TLSV1.3'
+        objs = self.render_chart({'licenseServerSSLMethod': ssl_method})
+        config_map = objs['ConfigMap'][f'{self.name()}-default-cfg']
+        self.assertTrue(any(f'SSLMethod={ssl_method}' in content 
+                           for content in config_map['data'].values()))
+
 class StatefulSetTests():
     def test_volume_claim_templates(self):
         ''' Any StatefulSets do not contain chart version in volumeClaimTemplate labels '''
