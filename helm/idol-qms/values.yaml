@@ -236,15 +236,6 @@ singleAgentstore:
   # -- the agentstore engine's index service name
   indexserviceName: ""
 
-  # -- license server hostname
-  licenseServerHostname: "idol-licenseserver"
-
-  # -- the ACI port of the IDOL LicenseServer (or abstraction)
-  licenseServerPort: "20000"
-
-  # -- SSL method for license server connection (None, Negotiate, etc.)
-  licenseServerSSLMethod: "None"
-
   # -- used to name deployment, service, ingress
   name: *agentStoreName
 
