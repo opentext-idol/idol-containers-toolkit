@@ -8,9 +8,59 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
+
+{{- define "idol-library.ingress.httproute" -}}
+{{- $root := get . "root" | required "missing root" -}}
+{{- $component := get . "component" | required "missing component" -}}
+{{- $ingress := get . "ingress" | required "missing ingress" -}}
+{{- $portmapping := get . "portmapping" | default (dict 
+    $component.aciPort $ingress.path
+    $component.servicePort $ingress.servicePath
+    $component.indexPort $ingress.indexPath) -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $component.name }}-http
+  labels: {{- include "idol-library.labels" . | nindent 4 }}
+spec:
+  parentRefs:
+  - name: {{ $ingress.gateway.name | required "Must specify ingress.gateway.name, having set ingress.type=gateway" }}
+  {{- if $ingress.gateway.namespace }}
+    namespace: {{ $ingress.gateway.namespace }}
+  {{- end }}
+  hostnames: [{{ $ingress.host }}]
+  rules:
+{{- range $port, $pathKey := $portmapping -}}
+  {{- if $pathKey }}
+  - matches:
+    - path:
+        type: PathPrefix
+        value: {{ include "idol-library.ingress.path" (dict "ingress" $ingress "path" $pathKey) }}
+    backendRefs:
+    - name: {{ $component.name | quote }}
+      port: {{ $port }}
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        path:
+          type: ReplacePrefixMatch
+          replacePrefixMatch: /
+    {{- if (or $ingress.gateway.requestTimeout $ingress.gateway.backendTimeout) }}
+    timeouts:
+      {{- if $ingress.gateway.requestTimeout }}
+      request: {{ $ingress.gateway.requestTimeout }}
+      {{- end -}}
+      {{- if $ingress.gateway.backendTimeout }}
+      backendRequest: {{ $ingress.gateway.backendTimeout }}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- end -}}
+
 {{- define "idol-library.ingress.base" -}}
 {{/*
-    Common ingress template
+    Classic Ingress (non-gateway) template
 */}}
 {{- $root := get . "root" | required "missing root" -}}
 {{- $component := get . "component" | required "missing component" -}}
@@ -116,8 +166,12 @@ Generates ingress
 {{- $component := get . "component" | required "missing component" -}}
 {{- $ingress := get . "ingress" | required "missing ingress" -}}
 {{- if $ingress.enabled }}
+  {{- if eq $ingress.type "gateway" }}
+{{ include "idol-library.ingress.httproute" (dict "root" $root "component" $component "ingress" $ingress) }}
+  {{- else }}
 {{- $_ := set . "source" "idol-library.ingress.base" -}}
 {{- include "idol-library.util.merge" $_ -}}
+  {{- end }}
 {{- end }}
 {{ if $ingress.tls.secretName -}}
 ---

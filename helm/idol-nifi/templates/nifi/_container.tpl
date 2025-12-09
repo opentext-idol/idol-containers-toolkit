@@ -56,6 +56,10 @@ env:
     value: $(POD_IP) # Use pod ip as hostname
   - name: NODE_IDENTITY
     value: $(POD_NAME) # Use pod name as identity
+{{- if eq $root.Values.ingressType "gateway" }}
+  - name: SERVER_FORWARD_HEADERS_STRATEGY
+    value: framework
+{{- end }}
 envFrom:
   - configMapRef:
       name: {{ $component.name }}-env

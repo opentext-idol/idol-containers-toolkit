@@ -66,6 +66,10 @@ spec:
         env:
         - name: IDOL_UI_CFG
           value: config_map/find_config.json
+{{- if eq .Values.ingress.type "gateway" }}
+        - name: SERVER_FORWARD_HEADERS_STRATEGY
+          value: framework
+{{- end }}
       volumes:
       - name: config-map
         configMap:

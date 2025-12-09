@@ -85,6 +85,10 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: status.podIP
+{{- if eq .Values.ingressType "gateway" }}
+          - name: SERVER_FORWARD_HEADERS_STRATEGY
+            value: framework
+{{- end }}
         envFrom:
           - configMapRef:
               name: {{ .Values.name }}-reg-cm

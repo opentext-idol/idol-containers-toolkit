@@ -157,11 +157,11 @@ ingress:
   enabled: true
 
   # -- Ingress controller type to setup for.
-  # Valid values are nginx or haproxy (used by OpenShift)
+  # Valid values are nginx, gateway or haproxy (used by OpenShift)
   # @section -- Ingress
   type: nginx
 
-  # -- Optional parameter to override the default ingress class
+  # -- Optional parameter to override the default ingress class (has no effect if type is 'gateway')
   # @section -- Ingress
   className: ""
 
@@ -193,6 +193,20 @@ ingress:
   # e.g. https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations
   # @section -- Ingress
   annotations: {}
+
+  # Gateway settings (only applies if type is 'gateway')
+  gateway:
+    # -- Optional, name of the gateway to use for ingress
+    name: ""
+
+    # -- Optional, namespace of the gateway to use for ingress
+    namespace: ""
+
+    # -- Optional, request timeout for ingress route
+    requestTimeout: ""
+
+    # -- Optional, backend timeout for ingress route
+    backendTimeout: ""
 
   # -- Whether ingress uses TLS. You must set an ingress host to use this. 
   # See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls 

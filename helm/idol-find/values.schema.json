@@ -223,6 +223,31 @@
                 }
             }
         },
+        "optional_duration":{
+            "type": "string",
+            "pattern": "^(([0-9]{1,5}(h|m|s|ms)){1,4})?$"
+        },
+        "gateway": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "requestTimeout": {
+                    "$ref": "#/$defs/optional_duration"
+                },
+                "backendTimeout": {
+                    "$ref": "#/$defs/optional_duration"
+                },
+                "protocol": {
+                    "type": "string",
+                    "enum": ["http","https"]
+                }
+            }
+        },
         "ingressCommon":{
             "type": "object",
             "properties":{
@@ -231,13 +256,13 @@
                 },
                 "type": {
                     "type": "string",
-                    "enum": ["nginx","haproxy"]
+                    "enum": ["nginx","haproxy","gateway"]
                 },
                 "className": {
                     "type": "string"
                 },
-                "host": {
-                    "type": "string"
+                "gateway": {
+                    "$ref": "#/$defs/gateway"
                 },
                 "proxyBodySize":{
                     "type":"string",

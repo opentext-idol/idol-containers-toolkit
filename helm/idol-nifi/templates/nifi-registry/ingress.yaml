@@ -19,6 +19,50 @@
 {{- end }}
 {{ $root := . }}
 {{- range $endpointSuffix := $endpointSuffixes }}
+{{- if eq $root.Values.ingressType "gateway" }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $root.Values.name }}-reg{{ $endpointSuffix }}
+  labels: {{- include "idol-library.labels" (dict "root" $root "component" $root.Values.nifiRegistry) | nindent 4 -}}
+    app: {{ $root.Values.name }}-reg
+spec:
+  parentRefs:
+  - name: {{ $root.Values.nifiRegistry.ingress.gateway.name | required "Must specify nifiRegistry.ingress.gateway.name, having set ingressType=gateway" }}
+  {{- if $root.Values.nifiRegistry.ingress.gateway.namespace }}
+    namespace: {{ $root.Values.nifiRegistry.ingress.gateway.namespace }}
+  {{- end }}
+  hostnames: [{{ $root.Values.nifiRegistry.ingress.host }}]
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: {{ print ($root.Values.nifiRegistry.ingress.contextPath | default "") "/nifi-registry" $endpointSuffix | quote }}
+    backendRefs:
+    - name: {{ $root.Values.name }}-reg
+      port: 18080
+    filters:
+    - type: RequestHeaderModifier
+      requestHeaderModifier:
+        add:
+        - name: X-Forwarded-Prefix
+          value: {{ print ($root.Values.nifiRegistry.ingress.contextPath | default "") "/nifi-registry" $endpointSuffix }}
+        - name: X-Forwarded-Proto
+          value: {{ ternary "https" "http" (eq $root.Values.nifiRegistry.ingress.gateway.protocol "https") }}
+        - name: X-Forwarded-Host
+          value: {{ $root.Values.nifiRegistry.ingress.host }}
+        - name: X-Forwarded-Port
+          value: {{ $root.Values.nifiRegistry.ingress.port | quote }}
+    {{- if (or $root.Values.nifiRegistry.ingress.gateway.requestTimeout $root.Values.nifiRegistry.ingress.gateway.backendTimeout) }}
+    timeouts:
+      {{- if $root.Values.nifiRegistry.ingress.gateway.requestTimeout }}
+      request: {{ $root.Values.nifiRegistry.ingress.gateway.requestTimeout }}
+      {{- end -}}
+      {{- if $root.Values.nifiRegistry.ingress.gateway.backendTimeout }}
+      backendRequest: {{ $root.Values.nifiRegistry.ingress.gateway.backendTimeout }}
+      {{- end -}}
+    {{- end -}}
+{{- else }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -65,6 +109,7 @@ spec:
               name: http
 {{- if $root.Values.nifiRegistry.ingress.host }}
     host: {{ $root.Values.nifiRegistry.ingress.host | quote }}
+{{- end }}
 {{- end }}
 ---
 {{- end }}

@@ -15,6 +15,8 @@ class HelmChartTestBase():
     validation_namespace = ''
 
     _kinds = None
+    _gateway_data = None
+    _gateway_bad_data = None
 
     @property
     def kinds(self):
@@ -80,7 +82,7 @@ class HelmChartTestBase():
         values = subprocess.check_output(['helm','show','values',self.chartpath])
         return yaml.load(values, Loader=yaml.FullLoader)
 
-    def render_chart(self, values: Optional[Dict] = None, name: str ='test') -> Dict:
+    def render_chart(self, values: Optional[Dict] = None, name: str ='test', capture_output=False) -> Dict:
         with TemporaryDirectory() as tmp_dir:
             cmd = ['helm','template', name, self.chartpath ]
             if values:
@@ -92,7 +94,7 @@ class HelmChartTestBase():
                 cmd.extend(['-n', HelmChartTestBase.validation_namespace, '--validate'])
             if HelmChartTestBase.debug:
                 cmd.extend(['--debug'])
-            templates = subprocess.check_output(cmd)
+            templates = subprocess.check_output(cmd, stderr=subprocess.STDOUT if capture_output else None)
             ret = dict()
             for obj in yaml.load_all(templates, Loader=yaml.FullLoader):
                 if not obj:
@@ -182,3 +184,23 @@ class HelmChartTestBase():
     def test_additionalVolumes_array(self):
         ''' Can specify additionalVolumes in array form (legacy) '''
         self.check_additionalVolumes_array()
+
+    def test_gateway_ingress(self):
+        ''' Gateway ingress configuration renders HTTPRoute correctly '''
+        gateway_spec = self._gateway_data or {'ingress': {'host': 'component.example.12-34-56-78.nip.io', 'type': 'gateway', 'gateway': {'name': 'test-gateway'}}}
+        objs = self.render_chart(gateway_spec)
+        http_route = objs.get('HTTPRoute')
+        if not http_route:
+            self.fail("No HTTPRoute found in rendered chart for gateway ingress type")
+        route = next(iter(http_route.values()))
+        route_spec = route["spec"]
+        self.assertEqual(route_spec["parentRefs"][0]["name"], "test-gateway", msg="Incorrect gateway name in HTTPRoute parentRefs")
+        self.assertEqual(route_spec["hostnames"][0], "component.example.12-34-56-78.nip.io", msg="Incorrect hostname in HTTPRoute spec")
+        self.assertNotEqual(0, len(route_spec["rules"]), msg="No rules found in HTTPRoute spec")
+
+    def test_gateway_ingress_invalid(self):
+        ''' Invalid gateway ingress configuration raises error '''
+        with self.assertRaises(subprocess.CalledProcessError) as raiser:
+            gateway_bad_spec = self._gateway_bad_data or {'ingress': {'host': 'component.example.12-34-56-78.nip.io', 'type': 'gateway'}}
+            self.render_chart(gateway_bad_spec, capture_output=True)
+        self.assertIn('Must specify ingress.gateway.name', raiser.exception.output.decode('utf8'))

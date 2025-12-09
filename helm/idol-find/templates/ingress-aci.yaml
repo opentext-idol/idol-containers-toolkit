@@ -12,6 +12,67 @@
 {{- $pathSuffix = "(.*)"}}
 {{- $pathType = "ImplementationSpecific" }}
 {{- end }}
+
+{{- if eq $ingress.type "gateway" }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ .Values.findIngressName }}-aci
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values) | nindent 4 }}
+spec:
+  parentRefs:
+  - name: {{ $ingress.gateway.name | required "Must specify ingress.gateway.name, having set ingress.type=gateway" }}
+  {{- if $ingress.gateway.namespace }}
+    namespace: {{ $ingress.gateway.namespace }}
+  {{- end }}
+  hostnames: [{{ $ingress.host }}]
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /community
+    backendRefs:
+    - name: {{ .Values.communityName }}
+      port: {{ .Values.communityACIPort }}
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        path:
+          type: ReplacePrefixMatch
+          replacePrefixMatch: /
+    {{- if (or $ingress.gateway.requestTimeout $ingress.gateway.backendTimeout) }}
+    timeouts:
+      {{- if $ingress.gateway.requestTimeout }}
+      request: {{ $ingress.gateway.requestTimeout }}
+      {{- end -}}
+      {{- if $ingress.gateway.backendTimeout }}
+      backendRequest: {{ $ingress.gateway.backendTimeout }}
+      {{- end -}}
+    {{- end }}
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /view
+    backendRefs:
+    - name: {{ .Values.viewServerName }}
+      port: {{ .Values.viewServerACIPort }}
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        path:
+          type: ReplacePrefixMatch
+          replacePrefixMatch: /
+    {{- if (or $ingress.gateway.requestTimeout $ingress.gateway.backendTimeout) }}
+    timeouts:
+      {{- if $ingress.gateway.requestTimeout }}
+      request: {{ $ingress.gateway.requestTimeout }}
+      {{- end -}}
+      {{- if $ingress.gateway.backendTimeout }}
+      backendRequest: {{ $ingress.gateway.backendTimeout }}
+      {{- end -}}
+    {{- end -}}
+{{- else }}
+
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -58,5 +119,6 @@ spec:
 {{ if $ingress.tls.secretName -}}
 ---
 {{ include "idol-library.ingress.secret" (dict "tls" $ingress.tls) -}}
+{{- end }}
 {{- end }}
 {{- end }}

@@ -198,6 +198,25 @@ nifi:
     aciHost: ""
     # -- optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules
     metricsHost: ""
+    # -- optional ingress port to forward in ingress rules
+    port: ""
+
+    # Gateway settings (only applies if type is 'gateway')
+    gateway:
+      # -- Optional, name of the gateway to use for ingress
+      name: ""
+
+      # -- Optional, namespace of the gateway to use for ingress
+      namespace: ""
+
+      # -- Optional, request timeout for ingress route
+      requestTimeout: ""
+
+      # -- Optional, backend timeout for ingress route
+      backendTimeout: ""
+
+      # -- Forwarded protocol for ingress (http|https)
+      protocol: "http"
     
     # -- Whether ingress uses TLS. You must set an ingress host to use this. 
     # See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
@@ -296,6 +315,26 @@ nifiRegistry:
     host: ""
     # nifiRegistry.ingress.contextPath -- optional ingress context path
     contextPath: ""
+    # The external port the ingress is exposed on.
+    # For Kubernetes-in-Docker, this may be different to the container ingress port.
+    port: ""
+
+    # Gateway settings (only applies if type is 'gateway')
+    gateway:
+      # -- Optional, name of the gateway to use for ingress
+      name: ""
+
+      # -- Optional, namespace of the gateway to use for ingress
+      namespace: ""
+
+      # -- Optional, request timeout for ingress route
+      requestTimeout: ""
+
+      # -- Optional, backend timeout for ingress route
+      backendTimeout: ""
+
+      # -- Forwarded protocol for ingress
+      protocol: "http"
 
     # -- Whether ingress uses TLS. You must set an ingress host to use this. 
     # See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls

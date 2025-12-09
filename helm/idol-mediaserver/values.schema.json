@@ -34,6 +34,10 @@
             "type": "string",
             "pattern": "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$"
         },
+        "optional_duration":{
+            "type": "string",
+            "pattern": "^(([0-9]{1,5}(h|m|s|ms)){1,4})?$"
+        },
         "required_string":{
             "type": "string",
             "minLength": 1
@@ -66,6 +70,23 @@
                 }
             }
         },
+        "gateway": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "requestTimeout": {
+                    "$ref": "#/$defs/optional_duration"
+                },
+                "backendTimeout": {
+                    "$ref": "#/$defs/optional_duration"
+                }
+            }
+        },
         "ingressCommon":{
             "type": "object",
             "properties":{
@@ -74,10 +95,13 @@
                 },
                 "type": {
                     "type": "string",
-                    "enum": ["nginx","haproxy"]
+                    "enum": ["nginx","haproxy","gateway"]
                 },
                 "className": {
                     "type": "string"
+                },
+                "gateway": {
+                    "$ref": "#/$defs/gateway"
                 },
                 "host": {
                     "type": "string"
