@@ -286,6 +286,11 @@
                 },
                 "licenseServerPort": {
                     "$ref": "#/$defs/port_number"
+                },
+                "licenseServerSSLMethod": {
+                    "type": "string",
+                    "enum": ["None", "Negotiate", "SSLV3", "TLSV1", "TLSV1.2", "TLSV1.3"],
+                    "description": "SSL method for license server connection. Valid values: None (no SSL/TLS), Negotiate (use highest protocol supported by both client and server), SSLV3, TLSV1, TLSV1.2, TLSV1.3"
                 }
             },
             "required": ["licenseServerHostname","licenseServerPort"]
