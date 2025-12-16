@@ -46,7 +46,7 @@ spec:
         args: 
         - sh 
         - -c 
-        - {{ printf "curl \"http://%s:%d%s\"" .Values.communityName (.Values.communityACIPort | int) .Values.livenessProbePath }}
+        - {{ printf "curl \"http://%s:%d/a=getpid\"" (index .Values "idol-community" "name") (index .Values "idol-community" "aciPort" | int) }}
       containers:
       - name: {{ .Values.findUIName }}
         image: {{ .Values.idolImageRegistry }}/{{ .Values.findUIImage }}:{{ .Values.idolVersion }}
