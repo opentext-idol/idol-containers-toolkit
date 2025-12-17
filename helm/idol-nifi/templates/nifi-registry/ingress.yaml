@@ -24,7 +24,7 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: {{ $root.Values.name }}-reg{{ $endpointSuffix }}
-  labels: {{- include "idol-library.labels" (dict "root" $root "component" $root.Values.nifiRegistry) | nindent 4 -}}
+  labels: {{- include "idol-library.labels" (dict "root" $root "component" $root.Values.nifiRegistry) | nindent 4 }}
     app: {{ $root.Values.name }}-reg
 spec:
   parentRefs:

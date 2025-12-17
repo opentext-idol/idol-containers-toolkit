@@ -26,6 +26,8 @@ idol-find:
   enabled: true
   idol-licenseserver:
     enabled: false
+  single-content:
+    enabled: false
 
 idol-nifi:
   enabled: true

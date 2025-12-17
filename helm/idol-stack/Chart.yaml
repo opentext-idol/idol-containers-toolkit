@@ -11,7 +11,7 @@
 
 apiVersion: v2
 name: idol-stack
-version: 0.2.4
+version: 0.2.5
 appVersion: "25.4"
 description: An IDOL setup for ingesting, processing and serving document content using Apache NiFi and the Find interface
 dependencies:

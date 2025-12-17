@@ -114,6 +114,10 @@ ingress:
 # They are generally here in values.yaml so that DRY principles and a consistent
 # scheme for specifying these values in the templates can be followed.
 
+# queryserviceName is an internal parameter to specify the query service name.
+queryserviceName: "idol-query-service"
+# the queryservice port
+queryserviceACIPort: "9060"
 # nifiserviceName is an internal parameter to specify the NiFi service name.
 nifiserviceName: "idol-nifi"
 # list of ports for the NiFi service
@@ -126,6 +130,16 @@ webappPortName: "web-app"
 findIngressName: "idol-find-ingress"
 # findEndpointName is an internal parameter to specify the URL path to proxy Find.
 findEndpointName: "find"
+
+# communityName is an internal parameter to specify the name of the Community service.
+communityName: "idol-community"
+# the Community service port.
+communityACIPort: "9030"
+
+# viewServerName is an internal parameter to specify the name of the View service.
+viewServerName: "idol-view"
+# the View service port.
+viewServerACIPort: "9080"
 
 # Find UI internal name parameter
 findUIName: "idol-find"

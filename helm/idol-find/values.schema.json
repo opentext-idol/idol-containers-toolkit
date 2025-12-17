@@ -33,6 +33,13 @@
                 "minLength": 1
             }
         },
+        "queryserviceName": {
+            "type": "string",
+            "format": "hostname"
+        },
+        "queryserviceACIPort": {
+            "$ref": "#/$defs/port_number"
+        },
         "nifiserviceName": {
             "type": "string",
             "format": "hostname"
@@ -51,6 +58,20 @@
         "findEndpointName": {
             "type": "string",
             "minLength": 1
+        },
+        "communityName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "communityACIPort": {
+            "$ref": "#/$defs/port_number"
+        },
+        "viewServerName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "viewServerACIPort": {
+            "$ref": "#/$defs/port_number"
         },
         "findUIName": {
             "type": "string",
@@ -86,11 +107,17 @@
         "idolVersion",
         "ingress",
         "imagePullSecrets",
+        "queryserviceName",
+        "queryserviceACIPort",
         "nifiserviceName",
         "nifiserviceACIPort",
         "webappPortName",
         "findIngressName",
         "findEndpointName",
+        "communityName",
+        "communityACIPort",
+        "viewServerName",
+        "viewServerACIPort",
         "findUIName",
         "findUIImage",
         "findUIPort",

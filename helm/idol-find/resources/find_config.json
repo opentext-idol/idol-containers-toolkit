@@ -7,15 +7,15 @@
     },
     "community" : {
       "protocol" : {{ .Values.findHTTPScheme | quote }},
-      "host" : {{ index .Values "idol-community" "name" | quote }},
-      "port" : {{ index .Values "idol-community" "aciPort" | int }}
+      "host" : {{ .Values.communityName | quote }},
+      "port" : {{ .Values.communityACIPort | int }}
     },
     "method" : {{ .Values.findLoginMethod | quote }}
   },
   "content" : {
     "protocol" : {{ .Values.findHTTPScheme | quote }},
-    "host" : {{ index .Values "single-content" "queryserviceName" | quote }},
-    "port" : {{ index .Values "single-content" "queryserviceACIPort" | int }}
+    "host" : {{ .Values.queryserviceName | quote }},
+    "port" : {{ .Values.queryserviceACIPort | int }}
   },
   "referenceField" : "DREREFERENCE",
   "queryManipulation" : {
@@ -39,8 +39,8 @@
     "viewingMode" : "UNIVERSAL",
     "highlighting" : true,
     "protocol" : {{ .Values.findHTTPScheme | quote }},
-    "host" : {{ index .Values "idol-view" "name" | quote }},
-    "port" : {{ index .Values "idol-view" "aciPort" | int }}
+    "host" : {{ .Values.viewServerName | quote }},
+    "port" : {{ .Values.viewServerACIPort | int }}
   },
   "answerServer" : {
     "server" : {
