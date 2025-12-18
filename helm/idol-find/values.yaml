@@ -42,14 +42,6 @@ idolVersion: "25.4"
 imagePullSecrets:
   - "dockerhub-secret"
 
-# licenseServerHostname maps to [License] LicenseServerHost in the IDOL cfg files
-# Should point to a resolvable IDOL LicenseServer (or Kubernetes service abstraction - see the idol-licenseserver chart)
-licenseServerHostname: "idol-licenseserver"
-# licenseServerPort is the ACI port of the LicenseServer instance
-licenseServerPort: "20000"
-# licenseServerSSLMethod -- SSL method for license server connection (None, Negotiate, etc.)
-licenseServerSSLMethod: "None"
-
 ################################
 
 
@@ -124,22 +116,13 @@ ingress:
 
 # queryserviceName is an internal parameter to specify the query service name.
 queryserviceName: "idol-query-service"
-# list of ports for the queryservice
+# the queryservice port
 queryserviceACIPort: "9060"
 # nifiserviceName is an internal parameter to specify the NiFi service name.
 nifiserviceName: "idol-nifi"
 # list of ports for the NiFi service
 nifiserviceACIPort: "11000"
 
-# livenessProbePath is an internal parameter to specify the IDOL path used
-# as part of liveness checks.
-livenessProbePath: "/a=getpid"
-# name of port to use for ACI actions (action=query, etc.)
-idolACIPortName: "aci-port"
-# name of port to use for Index actions (DREADDDATA, etc.)
-idolIndexPortName: "index-port"
-# name of port to use for Service actions (Action=GetConfig, etc.)
-idolServicePortName: "service-port"
 # name of port to use for Web Application servers
 webappPortName: "web-app"
 
@@ -148,33 +131,15 @@ findIngressName: "idol-find-ingress"
 # findEndpointName is an internal parameter to specify the URL path to proxy Find.
 findEndpointName: "find"
 
-# agentStoreName is an internal parameter to specify the name of the various AgentStore objects in the charts.
-agentStoreName: "idol-agentstore"
-# agentStoreImage is an internal parameter to specify the name of the AgentStore image pulled for the AgentStore container.
-agentStoreImage: "agentstore"
-# an internal list of ports for AgentStore.
-agentStoreACIPort: "9050"
-agentStoreIndexPort: "9051"
-agentStoreServicePort: "9052"
-
-# communityName is an internal parameter to specify the name of the various Community objects in the charts.
+# communityName is an internal parameter to specify the name of the Community service.
 communityName: "idol-community"
-# communityImage is an internal parameter to specify the name of the Community image pulled for the Community container.
-communityImage: "community"
-# an internal list of ports for Community.
+# the Community service port.
 communityACIPort: "9030"
-communityServicePort: "9032"
-# overrides for liveness probe settings
-communityLivenessProbe:
-  initialDelaySeconds: 30
 
-# viewServerName is an internal parameter to specify the name of the various ViewServer objects in the charts.
-viewServerName: "idol-viewserver"
-# viewServerImage is an internal parameter to specify the name of the ViewServer image pulled for the ViewServer container.
-viewServerImage: "view"
-# an internal list of ports for ViewServer.
+# viewServerName is an internal parameter to specify the name of the View service.
+viewServerName: "idol-view"
+# the View service port.
 viewServerACIPort: "9080"
-viewServerServicePort: "9082"
 
 # Find UI internal name parameter
 findUIName: "idol-find"
@@ -201,3 +166,12 @@ idol-licenseserver:
 # create a cluster service proxying to a LicenseServer instance
   enabled: true
   licenseServerExternalName: "example.licenseserver.host"
+
+idol-community:
+  enabled: true
+
+idol-view:
+  enabled: true
+
+single-content:
+  enabled: true

@@ -33,18 +33,6 @@
                 "minLength": 1
             }
         },
-        "licenseServerHostname": {
-            "type": "string",
-            "format": "hostname"
-        },
-        "licenseServerPort": {
-            "$ref": "#/$defs/port_number"
-        },
-        "licenseServerSSLMethod": {
-            "type": "string",
-            "enum": ["None", "Negotiate", "SSLV3", "TLSV1", "TLSV1.2", "TLSV1.3"],
-            "description": "SSL method for license server connection. Valid values: None (no SSL/TLS), Negotiate (use highest protocol supported by both client and server), SSLV3, TLSV1, TLSV1.2, TLSV1.3"
-        },
         "queryserviceName": {
             "type": "string",
             "format": "hostname"
@@ -59,22 +47,6 @@
         "nifiserviceACIPort": {
             "$ref": "#/$defs/port_number"
         },
-        "livenessProbePath": {
-            "type": "string",
-            "minLength": 1
-        },
-        "idolACIPortName": {
-            "type": "string",
-            "minLength": 1
-        },
-        "idolIndexPortName": {
-            "type": "string",
-            "minLength": 1
-        },
-        "idolServicePortName": {
-            "type": "string",
-            "minLength": 1
-        },
         "webappPortName": {
             "type": "string",
             "minLength": 1
@@ -87,55 +59,18 @@
             "type": "string",
             "minLength": 1
         },
-        "agentStoreName": {
-            "type": "string",
-            "minLength": 1
-        },
-        "agentStoreImage": {
-            "type": "string",
-            "minLength": 1
-        },
-        "agentStoreACIPort": {
-            "$ref": "#/$defs/port_number"
-        },
-        "agentStoreIndexPort": {
-            "$ref": "#/$defs/port_number"
-        },
-        "agentStoreServicePort": {
-            "$ref": "#/$defs/port_number"
-        },
-        "agentStoreLivenessProbe": {
-            "$ref": "#/$defs/liveness_probe"
-        },
         "communityName": {
-            "type": "string",
-            "minLength": 1
-        },
-        "communityImage": {
             "type": "string",
             "minLength": 1
         },
         "communityACIPort": {
             "$ref": "#/$defs/port_number"
         },
-        "communityServicePort": {
-            "$ref": "#/$defs/port_number"
-        },
-        "communityLivenessProbe": {
-            "$ref": "#/$defs/liveness_probe"
-        },
         "viewServerName": {
             "type": "string",
             "minLength": 1
         },
-        "viewServerImage": {
-            "type": "string",
-            "minLength": 1
-        },
         "viewServerACIPort": {
-            "$ref": "#/$defs/port_number"
-        },
-        "viewServerServicePort": {
             "$ref": "#/$defs/port_number"
         },
         "findUIName": {
@@ -172,32 +107,17 @@
         "idolVersion",
         "ingress",
         "imagePullSecrets",
-        "licenseServerHostname",
-        "licenseServerPort",
-        "livenessProbePath",
         "queryserviceName",
         "queryserviceACIPort",
         "nifiserviceName",
         "nifiserviceACIPort",
-        "idolACIPortName",
-        "idolIndexPortName",
-        "idolServicePortName",
         "webappPortName",
         "findIngressName",
         "findEndpointName",
-        "agentStoreName",
-        "agentStoreImage",
-        "agentStoreACIPort",
-        "agentStoreIndexPort",
-        "agentStoreServicePort",
         "communityName",
-        "communityImage",
         "communityACIPort",
-        "communityServicePort",
         "viewServerName",
-        "viewServerImage",
         "viewServerACIPort",
-        "viewServerServicePort",
         "findUIName",
         "findUIImage",
         "findUIPort",
