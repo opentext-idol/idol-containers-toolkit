@@ -10,7 +10,7 @@
 # END COPYRIGHT NOTICE
 apiVersion: v2
 name: idol-find
-version: "0.3.3"
+version: "0.4.0"
 appVersion: "25.4.0"
 description: Adds ``Find`` UI and supporting servers (Community, View)
 dependencies:
@@ -23,7 +23,7 @@ dependencies:
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 - name: single-content
   condition: single-content.enabled
-  version: "~0.11.0
+  version: "~0.11.0"
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 - name: idol-community
   condition: idol-community.enabled
