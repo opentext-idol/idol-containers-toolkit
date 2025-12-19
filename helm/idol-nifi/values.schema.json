@@ -36,6 +36,18 @@
                 "global": {
                     "#ref": "#/$defs/Global"
                 },
+                "idolImage":{
+                    "allOf": [
+                        {
+                            "$ref": "#/$defs/idolImage"
+                        }
+                    ],
+                    "required":[
+                        "registry",
+                        "version",
+                        "repo"
+                    ]
+                },
                 "indexserviceName": {
                     "type": "string",
                     "minLength": 1
@@ -75,7 +87,7 @@
                     "$ref": "#/$defs/Nifi"
                 },
                 "nifiClusters": {
-                    "$ref": "#/$defs/NifiCluster"
+                    "$ref": "#/$defs/NifiClusters"
                 },
                 "nifiRegistry": {
                     "$ref": "#/$defs/NifiRegistry"
@@ -124,11 +136,6 @@
                     "enum": ["Always", "IfNotPresent", "Never"]
                 }
             },
-            "required":[
-                "registry",
-                "version",
-                "repo"
-            ],
             "unevaluatedProperties": false
         },
         "IdolLicenseserver": {
@@ -180,6 +187,9 @@
                     ]
                 }
             ],
+            "not":{
+                "$ref": "#/$defs/Deletable"
+            },
             "title": "Flow"
         },
         "Bucket": {
@@ -228,10 +238,27 @@
                     "description": "Deprecated, prefer 'flows'"
                 },
                 "flows": {
-                    "type": ["object"],
-                    "items": {
-                        "$ref": "#/$defs/Flow"
-                    }
+                    "oneOf":[
+                        {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/$defs/Flow"
+                            }
+                        },
+                        {
+                            "type": "object",
+                            "patternProperties":{
+                                "^[-a-zA-Z0-9]{0,63}$":{
+                                    "type": "object",
+                                    "oneOf": [
+                                        {"$ref": "#/$defs/Flow"},
+                                        {"$ref": "#/$defs/Deletable"}
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                    
                 },
                 "ingress": {
                     "$ref": "#/$defs/NifiIngress"
@@ -310,7 +337,7 @@
             ],
             "title": "Nifi"
         },
-        "NifiCluster": {
+        "NifiClusters": {
             "oneOf": [
              {
                 "type": "array",
@@ -337,25 +364,35 @@
             {
                 "type": "object",
                 "patternProperties":{
-                    "^[-a-zA-Z0-0]{0,63}$":{
-                            "type": "object",
-                            "unevaluatedProperties": false,
-                            "allOf": [
-                                {"$ref":"#/$defs/NifiProperties"},
-                                {
-                                    "properties": {
-                                    "clusterId":{
-                                        "type": "string"
+                    "^[-a-zA-Z0-9]{0,63}$":{
+                        "type": "object",
+                        "unevaluatedProperties": false,
+                        "oneOf":[
+                            {
+                                "$ref":"#/$defs/Deletable"
+                            },
+                            {
+                                "allOf": [
+                                    {"$ref":"#/$defs/NifiProperties"},
+                                    {
+                                        "properties": {
+                                            "clusterId":{
+                                                "type": "string"
+                                                },
+                                            "image": {
+                                                "$ref": "#/$defs/idolImage"
+                                            }
                                         }
                                     },
-                                    "image": {
-                                        "$ref": "#/$defs/idolImage"
+                                    {
+                                        "not":{ "$ref":"#/$defs/Deletable" }
                                     }
-                                }
-                            ],
-                            "title": "NifiCluster"
-                        }
+                                ]
+                            }
+                        ],
+                        "title": "NifiCluster"
                     }
+                }
             },
             {
                 "type": "null"
@@ -659,6 +696,17 @@
                     "enum": ["http","https"]
                 }
             }
+        },
+        "Deletable":{
+            "type": "object",
+            "properties": {
+                "DELETE":{
+                    "type":"boolean"
+                }
+            },
+            "required": [
+                "DELETE"
+            ]
         }
     }
 }

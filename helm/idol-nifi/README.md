@@ -1,8 +1,6 @@
 # idol-nifi
 
-
-
-![Version: 0.15.3](https://img.shields.io/badge/Version-0.15.3-informational?style=flat-square) ![AppVersion: 25.4](https://img.shields.io/badge/AppVersion-25.4-informational?style=flat-square) 
+![Version: 0.15.3](https://img.shields.io/badge/Version-0.15.3-informational?style=flat-square) ![AppVersion: 25.4](https://img.shields.io/badge/AppVersion-25.4-informational?style=flat-square)
 
 Provides a scaleable Knowledge Discovery NiFi cluster instance (NiFi, NiFi Registry and ZooKeeper).
 
@@ -12,12 +10,6 @@ Provides a scaleable Knowledge Discovery NiFi cluster instance (NiFi, NiFi Regis
 
 * <https://nifi.apache.org/>
 * <https://zookeeper.apache.org/>
-
-
-
-
-
-
 
 ## Requirements
 
@@ -38,7 +30,7 @@ There are two methods for deploying a flow in a Nifi cluster:
 
 ```yaml
 nifi:
-  flows: 
+  flows:
     # NOTE: helm values merging allows flows to be imported from multiple values files
     # To remove the default packaged flow, explicitly opt-out by using chart-specific DELETE keyword
     basic-idol:
@@ -52,7 +44,7 @@ nifi:
   flows:
     basic-idol:
       DELETE: true
-    my-flow: 
+    my-flow:
       name: "My Flow"
       bucket: "my-bucket"
     my-other-flow:
@@ -79,7 +71,7 @@ nifiRegistry:
     # To remove the default packaged bucket, explicitly opt-out by using chart-specific DELETE keyword
     default-bucket:
       DELETE: true
-    my-bucket: 
+    my-bucket:
       name: "my-bucket"
       flowfiles: []
     my-other-bucket:
@@ -137,7 +129,7 @@ Multiple NiFi clusters can be deployed from a single helm install command by spe
     nifiClusters:
       nf1:
         clusterId: nf1
-      nf2: 
+      nf2:
         clusterId: nf2
 ```
 
@@ -218,12 +210,18 @@ Each deployment will require a unique name, and ingress points should be manuall
 | nifi.ingress.aciTLS.secretName | string | `""` | The name of the secret for aci ingress tls. Leave empty if not using TLS. |
 | nifi.ingress.annotations | object | `{}` | optional ingress annotations |
 | nifi.ingress.enabled | bool | `true` | whether to deploy ingress for nifi |
+| nifi.ingress.gateway.backendTimeout | string | `""` | Optional, backend timeout for ingress route |
+| nifi.ingress.gateway.name | string | `""` | Optional, name of the gateway to use for ingress |
+| nifi.ingress.gateway.namespace | string | `""` | Optional, namespace of the gateway to use for ingress |
+| nifi.ingress.gateway.protocol | string | `"http"` | Forwarded protocol for ingress (http|https) |
+| nifi.ingress.gateway.requestTimeout | string | `""` | Optional, request timeout for ingress route |
 | nifi.ingress.host | string | `""` | optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules |
 | nifi.ingress.metricsHost | string | `""` | optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules |
 | nifi.ingress.metricsTLS | object | `{"crt":"","key":"","secretName":""}` | Whether metrics ingress uses TLS. You must set an ingress metricsHost to use this.  See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls |
 | nifi.ingress.metricsTLS.crt | string | `""` | Certificate data value to generate tls Secret (should be base64 encoded) |
 | nifi.ingress.metricsTLS.key | string | `""` | Private key data value to generate tls Secret (should be base64 encoded) |
 | nifi.ingress.metricsTLS.secretName | string | `""` | The name of the secret for metrics ingress tls. Leave empty if not using TLS. |
+| nifi.ingress.port | string | `""` | optional ingress port to forward in ingress rules |
 | nifi.ingress.proxyHost | string | `""` | optional nifi.web.proxy.host value (see https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#web-properties) |
 | nifi.ingress.proxyPath | string | `""` | optional nifi.web.proxy.context.path value (see https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#web-properties) |
 | nifi.ingress.tls | object | `{"crt":"","key":"","secretName":""}` | Whether ingress uses TLS. You must set an ingress host to use this.  See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls |
@@ -232,6 +230,7 @@ Each deployment will require a unique name, and ingress points should be manuall
 | nifi.ingress.tls.secretName | string | `""` | The name of the secret for ingress TLS. Leave empty if not using TLS.  If specified then either this secret must already exist, or crt and key values must be provided and secret will be created..  |
 | nifi.jvmMemoryRatio | float | `0.5` | What proportion of the pod memory to allocate for JVM usage |
 | nifi.keystorePassword | string | `""` | optional nifi.security.keystorePasswd value (see https://nifi.apache.org/docs/nifi-docs/html/administration-guide.html#security_properties) Setting this value is recommended. If it is not set, it will default to a generated value |
+| nifi.labels."app.framework/openjdk" | string | `"21"` |  |
 | nifi.mallocArenaMax | int | `2` | MALLOC_ARENA_MAX environment variable controlling glibc memory pool tuning. Increasing this may improve performance, but at  potential cost of extra memory usage. See https://www.gnu.org/software/libc/manual/html_node/Malloc-Tunable-Parameters.html |
 | nifi.registryHost | string | `""` | optional hostname of an existing nifi registry instance. Defaults to the created registry instance when nifiRegistry.enabled=true |
 | nifi.replicas | int | `1` | Initial replica count for nifi. See also nifi.autoScaling.minReplicas and nifi.autoScaling.maxReplicas |
@@ -257,11 +256,18 @@ Each deployment will require a unique name, and ingress points should be manuall
 | nifiRegistry.ingress.annotations | object | `{}` | optional ingress annotations |
 | nifiRegistry.ingress.contextPath | string | `""` | optional ingress context path |
 | nifiRegistry.ingress.enabled | bool | `true` | whether to deploy ingress for nifi registry |
+| nifiRegistry.ingress.gateway.backendTimeout | string | `""` | Optional, backend timeout for ingress route |
+| nifiRegistry.ingress.gateway.name | string | `""` | Optional, name of the gateway to use for ingress |
+| nifiRegistry.ingress.gateway.namespace | string | `""` | Optional, namespace of the gateway to use for ingress |
+| nifiRegistry.ingress.gateway.protocol | string | `"http"` | Forwarded protocol for ingress |
+| nifiRegistry.ingress.gateway.requestTimeout | string | `""` | Optional, request timeout for ingress route |
 | nifiRegistry.ingress.host | string | `""` | optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules |
+| nifiRegistry.ingress.port | string | `""` |  |
 | nifiRegistry.ingress.tls | object | `{"crt":"","key":"","secretName":""}` | Whether ingress uses TLS. You must set an ingress host to use this.  See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls |
 | nifiRegistry.ingress.tls.crt | string | `""` | Certificate data value to generate tls Secret (should be base64 encoded) |
 | nifiRegistry.ingress.tls.key | string | `""` | Private key data value to generate tls Secret (should be base64 encoded) |
 | nifiRegistry.ingress.tls.secretName | string | `""` | The name of the secret for ingress TLS. Leave empty if not using TLS.  If specified then either this secret must already exist, or crt and key values must be provided and secret will be created. |
+| nifiRegistry.labels."app.framework/openjdk" | string | `"21"` |  |
 | nifiRegistry.resources | object | `{"limits":{"cpu":"1000m","memory":"1Gi"},"requests":{"cpu":"200m","memory":"1Gi"}}` | https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits |
 | podSecurityContext | object | `{"enabled":true,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000,"seccompProfile":{"type":"RuntimeDefault"}}` | pod security context definition  See https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod |
 | postgresql | object | Default configuration to support shared state data. See values.yaml for details. | `postgresql` sub-chart configuration Required for shared state data storage across the nifi cluster. See https://github.com/bitnami/charts/tree/main/bitnami/postgresql-ha |
@@ -271,8 +277,8 @@ Each deployment will require a unique name, and ingress points should be manuall
 | serviceAccountName | string | `""` | Optional serviceAccountName for the pods (https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account) |
 | usingTLS | bool | `false` | whether ports are configured to use TLS (https). |
 | zookeeper.image | string | `"docker.io/zookeeper:3.8"` | zookeeper image to use |
+| zookeeper.labels."app.framework/openjdk" | string | `"17"` |  |
 | zookeeper.resources | object | `{"limits":{"cpu":"200m","memory":"500Mi"},"requests":{"cpu":"200m","memory":"500Mi"}}` | https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits |
-
 
 ----------------------------------------------
 Autogenerated from chart metadata using [helm-docs v1.14.2](https://github.com/norwoodj/helm-docs/releases/v1.14.2)
