@@ -10,6 +10,9 @@
                 "idol-library": {
                     "type": "object"
                 },
+                "ext": {
+                    "type": "object"
+                },
                 "enabled": {
                     "type": "boolean"
                 }
