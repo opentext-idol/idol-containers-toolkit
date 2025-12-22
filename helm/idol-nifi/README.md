@@ -1,10 +1,10 @@
 # idol-nifi
 
-![Version: 0.15.3](https://img.shields.io/badge/Version-0.15.3-informational?style=flat-square) ![AppVersion: 25.4](https://img.shields.io/badge/AppVersion-25.4-informational?style=flat-square)
+![Version: 0.16.0](https://img.shields.io/badge/Version-0.16.0-informational?style=flat-square) ![AppVersion: 26.1](https://img.shields.io/badge/AppVersion-26.1-informational?style=flat-square)
 
 Provides a scaleable Knowledge Discovery NiFi cluster instance (NiFi, NiFi Registry and ZooKeeper).
 
-> Full documentation for Knowledge Discovery NiFi Ingest available from <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.4/NiFiIngest_25.4_Documentation/Help/>
+> Full documentation for Knowledge Discovery NiFi Ingest available from <https://www.microfocus.com/documentation/idol/knowledge-discovery-26.1/NiFiIngest_26.1_Documentation/Help/>
 
 ## Related Documentation
 
@@ -19,7 +19,7 @@ Provides a scaleable Knowledge Discovery NiFi cluster instance (NiFi, NiFi Regis
 | @kubernetes-sigs | metrics-server | 3.8.2 |
 | @prometheus-community | prometheus-adapter | 4.2.0 |
 | @prometheus | prometheus | 25.0.0 |
-| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | ~0.15.0 |
+| https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-library | ~0.16.0 |
 | https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm | idol-licenseserver | ~0.5.0 |
 
 ## Deploying a flow into NiFi
@@ -181,7 +181,7 @@ Each deployment will require a unique name, and ingress points should be manuall
 | idolImage.imagePullPolicy | string | `"IfNotPresent"` | used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) |
 | idolImage.registry | string | `"microfocusidolserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | idolImage.repo | string | `"nifi-ver2-full"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
-| idolImage.version | string | `"25.4"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
+| idolImage.version | string | `"26.1"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | indexserviceACIPort | string | `"9070"` | the ACI port of the indexing IDOL component |
 | indexserviceName | string | `"idol-index-service"` | the hostname of the indexing IDOL component |
 | ingressBasicAuthData | string | `"YWRtaW46JGFwcjEkSDY1dnBkTU8kMXAxOGMxN3BuZVFUT2ZjVC9TZkZzMQo="` | base64 encoded htpasswd https://httpd.apache.org/docs/2.4/misc/password_encryptions.html. Default is admin/admin |
