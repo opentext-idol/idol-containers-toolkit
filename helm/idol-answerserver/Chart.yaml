@@ -10,26 +10,26 @@
 # END COPYRIGHT NOTICE
 apiVersion: v2
 name: idol-answerserver
-version: "0.5.5"
-appVersion: "25.4"
+version: "0.6.0"
+appVersion: "26.1"
 description: Adds Knowledge Discovery AnswerServer
 dependencies:
 - name: idol-library
-  version: ~0.15.0
+  version: ~0.16.0
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 - name: single-content
   alias: "passageextractorAgentstore"
   condition: passageextractorAgentstore.enabled
-  version: ~0.11.0
+  version: ~0.12.0
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 - name: single-content
   alias: "answerbankAgentstore"
   condition: answerbankAgentstore.enabled
-  version: ~0.11.0
+  version: ~0.12.0
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 - name: single-content
   condition: single-content.enabled
-  version: ~0.11.0
+  version: ~0.12.0
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 - name: postgresql
   condition: postgresql.enabled
