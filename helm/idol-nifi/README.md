@@ -1,6 +1,6 @@
 # idol-nifi
 
-![Version: 0.16.0](https://img.shields.io/badge/Version-0.16.0-informational?style=flat-square) ![AppVersion: 26.1](https://img.shields.io/badge/AppVersion-26.1-informational?style=flat-square)
+![Version: 0.16.1](https://img.shields.io/badge/Version-0.16.1-informational?style=flat-square) ![AppVersion: 26.1](https://img.shields.io/badge/AppVersion-26.1-informational?style=flat-square)
 
 Provides a scaleable Knowledge Discovery NiFi cluster instance (NiFi, NiFi Registry and ZooKeeper).
 
