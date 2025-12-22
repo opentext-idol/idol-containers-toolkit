@@ -31,7 +31,7 @@ idolImage:
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
   registry: "microfocusidolserver"
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
-  version: "25.4"
+  version: "26.1"
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}.
   repo: "community"
   # -- used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy)
@@ -58,6 +58,9 @@ usingTLS: false
 
 # -- if specified, mounted at /etc/config/idol and expected to provide community.cfg
 existingConfigMap: ""
+
+# -- Space for additional/external values (ignored by schema validation)
+ext: {}
 
 # -- Additional PodSpec Volume(s) (see <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes>)
 # Can be dict of (name, Volume), or list of (Volume). dict form allows for merging definitions from multiple values files.
