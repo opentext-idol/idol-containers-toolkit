@@ -8,6 +8,9 @@ HelmChartTestBase.debug = False
 
 class TestDistributedIdol(unittest.TestCase, HelmChartTestBase):
     chartpath = os.path.join('..','distributed-idol')
+    _gateway_data = {'content': {'ingress': {'type': 'gateway','host': 'component.example.12-34-56-78.nip.io', 'gateway': {'name': 'test-gateway'}}}}
+    _gateway_bad_data = {'content': {'ingress': {'type': 'gateway','host': 'component.example.12-34-56-78.nip.io', 'gateway': {'name':''}}}}
+    
 
     def setUp(self):
         self._kinds = ['Deployment','StatefulSet','Ingress','ConfigMap','Service']

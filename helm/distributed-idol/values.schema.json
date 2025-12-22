@@ -20,16 +20,16 @@
                     "$ref": "#/$defs/dih"
                 },
                 "idol-licenseserver":{
-                    "$ref": "#/$defs/optional_subchart"
+                    "$ref": "#/$defs/optional_object"
                 },
                 "metrics-server":{
-                    "$ref": "#/$defs/optional_subchart"
+                    "$ref": "#/$defs/optional_object"
                 },
                 "prometheus":{
-                    "$ref": "#/$defs/optional_subchart"
+                    "$ref": "#/$defs/optional_object"
                 },
                 "prometheus-adapter":{
-                    "$ref": "#/$defs/optional_subchart"
+                    "$ref": "#/$defs/optional_object"
                 },
                 "autoscaling":{
                     "$ref": "#/$defs/autoscaling"
@@ -78,16 +78,9 @@
             "type": "string",
             "pattern": "^[1-9]|\\d{2,}$"
         },
-        "optional_subchart":{
-            "type": "object",
-            "properties": {
-                "enabled": {
-                    "type": "boolean"
-                }
-            },
-            "required":[
-                "enabled"
-            ]
+        "optional_duration":{
+            "type": "string",
+            "pattern": "^(([0-9]{1,5}(h|m|s|ms)){1,4})?$"
         },
         "optional_object":{
             "type": "object",
@@ -117,6 +110,23 @@
                 }
             }
         },
+        "gateway": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "requestTimeout": {
+                    "$ref": "#/$defs/optional_duration"
+                },
+                "backendTimeout": {
+                    "$ref": "#/$defs/optional_duration"
+                }
+            }
+        },
         "ingressBase":{
             "type": "object",
             "properties":{
@@ -125,10 +135,13 @@
                 },
                 "type": {
                     "type": "string",
-                    "enum": ["nginx","haproxy"]
+                    "enum": ["nginx","haproxy", "gateway"]
                 },
                 "className": {
                     "type": "string"
+                },
+                "gateway": {
+                    "$ref": "#/$defs/gateway"
                 },
                 "host": {
                     "type": "string"
