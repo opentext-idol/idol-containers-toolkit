@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2023 Open Text.
+# Copyright 2023-2024 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -8,14 +8,8 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ .Release.Name }}-idol-config
-  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values) | nindent 4 }}
-data:
-  {{- $ctx := . }}
-  {{- range tuple "find_config.json"}}
-  {{ . }}: |-
-{{ tpl (. | print "resources/" | $ctx.Files.Get) $ctx | indent 4 }}
-  {{- end }}
+{{- include "idol-library.aciserver.defaultcfg" (dict 
+    "root" .
+    "component" .Values
+    "componentName" (trimPrefix "idol-" .Values.name)
+) -}}
