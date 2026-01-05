@@ -1,0 +1,69 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.dataadminUIName }}
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values) | nindent 4 }}
+spec:
+  ports:
+  - port: {{ .Values.dataadminUIPort | int }}
+    targetPort: {{ .Values.webappPortName }}
+    name: {{ .Values.webappPortName }}
+  selector:
+    app: {{ .Values.dataadminUIName }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.dataadminUIName }}
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values) | nindent 4 }}
+spec:
+  replicas: {{ default 1 .Values.dataadminUIReplicas | int }}
+  selector:
+    matchLabels:
+      app: {{ .Values.dataadminUIName }}
+  template:
+    metadata:
+      labels: {{- include "idol-library.labels" (dict "root" . "component" .Values) | nindent 8 }}
+        app: {{ .Values.dataadminUIName }}
+    spec:
+      imagePullSecrets:
+        {{- range .Values.imagePullSecrets }}
+        - name: {{ . }}
+        {{- end }}
+      initContainers:
+      - name: check-community-availability
+        image: yauritux/busybox-curl
+        args: 
+        - sh 
+        - -c 
+        - {{ printf "curl \"http://%s:%d/a=getpid\"" .Values.community.name (.Values.community.aciPort | int) }}
+      containers:
+      - name: {{ .Values.dataadminUIName }}
+        image: {{ .Values.idolImageRegistry }}/{{ .Values.dataadminUIImage }}:{{ .Values.idolVersion }}
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: {{ .Values.dataadminUIPort | int }}
+          name: {{ .Values.webappPortName }}
+          protocol: TCP
+        volumeMounts:
+        - name: config-map
+          mountPath: /opt/dataadmin/home/config.json
+          subPath: config.json
+{{- if eq .Values.ingress.type "gateway" }}
+        - name: SERVER_FORWARD_HEADERS_STRATEGY
+          value: framework
+{{- end }}
+      volumes:
+      - name: config-map
+        configMap:
+          name: {{ .Release.Name }}-idol-config

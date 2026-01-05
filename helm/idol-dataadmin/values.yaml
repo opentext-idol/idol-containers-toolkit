@@ -1,0 +1,218 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+
+# As per https://helm.sh/docs/topics/charts/#the-chart-file-structure
+# this values.yaml file contains the default configuration values for this chart.
+# These default values can be overridden by using the --values or --set flags on the `helm install`
+# command: see https://helm.sh/docs/helm/helm_install/
+
+##### HIGH LEVEL CHART CONFIGURATION #####
+# This section contains parameters that are most likely to be overridden for
+# the basic choices and constraints around how this chart will be used.
+
+# LEFT INTENTIONALLY BLANK
+
+#############################################
+
+
+##### IMAGE CONFIGURATION #####
+# Parameters to specify the IDOL images pulled for this chart are
+# configured here
+
+# idolImageRegistry is the registry from which the IDOL images being run
+# in this chart are pulled from. Override this if IDOL images are to be
+# pulled from a different private registry.
+idolImageRegistry: "microfocusidolserver"
+
+# idolVersion is the image tag that will be used when pulling images, and
+# corresponds to the IDOL version of the components being used.
+idolVersion: "25.4"
+
+# imagePullSecrets is a list of names of Kubernetes secrets containing the
+# credentials for pulling images from repositories. Most likely requires
+# a secret for Dockerhub credentials and a secret per private repository used.
+imagePullSecrets:
+  - "dockerhub-secret"
+
+################################
+
+
+##### NETWORKING CONFIGURATION #####
+# This section contains parameters to configure various network-related
+# properties in this chart.
+
+ingress:
+  # Create ingress resource
+  enabled: true
+
+  # Ingress controller type to setup for.
+  # Valid values are nginx or haproxy (used by OpenShift)
+  type: nginx
+
+  # Optional parameter to override the default ingress class
+  className: ""
+
+  # Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules).
+  # For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration)
+  host: ""
+
+  # The external port the ingress is exposed on.
+  # For Kubernetes-in-Docker, this may be different to the container ingress port.
+  port: ""
+
+  # Maximum allowed size of the client request body, defining
+  # the maximum size of requests that can be made to IDOL components within the installation, e.g.
+  # the amount of data sent in DREADDDATA index commands.
+  # The value should be an nginx "size" value.
+  # See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the
+  # corresponding nginx configuration parameter.
+  proxyBodySize: 2048m
+
+  # Gateway settings (only applies if type is 'gateway')
+  gateway:
+    # -- Optional, name of the gateway to use for ingress
+    name: ""
+
+    # -- Optional, namespace of the gateway to use for ingress
+    namespace: ""
+
+    # -- Optional, request timeout for ingress route
+    requestTimeout: ""
+
+    # -- Optional, backend timeout for ingress route
+    backendTimeout: ""
+
+    # -- Forwarded protocol for ingress
+    protocol: "http"
+
+  # -- Whether ingress uses TLS. You must set an ingress host to use this. 
+  # See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls 
+  tls:
+    # -- The name of the secret for ingress TLS. Leave empty if not using TLS. 
+    # If specified then either this secret must already exist, or crt and key values must be provided and secret will be created.. 
+    secretName: ""
+
+    # -- Certificate data value to generate tls Secret (should be base64 encoded)
+    crt: ""
+
+    # -- Private key data value to generate tls Secret (should be base64 encoded)
+    key: ""
+
+#####################################
+
+
+##### INTERNAL VARIABLES #####
+# Values specified below this point in the file should not need to be overriden.
+# They are generally here in values.yaml so that DRY principles and a consistent
+# scheme for specifying these values in the templates can be followed.
+
+# whether the query service is distributed or uses a single Content engine
+dataadminDistributed: false
+
+# queryserviceName is an internal parameter to specify the query service name.
+queryserviceName: &query-service-name "idol-query-service"
+# the queryservice port
+queryserviceACIPort: &query-service-aci-port "9060"
+# the queryservice index port, only has an effect if dataadminDistributed is false
+queryserviceIndexPort: &query-service-index-port "9061"
+# the queryservice service port, only has an effect if dataadminDistributed is false
+queryserviceServicePort: &query-service-service-port "9062"
+# indexserviceName is an internal parameter to specify the index service name, only has an effect if dataadminDistributed is true.
+indexserviceName: &index-service-name "idol-index-service"
+# the indexservice port, only has an effect if dataadminDistributed is true.
+indexserviceACIPort: &index-service-aci-port "9070"
+
+# name of port to use for Web Application servers
+webappPortName: "web-app"
+
+# dataadminIngressName is an internal parameter to specify the IDOL ingress name.
+dataadminIngressName: "idol-dataadmin-ingress"
+# dataadminEndpointName is an internal parameter to specify the URL path to proxy dataadmin.
+dataadminEndpointName: "dataadmin"
+
+dataadminUsername: "admin"
+dataadminPassword: "admin"
+
+# dataadmin UI internal name parameter
+dataadminUIName: "idol-dataadmin"
+# dataadmin UI container image name
+dataadminUIImage: "dataadmin"
+# dataadmin UI port number
+dataadminUIPort: "8000"
+# URL scheme dataadmin should use
+dataadminHTTPScheme: "HTTP"
+# Login method dataadmin should use
+dataadminLoginMethod: "autonomy"
+# overrides for liveness probe settings
+dataadminUILivenessProbe:
+  path: "/p/overview"
+  initialDelaySeconds: 300
+  timeoutSeconds: 10
+  periodSeconds: 30
+  failureThreshold: 5
+
+################################
+
+##### SUBCHART VALUES #####
+idol-licenseserver:
+# create a cluster service proxying to a LicenseServer instance
+  enabled: true
+  licenseServerExternalName: "example.license.server"
+
+content:
+  enabled: true
+  aciPort: *query-service-aci-port
+  indexPort: *query-service-index-port
+  servicePort: *query-service-service-port
+
+answerserver:
+  enabled: true
+  passageExtractorAgentstoreHostname: &passageExtractorAgentstoreHostname "idol-passageextractor-agentstore"
+  passageExtractorAgentstorePort: &passageExtractorAgentstorePort "12300"
+  passageExtractorHostname: *query-service-name
+  passageExtractorACIPort: *query-service-aci-port
+  single-content:
+    enabled: false
+  postgresql:
+    fullnameOverride: "idol-factbank-postgres"
+    image:
+      repository: bitnamilegacy/postgresql
+
+community:
+  enabled: true
+  agentStoreName: *passageExtractorAgentstoreHostname
+  agentStoreACIPort: *passageExtractorAgentstorePort
+  additionalVolumes:
+    poststart:
+      name: poststart
+      configMap:
+        name: idol-dataadmin-community-poststart-scripts
+  additionalVolumeMounts:
+    poststart:
+      name: poststart
+      mountPath: /community/poststart_scripts/002_add_default_dataadmin_users.sh
+      subPath: 002_add_default_dataadmin_users.sh
+
+qms:
+  enabled: true
+  queryserviceName: *query-service-name
+  queryserviceACIPort: *query-service-aci-port
+  single-content:
+    enabled: false
+
+statsserver:
+  enabled: true
+
+view:
+  enabled: true
+  agentStoreName: *query-service-name
+  agentStoreACIPort: *query-service-aci-port
+

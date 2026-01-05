@@ -1,0 +1,156 @@
+{
+  "locale" : "en_US",
+  "allowedOrigins" : [ {{ if .Values.ingress.host }} "{{ .Values.dataadminHTTPScheme | lower }}://{{ .Values.ingress.host }}:{{ .Values.ingress.port }}" {{ end }}],
+  "locking" : {
+    "ttlSeconds" : 300
+  },
+  "uiCustomization" : {
+    "previewWhitelistUrls" : {
+      "^(https?://)?www\\.youtube(-nocookie)?\\.com/embed/.*" : "<iframe class=\"cboxIframe view-server-page\" allow=\"autoplay; encrypted-media\" allowfullscreen src=\"<%-reference%>\">",
+      "^(https?://)?www\\.facebook\\.com/plugins/.*" : "<iframe class=\"cboxIframe view-server-page\" allow=\"autoplay; encrypted-media\" allowfullscreen src=\"<%-reference%>\">",
+      "^(https?://)?video\\.xx\\.fbcdn\\.net/.*" : "<iframe class=\"cboxIframe view-server-page\" allow=\"autoplay; encrypted-media\" allowfullscreen src=\"<%-reference%>\">",
+      "^(https?:\\/\\/)?www.youtube.com\\/watch(.*?)[?&]v=([^&?]+)(.*)" : "<iframe class=\"cboxIframe view-server-page\" allow=\"autoplay; encrypted-media\" allowfullscreen src=\"https://www.youtube-nocookie.com/embed/<%-match[3]%>?<%-match[2]%><%-match[4]%>\">"
+    },
+    "listViewPagingSize" : 6
+  },
+  "view" : {
+    "connector" : {
+      "protocol" : {{ .Values.dataadminHTTPScheme | quote }},
+      "host" : "localhost",
+      "port" : "10000",
+      "indexProtocol" : {{ .Values.dataadminHTTPScheme | quote }},
+      "indexPort" : null,
+      "serviceProtocol" : {{ .Values.dataadminHTTPScheme | quote }},
+      "servicePort" : null
+    },
+    "referenceField" : "DREREFERENCE",
+    "viewingMode" : "CONNECTOR",
+    "serviceProtocol" : {{ .Values.dataadminHTTPScheme | quote }},
+    "protocol" : {{ .Values.dataadminHTTPScheme | quote }},
+    "host" : {{ .Values.view.name | quote }},
+    "port" : {{ .Values.view.aciPort | int }}
+  },
+  "agentstore" : {
+    "enabled" : true,
+    "distributed" : false,
+    "dah" : {
+      "protocol" : {{ .Values.dataadminHTTPScheme | quote }},
+      "host" : "",
+      "port" : 9160,
+      "indexProtocol" : {{ .Values.dataadminHTTPScheme | quote }},
+      "indexPort" : null,
+      "serviceProtocol" : {{ .Values.dataadminHTTPScheme | quote }},
+      "servicePort" : null
+    },
+    "dih" : {
+      "protocol" : {{ .Values.dataadminHTTPScheme | quote }},
+      "host" : "",
+      "port" : 9170,
+      "indexProtocol" : {{ .Values.dataadminHTTPScheme | quote }},
+      "indexPort" : null,
+      "serviceProtocol" : {{ .Values.dataadminHTTPScheme | quote }},
+      "servicePort" : null
+    },
+    "standard" : {
+      "protocol" : {{ .Values.dataadminHTTPScheme | quote }},
+      "host" : {{ .Values.qms.agentStoreName | quote }},
+      "port" : {{ .Values.qms.agentStoreACIPort | int }},
+      "indexProtocol" : {{ .Values.dataadminHTTPScheme | quote }},
+      "indexPort" : {{ .Values.qms.singleAgentstore.indexPort | int}},
+      "serviceProtocol" : {{ .Values.dataadminHTTPScheme | quote }},
+      "servicePort" : {{ .Values.qms.singleAgentstore.servicePort | int}}
+    }
+  },
+  "content" : {
+    "distributed" : {{ .Values.dataadminDistributed }},
+    "standard" : {
+      "protocol" : {{ .Values.dataadminHTTPScheme | quote }},
+      "host" : {{ .Values.queryserviceName | quote }},
+      "port" : {{ .Values.queryserviceACIPort | int }},
+      "indexProtocol" : {{ .Values.dataadminHTTPScheme | quote }},
+      "indexPort" : {{ .Values.queryserviceIndexPort | int }},
+      "serviceProtocol" : {{ .Values.dataadminHTTPScheme | quote }},
+      "servicePort" : {{ .Values.queryserviceServicePort | int }}
+    },
+    "dih" : {
+      "protocol" : {{ .Values.dataadminHTTPScheme | quote }},
+      "host" : {{ .Values.indexserviceName | quote }},
+      "port" : {{ .Values.indexserviceACIPort | int }},
+      "indexProtocol" : {{ .Values.dataadminHTTPScheme | quote }},
+      "indexPort" : null,
+      "serviceProtocol" : {{ .Values.dataadminHTTPScheme | quote }},
+      "servicePort" : null
+    },
+    "dah" : {
+      "protocol" : {{ .Values.dataadminHTTPScheme | quote }},
+      "host" : {{ .Values.queryserviceName | quote }},
+      "port" : {{ .Values.queryserviceACIPort | int }},
+      "indexProtocol" : {{ .Values.dataadminHTTPScheme | quote }},
+      "indexPort" : null,
+      "serviceProtocol" : {{ .Values.dataadminHTTPScheme | quote }},
+      "servicePort" : null
+    }
+  },
+  "referenceField" : "DREREFERENCE",
+  "synonymRootPrefix" : "/DOCUMENT/",
+  "qms" : {
+    "server" : {
+      "protocol" : {{ .Values.dataadminHTTPScheme | quote }},
+      "host" : {{ .Values.qms.name | quote }},
+      "port" : {{ .Values.qms.aciPort | int }},
+      "indexProtocol" : {{ .Values.dataadminHTTPScheme | quote }},
+      "indexPort" : null,
+      "serviceProtocol" : {{ .Values.dataadminHTTPScheme | quote }},
+      "servicePort" : null
+    },
+    "synonymDatabaseMatch" : true,
+    "blacklist" : "ISO_BLACKLIST",
+    "typeAheadMode" : "Index",
+    "enabled" : true
+  },
+  "statsServer" : {
+    "protocol" : {{ .Values.dataadminHTTPScheme | quote }},
+    "host" : {{ .Values.statsserver.name | quote }},
+    "port" : {{ .Values.statsserver.aciPort | quote }},
+    "productType" : [ "IDOLPROXY", "DAH", "STATS" ],
+    "enabled" : true
+  },
+  "login" : {
+    "name" : "CommunityAuthentication",
+    "defaultLogin" : {
+      "username" : null,
+      "password" : null
+    },
+    "community" : {
+      "protocol" : {{ .Values.dataadminHTTPScheme | quote }},
+      "host" : {{ .Values.community.name | quote }},
+      "port" : {{ .Values.community.aciPort | int }},
+      "indexProtocol" : {{ .Values.dataadminHTTPScheme | quote }},
+      "indexPort" : null,
+      "serviceProtocol" : {{ .Values.dataadminHTTPScheme | quote }},
+      "servicePort" : null
+    },
+    "method" : {{ .Values.dataadminLoginMethod | quote }}
+  },
+  "answerServer" : {
+    "server" : {
+      "protocol" : {{ .Values.dataadminHTTPScheme | quote }},
+      "host" : {{ .Values.answerserver.name | quote }},
+      "port" : {{ .Values.answerserver.aciPort | int }},
+      "indexProtocol" : {{ .Values.dataadminHTTPScheme | quote }},
+      "indexPort" : null,
+      "serviceProtocol" : {{ .Values.dataadminHTTPScheme | quote }},
+      "servicePort" : null
+    },
+    "systemNames" : [ "AnswerBank" ],
+    "enabled" : true,
+    "conversationSystemName" : null,
+    "conceptualMinScore" : 10.0
+  },
+  "searchEngine" : {
+    "searchEngineString" : null,
+    "enabled" : false
+  },
+  "answerBankConceptualMinScore" : 10.0,
+  "combineMethod" : "Simple"
+}

@@ -1,0 +1,35 @@
+{{ template "chart.header" . }}
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{- $component := "statsserver" }}
+{{- $appVersion := .AppVersion }}
+{{- $versionList := slice (splitList "." $appVersion) 0 2 }}
+
+{{- $docsLink := printf "https://www.microfocus.com/documentation/idol/knowledge-discovery-%s/QMS_%s_Documentation/Help/Content/Appendixes/%s" 
+  (join "." $versionList ) (join "." $versionList) $component}}
+
+Provides a Knowledge Discovery {{ $component }} deployment. This provides statistics about interactions with other Knowledge Discovery components.
+
+Depends on connections to:
+
+- Knowledge Discovery LicenseServer (`licenseServerHostname`)
+
+The config file can be overridden via `existingConfigMap`.
+
+This chart provides an `idol-statsserver` system. 
+
+> Full documentation for statsserver available from <{{ $docsLink }}>
+
+{{ template "chart.homepageLine" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.requirementsSection" . }}
+
+{{ template "chart.valuesSection" . }}
+
+{{ template "helm-docs.versionFooter" . }}

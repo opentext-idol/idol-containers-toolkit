@@ -8,14 +8,3 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ .Release.Name }}-idol-config
-  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values) | nindent 4 }}
-data:
-  {{- $ctx := . }}
-  {{- range tuple "find_config.json"}}
-  {{ . }}: |-
-{{ tpl (. | print "resources/" | $ctx.Files.Get) $ctx | indent 4 }}
-  {{- end }}

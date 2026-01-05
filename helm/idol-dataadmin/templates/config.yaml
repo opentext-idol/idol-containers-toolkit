@@ -15,7 +15,17 @@ metadata:
   labels: {{- include "idol-library.labels" (dict "root" . "component" .Values) | nindent 4 }}
 data:
   {{- $ctx := . }}
-  {{- range tuple "find_config.json"}}
-  {{ . }}: |-
+  {{- range tuple "dataadmin_config.json"}}
+  config.json: |-
 {{ tpl (. | print "resources/" | $ctx.Files.Get) $ctx | indent 4 }}
   {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: idol-dataadmin-community-poststart-scripts
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values) | nindent 4 }}
+data:
+  002_add_default_dataadmin_users.sh: |
+{{ tpl (print "resources/community/add_users.sh" | .Files.Get) . | indent 4 }}
+

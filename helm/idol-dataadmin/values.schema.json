@@ -1,0 +1,223 @@
+{
+    "$schema": "https://json-schema.org/draft-07/schema#",
+    "title": "Values",
+    "type": "object",
+    "properties": {
+        "idolImageRegistry": {
+            "type": "string",
+            "minLength": 1
+        },
+        "idolVersion": {
+            "type": "string",
+            "minLength": 1
+        },
+        "ingress": {
+            "type":"object",
+                    "properties":{
+                        "port": {
+                            "$ref": "#/$defs/port_number"
+                        }
+                    },
+                    "required":[
+                    ],
+                    "allOf":[
+                        {"$ref":"#/$defs/ingressCommon"}
+                    ],
+                    "unevaluatedProperties": false
+        },
+        "imagePullSecrets": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "string",
+                "minLength": 1
+            }
+        },
+        "dataadminDistributed": {
+            "type": "boolean"
+        },
+        "queryserviceName": {
+            "type": "string",
+            "format": "hostname"
+        },
+        "queryserviceACIPort": {
+            "$ref": "#/$defs/port_number"
+        },
+        "queryserviceIndexPort": {
+            "$ref": "#/$defs/port_number"
+        },
+        "queryserviceServicePort": {
+            "$ref": "#/$defs/port_number"
+        },
+        "indexserviceName": {
+            "type": "string",
+            "format": "hostname"
+        },
+        "indexserviceACIPort": {
+            "$ref": "#/$defs/port_number"
+        },
+        "webappPortName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "dataadminIngressName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "dataadminUsername": {
+            "type": "string",
+            "minLength": 1
+        },
+        "dataadminPassword": {
+            "type": "string",
+            "minLength": 1
+        },
+        "dataadminUIName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "dataadminUIImage": {
+            "type": "string",
+            "minLength": 1
+        },
+        "dataadminUIPort": {
+            "$ref": "#/$defs/port_number"
+        },
+        "dataadminHTTPScheme": {
+            "type": "string",
+            "minLength": 1
+        },
+        "dataadminLoginMethod": {
+            "type": "string",
+            "minLength": 1
+        },
+        "dataadminUILivenessProbe": {
+            "allOf": [{"$ref": "#/$defs/liveness_probe"}],
+            "properties": {
+                "path": {
+                    "type": "string"
+                }
+            },
+            "required": ["path"]
+        }
+    },
+    "required": [
+        "idolImageRegistry",
+        "idolVersion",
+        "ingress",
+        "imagePullSecrets",
+        "queryserviceName",
+        "queryserviceACIPort",
+        "queryserviceIndexPort",
+        "queryserviceServicePort",
+        "indexserviceName",
+        "indexserviceACIPort",
+        "webappPortName",
+        "dataadminIngressName",
+        "dataadminEndpointName",
+        "dataadminUsername",
+        "dataadminPassword",
+        "dataadminUIName",
+        "dataadminUIImage",
+        "dataadminUIPort",
+        "dataadminHTTPScheme",
+        "dataadminLoginMethod",
+        "dataadminUILivenessProbe"
+    ],
+
+    "$defs": {
+        "port_number": {
+            "type": "string",
+            "pattern": "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$"
+        },
+        "liveness_probe": {
+            "type": "object",
+            "properties": {
+                "initialDelaySeconds": {
+                    "type": "integer"
+                },
+                "timeoutSeconds": {
+                    "type": "integer"
+                },
+                "periodSeconds": {
+                    "type": "integer"
+                },
+                "failureThreshold": {
+                    "type": "integer"
+                }
+            }
+        },
+        "optional_duration":{
+            "type": "string",
+            "pattern": "^(([0-9]{1,5}(h|m|s|ms)){1,4})?$"
+        },
+        "gateway": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "requestTimeout": {
+                    "$ref": "#/$defs/optional_duration"
+                },
+                "backendTimeout": {
+                    "$ref": "#/$defs/optional_duration"
+                },
+                "protocol": {
+                    "type": "string",
+                    "enum": ["http","https"]
+                }
+            }
+        },
+        "ingressCommon":{
+            "type": "object",
+            "properties":{
+                "enabled": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": ["nginx","haproxy","gateway"]
+                },
+                "className": {
+                    "type": "string"
+                },
+                "gateway": {
+                    "$ref": "#/$defs/gateway"
+                },
+                "proxyBodySize":{
+                    "type":"string",
+                    "pattern": "^\\d+(?:\\.\\d+)?(?:Ki|Mi|Gi|Ti|Pi|Ei|m|k|M|G|T|P|E)?$"
+                },
+                "tls":{
+                    "$ref": "#/$defs/ingressTLS"
+                }
+            },
+            "required":[
+                "enabled",
+                "type",
+                "tls"
+            ]
+        },
+        "ingressTLS":{
+            "type": "object",
+            "properties":{
+                "secretName": {
+                    "type": "string"
+                },
+                "crt": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                }
+            },
+            "required":[
+                "secretName"
+            ]
+        }
+    }
+}

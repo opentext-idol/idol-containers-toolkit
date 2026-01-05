@@ -1,0 +1,54 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023-2024 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+
+apiVersion: v2
+name: idol-dataadmin
+version: 0.1.0
+appVersion: "25.4"
+description: An IDOL setup for a data-admin system
+dependencies:
+- name: idol-library
+  version: ~0.15.0
+  repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+- name: idol-licenseserver
+  condition: idol-licenseserver.enabled
+  version: "~0.5.0"
+  repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+- alias: content
+  name: single-content
+  condition: content.enabled
+  version: "~0.11.0"
+  repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+- alias: answerserver
+  name: idol-answerserver
+  condition: answerserver.enabled
+  version: "~0.5.0"
+  repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+- alias: qms
+  name: idol-qms
+  condition: qms.enabled
+  version: "~0.7.0"
+  repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+- alias: view
+  name: idol-view
+  condition: view.enabled
+  version: "~0.8.0"
+  repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+- alias: community
+  name: idol-community
+  condition: community.enabled
+  version: "~0.7.0"
+  repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+- alias: statsserver
+  name: idol-statsserver
+  condition: statsserver.enabled
+  version: "~0.1.0"
+  repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
