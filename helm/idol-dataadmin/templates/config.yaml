@@ -1,0 +1,31 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-idol-config
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values) | nindent 4 }}
+data:
+  {{- $ctx := . }}
+  {{- range tuple "dataadmin_config.json"}}
+  config.json: |-
+{{ tpl (. | print "resources/" | $ctx.Files.Get) $ctx | indent 4 }}
+  {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: idol-dataadmin-community-poststart-scripts
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values) | nindent 4 }}
+data:
+  002_add_default_dataadmin_users.sh: |
+{{ tpl (print "resources/community/add_users.sh" | .Files.Get) . | indent 4 }}
+
