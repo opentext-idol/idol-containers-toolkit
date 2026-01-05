@@ -13,5 +13,5 @@
     "component" .Values
     "destination" "idolcommunity.service") }}
 {{- define "idolcommunity.service" -}}
-{{/* Any specific merges to base template go here */}}
+{{/* Any Community specific merges to base template go here */}}
 {{- end -}}
