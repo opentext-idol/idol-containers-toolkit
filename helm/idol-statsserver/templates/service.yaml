@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2023-2024 Open Text.
+# Copyright 2026 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -11,6 +11,7 @@
 {{ include "idol-library.aciserver.service" (dict 
     "root" .
     "component" .Values
+    "ports" (list (dict "port" (int .Values.eventPort) "targetPort" "event-port" "name" "event-port"))
     "destination" "idolstatsserver.service") }}
 {{- define "idolstatsserver.service" -}}
 {{/* Any Statistics Server specific merges to base template go here */}}
