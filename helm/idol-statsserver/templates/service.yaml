@@ -11,8 +11,13 @@
 {{ include "idol-library.aciserver.service" (dict 
     "root" .
     "component" .Values
-    "ports" (list (dict "port" (int .Values.eventPort) "targetPort" "event-port" "name" "event-port"))
+    "ports" (fromYamlArray (include "idolstatsserver.customports" .))
     "destination" "idolstatsserver.service") }}
 {{- define "idolstatsserver.service" -}}
 {{/* Any Statistics Server specific merges to base template go here */}}
+{{- end -}}
+{{- define "idolstatsserver.customports" -}}
+- port: {{ .Values.eventPort | int }}
+  targetPort: event-port
+  name: event-port
 {{- end -}}
