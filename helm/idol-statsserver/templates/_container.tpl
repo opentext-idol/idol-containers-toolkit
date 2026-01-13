@@ -24,6 +24,7 @@
   "component" $component
   "source" "idol-library.aciserver.container.base.v1"
   "destination" "idolstatsserver.container.base" 
+  "volumeMounts" (list (dict "name" "index" "mountPath" "/statsserver/main" "subPath" "main"))
 ) -}}
 {{- /* END of idolacitest.container */ -}}
 {{- end -}}
