@@ -34,9 +34,9 @@ global:
 
 idolImage:
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
-  registry: "idol-docker-images.svsartifactory.swinfra.net"
+  registry: "microfocusidolserver"
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
-  version: "25.4"
+  version: "26.1"
   # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
   repo: "statsserver"
   # -- used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy)
@@ -201,5 +201,4 @@ livenessProbe:
 ##### SUB-CHART VARIABLES #####
 idol-licenseserver:
   # -- whether to deploy the idol-licenseserver sub-chart
-  enabled: true
-  licenseServerExternalName: "cbgdevdish.swinfra.net"
+  enabled: false
