@@ -48,6 +48,17 @@ annotations: {}
 # -- Additional labels applied to all objects (https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/)
 labels: {}
 
+# statsServerVolumeSize -- Size of the PersistentVolumeClaim that is created
+# for each StatsServer instance. The Kubernetes cluster will need to provide
+# enough PersistentVolumes to satisfy the claims made for the desired number
+# of StatsServer instances.
+statsServerVolumeSize: 1Gi
+
+# statsServerStorageClass -- Name of the storage class used to provision a PersistentVolume
+# for each StatsServer instance.
+# The associated PVCs are named state-{name}-{pod number}
+statsServerStorageClass: "idol-statsserver-storage-class"
+
 # -- whether aci/service/index ports are configured to use TLS (https).
 # If configuring for TLS, then consider setting IDOL_SSL_COMPONENT_CERT_PATH and IDOL_SSL_COMPONENT_KEY_PATH in envConfigMap
 # to provide required TLS certificates
