@@ -12,7 +12,11 @@
     "root" .
     "component" .Values
     "ingress" .Values.ingress
-    "destination" "idolstatsserver.ingress")  -}}
+    "destination" "idolstatsserver.ingress"
+    "portmapping" (dict
+      "events-port" .Values.ingress.eventsPath
+      "aci-port" .Values.ingress.path
+      "service-port" .Values.ingress.servicePath ))  -}}
 {{- define "idolstatsserver.ingress" -}}
 {{/* Any Statistics Server specific merges to base template go here */}}
 {{- end -}}

@@ -146,6 +146,10 @@ ingress:
   # @section -- Ingress
   servicePath: "/statsserver/service/"
 
+  # -- Ingress controller path for events connections.
+  # @section -- Ingress
+  eventsPath: "/statsserver/events/"
+
   # -- Maximum allowed size of the client request body, defining
   # the maximum size of requests that can be made to IDOL components within the installation, e.g.
   # the amount of data sent in DREADDDATA index commands.
