@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2024-2025 Open Text.
+# Copyright 2026 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -194,6 +194,8 @@ workingDir: "/statsserver"
 aciPort: "19870"
 # servicePort -- port service will serve service connections on
 servicePort: "19872"
+# eventPort -- port service will receive event connections on
+eventPort: "19871"
 # livenessProbe -- container livenessProbe settings
 livenessProbe:
   initialDelaySeconds: 120
