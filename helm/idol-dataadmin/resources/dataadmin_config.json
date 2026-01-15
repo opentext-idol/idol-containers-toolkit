@@ -24,7 +24,7 @@
       "servicePort" : null
     },
     "referenceField" : "DREREFERENCE",
-    "viewingMode" : "CONNECTOR",
+    "viewingMode" : "UNIVERSAL",
     "serviceProtocol" : {{ .Values.dataadminHTTPScheme | quote }},
     "protocol" : {{ .Values.dataadminHTTPScheme | quote }},
     "host" : {{ .Values.view.name | quote }},
