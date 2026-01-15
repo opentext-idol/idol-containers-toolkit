@@ -18,6 +18,6 @@
 {{- end -}}
 {{- define "idolstatsserver.customports" -}}
 - port: {{ .Values.eventPort | int }}
-  targetPort: event-port
-  name: event-port
+  targetPort: events-port
+  name: events-port
 {{- end -}}
