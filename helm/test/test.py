@@ -32,6 +32,21 @@ class TestIdolOmniGroupServer(AciTestBase, StatefulSetTests, unittest.TestCase):
 class TestIdolQms(AciTestBase, unittest.TestCase):
     chartpath = os.path.join('..','idol-qms')
 
+class TestIdolStatsServer(AciTestBase, unittest.TestCase):
+    chartpath = os.path.join('..','idol-statsserver')
+    _kinds = ['StatefulSet','Ingress','ConfigMap','Service']
+
+    def test_events_port(self):
+        ''' Events port is created in Service '''
+        objs = self.render_chart( {} )
+        svc = objs.get('Service', {}).get(self.name(), None)
+        self.assertIsNotNone(svc)
+        events_port = None
+        for p in svc['spec']['ports']:
+            if p.get('name','') == 'events-port':
+                events_port = p['targetPort']
+        self.assertIsNotNone(events_port)
+
 class TestIdolView(AciTestBase, unittest.TestCase):
     chartpath = os.path.join('..','idol-view')
     _kinds = ['Deployment','Ingress','ConfigMap','Service']
