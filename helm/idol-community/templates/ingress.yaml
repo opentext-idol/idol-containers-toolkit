@@ -14,5 +14,5 @@
     "ingress" .Values.ingress
     "destination" "idolcommunity.ingress")  -}}
 {{- define "idolcommunity.ingress" -}}
-{{/* Any View specific merges to base template go here */}}
+{{/* Any Community specific merges to base template go here */}}
 {{- end -}}

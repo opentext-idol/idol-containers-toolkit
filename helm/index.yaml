@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2023-2025 Open Text.
+# Copyright 2023-2026 Open Text.
 #
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -3251,6 +3251,24 @@ entries:
     urls:
     - release/idol-stack-0.1.0.tgz
     version: 0.1.0
+  idol-statsserver:
+  - apiVersion: v2
+    appVersion: "26.1"
+    created: "2026-01-16T17:00:28.853338277Z"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: ~0.16.0
+    - condition: idol-licenseserver.enabled
+      name: idol-licenseserver
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: ~0.5.0
+    description: Adds Knowledge Discovery Statistics Server
+    digest: 4ce7bf06e1ab2c2b1276318fb2a1633049686660c83124f32c78ed2adc0d45e6
+    name: idol-statsserver
+    urls:
+    - release/idol-statsserver-0.1.0.tgz
+    version: 0.1.0
   idol-view:
   - apiVersion: v2
     appVersion: "26.1"
@@ -3732,4 +3750,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2025-12-22T16:37:32.810147273Z"
+generated: "2026-01-16T17:00:28.85229017Z"

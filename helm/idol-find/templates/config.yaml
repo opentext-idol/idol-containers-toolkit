@@ -15,7 +15,7 @@ metadata:
   labels: {{- include "idol-library.labels" (dict "root" . "component" .Values) | nindent 4 }}
 data:
   {{- $ctx := . }}
-  {{- range tuple "agentstore.cfg" "community.cfg" "find_config.json" "view.cfg" }}
+  {{- range tuple "find_config.json"}}
   {{ . }}: |-
 {{ tpl (. | print "resources/" | $ctx.Files.Get) $ctx | indent 4 }}
   {{- end }}

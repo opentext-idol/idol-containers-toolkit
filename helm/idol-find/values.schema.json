@@ -183,6 +183,9 @@
                     "type": "string",
                     "enum": ["nginx","haproxy","gateway"]
                 },
+                "host": {
+                    "type": "string"
+                },
                 "className": {
                     "type": "string"
                 },

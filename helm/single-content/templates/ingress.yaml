@@ -14,5 +14,5 @@
     "ingress" .Values.ingress
     "destination" "single-content.ingress")  -}}
 {{- define "single-content.ingress" -}}
-{{/* Any View specific merges to base template go here */}}
+{{/* Any Content specific merges to base template go here */}}
 {{- end -}}
