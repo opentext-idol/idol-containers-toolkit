@@ -130,6 +130,9 @@
                 "servicePath": {
                     "type": "string"
                 },
+                "eventsPath": {
+                    "type": "string"
+                },
                 "tls": {
                     "$ref": "#/$defs/ingressTLS"
                 }
@@ -223,10 +226,19 @@
                 "name": {
                     "$ref": "#/$defs/required_string"
                 },
+                "statsServerVolumeSize":{
+                    "$ref": "#/$defs/volume_size"
+                },
+                "statsServerStorageClass": {
+                    "$ref": "#/$defs/required_string"
+                },
                 "aciPort": {
                     "$ref": "#/$defs/port_number"
                 },
                 "servicePort": {
+                    "$ref": "#/$defs/port_number"
+                },
+                "eventPort": {
                     "$ref": "#/$defs/port_number"
                 },
                 "livenessProbe": {

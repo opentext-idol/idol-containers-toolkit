@@ -1,5 +1,5 @@
 # BEGIN COPYRIGHT NOTICE
-# Copyright 2024-2025 Open Text.
+# Copyright 2026 Open Text.
 # 
 # The only warranties for products and services of Open Text and its affiliates and licensors
 # ("Open Text") are as may be set forth in the express warranty statements accompanying such
@@ -11,11 +11,11 @@
 apiVersion: v2
 name: idol-statsserver
 version: "0.1.0"
-appVersion: "25.4"
+appVersion: "26.1"
 description: Adds Knowledge Discovery Statistics Server
 dependencies:
 - name: idol-library
-  version: ~0.15.0
+  version: ~0.16.0
   repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
 - name: idol-licenseserver
   condition: idol-licenseserver.enabled
