@@ -11,7 +11,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Release.Name }}-idol-config
+  name: {{ .Release.Name }}-idol-dataadmin-config
   labels: {{- include "idol-library.labels" (dict "root" . "component" .Values) | nindent 4 }}
 data:
   {{- $ctx := . }}

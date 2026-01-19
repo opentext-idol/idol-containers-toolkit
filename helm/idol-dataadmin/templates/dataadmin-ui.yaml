@@ -49,8 +49,8 @@ spec:
         - {{ printf "curl \"http://%s:%d/a=getpid\"" .Values.community.name (.Values.community.aciPort | int) }}
       containers:
       - name: {{ .Values.dataadminUIName }}
-        image: {{ .Values.idolImageRegistry }}/{{ .Values.dataadminUIImage }}:{{ .Values.idolVersion }}
-        imagePullPolicy: IfNotPresent
+        image: {{ include "idol-library.idolImage" (dict "root" $root "idolImage" $component.idolImage) }}
+        imagePullPolicy: {{ default (default "IfNotPresent" $component.idolImage.imagePullPolicy) $root.Values.global.imagePullPolicy | quote }}
         ports:
         - containerPort: {{ .Values.dataadminUIPort | int }}
           name: {{ .Values.webappPortName }}
@@ -66,4 +66,4 @@ spec:
       volumes:
       - name: config-map
         configMap:
-          name: {{ .Release.Name }}-idol-config
+          name: {{ .Release.Name }}-idol-dataadmin-config
