@@ -55,7 +55,7 @@ idolImage:
   # -- used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy)
   imagePullPolicy: "IfNotPresent"
 
-# -- if specified, mounted at /etc/config/idol and expected to provide dataadmin_config.json
+# -- if specified, mounted at /opt/dataadmin/home/ and expected to provide config.json
 existingConfigMap: ""
 
 ################################

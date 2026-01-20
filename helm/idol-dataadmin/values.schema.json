@@ -3,6 +3,9 @@
     "title": "Values",
     "type": "object",
     "properties": {
+        "existingConfigMap": {
+            "type": "string"
+        },
         "idolImageRegistry": {
             "type": "string",
             "minLength": 1

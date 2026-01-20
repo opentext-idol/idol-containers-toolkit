@@ -8,10 +8,11 @@
 # The information contained herein is subject to change without notice.
 #
 # END COPYRIGHT NOTICE
+{{- if not .Values.existingConfigMap }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Release.Name }}-idol-dataadmin-config
+  name: idol-dataadmin-default-cfg
   labels: {{- include "idol-library.labels" (dict "root" . "component" .Values) | nindent 4 }}
 data:
   {{- $ctx := . }}
@@ -19,6 +20,7 @@ data:
   config.json: |-
 {{ tpl (. | print "resources/" | $ctx.Files.Get) $ctx | indent 4 }}
   {{- end }}
+{{- end -}}
 ---
 apiVersion: v1
 kind: ConfigMap
