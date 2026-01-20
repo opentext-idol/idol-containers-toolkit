@@ -1,0 +1,42 @@
+{{ template "chart.header" . }}
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{- $component := "DataAdmin" }}
+{{- $appVersion := .AppVersion }}
+{{- $versionList := slice (splitList "." $appVersion) 0 2 }}
+
+{{- $adminDocsLink := printf "https://www.microfocus.com/documentation/idol/knowledge-discovery-%s/%s_%s_Documentation/admin/" 
+  (join "." $versionList ) $component (join "." $versionList) }}
+
+{{- $userDocsLink := printf "https://www.microfocus.com/documentation/idol/knowledge-discovery-%s/%s_%s_Documentation/user/"
+  (join "." $versionList ) $component (join "." $versionList) }}
+
+Provides a Knowledge Discovery {{ $component }} UI deployment.
+
+Depends on connections to:
+
+- Knowledge Discovery LicenseServer (`idol-licenseserver.licenseServerExternalName`)
+- Knowledge Discovery Content (`queryserviceName`, `queryserviceACIPort`, `queryserviceIndexPort`)
+
+This chart deploys a Community and View instance and (a single) Content by default, as well as AnswerServer and QMS with agentstores. If you wish to use a distributed-idol deployment instead,
+set `dataadminDistributed`, disable `content.enabled` and set `indexserviceName` and `indexserviceACIPort` to appropriate values from the DIH.
+
+The config file can be overridden via `existingConfigMap`.
+
+This chart may be used to provide a user interface for managing data indexed into your Content components and optimizing search processes.
+
+> Full documentation for DataAdmin available from <{{ $adminDocsLink }}> and <{{ $userDocsLink }}>
+
+{{ template "chart.homepageLine" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.requirementsSection" . }}
+
+{{ template "chart.valuesSection" . }}
+
+{{ template "helm-docs.versionFooter" . }}
