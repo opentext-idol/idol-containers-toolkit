@@ -20,7 +20,7 @@ data:
   config.json: |-
 {{ tpl (. | print "resources/" | $ctx.Files.Get) $ctx | indent 4 }}
   {{- end }}
-{{- end -}}
+{{- end }}
 ---
 apiVersion: v1
 kind: ConfigMap

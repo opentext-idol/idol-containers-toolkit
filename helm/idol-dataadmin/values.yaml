@@ -165,6 +165,10 @@ dataadminUIPort: "8000"
 dataadminHTTPScheme: "HTTP"
 # Login method dataadmin should use
 dataadminLoginMethod: "autonomy"
+# nifiserviceName is an internal parameter to specify the NiFi service name.
+nifiserviceName: &nifi-service-name "idol-nifi"
+# list of ports for the NiFi service
+nifiserviceACIPort: &nifi-service-aci-port "11000"
 # overrides for liveness probe settings
 dataadminUILivenessProbe:
   path: "/p/overview"
@@ -229,4 +233,6 @@ view:
   enabled: true
   agentStoreName: *query-service-name
   agentStoreACIPort: *query-service-aci-port
+  nifiServiceName: *nifi-service-name
+  nifiServiceACIPort: *nifi-service-aci-port
 

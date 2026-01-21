@@ -27,7 +27,7 @@ spec:
 {{- include "idoldataadmin.dataadmin-ui.service" (dict
   "root" .
   "component" .Values
-) -}}
+) }}
 ---
 {{- define "idoldataadmin.dataadmin-ui.deployment" }}
 {{- $root := get . "root" | required "idoldataadmin.dataadmin-ui: missing root" }}
@@ -48,7 +48,7 @@ spec:
         app: {{ $component.dataadminUIName }}
     spec:
       imagePullSecrets:
-        {{- range $component.imagePullSecrets }}
+        {{- range $root.Values.global.imagePullSecrets }}
         - name: {{ . }}
         {{- end }}
       initContainers:
@@ -61,7 +61,7 @@ spec:
       containers:
       - name: {{ $component.dataadminUIName }}
         image: {{ include "idol-library.idolImage" (dict "root" $root "idolImage" $component.idolImage) }}
-        imagePullPolicy: {{ default (default "IfNotPresent" $component.idolImage.imagePullPolicy) $component.global.imagePullPolicy | quote }}
+        imagePullPolicy: {{ default (default "IfNotPresent" $component.idolImage.imagePullPolicy) $root.Values.global.imagePullPolicy | quote }}
         ports:
         - containerPort: {{ $component.dataadminUIPort | int }}
           name: {{ $component.webappPortName }}
