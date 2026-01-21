@@ -196,7 +196,7 @@ answerserver:
   passageExtractorAgentstoreHostname: &passageExtractorAgentstoreHostname "idol-passageextractor-agentstore"
   passageExtractorAgentstorePort: &passageExtractorAgentstorePort "12300"
   passageExtractorHostname: *query-service-name
-  passageExtractorACIPort: *query-service-aci-port
+  passageExtractorPort: *query-service-aci-port
   single-content:
     enabled: false
   postgresql:
@@ -233,6 +233,6 @@ view:
   enabled: true
   agentStoreName: *query-service-name
   agentStoreACIPort: *query-service-aci-port
-  nifiServiceName: *nifi-service-name
-  nifiServiceACIPort: *nifi-service-aci-port
+  nifiserviceName: *nifi-service-name
+  nifiserviceACIPort: *nifi-service-aci-port
 

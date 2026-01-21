@@ -50,10 +50,10 @@ This chart may be used to provide a user interface for managing data indexed int
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | answerserver.enabled | bool | `true` |  |
-| answerserver.passageExtractorACIPort | string | `"9060"` |  |
 | answerserver.passageExtractorAgentstoreHostname | string | `"idol-passageextractor-agentstore"` |  |
 | answerserver.passageExtractorAgentstorePort | string | `"12300"` |  |
 | answerserver.passageExtractorHostname | string | `"idol-query-service"` |  |
+| answerserver.passageExtractorPort | string | `"9060"` |  |
 | answerserver.postgresql.fullnameOverride | string | `"idol-factbank-postgres"` |  |
 | answerserver.postgresql.image.repository | string | `"bitnamilegacy/postgresql"` |  |
 | answerserver.single-content.enabled | bool | `false` |  |
@@ -121,8 +121,8 @@ This chart may be used to provide a user interface for managing data indexed int
 | view.agentStoreACIPort | string | `"9060"` |  |
 | view.agentStoreName | string | `"idol-query-service"` |  |
 | view.enabled | bool | `true` |  |
-| view.nifiServiceACIPort | string | `"11000"` |  |
-| view.nifiServiceName | string | `"idol-nifi"` |  |
+| view.nifiserviceACIPort | string | `"11000"` |  |
+| view.nifiserviceName | string | `"idol-nifi"` |  |
 | webappPortName | string | `"web-app"` |  |
 
 ----------------------------------------------
