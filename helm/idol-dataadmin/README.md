@@ -1,6 +1,6 @@
 # idol-dataadmin
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![AppVersion: 25.4](https://img.shields.io/badge/AppVersion-25.4-informational?style=flat-square)
+![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![AppVersion: 26.1](https://img.shields.io/badge/AppVersion-26.1-informational?style=flat-square)
 
 Provides a Knowledge Discovery DataAdmin UI deployment.
 
@@ -18,7 +18,7 @@ The config file can be overridden via `existingConfigMap`.
 
 This chart may be used to provide a user interface for managing data indexed into your Content components and optimizing search processes.
 
-> Full documentation for DataAdmin available from <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.4/DataAdmin_25.4_Documentation/admin/> and <https://www.microfocus.com/documentation/idol/knowledge-discovery-25.4/DataAdmin_25.4_Documentation/user/>
+> Full documentation for DataAdmin available from <https://www.microfocus.com/documentation/idol/knowledge-discovery-26.1/DataAdmin_26.1_Documentation/admin/> and <https://www.microfocus.com/documentation/idol/knowledge-discovery-26.1/DataAdmin_26.1_Documentation/user/>
 
 ## Requirements
 
