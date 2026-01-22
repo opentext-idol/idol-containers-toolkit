@@ -12,7 +12,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: idol-dataadmin-default-cfg
+  name: {{ .Values.name }}-default-cfg
   labels: {{- include "idol-library.labels" (dict "root" . "component" .Values) | nindent 4 }}
 data:
   {{- $ctx := . }}
@@ -25,7 +25,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: idol-dataadmin-community-poststart-scripts
+  name: {{ .Values.name }}-community-poststart-scripts
   labels: {{- include "idol-library.labels" (dict "root" . "component" .Values) | nindent 4 }}
 data:
   002_add_default_dataadmin_users.sh: |

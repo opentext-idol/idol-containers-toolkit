@@ -14,15 +14,15 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ $component.dataadminUIName }}
+  name: {{ $component.name }}
   labels: {{- include "idol-library.labels" (dict "root" $root "component" $component) | nindent 4 }}
 spec:
   ports:
   - port: {{ $component.dataadminUIPort | int }}
-    targetPort: {{ $component.webappPortName }}
-    name: {{ $component.webappPortName }}
+    targetPort: "web-app"
+    name: "web-app"
   selector:
-    app: {{ $component.dataadminUIName }}
+    app: {{ $component.name }}
 {{- end }}
 {{- include "idoldataadmin.dataadmin-ui.service" (dict
   "root" .
@@ -35,17 +35,17 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ $component.dataadminUIName }}
+  name: {{ $component.name }}
   labels: {{- include "idol-library.labels" (dict "root" $root "component" $component) | nindent 4 }}
 spec:
   replicas: {{ default 1 $component.dataadminUIReplicas | int }}
   selector:
     matchLabels:
-      app: {{ $component.dataadminUIName }}
+      app: {{ $component.name }}
   template:
     metadata:
       labels: {{- include "idol-library.labels" (dict "root" $root "component" $component) | nindent 8 }}
-        app: {{ $component.dataadminUIName }}
+        app: {{ $component.name }}
     spec:
       imagePullSecrets:
         {{- range $root.Values.global.imagePullSecrets }}
@@ -59,12 +59,12 @@ spec:
         - -c 
         - {{ printf "curl \"http://%s:%d/a=getpid\"" $component.community.name ($component.community.aciPort | int) }}
       containers:
-      - name: {{ $component.dataadminUIName }}
+      - name: {{ $component.name }}
         image: {{ include "idol-library.idolImage" (dict "root" $root "idolImage" $component.idolImage) }}
         imagePullPolicy: {{ default (default "IfNotPresent" $component.idolImage.imagePullPolicy) $root.Values.global.imagePullPolicy | quote }}
         ports:
         - containerPort: {{ $component.dataadminUIPort | int }}
-          name: {{ $component.webappPortName }}
+          name: "web-app"
           protocol: TCP
         volumeMounts:
         - name: config-map
@@ -77,7 +77,7 @@ spec:
       volumes:
       - name: config-map
         configMap:
-          name: {{ default "idol-dataadmin-default-cfg" $component.existingConfigMap }}
+          name: {{ default (printf "%s-default-cfg" $component.name) $component.existingConfigMap }}
 {{- end }}
 {{- include "idoldataadmin.dataadmin-ui.deployment" (dict
   "root" .

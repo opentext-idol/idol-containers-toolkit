@@ -84,6 +84,9 @@ ingress:
   # For Kubernetes-in-Docker, this may be different to the container ingress port.
   port: ""
 
+   # -- Ingress controller path for connections.
+  path: "dataadmin"
+
   # Maximum allowed size of the client request body, defining
   # the maximum size of requests that can be made to IDOL components within the installation, e.g.
   # the amount of data sent in DREADDDATA index commands.
@@ -146,19 +149,11 @@ indexserviceName: &index-service-name "idol-index-service"
 # the indexservice port, only has an effect if dataadminDistributed is true.
 indexserviceACIPort: &index-service-aci-port "9070"
 
-# name of port to use for Web Application servers
-webappPortName: "web-app"
-
-# dataadminIngressName is an internal parameter to specify the IDOL ingress name.
-dataadminIngressName: "idol-dataadmin-ingress"
-# dataadminEndpointName is an internal parameter to specify the URL path to proxy dataadmin.
-dataadminEndpointName: "dataadmin"
-
 dataadminUsername: "admin"
 dataadminPassword: "admin"
 
-# dataadmin UI internal name parameter
-dataadminUIName: "idol-dataadmin"
+# name of the dataadmin deployment
+name: "idol-dataadmin"
 # dataadmin UI port number
 dataadminUIPort: "8000"
 # URL scheme dataadmin should use

@@ -56,23 +56,11 @@
         "indexserviceACIPort": {
             "$ref": "#/$defs/port_number"
         },
-        "webappPortName": {
-            "type": "string",
-            "minLength": 1
-        },
-        "dataadminIngressName": {
-            "type": "string",
-            "minLength": 1
-        },
         "dataadminUsername": {
             "type": "string",
             "minLength": 1
         },
         "dataadminPassword": {
-            "type": "string",
-            "minLength": 1
-        },
-        "dataadminUIName": {
             "type": "string",
             "minLength": 1
         },
@@ -95,6 +83,10 @@
                 }
             },
             "required": ["path"]
+        },
+        "name": {
+            "type": "string",
+            "minLength": 1
         }
     },
     "required": [
@@ -107,16 +99,13 @@
         "queryserviceServicePort",
         "indexserviceName",
         "indexserviceACIPort",
-        "webappPortName",
-        "dataadminIngressName",
-        "dataadminEndpointName",
         "dataadminUsername",
         "dataadminPassword",
-        "dataadminUIName",
         "dataadminUIPort",
         "dataadminHTTPScheme",
         "dataadminLoginMethod",
-        "dataadminUILivenessProbe"
+        "dataadminUILivenessProbe",
+        "name"
     ],
 
     "$defs": {
@@ -226,6 +215,9 @@
                     "type": "boolean"
                 },
                 "host": {
+                    "type": "string"
+                },
+                "path": {
                     "type": "string"
                 },
                 "type": {

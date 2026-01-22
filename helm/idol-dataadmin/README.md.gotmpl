@@ -15,11 +15,6 @@
 
 Provides a Knowledge Discovery {{ $component }} UI deployment.
 
-Depends on connections to:
-
-- Knowledge Discovery LicenseServer (`idol-licenseserver.licenseServerExternalName`)
-- Knowledge Discovery Content (`queryserviceName`, `queryserviceACIPort`, `queryserviceIndexPort`)
-
 This chart deploys a Community and View instance and (a single) Content by default, as well as AnswerServer and QMS with agentstores. If you wish to use a distributed-idol deployment instead,
 set `dataadminDistributed`, disable `content.enabled` and set `indexserviceName` and `indexserviceACIPort` to appropriate values from the DIH.
 
