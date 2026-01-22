@@ -1063,7 +1063,7 @@ entries:
   idol-dataadmin:
   - apiVersion: v2
     appVersion: "26.1"
-    created: "2026-01-21T13:01:31.64262048Z"
+    created: "2026-01-22T12:27:45.81313035Z"
     dependencies:
     - name: idol-library
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
@@ -1103,7 +1103,7 @@ entries:
       repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
       version: ~0.1.0
     description: An IDOL setup for a data-admin system
-    digest: 06d3e273e6d40aaad4f2d9c86a0e78d34bba66b2432b6c1e06bcd779467a3deb
+    digest: cb497df3d6edbfbd14724e06526fb0a0f84395124b9d85020650a9cc96a18603
     name: idol-dataadmin
     urls:
     - release/idol-dataadmin-0.1.0.tgz
@@ -3798,4 +3798,4 @@ entries:
     urls:
     - release/single-content-0.1.0.tgz
     version: 0.1.0
-generated: "2026-01-21T13:01:31.631508303Z"
+generated: "2026-01-22T12:27:45.798135282Z"
