@@ -1,0 +1,296 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+
+# As per https://helm.sh/docs/topics/charts/#the-chart-file-structure
+# this values.yaml file contains the default configuration values for this chart.
+# These default values can be overridden by using the --values or --set flags on the `helm install`
+# command: see https://helm.sh/docs/helm/helm_install/
+
+##### HIGH LEVEL CHART CONFIGURATION #####
+# This section contains parameters that are most likely to be overridden for
+# the basic choices and constraints around how this chart will be used.
+
+# LEFT INTENTIONALLY BLANK
+
+#############################################
+
+
+##### IMAGE CONFIGURATION #####
+# Parameters to specify the IDOL images pulled for this chart are
+# configured here
+
+global:
+  # -- Global override value for idolImage.registry
+  # @section -- Globals
+  idolImageRegistry: ""
+  # -- Global override value for idolImage.version
+  # @section -- Globals
+  idolVersion: ""
+  # -- Global secrets used to pull container images
+  # @section -- Globals
+  imagePullSecrets:
+  - "dockerhub-secret"
+  # -- Global override value for idolImage.imagePullPolicy, has no effect if it is empty or is removed
+  # @section -- Globals
+  imagePullPolicy: ""
+  # -- Optional Secret containing OEM licensekey.dat and versionkey.dat files for licensing
+  # @section -- Globals
+  idolOemLicenseSecret: ""
+
+idolImage:
+  # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
+  registry: "microfocusidolserver"
+  # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
+  version: "26.1"
+  # -- used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version}
+  repo: "dataadmin"
+  # -- used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy)
+  imagePullPolicy: "IfNotPresent"
+
+# -- if specified, mounted at /opt/dataadmin/home/ and expected to provide config.json
+existingConfigMap: ""
+
+################################
+
+
+##### NETWORKING CONFIGURATION #####
+# This section contains parameters to configure various network-related
+# properties in this chart.
+
+ingress:
+  # -- Create ingress resource
+  # @section -- Ingress
+  enabled: true
+
+  # -- Ingress controller type to setup for.
+  # Valid values are nginx or haproxy (used by OpenShift)
+  # @section -- Ingress
+  type: nginx
+
+  # -- Optional parameter to override the default ingress class
+  # @section -- Ingress
+  className: ""
+
+  # -- Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules).
+  # For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration)
+  # @section -- Ingress
+  host: ""
+
+  # -- The external port the ingress is exposed on.
+  # For Kubernetes-in-Docker, this may be different to the container ingress port.
+  # @section -- Ingress
+  port: ""
+
+  # -- Ingress controller path for connections.
+  # @section -- Ingress
+  path: "dataadmin"
+
+  # -- Maximum allowed size of the client request body, defining
+  # the maximum size of requests that can be made to IDOL components within the installation, e.g.
+  # the amount of data sent in DREADDDATA index commands.
+  # The value should be an nginx "size" value.
+  # See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the
+  # corresponding nginx configuration parameter.
+  # @section -- Ingress
+  proxyBodySize: 2048m
+
+  # -- Gateway settings (only applies if type is 'gateway')
+  # @section -- Ingress
+  gateway:
+    # -- Optional, name of the gateway to use for ingress
+    # @section -- Ingress
+    name: ""
+
+    # -- Optional, namespace of the gateway to use for ingress
+    # @section -- Ingress
+    namespace: ""
+
+    # -- Optional, request timeout for ingress route
+    # @section -- Ingress
+    requestTimeout: ""
+
+    # -- Optional, backend timeout for ingress route
+    # @section -- Ingress
+    backendTimeout: ""
+
+    # -- Forwarded protocol for ingress
+    # @section -- Ingress
+    protocol: "http"
+
+  # -- Whether ingress uses TLS. You must set an ingress host to use this. 
+  # See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls 
+  # @section -- Ingress
+  tls:
+    # -- The name of the secret for ingress TLS. Leave empty if not using TLS. 
+    # If specified then either this secret must already exist, or crt and key values must be provided and secret will be created.. 
+    # @section -- Ingress
+    secretName: ""
+
+    # -- Certificate data value to generate tls Secret (should be base64 encoded)
+    # @section -- Ingress
+    crt: ""
+
+    # -- Private key data value to generate tls Secret (should be base64 encoded)
+    # @section -- Ingress
+    key: ""
+
+#####################################
+
+
+##### INTERNAL VARIABLES #####
+# Values specified below this point in the file should not need to be overriden.
+# They are generally here in values.yaml so that DRY principles and a consistent
+# scheme for specifying these values in the templates can be followed.
+
+# -- Whether the query service is distributed or uses a single Content engine
+dataadminDistributed: false
+
+# -- queryserviceName is an internal parameter to specify the query service name.
+queryserviceName: &query-service-name "idol-query-service"
+# -- the queryservice port
+queryserviceACIPort: &query-service-aci-port "9060"
+# -- the queryservice index port, only has an effect if dataadminDistributed is false
+queryserviceIndexPort: &query-service-index-port "9061"
+# -- the queryservice service port, only has an effect if dataadminDistributed is false
+queryserviceServicePort: &query-service-service-port "9062"
+# -- indexserviceName is an internal parameter to specify the index service name, only has an effect if dataadminDistributed is true.
+indexserviceName: &index-service-name "idol-index-service"
+# -- the indexservice port, only has an effect if dataadminDistributed is true.
+indexserviceACIPort: &index-service-aci-port "9070"
+
+# -- Username used to login to the dataadmin UI
+dataadminUsername: "admin"
+# -- Password used to login to the dataadmin UI
+dataadminPassword: "admin"
+
+# -- The name of the dataadmin deployment
+# if this is changed, then the name of the idol-dataadmin-community-poststart-scripts configMap used by Community
+# should also be updated accordingly
+name: "idol-dataadmin"
+# -- dataadmin UI port number
+dataadminUIPort: "8000"
+# -- URL scheme dataadmin should use
+dataadminHTTPScheme: "HTTP"
+# -- Login method dataadmin should use
+dataadminLoginMethod: "autonomy"
+# -- nifiserviceName is an internal parameter to specify the NiFi service name.
+nifiserviceName: &nifi-service-name "idol-nifi"
+# -- list of ports for the NiFi service
+nifiserviceACIPort: &nifi-service-aci-port "11000"
+# -- overrides for liveness probe settings
+dataadminUILivenessProbe:
+  path: "/p/overview"
+  initialDelaySeconds: 300
+  timeoutSeconds: 10
+  periodSeconds: 30
+  failureThreshold: 5
+
+################################
+
+##### SUBCHART VALUES #####
+# -- `licenseserver` subchart values (see https://github.com/opentext-idol/idol-containers-toolkit/tree/main/helm/idol-licenseserver#values)
+# @default -- default configuration for Data Admin License Server
+idol-licenseserver:
+  # -- Whether to deploy an IDOL LicenseServer service abstraction
+  enabled: true
+  # -- The hostname of the IDOL LicenseServer (or abstraction)
+  licenseServerExternalName: "example.license.server"
+
+# -- `content` subchart values (see https://github.com/opentext-idol/idol-containers-toolkit/tree/main/helm/single-content#values)
+# @default -- default configuration for Data Admin Content
+content:
+  # -- Whether to enable an IDOL Content Server service
+  enabled: true
+  # -- port service will serve ACI connections on
+  aciPort: *query-service-aci-port
+  # -- port service will serve index connections on
+  indexPort: *query-service-index-port
+  # -- port service will serve service connections on
+  servicePort: *query-service-service-port
+
+# -- `answerserver` subchart values (see https://github.com/opentext-idol/idol-containers-toolkit/tree/main/helm/idol-answerserver#values)
+# @default -- default configuration for Data Admin Answer Server
+answerserver:
+  # -- Whether to enable an IDOL Answer Server service
+  enabled: true
+  # -- Configuration for [PassageExtractor]::AgentstoreHost
+  passageExtractorAgentstoreHostname: &passageExtractorAgentstoreHostname "idol-passageextractor-agentstore"
+  # -- Configuration for [PassageExtractor]::AgentstoreAciPort
+  passageExtractorAgentstorePort: &passageExtractorAgentstorePort "12300"
+  # -- Configuration for [PassageExtractor]::IdolHost
+  passageExtractorHostname: *query-service-name
+  # -- Configuration for [PassageExtractor]::IdolAciPort
+  passageExtractorPort: *query-service-aci-port
+  single-content:
+    # -- Whether to deploy the single-content subchart
+    enabled: false
+  # -- Postgresql subchart values (see https://github.com/bitnami/charts/tree/main/bitnami/postgresql)
+  # @default -- default configuration for FactBank PostgreSQL
+  postgresql:
+    fullnameOverride: "idol-factbank-postgres"
+    image:
+      repository: bitnamilegacy/postgresql
+
+# -- `community` subchart values (see https://github.com/opentext-idol/idol-containers-toolkit/tree/main/helm/idol-community#values)
+# @default -- default configuration for Data Admin Community Server
+community:
+  # -- Whether to enable an IDOL Community Server service
+  enabled: true
+  # -- Community agentstore service/hostname
+  agentStoreName: *passageExtractorAgentstoreHostname
+  # -- Community agentstore service ACI port
+  agentStoreACIPort: *passageExtractorAgentstorePort
+  # -- ConfigMap to add users used by Data Admin to Community
+  additionalVolumes:
+    poststart:
+      name: poststart
+      configMap:
+        name: idol-dataadmin-community-poststart-scripts
+  # -- PostStart script mount to add users used by Data Admin to Community
+  additionalVolumeMounts:
+    poststart:
+      name: poststart
+      mountPath: /community/poststart_scripts/002_add_default_dataadmin_users.sh
+      subPath: 002_add_default_dataadmin_users.sh
+
+# -- `QMS` subchart values (see https://github.com/opentext-idol/idol-containers-toolkit/tree/main/helm/idol-qms#values)
+# @default -- default configuration for Data Admin QMS
+qms:
+  # -- Whether to enable an IDOL QMS service
+  enabled: true
+  # -- Default configuration for [IDOL]::Host
+  queryserviceName: *query-service-name
+  # -- Default configuration for [IDOL]::Port
+  queryserviceACIPort: *query-service-aci-port
+  single-content:
+    # -- Whether to deploy the single-content subchart
+    enabled: false
+
+# -- `statsserver` subchart values (see https://github.com/opentext-idol/idol-containers-toolkit/tree/main/helm/idol-statsserver#values)
+# @default -- default configuration for Data Admin Statistics Server
+statsserver:
+  # -- Whether to enable an IDOL Statistics Server service
+  enabled: true
+
+# -- `view` subchart values (see https://github.com/opentext-idol/idol-containers-toolkit/tree/main/helm/idol-view#values)
+# @default -- default configuration for Data Admin View Server
+view:
+  # -- Whether to enable an IDOL View Server service
+  enabled: true
+  # -- Default configuration for [Viewing]::IdolHost
+  agentStoreName: *query-service-name
+  # -- Default configuration for [Viewing]::IdolPort
+  agentStoreACIPort: *query-service-aci-port
+  # -- Default configuration for [Viewing]::DistributedConnectorHost
+  nifiserviceName: *nifi-service-name
+  # -- Default configuration for [Viewing]::DistributedConnectorPort
+  nifiserviceACIPort: *nifi-service-aci-port
+

@@ -1,0 +1,112 @@
+# BEGIN COPYRIGHT NOTICE
+# (c) Copyright 2022 Micro Focus or one of its affiliates.
+# END COPYRIGHT NOTICE
+
+{{- /*
+ nginx ingress needs path capture to achieve prefix type routing
+*/}}
+{{- $ingress := .Values.ingress }}
+{{- $pathSuffix := "" }}
+{{- $pathType := "Prefix" }}
+{{- if eq $ingress.type "nginx" }}
+{{- $pathSuffix = "(.*)"}}
+{{- $pathType = "ImplementationSpecific" }}
+{{- end }}
+
+{{- $portSuffix := "" }}
+{{- if $ingress.port }}
+{{- $portSuffix = printf ":%d" ($ingress.port | int) }}
+{{- end }}
+
+{{- if eq $ingress.type "gateway" }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ .Values.name }}
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values) | nindent 4 }}
+spec:
+  parentRefs:
+  - name: {{ $ingress.gateway.name | required "Must specify ingress.gateway.name, having set ingress.type=gateway" }}
+  {{- if $ingress.gateway.namespace }}
+    namespace: {{ $ingress.gateway.namespace }}
+  {{- end }}
+  hostnames: [{{ $ingress.host }}]
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: {{ printf "/%s" .Values.ingress.path }}
+    backendRefs:
+    - name: {{ .Values.name }}
+      port: {{ .Values.dataadminUIPort }}
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        path:
+          type: ReplacePrefixMatch
+          replacePrefixMatch: /
+    - type: RequestHeaderModifier
+      requestHeaderModifier:
+        add:
+        - name: X-Forwarded-Prefix
+          value: /{{ .Values.ingress.path }}
+        - name: X-Forwarded-Proto
+          value: {{ ternary "https" "http" (eq $ingress.gateway.protocol "https") }}
+        - name: X-Forwarded-Host
+          value: {{ $ingress.host }}
+        - name: X-Forwarded-Port
+          value: {{ $ingress.port | quote }}
+    {{- if (or $ingress.gateway.requestTimeout $ingress.gateway.backendTimeout) }}
+    timeouts:
+      {{- if $ingress.gateway.requestTimeout }}
+      request: {{ $ingress.gateway.requestTimeout }}
+      {{- end -}}
+      {{- if $ingress.gateway.backendTimeout }}
+      backendRequest: {{ $ingress.gateway.backendTimeout }}
+      {{- end -}}
+    {{- end -}}
+{{- else }}
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.name }}
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values) | nindent 4 }}
+  annotations:
+{{- if eq $ingress.type "nginx" }}
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/proxy-redirect-from: ~^(https?://[^:/]+)(:\d+)?(/.+)$
+    nginx.ingress.kubernetes.io/proxy-redirect-to: {{ printf "$1%s/%s$3" $portSuffix .Values.ingress.path }}
+    nginx.ingress.kubernetes.io/proxy-body-size: {{ $ingress.proxyBodySize }}
+{{- else if eq $ingress.type "haproxy" }}
+    haproxy.router.openshift.io/rewrite-target: / 
+    haproxy.router.openshift.io/proxy-body-size: {{ $ingress.proxyBodySize }}
+{{- end }}
+spec:
+{{- if $ingress.className }}
+  ingressClassName: {{ $ingress.className }}
+{{- end }}
+{{- if $ingress.tls.secretName }}
+  tls:
+  - hosts:
+      - {{ $ingress.host | required "tls.secretName was specified but no host value supplied" }}
+    secretName: {{ $ingress.tls.secretName }}
+{{- end }}
+  rules:
+  - http:
+      paths:
+      - path: {{ printf "/%s/%s" .Values.ingress.path $pathSuffix }}
+        pathType: {{ $pathType }}
+        backend:
+          service:
+            name: {{ .Values.name }}
+            port:
+              name: "web-app"
+{{- if $ingress.host }}
+    host: {{ $ingress.host }}
+{{- end }}
+{{ if $ingress.tls.secretName -}}
+---
+{{ include "idol-library.ingress.secret" (dict "tls" $ingress.tls) -}}
+{{- end }}
+{{- end }}

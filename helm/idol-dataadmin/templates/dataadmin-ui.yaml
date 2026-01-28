@@ -1,0 +1,85 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+{{- define "idoldataadmin.dataadmin-ui.service" }}
+{{- $root := get . "root" | required "idoldataadmin.dataadmin-ui: missing root" }}
+{{- $component := get . "component" | required "idoldataadmin.dataadmin-ui: missing component" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $component.name }}
+  labels: {{- include "idol-library.labels" (dict "root" $root "component" $component) | nindent 4 }}
+spec:
+  ports:
+  - port: {{ $component.dataadminUIPort | int }}
+    targetPort: "web-app"
+    name: "web-app"
+  selector:
+    app: {{ $component.name }}
+{{- end }}
+{{- include "idoldataadmin.dataadmin-ui.service" (dict
+  "root" .
+  "component" .Values
+) }}
+---
+{{- define "idoldataadmin.dataadmin-ui.deployment" }}
+{{- $root := get . "root" | required "idoldataadmin.dataadmin-ui: missing root" }}
+{{- $component := get . "component" | required "idoldataadmin.dataadmin-ui: missing component" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $component.name }}
+  labels: {{- include "idol-library.labels" (dict "root" $root "component" $component) | nindent 4 }}
+spec:
+  replicas: {{ default 1 $component.dataadminUIReplicas | int }}
+  selector:
+    matchLabels:
+      app: {{ $component.name }}
+  template:
+    metadata:
+      labels: {{- include "idol-library.labels" (dict "root" $root "component" $component) | nindent 8 }}
+        app: {{ $component.name }}
+    spec:
+      imagePullSecrets:
+        {{- range $root.Values.global.imagePullSecrets }}
+        - name: {{ . }}
+        {{- end }}
+      initContainers:
+      - name: check-community-availability
+        image: yauritux/busybox-curl
+        args: 
+        - sh 
+        - -c 
+        - {{ printf "curl \"http://%s:%d/a=getpid\"" $component.community.name ($component.community.aciPort | int) }}
+      containers:
+      - name: {{ $component.name }}
+        image: {{ include "idol-library.idolImage" (dict "root" $root "idolImage" $component.idolImage) }}
+        imagePullPolicy: {{ default (default "IfNotPresent" $component.idolImage.imagePullPolicy) $root.Values.global.imagePullPolicy | quote }}
+        ports:
+        - containerPort: {{ $component.dataadminUIPort | int }}
+          name: "web-app"
+          protocol: TCP
+        volumeMounts:
+        - name: config-map
+          mountPath: /opt/dataadmin/home/config.json
+          subPath: config.json
+{{- if eq $component.ingress.type "gateway" }}
+        - name: SERVER_FORWARD_HEADERS_STRATEGY
+          value: framework
+{{- end }}
+      volumes:
+      - name: config-map
+        configMap:
+          name: {{ default (printf "%s-default-cfg" $component.name) $component.existingConfigMap }}
+{{- end }}
+{{- include "idoldataadmin.dataadmin-ui.deployment" (dict
+  "root" .
+  "component" .Values
+) -}}
