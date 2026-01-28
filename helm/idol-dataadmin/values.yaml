@@ -66,63 +66,80 @@ existingConfigMap: ""
 # properties in this chart.
 
 ingress:
-  # Create ingress resource
+  # -- Create ingress resource
+  # @section -- Ingress
   enabled: true
 
-  # Ingress controller type to setup for.
+  # -- Ingress controller type to setup for.
   # Valid values are nginx or haproxy (used by OpenShift)
+  # @section -- Ingress
   type: nginx
 
-  # Optional parameter to override the default ingress class
+  # -- Optional parameter to override the default ingress class
+  # @section -- Ingress
   className: ""
 
-  # Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules).
+  # -- Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules).
   # For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration)
+  # @section -- Ingress
   host: ""
 
-  # The external port the ingress is exposed on.
+  # -- The external port the ingress is exposed on.
   # For Kubernetes-in-Docker, this may be different to the container ingress port.
+  # @section -- Ingress
   port: ""
 
-   # -- Ingress controller path for connections.
+  # -- Ingress controller path for connections.
+  # @section -- Ingress
   path: "dataadmin"
 
-  # Maximum allowed size of the client request body, defining
+  # -- Maximum allowed size of the client request body, defining
   # the maximum size of requests that can be made to IDOL components within the installation, e.g.
   # the amount of data sent in DREADDDATA index commands.
   # The value should be an nginx "size" value.
   # See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the
   # corresponding nginx configuration parameter.
+  # @section -- Ingress
   proxyBodySize: 2048m
 
-  # Gateway settings (only applies if type is 'gateway')
+  # -- Gateway settings (only applies if type is 'gateway')
+  # @section -- Ingress
   gateway:
     # -- Optional, name of the gateway to use for ingress
+    # @section -- Ingress
     name: ""
 
     # -- Optional, namespace of the gateway to use for ingress
+    # @section -- Ingress
     namespace: ""
 
     # -- Optional, request timeout for ingress route
+    # @section -- Ingress
     requestTimeout: ""
 
     # -- Optional, backend timeout for ingress route
+    # @section -- Ingress
     backendTimeout: ""
 
     # -- Forwarded protocol for ingress
+    # @section -- Ingress
     protocol: "http"
 
   # -- Whether ingress uses TLS. You must set an ingress host to use this. 
   # See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls 
+  # @section -- Ingress
   tls:
     # -- The name of the secret for ingress TLS. Leave empty if not using TLS. 
     # If specified then either this secret must already exist, or crt and key values must be provided and secret will be created.. 
+    # @section -- Ingress
     secretName: ""
 
     # -- Certificate data value to generate tls Secret (should be base64 encoded)
+    # @section -- Ingress
     crt: ""
 
     # -- Private key data value to generate tls Secret (should be base64 encoded)
+    # @section -- Ingress
     key: ""
 
 #####################################
@@ -133,38 +150,42 @@ ingress:
 # They are generally here in values.yaml so that DRY principles and a consistent
 # scheme for specifying these values in the templates can be followed.
 
-# whether the query service is distributed or uses a single Content engine
+# -- Whether the query service is distributed or uses a single Content engine
 dataadminDistributed: false
 
-# queryserviceName is an internal parameter to specify the query service name.
+# -- queryserviceName is an internal parameter to specify the query service name.
 queryserviceName: &query-service-name "idol-query-service"
-# the queryservice port
+# -- the queryservice port
 queryserviceACIPort: &query-service-aci-port "9060"
-# the queryservice index port, only has an effect if dataadminDistributed is false
+# -- the queryservice index port, only has an effect if dataadminDistributed is false
 queryserviceIndexPort: &query-service-index-port "9061"
-# the queryservice service port, only has an effect if dataadminDistributed is false
+# -- the queryservice service port, only has an effect if dataadminDistributed is false
 queryserviceServicePort: &query-service-service-port "9062"
-# indexserviceName is an internal parameter to specify the index service name, only has an effect if dataadminDistributed is true.
+# -- indexserviceName is an internal parameter to specify the index service name, only has an effect if dataadminDistributed is true.
 indexserviceName: &index-service-name "idol-index-service"
-# the indexservice port, only has an effect if dataadminDistributed is true.
+# -- the indexservice port, only has an effect if dataadminDistributed is true.
 indexserviceACIPort: &index-service-aci-port "9070"
 
+# -- Username used to login to the dataadmin UI
 dataadminUsername: "admin"
+# -- Password used to login to the dataadmin UI
 dataadminPassword: "admin"
 
-# name of the dataadmin deployment
+# -- The name of the dataadmin deployment
+# if this is changed, then the name of the idol-dataadmin-community-poststart-scripts configMap used by Community
+# should also be updated accordingly
 name: "idol-dataadmin"
-# dataadmin UI port number
+# -- dataadmin UI port number
 dataadminUIPort: "8000"
-# URL scheme dataadmin should use
+# -- URL scheme dataadmin should use
 dataadminHTTPScheme: "HTTP"
-# Login method dataadmin should use
+# -- Login method dataadmin should use
 dataadminLoginMethod: "autonomy"
-# nifiserviceName is an internal parameter to specify the NiFi service name.
+# -- nifiserviceName is an internal parameter to specify the NiFi service name.
 nifiserviceName: &nifi-service-name "idol-nifi"
-# list of ports for the NiFi service
+# -- list of ports for the NiFi service
 nifiserviceACIPort: &nifi-service-aci-port "11000"
-# overrides for liveness probe settings
+# -- overrides for liveness probe settings
 dataadminUILivenessProbe:
   path: "/p/overview"
   initialDelaySeconds: 300

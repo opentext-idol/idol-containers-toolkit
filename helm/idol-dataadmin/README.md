@@ -40,6 +40,28 @@ This chart may be used to provide a user interface for managing data indexed int
 | global.imagePullPolicy | string | `""` | Global override value for idolImage.imagePullPolicy, has no effect if it is empty or is removed |
 | global.imagePullSecrets | list | `["dockerhub-secret"]` | Global secrets used to pull container images |
 
+### Ingress
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| ingress.className | string | `""` | Optional parameter to override the default ingress class |
+| ingress.enabled | bool | `true` | Create ingress resource |
+| ingress.gateway | object | `{"backendTimeout":"","name":"","namespace":"","protocol":"http","requestTimeout":""}` | Gateway settings (only applies if type is 'gateway') |
+| ingress.gateway.backendTimeout | string | `""` | Optional, backend timeout for ingress route |
+| ingress.gateway.name | string | `""` | Optional, name of the gateway to use for ingress |
+| ingress.gateway.namespace | string | `""` | Optional, namespace of the gateway to use for ingress |
+| ingress.gateway.protocol | string | `"http"` | Forwarded protocol for ingress |
+| ingress.gateway.requestTimeout | string | `""` | Optional, request timeout for ingress route |
+| ingress.host | string | `""` | Optional host (see https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules). For an OpenShift environment this is required (see https://docs.openshift.com/container-platform/4.11/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration) |
+| ingress.path | string | `"dataadmin"` | Ingress controller path for connections. |
+| ingress.port | string | `""` | The external port the ingress is exposed on. For Kubernetes-in-Docker, this may be different to the container ingress port. |
+| ingress.proxyBodySize | string | `"2048m"` | Maximum allowed size of the client request body, defining the maximum size of requests that can be made to IDOL components within the installation, e.g. the amount of data sent in DREADDDATA index commands. The value should be an nginx "size" value. See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the corresponding nginx configuration parameter. |
+| ingress.tls | object | `{"crt":"","key":"","secretName":""}` | Whether ingress uses TLS. You must set an ingress host to use this.  See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls  |
+| ingress.tls.crt | string | `""` | Certificate data value to generate tls Secret (should be base64 encoded) |
+| ingress.tls.key | string | `""` | Private key data value to generate tls Secret (should be base64 encoded) |
+| ingress.tls.secretName | string | `""` | The name of the secret for ingress TLS. Leave empty if not using TLS.  If specified then either this secret must already exist, or crt and key values must be provided and secret will be created..  |
+| ingress.type | string | `"nginx"` | Ingress controller type to setup for. Valid values are nginx or haproxy (used by OpenShift) |
+
 ### Other Values
 
 | Key | Type | Default | Description |
@@ -64,17 +86,13 @@ This chart may be used to provide a user interface for managing data indexed int
 | content.enabled | bool | `true` |  |
 | content.indexPort | string | `"9061"` |  |
 | content.servicePort | string | `"9062"` |  |
-| dataadminDistributed | bool | `false` |  |
-| dataadminHTTPScheme | string | `"HTTP"` |  |
-| dataadminLoginMethod | string | `"autonomy"` |  |
-| dataadminPassword | string | `"admin"` |  |
-| dataadminUILivenessProbe.failureThreshold | int | `5` |  |
-| dataadminUILivenessProbe.initialDelaySeconds | int | `300` |  |
-| dataadminUILivenessProbe.path | string | `"/p/overview"` |  |
-| dataadminUILivenessProbe.periodSeconds | int | `30` |  |
-| dataadminUILivenessProbe.timeoutSeconds | int | `10` |  |
-| dataadminUIPort | string | `"8000"` |  |
-| dataadminUsername | string | `"admin"` |  |
+| dataadminDistributed | bool | `false` | Whether the query service is distributed or uses a single Content engine |
+| dataadminHTTPScheme | string | `"HTTP"` | URL scheme dataadmin should use |
+| dataadminLoginMethod | string | `"autonomy"` | Login method dataadmin should use |
+| dataadminPassword | string | `"admin"` | Password used to login to the dataadmin UI |
+| dataadminUILivenessProbe | object | `{"failureThreshold":5,"initialDelaySeconds":300,"path":"/p/overview","periodSeconds":30,"timeoutSeconds":10}` | overrides for liveness probe settings |
+| dataadminUIPort | string | `"8000"` | dataadmin UI port number |
+| dataadminUsername | string | `"admin"` | Username used to login to the dataadmin UI |
 | existingConfigMap | string | `""` | if specified, mounted at /opt/dataadmin/home/ and expected to provide config.json |
 | idol-licenseserver.enabled | bool | `true` |  |
 | idol-licenseserver.licenseServerExternalName | string | `"example.license.server"` |  |
@@ -82,35 +100,19 @@ This chart may be used to provide a user interface for managing data indexed int
 | idolImage.registry | string | `"microfocusidolserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | idolImage.repo | string | `"dataadmin"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | idolImage.version | string | `"26.1"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
-| indexserviceACIPort | string | `"9070"` |  |
-| indexserviceName | string | `"idol-index-service"` |  |
-| ingress.className | string | `""` |  |
-| ingress.enabled | bool | `true` |  |
-| ingress.gateway.backendTimeout | string | `""` | Optional, backend timeout for ingress route |
-| ingress.gateway.name | string | `""` | Optional, name of the gateway to use for ingress |
-| ingress.gateway.namespace | string | `""` | Optional, namespace of the gateway to use for ingress |
-| ingress.gateway.protocol | string | `"http"` | Forwarded protocol for ingress |
-| ingress.gateway.requestTimeout | string | `""` | Optional, request timeout for ingress route |
-| ingress.host | string | `""` |  |
-| ingress.path | string | `"dataadmin"` | Ingress controller path for connections. |
-| ingress.port | string | `""` |  |
-| ingress.proxyBodySize | string | `"2048m"` |  |
-| ingress.tls | object | `{"crt":"","key":"","secretName":""}` | Whether ingress uses TLS. You must set an ingress host to use this.  See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls  |
-| ingress.tls.crt | string | `""` | Certificate data value to generate tls Secret (should be base64 encoded) |
-| ingress.tls.key | string | `""` | Private key data value to generate tls Secret (should be base64 encoded) |
-| ingress.tls.secretName | string | `""` | The name of the secret for ingress TLS. Leave empty if not using TLS.  If specified then either this secret must already exist, or crt and key values must be provided and secret will be created..  |
-| ingress.type | string | `"nginx"` |  |
-| name | string | `"idol-dataadmin"` |  |
-| nifiserviceACIPort | string | `"11000"` |  |
-| nifiserviceName | string | `"idol-nifi"` |  |
+| indexserviceACIPort | string | `"9070"` | the indexservice port, only has an effect if dataadminDistributed is true. |
+| indexserviceName | string | `"idol-index-service"` | indexserviceName is an internal parameter to specify the index service name, only has an effect if dataadminDistributed is true. |
+| name | string | `"idol-dataadmin"` | The name of the dataadmin deployment if this is changed, then the name of the idol-dataadmin-community-poststart-scripts configMap used by Community should also be updated accordingly |
+| nifiserviceACIPort | string | `"11000"` | list of ports for the NiFi service |
+| nifiserviceName | string | `"idol-nifi"` | nifiserviceName is an internal parameter to specify the NiFi service name. |
 | qms.enabled | bool | `true` |  |
 | qms.queryserviceACIPort | string | `"9060"` |  |
 | qms.queryserviceName | string | `"idol-query-service"` |  |
 | qms.single-content.enabled | bool | `false` |  |
-| queryserviceACIPort | string | `"9060"` |  |
-| queryserviceIndexPort | string | `"9061"` |  |
-| queryserviceName | string | `"idol-query-service"` |  |
-| queryserviceServicePort | string | `"9062"` |  |
+| queryserviceACIPort | string | `"9060"` | the queryservice port |
+| queryserviceIndexPort | string | `"9061"` | the queryservice index port, only has an effect if dataadminDistributed is false |
+| queryserviceName | string | `"idol-query-service"` | queryserviceName is an internal parameter to specify the query service name. |
+| queryserviceServicePort | string | `"9062"` | the queryservice service port, only has an effect if dataadminDistributed is false |
 | statsserver.enabled | bool | `true` |  |
 | view.agentStoreACIPort | string | `"9060"` |  |
 | view.agentStoreName | string | `"idol-query-service"` |  |
