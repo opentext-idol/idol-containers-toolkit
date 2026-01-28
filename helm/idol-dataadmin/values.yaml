@@ -196,59 +196,101 @@ dataadminUILivenessProbe:
 ################################
 
 ##### SUBCHART VALUES #####
+# -- `licenseserver` subchart values (see https://github.com/opentext-idol/idol-containers-toolkit/tree/main/helm/idol-licenseserver#values)
+# @default -- default configuration for Data Admin License Server
 idol-licenseserver:
-# create a cluster service proxying to a LicenseServer instance
+  # -- Whether to deploy an IDOL LicenseServer service abstraction
   enabled: true
+  # -- The hostname of the IDOL LicenseServer (or abstraction)
   licenseServerExternalName: "example.license.server"
 
+# -- `content` subchart values (see https://github.com/opentext-idol/idol-containers-toolkit/tree/main/helm/single-content#values)
+# @default -- default configuration for Data Admin Content
 content:
+  # -- Whether to enable an IDOL Content Server service
   enabled: true
+  # -- port service will serve ACI connections on
   aciPort: *query-service-aci-port
+  # -- port service will serve index connections on
   indexPort: *query-service-index-port
+  # -- port service will serve service connections on
   servicePort: *query-service-service-port
 
+# -- `answerserver` subchart values (see https://github.com/opentext-idol/idol-containers-toolkit/tree/main/helm/idol-answerserver#values)
+# @default -- default configuration for Data Admin Answer Server
 answerserver:
+  # -- Whether to enable an IDOL Answer Server service
   enabled: true
+  # -- Configuration for [PassageExtractor]::AgentstoreHost
   passageExtractorAgentstoreHostname: &passageExtractorAgentstoreHostname "idol-passageextractor-agentstore"
+  # -- Configuration for [PassageExtractor]::AgentstoreAciPort
   passageExtractorAgentstorePort: &passageExtractorAgentstorePort "12300"
+  # -- Configuration for [PassageExtractor]::IdolHost
   passageExtractorHostname: *query-service-name
+  # -- Configuration for [PassageExtractor]::IdolAciPort
   passageExtractorPort: *query-service-aci-port
   single-content:
+    # -- Whether to deploy the single-content subchart
     enabled: false
+  # -- Postgresql subchart values (see https://github.com/bitnami/charts/tree/main/bitnami/postgresql)
+  # @default -- default configuration for FactBank PostgreSQL
   postgresql:
     fullnameOverride: "idol-factbank-postgres"
     image:
       repository: bitnamilegacy/postgresql
 
+# -- `community` subchart values (see https://github.com/opentext-idol/idol-containers-toolkit/tree/main/helm/idol-community#values)
+# @default -- default configuration for Data Admin Community Server
 community:
+  # -- Whether to enable an IDOL Community Server service
   enabled: true
+  # -- Community agentstore service/hostname
   agentStoreName: *passageExtractorAgentstoreHostname
+  # -- Community agentstore service ACI port
   agentStoreACIPort: *passageExtractorAgentstorePort
+  # -- ConfigMap to add users used by Data Admin to Community
   additionalVolumes:
     poststart:
       name: poststart
       configMap:
         name: idol-dataadmin-community-poststart-scripts
+  # -- PostStart script mount to add users used by Data Admin to Community
   additionalVolumeMounts:
     poststart:
       name: poststart
       mountPath: /community/poststart_scripts/002_add_default_dataadmin_users.sh
       subPath: 002_add_default_dataadmin_users.sh
 
+# -- `QMS` subchart values (see https://github.com/opentext-idol/idol-containers-toolkit/tree/main/helm/idol-qms#values)
+# @default -- default configuration for Data Admin QMS
 qms:
+  # -- Whether to enable an IDOL QMS service
   enabled: true
+  # -- Default configuration for [IDOL]::Host
   queryserviceName: *query-service-name
+  # -- Default configuration for [IDOL]::Port
   queryserviceACIPort: *query-service-aci-port
   single-content:
+    # -- Whether to deploy the single-content subchart
     enabled: false
 
+# -- `statsserver` subchart values (see https://github.com/opentext-idol/idol-containers-toolkit/tree/main/helm/idol-statsserver#values)
+# @default -- default configuration for Data Admin Statistics Server
 statsserver:
+  # -- Whether to enable an IDOL Statistics Server service
   enabled: true
 
+# -- `view` subchart values (see https://github.com/opentext-idol/idol-containers-toolkit/tree/main/helm/idol-view#values)
+# @default -- default configuration for Data Admin View Server
 view:
+  # -- Whether to enable an IDOL View Server service
   enabled: true
+  # -- Default configuration for [Viewing]::IdolHost
   agentStoreName: *query-service-name
+  # -- Default configuration for [Viewing]::IdolPort
   agentStoreACIPort: *query-service-aci-port
+  # -- Default configuration for [Viewing]::DistributedConnectorHost
   nifiserviceName: *nifi-service-name
+  # -- Default configuration for [Viewing]::DistributedConnectorPort
   nifiserviceACIPort: *nifi-service-aci-port
 

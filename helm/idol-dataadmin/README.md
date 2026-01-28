@@ -66,26 +66,25 @@ This chart may be used to provide a user interface for managing data indexed int
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| answerserver.enabled | bool | `true` |  |
-| answerserver.passageExtractorAgentstoreHostname | string | `"idol-passageextractor-agentstore"` |  |
-| answerserver.passageExtractorAgentstorePort | string | `"12300"` |  |
-| answerserver.passageExtractorHostname | string | `"idol-query-service"` |  |
-| answerserver.passageExtractorPort | string | `"9060"` |  |
-| answerserver.postgresql.fullnameOverride | string | `"idol-factbank-postgres"` |  |
-| answerserver.postgresql.image.repository | string | `"bitnamilegacy/postgresql"` |  |
-| answerserver.single-content.enabled | bool | `false` |  |
-| community.additionalVolumeMounts.poststart.mountPath | string | `"/community/poststart_scripts/002_add_default_dataadmin_users.sh"` |  |
-| community.additionalVolumeMounts.poststart.name | string | `"poststart"` |  |
-| community.additionalVolumeMounts.poststart.subPath | string | `"002_add_default_dataadmin_users.sh"` |  |
-| community.additionalVolumes.poststart.configMap.name | string | `"idol-dataadmin-community-poststart-scripts"` |  |
-| community.additionalVolumes.poststart.name | string | `"poststart"` |  |
-| community.agentStoreACIPort | string | `"12300"` |  |
-| community.agentStoreName | string | `"idol-passageextractor-agentstore"` |  |
-| community.enabled | bool | `true` |  |
-| content.aciPort | string | `"9060"` |  |
-| content.enabled | bool | `true` |  |
-| content.indexPort | string | `"9061"` |  |
-| content.servicePort | string | `"9062"` |  |
+| answerserver | object | default configuration for Data Admin Answer Server | `answerserver` subchart values (see https://github.com/opentext-idol/idol-containers-toolkit/tree/main/helm/idol-answerserver#values) |
+| answerserver.enabled | bool | `true` | Whether to enable an IDOL Answer Server service |
+| answerserver.passageExtractorAgentstoreHostname | string | `"idol-passageextractor-agentstore"` | Configuration for [PassageExtractor]::AgentstoreHost |
+| answerserver.passageExtractorAgentstorePort | string | `"12300"` | Configuration for [PassageExtractor]::AgentstoreAciPort |
+| answerserver.passageExtractorHostname | string | `"idol-query-service"` | Configuration for [PassageExtractor]::IdolHost |
+| answerserver.passageExtractorPort | string | `"9060"` | Configuration for [PassageExtractor]::IdolAciPort |
+| answerserver.postgresql | object | default configuration for FactBank PostgreSQL | Postgresql subchart values (see https://github.com/bitnami/charts/tree/main/bitnami/postgresql) |
+| answerserver.single-content.enabled | bool | `false` | Whether to deploy the single-content subchart |
+| community | object | default configuration for Data Admin Community Server | `community` subchart values (see https://github.com/opentext-idol/idol-containers-toolkit/tree/main/helm/idol-community#values) |
+| community.additionalVolumeMounts | object | `{"poststart":{"mountPath":"/community/poststart_scripts/002_add_default_dataadmin_users.sh","name":"poststart","subPath":"002_add_default_dataadmin_users.sh"}}` | PostStart script mount to add users used by Data Admin to Community |
+| community.additionalVolumes | object | `{"poststart":{"configMap":{"name":"idol-dataadmin-community-poststart-scripts"},"name":"poststart"}}` | ConfigMap to add users used by Data Admin to Community |
+| community.agentStoreACIPort | string | `"12300"` | Community agentstore service ACI port |
+| community.agentStoreName | string | `"idol-passageextractor-agentstore"` | Community agentstore service/hostname |
+| community.enabled | bool | `true` | Whether to enable an IDOL Community Server service |
+| content | object | default configuration for Data Admin Content | `content` subchart values (see https://github.com/opentext-idol/idol-containers-toolkit/tree/main/helm/single-content#values) |
+| content.aciPort | string | `"9060"` | port service will serve ACI connections on |
+| content.enabled | bool | `true` | Whether to enable an IDOL Content Server service |
+| content.indexPort | string | `"9061"` | port service will serve index connections on |
+| content.servicePort | string | `"9062"` | port service will serve service connections on |
 | dataadminDistributed | bool | `false` | Whether the query service is distributed or uses a single Content engine |
 | dataadminHTTPScheme | string | `"HTTP"` | URL scheme dataadmin should use |
 | dataadminLoginMethod | string | `"autonomy"` | Login method dataadmin should use |
@@ -94,8 +93,9 @@ This chart may be used to provide a user interface for managing data indexed int
 | dataadminUIPort | string | `"8000"` | dataadmin UI port number |
 | dataadminUsername | string | `"admin"` | Username used to login to the dataadmin UI |
 | existingConfigMap | string | `""` | if specified, mounted at /opt/dataadmin/home/ and expected to provide config.json |
-| idol-licenseserver.enabled | bool | `true` |  |
-| idol-licenseserver.licenseServerExternalName | string | `"example.license.server"` |  |
+| idol-licenseserver | object | default configuration for Data Admin License Server | `licenseserver` subchart values (see https://github.com/opentext-idol/idol-containers-toolkit/tree/main/helm/idol-licenseserver#values) |
+| idol-licenseserver.enabled | bool | `true` | Whether to deploy an IDOL LicenseServer service abstraction |
+| idol-licenseserver.licenseServerExternalName | string | `"example.license.server"` | The hostname of the IDOL LicenseServer (or abstraction) |
 | idolImage.imagePullPolicy | string | `"IfNotPresent"` | used to determine whether to pull the specified image (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) |
 | idolImage.registry | string | `"microfocusidolserver"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
 | idolImage.repo | string | `"dataadmin"` | used to construct container image name: {idolImage.registry}/{idolImage.repo}:{idolImage.version} |
@@ -105,20 +105,23 @@ This chart may be used to provide a user interface for managing data indexed int
 | name | string | `"idol-dataadmin"` | The name of the dataadmin deployment if this is changed, then the name of the idol-dataadmin-community-poststart-scripts configMap used by Community should also be updated accordingly |
 | nifiserviceACIPort | string | `"11000"` | list of ports for the NiFi service |
 | nifiserviceName | string | `"idol-nifi"` | nifiserviceName is an internal parameter to specify the NiFi service name. |
-| qms.enabled | bool | `true` |  |
-| qms.queryserviceACIPort | string | `"9060"` |  |
-| qms.queryserviceName | string | `"idol-query-service"` |  |
-| qms.single-content.enabled | bool | `false` |  |
+| qms | object | default configuration for Data Admin QMS | `QMS` subchart values (see https://github.com/opentext-idol/idol-containers-toolkit/tree/main/helm/idol-qms#values) |
+| qms.enabled | bool | `true` | Whether to enable an IDOL QMS service |
+| qms.queryserviceACIPort | string | `"9060"` | Default configuration for [IDOL]::Port |
+| qms.queryserviceName | string | `"idol-query-service"` | Default configuration for [IDOL]::Host |
+| qms.single-content.enabled | bool | `false` | Whether to deploy the single-content subchart |
 | queryserviceACIPort | string | `"9060"` | the queryservice port |
 | queryserviceIndexPort | string | `"9061"` | the queryservice index port, only has an effect if dataadminDistributed is false |
 | queryserviceName | string | `"idol-query-service"` | queryserviceName is an internal parameter to specify the query service name. |
 | queryserviceServicePort | string | `"9062"` | the queryservice service port, only has an effect if dataadminDistributed is false |
-| statsserver.enabled | bool | `true` |  |
-| view.agentStoreACIPort | string | `"9060"` |  |
-| view.agentStoreName | string | `"idol-query-service"` |  |
-| view.enabled | bool | `true` |  |
-| view.nifiserviceACIPort | string | `"11000"` |  |
-| view.nifiserviceName | string | `"idol-nifi"` |  |
+| statsserver | object | default configuration for Data Admin Statistics Server | `statsserver` subchart values (see https://github.com/opentext-idol/idol-containers-toolkit/tree/main/helm/idol-statsserver#values) |
+| statsserver.enabled | bool | `true` | Whether to enable an IDOL Statistics Server service |
+| view | object | default configuration for Data Admin View Server | `view` subchart values (see https://github.com/opentext-idol/idol-containers-toolkit/tree/main/helm/idol-view#values) |
+| view.agentStoreACIPort | string | `"9060"` | Default configuration for [Viewing]::IdolPort |
+| view.agentStoreName | string | `"idol-query-service"` | Default configuration for [Viewing]::IdolHost |
+| view.enabled | bool | `true` | Whether to enable an IDOL View Server service |
+| view.nifiserviceACIPort | string | `"11000"` | Default configuration for [Viewing]::DistributedConnectorPort |
+| view.nifiserviceName | string | `"idol-nifi"` | Default configuration for [Viewing]::DistributedConnectorHost |
 
 ----------------------------------------------
 Autogenerated from chart metadata using [helm-docs v1.14.2](https://github.com/norwoodj/helm-docs/releases/v1.14.2)
