@@ -22,6 +22,7 @@ data:
   {{- end }}
 {{- end }}
 ---
+{{- if semver.Compare "< 26.3" .Subcharts.community.appVersion }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -30,4 +31,4 @@ metadata:
 data:
   002_add_default_dataadmin_users.sh: |
 {{ tpl (print "resources/community/add_users.sh" | .Files.Get) . | indent 4 }}
-
+{{- end }}

@@ -350,6 +350,33 @@
                         {"$ref":"#/$defs/ingressCommon"}
                     ],
                     "unevaluatedProperties": false
+                },
+                "autoCreateRoles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "autoCreateUsers": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                            "initialPassword": {
+                                "type": "string"
+                            },
+                            "emailAddress": {
+                                "type": "string"
+                            },
+                            "roles": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "required": ["initialPassword"]
+                    }
                 }
             },
             "required": [
