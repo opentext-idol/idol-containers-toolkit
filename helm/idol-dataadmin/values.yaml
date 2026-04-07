@@ -166,9 +166,9 @@ indexserviceName: &index-service-name "idol-index-service"
 # -- the indexservice port, only has an effect if dataadminDistributed is true.
 indexserviceACIPort: &index-service-aci-port "9070"
 
-# -- Username used to login to the dataadmin UI
+# -- Username used to login to the dataadmin UI -- only used if a poststart script is used to create default users and roles
 dataadminUsername: "admin"
-# -- Password used to login to the dataadmin UI
+# -- Password used to login to the dataadmin UI -- only used if a poststart script is used to create default users and roles
 dataadminPassword: "admin"
 
 # -- The name of the dataadmin deployment
@@ -248,19 +248,15 @@ community:
   agentStoreName: *passageExtractorAgentstoreHostname
   # -- Community agentstore service ACI port
   agentStoreACIPort: *passageExtractorAgentstorePort
-  # -- ConfigMap to add users used by Data Admin to Community
-  additionalVolumes:
-    poststart:
-      name: poststart
-      configMap:
-        name: idol-dataadmin-community-poststart-scripts
-  # -- PostStart script mount to add users used by Data Admin to Community
-  additionalVolumeMounts:
-    poststart:
-      name: poststart
-      mountPath: /community/poststart_scripts/002_add_default_dataadmin_users.sh
-      subPath: 002_add_default_dataadmin_users.sh
-
+  # -- Addition of default users used by IDOL Data Admin
+  # -- Note - if using a version of IDOL Community below 26.3, the configMap idol-community-poststart-scripts should be configured instead
+  # -- This is expected to be mounted at /community/poststart/002_add_default_dataadmin_users.sh
+  # -- See .Values.dataadminUsername and .Values.dataadminPassword for the default username and password for the created user
+  autoCreateUsers:
+    admin:
+      initialPassword: "admin"
+      roles: ["AnswerBankUser", "IDAUser", "ISOUser", "ISOAdmin"]
+      
 # -- `QMS` subchart values (see https://github.com/opentext-idol/idol-containers-toolkit/tree/main/helm/idol-qms#values)
 # @default -- default configuration for Data Admin QMS
 qms:
