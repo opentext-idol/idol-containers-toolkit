@@ -124,14 +124,8 @@ autoCreateUsers:
     #optional email address for this user
     emailAddress: ""
     roles: ["FindUser", "FindAdmin", "FindBI"]
-  DataAdminUser:
-    username: "dataadmin"
-    initialPassword: "dataadmin"
-    #optional email address for this user
-    emailAddress: ""
-    roles: ["AnswerUser", "AnswerAdmin", "ContentUser", "ContentAdmin"]
 # autoCreateRoles -- list of initial roles to create upon server start
-autoCreateRoles: ["arole", "brole", "crole"]
+autoCreateRoles: []
 
 ##### NETWORKING CONFIGURATION #####
 # This section contains parameters to configure various network-related
