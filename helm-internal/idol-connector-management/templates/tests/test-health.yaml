@@ -1,0 +1,37 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023-2025 Open Text.
+#
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+{{- /*
+  Asserts the deep readiness endpoint reports every dependency healthy, naming any that are
+  not. Largely overlaps the readiness probe - after `helm install --wait` a Ready pod already
+  implies this - but it turns "the release did not become ready" into a message that says
+  which of the database, NiFi or resource provider is at fault.
+*/}}
+{{- if and .Values.tests.enabled .Values.connectorManagement.enabled }}
+{{- $svc := include "idol-connector-management.fullname" . }}
+{{- $script := printf `%s
+echo "Checking http://%s:8080/v1/health/ready"
+req "http://%s:8080/v1/health/ready"
+if [ "$code" != "200" ]; then
+  echo "  FAIL  readiness returned HTTP $code (expected 200)"
+  printf '        %%s\n' "$body" | head -10
+  exit 1
+fi
+DOWN=$(printf '%%s' "$body" | jq -r '[.checks[] | select(.status != "UP") | .name] | join(", ")')
+if [ -n "$DOWN" ]; then
+  echo "  FAIL  dependencies not healthy: $DOWN"
+  printf '%%s' "$body" | jq -r '.checks[] | "        \(.name): \(.status) \(.data // {} | tostring)"'
+  exit 1
+fi
+printf '%%s' "$body" | jq -r '.checks[] | "  PASS  \(.name): \(.status)"'
+echo "All dependency checks healthy."
+` (include "idol-connector-management.test.prelude" .) $svc $svc }}
+{{ include "idol-connector-management.test.pod" (dict "root" . "name" "health" "weight" 0 "image" .Values.connectorManagement.image "script" $script) }}
+{{- end }}

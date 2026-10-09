@@ -1,0 +1,914 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$ref": "#/$defs/Values",
+    "$defs": {
+        "Values": {
+            "type": "object",
+            "properties": {
+                "ingressClassName": {
+                    "type": "string"
+                },
+                "ingressProxyBodySize": {
+                    "type": "string",
+                    "pattern": "^\\d+(?:\\.\\d+)?(?:Ki|Mi|Gi|Ti|Pi|Ei|m|k|M|G|T|P|E)?$"
+                },
+                "ingressType": {
+                    "type": "string",
+                    "enum": [
+                        "nginx",
+                        "haproxy",
+                        "custom",
+                        "gateway"
+                    ]
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "tests": {
+                    "type": "object",
+                    "description": "helm test hooks. Run with `helm test <release> --logs`; never run by install itself.",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        }
+                    },
+                    "additionalProperties": false,
+                    "required": [
+                        "enabled"
+                    ]
+                },
+                "fullnameOverride": {
+                    "type": "string",
+                    "description": "Replaces the generated <release>-<name> for this chart's objects. Empty keeps release scoping."
+                },
+                "global": {
+                    "$ref": "#/$defs/Global"
+                },
+                "podSecurityContext": {
+                    "type": "object",
+                    "description": "Pod-level security context. Everything except `enabled` is passed through verbatim, so any valid Kubernetes PodSecurityContext field may be added.",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "runAsUser": {
+                            "type": "integer"
+                        },
+                        "runAsGroup": {
+                            "type": "integer"
+                        },
+                        "runAsNonRoot": {
+                            "type": "boolean"
+                        },
+                        "fsGroup": {
+                            "type": "integer",
+                            "description": "Group ownership applied to mounted volumes so the non-root container can write to them. Required on CSI storage; ignored for hostPath volumes."
+                        },
+                        "fsGroupChangePolicy": {
+                            "type": "string",
+                            "enum": [
+                                "Always",
+                                "OnRootMismatch"
+                            ]
+                        },
+                        "seccompProfile": {
+                            "$ref": "#/$defs/SeccompProfile"
+                        }
+                    },
+                    "required": [
+                        "enabled"
+                    ]
+                },
+                "containerSecurityContext": {
+                    "type": "object",
+                    "description": "Container-level security context. Everything except `enabled` is passed through verbatim, so any valid Kubernetes SecurityContext field may be added.",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "allowPrivilegeEscalation": {
+                            "type": "boolean"
+                        },
+                        "privileged": {
+                            "type": "boolean"
+                        },
+                        "readOnlyRootFilesystem": {
+                            "type": "boolean"
+                        },
+                        "runAsUser": {
+                            "type": "integer"
+                        },
+                        "runAsNonRoot": {
+                            "type": "boolean"
+                        },
+                        "capabilities": {
+                            "type": "object"
+                        },
+                        "seccompProfile": {
+                            "$ref": "#/$defs/SeccompProfile"
+                        }
+                    },
+                    "required": [
+                        "enabled"
+                    ]
+                },
+                "additionalVolumes": {
+                    "type": [
+                        "array",
+                        "object",
+                        "null"
+                    ]
+                },
+                "additionalVolumeMounts": {
+                    "type": [
+                        "array",
+                        "object",
+                        "null"
+                    ]
+                },
+                "serviceAccountName": {
+                    "type": "string",
+                    "description": "Default serviceAccountName for this chart's pods, overridden by connectorManagement.serviceAccountName and nifi.serviceAccountName. Empty uses the namespace default. Prefer the per-component values when binding a cloud identity, so the pods do not share one."
+                },
+                "connectorManagement": {
+                    "$ref": "#/$defs/ConnectorManagement"
+                },
+                "nifi": {
+                    "$ref": "#/$defs/NifiDeployment"
+                },
+                "postgresql": {
+                    "$ref": "#/$defs/Postgresql"
+                },
+                "prometheus": {
+                    "$ref": "#/$defs/Sub-Chart"
+                },
+                "externalPostgresql": {
+                    "$ref": "#/$defs/ExternalPostgresql"
+                },
+                "idolOemLicenseSecret": {
+                    "type": "string"
+                },
+                "licenseServerHostname": {
+                    "type": "string"
+                },
+                "licenseServerPort": {
+                    "type": "string"
+                },
+                "proxyServerScheme": {
+                    "type": "string",
+                    "enum": [
+                        "",
+                        "HTTP",
+                        "HTTPS"
+                    ]
+                },
+                "proxyServerHostname": {
+                    "type": "string"
+                },
+                "proxyServerPort": {
+                    "type": "string"
+                },
+                "proxyServerNoProxyHosts": {
+                    "type": "string",
+                    "description": "Comma-separated hosts to bypass the proxy for. Only applied when proxyServerHostname is set."
+                },
+                "idol-library": {
+                    "type": "object",
+                    "description": "Helm creates a values entry for every dependency, including the idol-library library chart. It takes no values, but the key must be permitted for additionalProperties: false to work."
+                },
+                "documentsecurity": {
+                    "type": "object",
+                    "description": "Values for the idol-documentsecurity sub-chart. That chart governs the contents; see its values.yaml.",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        }
+                    }
+                }
+            },
+            "required": [
+                "ingressProxyBodySize",
+                "ingressType",
+                "podSecurityContext",
+                "containerSecurityContext",
+                "connectorManagement",
+                "name",
+                "global"
+            ],
+            "additionalProperties": false,
+            "title": "Values"
+        },
+        "Global": {
+            "type": "object",
+            "properties": {
+                "imageRegistry": {
+                    "type": "string",
+                    "description": "Registry prefix for the bitnami postgresql-ha sub-charts only. Does NOT apply to this chart's own images, which are full references (connectorManagement.image, nifi.image, global.busyboxImage)."
+                },
+                "busyboxImage": {
+                    "type": "string",
+                    "description": "busybox image for every init container in this chart and the documentsecurity sub-chart (wait-for-postgres/nifi/documentsecurity, install-seccomp-profile)"
+                },
+                "defaultStorageClass": {
+                    "type": "string",
+                    "description": "StorageClass for every PVC this chart and its sub-charts create. A per-volume storageClass overrides it. Empty leaves the cluster default to apply; \"-\" disables dynamic provisioning."
+                },
+                "imagePullSecrets": {
+                    "type": "array",
+                    "description": "Secrets used to pull container images. May be empty or omitted when the registry needs no credentials, or when they are supplied by the node or the pods' ServiceAccount.",
+                    "items": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                },
+                "imagePullPolicy": {
+                    "type": "string",
+                    "description": "Pull policy for every container in this chart and its sub-charts. A per-component imagePullPolicy overrides it. Empty means IfNotPresent.",
+                    "enum": [
+                        "",
+                        "Always",
+                        "IfNotPresent",
+                        "Never"
+                    ]
+                }
+            }
+        },
+        "IngressTLS": {
+            "properties": {
+                "secretName": {
+                    "type": "string"
+                },
+                "crt": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "secretName"
+            ],
+            "title": "IngressTLS"
+        },
+        "ConnectorManagement": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "imagePullPolicy": {
+                    "type": "string",
+                    "description": "Pull policy for this component's image. Empty inherits global.imagePullPolicy.",
+                    "enum": [
+                        "",
+                        "Always",
+                        "IfNotPresent",
+                        "Never"
+                    ]
+                },
+                "serviceAccountName": {
+                    "type": "string",
+                    "description": "serviceAccountName for this component's pod. Empty inherits the chart-wide serviceAccountName."
+                },
+                "resourcesVolume": {
+                    "$ref": "#/$defs/ResourcesVolume"
+                },
+                "cacheVolume": {
+                    "$ref": "#/$defs/CacheVolume"
+                },
+                "ingress": {
+                    "$ref": "#/$defs/Ingress"
+                },
+                "resources": {
+                    "type": "object"
+                },
+                "reconcileOnStartup": {
+                    "type": "boolean",
+                    "description": "On startup, redeploy connectors and targets this release deployed that NiFi no longer has."
+                },
+                "shutdownDrainSeconds": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 3600,
+                    "description": "How long the api waits on shutdown for requests in flight to finish. terminationGracePeriodSeconds is derived from it."
+                },
+                "jvmHeapInitPercentage": {
+                    "type": [
+                        "number",
+                        "string"
+                    ],
+                    "pattern": "^\\d+(?:\\.\\d+)?$",
+                    "exclusiveMinimum": 0,
+                    "maximum": 100,
+                    "description": "API JVM initial heap as a percentage of resources.limits.memory (-XX:InitialRAMPercentage). Must not exceed jvmHeapMaxPercentage. A numeric string is accepted, since --set passes a decimal as a string."
+                },
+                "jvmHeapMaxPercentage": {
+                    "type": [
+                        "number",
+                        "string"
+                    ],
+                    "pattern": "^\\d+(?:\\.\\d+)?$",
+                    "exclusiveMinimum": 0,
+                    "maximum": 100,
+                    "description": "API JVM maximum heap as a percentage of resources.limits.memory (-XX:MaxRAMPercentage). A numeric string is accepted, since --set passes a decimal as a string."
+                },
+                "labels": {
+                    "type": "object"
+                },
+                "env": {
+                    "type": "object"
+                },
+                "secretEnv": {
+                    "type": "object",
+                    "description": "Sensitive env vars for the api, rendered into a Secret instead of the ConfigMap."
+                },
+                "envFrom": {
+                    "type": "object"
+                },
+                "nifi": {
+                    "$ref": "#/$defs/NifiConfig"
+                },
+                "targetPipelines": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/$defs/TargetPipeline"
+                    }
+                },
+                "siteToSiteIdentities": {
+                    "type": "string"
+                },
+                "callbacksEndpoint": {
+                    "type": "string",
+                    "description": "Base URL NiFi uses to call back into the internal API. Empty defaults to http://<release-scoped service name>:8081."
+                },
+                "reportsCallbackUrl": {
+                    "type": "string",
+                    "description": "Optional URL to POST reports to. Empty disables report callbacks."
+                },
+                "auth": {
+                    "type": "object",
+                    "description": "JWT authentication for the public API. Disabled by default, which leaves /v1/** unauthenticated.",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "jwksUri": {
+                            "type": "string",
+                            "description": "OTDS JWKS URI used to validate tokens. Required when enabled is true."
+                        },
+                        "issuer": {
+                            "type": "string",
+                            "description": "Issuer a token must name. Required when enabled is true."
+                        },
+                        "audience": {
+                            "type": "string",
+                            "description": "Audience a token must be addressed to. Required when enabled is true, unless requireValidSubscription is true."
+                        },
+                        "etsUrl": {
+                            "type": "string",
+                            "description": "Entitlement Service URL for subscription and role lookup. When set, roles come from the caller's ETS subscription rather than the token's scopes. Optional unless requireValidSubscription is true."
+                        },
+                        "etsCacheTtl": {
+                            "type": "string",
+                            "description": "How long a user's ETS entitlement is reused, e.g. 60s. 0 looks it up on every request."
+                        },
+                        "requireValidSubscription": {
+                            "type": "boolean",
+                            "description": "Refuse a caller unless the subscription it acts as is to one of validSubscriptionApplications."
+                        },
+                        "validSubscriptionApplications": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "description": "Application names a subscription must be to. Required when requireValidSubscription is true."
+                        }
+                    }
+                },
+                "startupProbe": {
+                    "type": "object",
+                    "description": "Startup gate on /v1/health/live. failureThreshold x periodSeconds is the budget before the kubelet kills the container; raise it for a first boot with the seeded storage provider.",
+                    "properties": {
+                        "periodSeconds": {
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        "timeoutSeconds": {
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        "failureThreshold": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    }
+                },
+                "metrics": {
+                    "type": "object",
+                    "description": "Prometheus metrics on the internal port (/internal/metrics, 8081). Cross-tenant aggregates - must not be routed through the public ingress.",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "serviceMonitor": {
+                            "type": "object",
+                            "description": "Prometheus Operator ServiceMonitor. Requires the monitoring.coreos.com CRDs.",
+                            "properties": {
+                                "enabled": { "type": "boolean" },
+                                "interval": { "type": "string" },
+                                "scrapeTimeout": { "type": "string" }
+                            }
+                        }
+                    }
+                }
+            },
+            "additionalProperties": false,
+            "required": [
+                "enabled",
+                "image",
+                "ingress",
+                "resources",
+                "env"
+            ],
+            "title": "ConnectorManagement"
+        },
+        "Ingress": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "internalEnabled": {
+                    "type": "boolean"
+                },
+                "annotations": {
+                    "type": "object"
+                },
+                "gateway": {
+                    "$ref": "#/$defs/gateway"
+                },
+                "host": {
+                    "type": "string"
+                },
+                "port": {
+                    "$ref": "#/$defs/port_number"
+                },
+                "contextPath": {
+                    "type": "string"
+                },
+                "tls": {
+                    "$ref": "#/$defs/IngressTLS"
+                }
+            },
+            "required": [
+                "enabled",
+                "host",
+                "contextPath",
+                "tls"
+            ],
+            "title": "ConnectorManagementIngress"
+        },
+        "port_number": {
+            "description": "A port, as a string or an integer. Both are accepted because `--set foo.port=8443` yields an integer while `--set-string` yields a string, and rejecting one of them is a needless papercut. The pattern constrains strings; minimum/maximum constrain integers.",
+            "type": [
+                "string",
+                "integer"
+            ],
+            "pattern": "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$",
+            "minimum": 0,
+            "maximum": 65535
+        },
+        "optional_duration": {
+            "type": "string",
+            "pattern": "^(([0-9]{1,5}(h|m|s|ms)){1,4})?$"
+        },
+        "gateway": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "requestTimeout": {
+                    "$ref": "#/$defs/optional_duration"
+                },
+                "backendTimeout": {
+                    "$ref": "#/$defs/optional_duration"
+                },
+                "protocol": {
+                    "type": "string",
+                    "enum": [
+                        "http",
+                        "https"
+                    ]
+                }
+            }
+        },
+        "ResourcesVolume": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "existingClaim": {
+                    "type": "string",
+                    "description": "Name of an existing, already-populated PVC to mount instead of provisioning one. When set, storageClass/size/accessModes are ignored and no PVC is created."
+                },
+                "readOnly": {
+                    "type": "boolean",
+                    "description": "Mount the volume read-only. Must be false when the volume is the target of the seeded storage provider."
+                },
+                "storageClass": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "string",
+                    "pattern": "^\\d+(?:\\.\\d+)?(?:Ki|Mi|Gi|Ti|Pi|Ei)?$"
+                },
+                "accessModes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "enum": [
+                            "ReadWriteOnce",
+                            "ReadOnlyMany",
+                            "ReadWriteMany"
+                        ]
+                    }
+                }
+            },
+            "required": [
+                "enabled"
+            ]
+        },
+        "SeccompProfile": {
+            "type": "object",
+            "description": "Kubernetes seccomp profile. Localhost also requires localhostProfile, and the file must be present on the node.",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "RuntimeDefault",
+                        "Localhost",
+                        "Unconfined"
+                    ]
+                },
+                "localhostProfile": {
+                    "type": "string",
+                    "description": "Path relative to the kubelet seccomp root. Required when type is Localhost."
+                }
+            },
+            "required": [
+                "type"
+            ]
+        },
+        "CacheVolume": {
+            "type": "object",
+            "description": "emptyDir backing the storage-provider cache, mounted at the path named by env.CONNECTORS_STORAGE_PROVIDER_CACHE_DIR. No volume is created when that env var is unset.",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "sizeLimit": {
+                    "type": "string",
+                    "description": "Optional cap on the emptyDir, e.g. 10Gi. Empty means uncapped.",
+                    "pattern": "^(\\d+(?:\\.\\d+)?(?:Ki|Mi|Gi|Ti|Pi|Ei))?$"
+                }
+            },
+            "required": [
+                "enabled"
+            ]
+        },
+        "NifiConfig": {
+            "type": "object",
+            "properties": {
+                "existingSecret": {
+                    "type": "string",
+                    "description": "Secret you manage holding the NiFi API credentials. Rotating a value inside it does not restart the api - the chart cannot read it."
+                },
+                "existingSecretUsernameKey": {
+                    "type": "string",
+                    "description": "Key in existingSecret holding the username. Empty keeps using the username value."
+                },
+                "existingSecretPasswordKey": {
+                    "type": "string",
+                    "description": "Key in existingSecret holding the password."
+                },
+                "endpoint": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "proxyHost": {
+                    "type": "string"
+                },
+                "proxyPort": {
+                    "type": "string"
+                },
+                "tls": {
+                    "$ref": "#/$defs/NifiTls"
+                }
+            }
+        },
+        "NifiTls": {
+            "type": "object",
+            "description": "Certificate verification for an https:// NiFi endpoint. Off by default, which accepts any certificate from any issuer.",
+            "properties": {
+                "verify": {
+                    "type": "boolean"
+                },
+                "verifyHostname": {
+                    "type": "boolean",
+                    "description": "Check the certificate names the host in endpoint. Only consulted when verify is on."
+                },
+                "existingCaSecret": {
+                    "type": "string",
+                    "description": "Secret holding the certificate to trust. Empty uses the JVM default trust store."
+                },
+                "existingCaConfigMap": {
+                    "type": "string",
+                    "description": "ConfigMap holding the certificate to trust, as an alternative to existingCaSecret."
+                },
+                "caKey": {
+                    "type": "string",
+                    "description": "Key within the Secret/ConfigMap. A .p12, .pfx or .jks extension is read as a trust store, anything else as PEM.",
+                    "minLength": 1
+                },
+                "trustStorePassword": {
+                    "type": "string",
+                    "description": "Password for the trust store named by caKey. Ignored for PEM."
+                },
+                "existingTrustStorePasswordSecret": {
+                    "type": "string",
+                    "description": "Secret holding the trust store password, instead of trustStorePassword."
+                },
+                "existingTrustStorePasswordKey": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "verify"
+            ]
+        },
+        "TargetPipeline": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Display name for the pipeline target"
+                },
+                "url": {
+                    "type": "string",
+                    "description": "NiFi URL for this pipeline"
+                },
+                "processGroupId": {
+                    "type": "string",
+                    "description": "NiFi process group UUID"
+                },
+                "portId": {
+                    "type": "string",
+                    "description": "NiFi input port UUID"
+                },
+                "portName": {
+                    "type": "string",
+                    "description": "NiFi input port name"
+                }
+            },
+            "required": [
+                "name",
+                "url",
+                "processGroupId",
+                "portId",
+                "portName"
+            ]
+        },
+        "Postgresql": {
+            "type": "object",
+            "description": "The bundled postgresql-ha sub-chart (enabled: true), or the credential/connection settings shared with an existing instance described by externalPostgresql (enabled: false). Sub-chart values are not constrained here.",
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "description": "Whether to deploy the bundled postgresql-ha sub-chart"
+                },
+                "existingSecret": {
+                    "type": "string",
+                    "description": "Secret you manage holding the bundled database's credentials (keys: password, repmgr-password, admin-password). Must also be passed to postgresql.postgresql.existingSecret and postgresql.pgpool.existingSecret. Required for GitOps, where lookup-based generation would rotate on every sync. For an external instance use externalPostgresql.existingSecret."
+                },
+                "jdbcParameters": {
+                    "type": "string",
+                    "description": "Optional JDBC query parameters appended to the connection URL, e.g. sslmode=require"
+                }
+            },
+            "required": [
+                "enabled"
+            ]
+        },
+        "Sub-Chart": {
+            "type": "object",
+            "description": "The bundled sub-chart (enabled: true). Sub-chart values are not constrained here.",
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "description": "Whether to deploy the bundled sub-chart"
+                }
+            },
+            "required": [
+                "enabled"
+            ]
+        },
+        "NifiDeployment": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "description": "Whether to deploy the NiFi instance"
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Component name for the NiFi StatefulSet, Service and DNS; objects are named <release>-<name>"
+                },
+                "fullnameOverride": {
+                    "type": "string",
+                    "description": "Replaces the generated <release>-<name> for the NiFi objects. Empty keeps release scoping."
+                },
+                "image": {
+                    "type": "string",
+                    "description": "NiFi container image"
+                },
+                "imagePullPolicy": {
+                    "type": "string",
+                    "description": "Pull policy for this component's image. Empty inherits global.imagePullPolicy.",
+                    "enum": [
+                        "",
+                        "Always",
+                        "IfNotPresent",
+                        "Never"
+                    ]
+                },
+                "serviceAccountName": {
+                    "type": "string",
+                    "description": "serviceAccountName for this component's pod. Empty inherits the chart-wide serviceAccountName."
+                },
+                "sensitivePropsKey": {
+                    "type": "string",
+                    "description": "Key NiFi uses to encrypt sensitive properties. Empty generates a 32-character key on first install and preserves it; a supplied value must be at least 12 characters (NiFi's own minimum).",
+                    "anyOf": [
+                        {
+                            "const": ""
+                        },
+                        {
+                            "minLength": 12
+                        }
+                    ]
+                },
+                "existingSensitivePropsSecret": {
+                    "type": "string",
+                    "description": "Secret you manage holding the sensitive properties key under key `sensitive-props-key`."
+                },
+                "jvmHeapInitPercentage": {
+                    "type": [
+                        "number",
+                        "string"
+                    ],
+                    "pattern": "^\\d+(?:\\.\\d+)?$",
+                    "exclusiveMinimum": 0,
+                    "maximum": 100,
+                    "description": "JVM initial heap as a percentage of resources.limits.memory (-XX:InitialRAMPercentage). Must not exceed jvmHeapMaxPercentage. A numeric string is accepted, since --set passes a decimal as a string."
+                },
+                "jvmHeapMaxPercentage": {
+                    "type": [
+                        "number",
+                        "string"
+                    ],
+                    "pattern": "^\\d+(?:\\.\\d+)?$",
+                    "exclusiveMinimum": 0,
+                    "maximum": 100,
+                    "description": "JVM maximum heap as a percentage of resources.limits.memory (-XX:MaxRAMPercentage). A numeric string is accepted, since --set passes a decimal as a string."
+                },
+                "resources": {
+                    "type": "object",
+                    "description": "Container resource requests and limits"
+                },
+                "labels": {
+                    "type": "object"
+                },
+                "env": {
+                    "type": "object",
+                    "description": "Environment variables for the NiFi container, e.g. DOCSECURITY_API_URL which the UserSecurity flow resolves."
+                },
+                "devShmSize": {
+                    "type": "string",
+                    "description": "Size of the /dev/shm Memory-medium emptyDir. The Web connector's headless Chrome aborts rather than degrading when a shared-memory allocation fails, and the 64MB runtime default is not enough. Keep resources.limits.memory comfortably above the maximum heap (jvmHeapMaxPercentage of it) plus this.",
+                    "pattern": "^\\d+(?:\\.\\d+)?(?:Ki|Mi|Gi|Ti|Pi|Ei)?$"
+                },
+                "seccompProfile": {
+                    "$ref": "#/$defs/SeccompProfile"
+                },
+                "seccompInstaller": {
+                    "type": "object",
+                    "description": "Installs a Localhost seccomp profile onto the node via a one-shot root initContainer with a hostPath write. Needs a namespace permitting hostPath and a root pod - PodSecurity baseline or privileged, not restricted.",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "kubeletSeccompDir": {
+                            "type": "string",
+                            "description": "Kubelet seccomp root on the node; localhostProfile is resolved relative to this."
+                        }
+                    },
+                    "required": [
+                        "enabled"
+                    ]
+                },
+                "metrics": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean",
+                            "description": "Advertise NiFi's Prometheus metrics with prometheus.io/* pod annotations"
+                        }
+                    }
+                },
+                "dataVolume": {
+                    "type": "object",
+                    "properties": {
+                        "storageClass": {
+                            "type": "string"
+                        },
+                        "size": {
+                            "type": "string",
+                            "pattern": "^\\d+(?:\\.\\d+)?(?:Ki|Mi|Gi|Ti|Pi|Ei)?$"
+                        }
+                    },
+                    "required": [
+                        "size"
+                    ]
+                },
+                "ingress": {
+                    "$ref": "#/$defs/Ingress"
+                }
+            },
+            "additionalProperties": false,
+            "required": [
+                "enabled",
+                "name",
+                "image"
+            ]
+        },
+        "ExternalPostgresql": {
+            "type": "object",
+            "description": "An existing PostgreSQL instance this chart does not deploy. Used only when postgresql.enabled is false; ignored when the bundled sub-chart is deployed.",
+            "properties": {
+                "host": {
+                    "type": "string",
+                    "description": "Hostname of the existing PostgreSQL instance (or a Service pointing at one). Required when postgresql.enabled is false."
+                },
+                "port": {
+                    "type": [
+                        "string",
+                        "integer"
+                    ],
+                    "description": "Port of the existing PostgreSQL instance."
+                },
+                "database": {
+                    "type": "string",
+                    "description": "Database on the existing instance. Falls back to postgresql.postgresql.database."
+                },
+                "username": {
+                    "type": "string",
+                    "description": "User on the existing instance. Falls back to postgresql.postgresql.username."
+                },
+                "password": {
+                    "type": "string",
+                    "description": "Password on the existing instance. Falls back to postgresql.postgresql.password."
+                },
+                "existingSecret": {
+                    "type": "string",
+                    "description": "Secret you manage holding this instance's credentials (a password, and optionally a username). Separate from postgresql.existingSecret, which is for the bundled database and must carry bitnami's key names."
+                },
+                "existingSecretPasswordKey": {
+                    "type": "string",
+                    "description": "Which key of postgresql.existingSecret holds the password. External instance only - the bundled sub-chart requires \"password\"."
+                },
+                "existingSecretUsernameKey": {
+                    "type": "string",
+                    "description": "Which key of postgresql.existingSecret holds the username. External instance only; empty takes the username from values."
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}

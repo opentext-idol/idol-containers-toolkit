@@ -1,0 +1,41 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2026 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+{{- /* Read access to this release's namespace for the bundled Prometheus, in place of the
+       sub-chart's ClusterRole (prometheus.rbac.create is false by default). Its one scrape job
+       discovers pods in its own namespace only, so this is all it needs - and being namespaced,
+       it lets any number of releases each run one. Skipped when prometheus.rbac.create is
+       turned back on, since the sub-chart then grants its own, cluster-wide. */}}
+{{- if and .Values.prometheus.enabled (not .Values.prometheus.rbac.create) }}
+{{- $name := printf "%s-prometheus-pods" (include "idol-connector-management.fullname" .) | trunc 63 | trimSuffix "-" }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ $name }}
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.connectorManagement) | nindent 4 }}
+rules:
+  - apiGroups: [""]
+    resources: [pods]
+    verbs: [get, list, watch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ $name }}
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.connectorManagement) | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ $name }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "idol-connector-management.prometheus.serverServiceAccount" . }}
+    namespace: {{ .Release.Namespace }}
+{{- end }}
