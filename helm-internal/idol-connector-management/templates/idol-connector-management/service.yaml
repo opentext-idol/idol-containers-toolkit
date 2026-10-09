@@ -1,0 +1,35 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+{{- if .Values.connectorManagement.enabled }}
+{{- $fullname := include "idol-connector-management.fullname" . }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $fullname }}
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.connectorManagement) | nindent 4 }}
+    app: "{{ $fullname }}"
+  annotations:
+    app.kubernetes.io/name: {{ $fullname }}
+    app.kubernetes.io/part-of: {{ $fullname }}
+spec:
+  type: ClusterIP
+  selector:
+    app: "{{ $fullname }}"
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+    name: http-public
+  - protocol: TCP
+    port: 8081
+    targetPort: 8081
+    name: http-internal
+{{- end -}}

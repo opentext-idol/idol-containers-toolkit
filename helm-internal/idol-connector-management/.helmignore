@@ -1,0 +1,8 @@
+/target/
+
+/build-*.sh
+
+# Local/development value overlays, applied explicitly with -f from this
+# directory rather than consumed from the packaged chart
+/values-dev.yaml
+/values-local.yaml

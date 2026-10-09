@@ -1,0 +1,50 @@
+{
+  "defaultAction": "SCMP_ACT_ALLOW",
+  "archMap": [
+    {
+      "architecture": "SCMP_ARCH_X86_64",
+      "subArchitectures": ["SCMP_ARCH_X86", "SCMP_ARCH_X32"]
+    },
+    {
+      "architecture": "SCMP_ARCH_AARCH64",
+      "subArchitectures": ["SCMP_ARCH_ARM"]
+    }
+  ],
+  "syscalls": [
+    {
+      "names": [
+        "acct",
+        "bpf",
+        "clock_settime",
+        "create_module",
+        "delete_module",
+        "finit_module",
+        "get_kernel_syms",
+        "init_module",
+        "ioperm",
+        "iopl",
+        "kexec_file_load",
+        "kexec_load",
+        "lookup_dcookie",
+        "nfsservctl",
+        "open_by_handle_at",
+        "perf_event_open",
+        "query_module",
+        "quotactl",
+        "reboot",
+        "settimeofday",
+        "stime",
+        "swapoff",
+        "swapon",
+        "_sysctl",
+        "uselib",
+        "ustat",
+        "vhangup",
+        "vm86",
+        "vm86old"
+      ],
+      "action": "SCMP_ACT_ERRNO",
+      "errnoRet": 1
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023-2025 Open Text.
+#
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+{{- /*
+  PortFilter binds /v1/* to the public port and /internal/* to the internal one, answering 403
+  on the wrong port (rest/PortFilter.java - `if (localPort != allowedPort)`). Worth asserting
+  because a regression here silently exposes the internal callback API through the public
+  ingress, and nothing else in the chart or the probes would notice.
+
+  The internal path deliberately does not have to exist: the filter runs before routing, so a
+  blocked request is 403 while an allowed one reaches routing and returns 404. "Not 403" is
+  therefore the correct assertion for the internal port.
+*/}}
+{{- if and .Values.tests.enabled .Values.connectorManagement.enabled }}
+{{- $svc := include "idol-connector-management.fullname" . }}
+{{- /*
+  The metrics endpoint only answers when it is switched on, so the positive assertion is built
+  here rather than inside the script: a backtick string is a raw literal to the template engine,
+  and a nested {{ if }} inside it would be emitted verbatim into the shell script.
+*/}}
+{{- $metricsServed := "" }}
+{{- if .Values.connectorManagement.metrics.enabled }}
+{{- $metricsServed = `expect 200 "$INT/internal/metrics" "metrics served on the internal port"` }}
+{{- end }}
+{{- $script := printf `%s
+PUB="http://%s:8080"
+INT="http://%s:8081"
+
+expect 200 "$PUB/v1/health/ready" "public API served on the public port"
+expect 403 "$INT/v1/health/ready" "public API refused on the internal port"
+expect 403 "$PUB/internal/helm-test-probe" "internal API refused on the public port"
+
+# On the internal port the filter must let /internal/* through to routing, so any real response
+# other than 403 is correct - 404 for this made-up path is the expected outcome. expect_not
+# rather than a bare "not 403" check, so an unreachable port fails instead of passing.
+expect_not 403 "$INT/internal/helm-test-probe" "internal API past the filter on the internal port"
+
+# The metrics endpoint carries cross-tenant aggregates - every tenant's connector and target
+# inventory. Unlike the callbacks API, which is at least tenant-scoped per request, a leak here
+# exposes the whole deployment, so the public-port refusal is asserted whether or not metrics
+# are enabled: when disabled the endpoint 404s on the internal port but must still be 403 here.
+expect 403 "$PUB/internal/metrics" "metrics refused on the public port"
+%s
+
+[ "$FAILED" = "0" ] || exit 1
+echo "Port isolation is enforced in both directions."
+` (include "idol-connector-management.test.prelude" .) $svc $svc $metricsServed }}
+{{ include "idol-connector-management.test.pod" (dict "root" . "name" "port-isolation" "weight" 1 "image" .Values.connectorManagement.image "script" $script) }}
+{{- end }}

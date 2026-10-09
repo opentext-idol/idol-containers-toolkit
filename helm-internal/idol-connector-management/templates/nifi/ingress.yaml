@@ -1,0 +1,130 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+{{- if and .Values.nifi.enabled .Values.nifi.ingress.enabled }}
+{{- $nifiFullname := include "idol-connector-management.nifi.fullname" . }}
+{{- $pathSuffix := "" }}
+{{- $pathType := "Prefix" }}
+{{- if eq .Values.ingressType "nginx" }}
+{{- $pathSuffix = "(.*)"}}
+{{- $pathType = "ImplementationSpecific" }}
+{{- end }}
+{{ $root := . }}
+{{- if eq $root.Values.ingressType "gateway" }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $nifiFullname }}
+  labels: {{- include "idol-library.labels" (dict "root" $root "component" $root.Values.nifi) | nindent 4 }}
+    app: "{{ $nifiFullname }}"
+spec:
+  parentRefs:
+  - name: {{ $root.Values.nifi.ingress.gateway.name | required "Must specify nifi.ingress.gateway.name, having set ingressType=gateway" }}
+  {{- if $root.Values.nifi.ingress.gateway.namespace }}
+    namespace: {{ $root.Values.nifi.ingress.gateway.namespace }}
+  {{- end }}
+  hostnames: [{{ $root.Values.nifi.ingress.host }}]
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: {{ print ($root.Values.nifi.ingress.contextPath | default "") "/" | quote }}
+    backendRefs:
+    - name: {{ $nifiFullname }}
+      port: 8080
+    filters:
+    - type: RequestHeaderModifier
+      requestHeaderModifier:
+        add:
+        - name: X-Forwarded-Prefix
+          value: {{ $root.Values.nifi.ingress.contextPath | default "" }}
+        - name: X-Forwarded-Proto
+          value: {{ ternary "https" "http" (eq $root.Values.nifi.ingress.gateway.protocol "https") }}
+        - name: X-Forwarded-Host
+          value: {{ $root.Values.nifi.ingress.host }}
+        - name: X-Forwarded-Port
+          value: {{ $root.Values.nifi.ingress.port | quote }}
+    {{- if (or $root.Values.nifi.ingress.gateway.requestTimeout $root.Values.nifi.ingress.gateway.backendTimeout) }}
+    timeouts:
+      {{- if $root.Values.nifi.ingress.gateway.requestTimeout }}
+      request: {{ $root.Values.nifi.ingress.gateway.requestTimeout }}
+      {{- end -}}
+      {{- if $root.Values.nifi.ingress.gateway.backendTimeout }}
+      backendRequest: {{ $root.Values.nifi.ingress.gateway.backendTimeout }}
+      {{- end -}}
+    {{- end -}}
+{{- else }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $nifiFullname }}
+  labels: {{- include "idol-library.labels" (dict "root" $root "component" $root.Values.nifi) | nindent 4 }}
+    app: "{{ $nifiFullname }}"
+  annotations:
+    app.kubernetes.io/name: {{ $nifiFullname }}
+    app.kubernetes.io/part-of: {{ $nifiFullname }}
+{{- if eq $root.Values.ingressType "nginx" }}
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/affinity-mode: persistent
+{{- if $root.Values.nifi.ingress.contextPath }}
+    # rewrite-target strips the context path before proxying; NiFi reconstructs its
+    # UI links from X-Forwarded-Prefix (the prefix must also be allowlisted via
+    # NIFI_WEB_PROXY_CONTEXT_PATH on the statefulset). No trailing slash: NiFi
+    # normalises trailing slashes off its allowlist but not off the header, so a
+    # trailing slash here would never match.
+    nginx.ingress.kubernetes.io/x-forwarded-prefix: {{ $root.Values.nifi.ingress.contextPath | quote }}
+{{- end }}
+{{- else if eq $root.Values.ingressType "haproxy" }}
+    haproxy.router.openshift.io/rewrite-target: /
+    haproxy.router.openshift.io/proxy-body-size: {{ $root.Values.ingressProxyBodySize }}
+{{- end }}
+{{/* ingress setup is very dependent on cluster ingress controller so allow user value annotations */ -}}
+{{ with $root.Values.nifi.ingress.annotations }}
+{{- toYaml . | trim | indent 4 }}
+{{- end }}
+spec:
+{{- if $root.Values.ingressClassName }}
+  ingressClassName: {{ $root.Values.ingressClassName | quote }}
+{{- end }}
+  {{- if $root.Values.nifi.ingress.tls.secretName }}
+  tls:
+  - hosts:
+      - {{ $root.Values.nifi.ingress.host }}
+    secretName: {{ $root.Values.nifi.ingress.tls.secretName }}
+  {{- end }}
+  rules:
+  - http:
+      paths:
+      - path: {{ print ($root.Values.nifi.ingress.contextPath | default "") "/" $pathSuffix | quote }}
+        pathType: {{ $pathType }}
+        backend:
+          service:
+            name: {{ $nifiFullname }}
+            port:
+              name: http
+{{- if $root.Values.nifi.ingress.host }}
+    host: {{ $root.Values.nifi.ingress.host | quote }}
+{{- end }}
+{{- end }}
+---
+{{- /* Only create the Secret when certificate data was actually supplied. With just
+       secretName the Secret is expected to exist already - the usual case, e.g. issued by
+       cert-manager or managed outside the chart - and calling the helper then fails with
+       "missing tls.crt", so a perfectly valid configuration could not render. */}}
+{{- $tls := .Values.nifi.ingress.tls }}
+{{- if and (or $tls.crt $tls.key) (not (and $tls.crt $tls.key)) }}
+{{- fail "ingress.tls: supply both crt and key, or neither. Set only secretName to reference a TLS Secret that already exists; set crt and key together to have the chart create it." }}
+{{- end }}
+{{ if and $tls.secretName $tls.crt -}}
+---
+{{ include "idol-library.ingress.secret" (dict "tls" $tls) -}}
+{{- end -}}
+{{- end -}}

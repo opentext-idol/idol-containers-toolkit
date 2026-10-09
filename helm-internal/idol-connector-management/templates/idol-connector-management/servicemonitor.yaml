@@ -1,0 +1,32 @@
+{{- if and .Values.connectorManagement.enabled .Values.connectorManagement.metrics.enabled .Values.connectorManagement.metrics.serviceMonitor.enabled }}
+{{- $fullname := include "idol-connector-management.fullname" . }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ $fullname }}
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.connectorManagement) | nindent 4 }}
+    app: "{{ $fullname }}"
+    {{- /* A Prometheus Operator only picks up ServiceMonitors its serviceMonitorSelector
+           matches, and kube-prometheus-stack defaults that to release: <its own release>.
+           Without a way to add that label the object installs cleanly and is then ignored
+           silently - no error, no target, no metrics. */}}
+    {{- with .Values.connectorManagement.metrics.serviceMonitor.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  # Selects the Service, from which the operator resolves the pod endpoints to scrape. This must
+  # match the label service.yaml sets on itself, not the pod labels.
+  selector:
+    matchLabels:
+      app: "{{ $fullname }}"
+  endpoints:
+    # A port NAME from service.yaml, not a number - the internal (8081) connector. The metrics
+    # endpoint is deliberately not on the public 8080 port: it carries cross-tenant aggregates,
+    # and PortFilter answers 403 for it there.
+    - port: http-internal
+      path: /internal/metrics
+      interval: {{ .Values.connectorManagement.metrics.serviceMonitor.interval }}
+      # Must stay below interval. A scrape that overruns is recorded as failed, which drops every
+      # series in the response - not just the slow one.
+      scrapeTimeout: {{ .Values.connectorManagement.metrics.serviceMonitor.scrapeTimeout }}
+{{- end }}

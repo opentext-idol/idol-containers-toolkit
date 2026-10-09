@@ -1,0 +1,366 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023-2025 Open Text.
+#
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+{{- if .Values.nifi.enabled }}
+{{- $nifiFullname := include "idol-connector-management.nifi.fullname" . }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ $nifiFullname }}
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifi) | nindent 4 }}
+    name: "{{ $nifiFullname }}"
+    app: "{{ $nifiFullname }}"
+spec:
+  serviceName: {{ $nifiFullname }}-headless
+  replicas: 1
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      app: "{{ $nifiFullname }}"
+  template:
+    metadata:
+      {{- /* Roll the pod when its configuration actually changes - see the equivalent
+             comment in idol-connector-management.yaml. Only the ConfigMaps' `data` is
+             hashed so a chart version bump does not force a needless restart, which
+             matters more here: NiFi takes a couple of minutes to come back.
+
+             The seccomp profile is included because the install-seccomp-profile init
+             container copies it onto the node at pod start, so a changed profile only
+             takes effect once the pod is recreated. */}}
+      {{- $cm := include (print $.Template.BasePath "/nifi/configmap.yaml") . | fromYaml | default dict }}
+      {{- $seccompCm := include (print $.Template.BasePath "/nifi/seccomp-configmap.yaml") . | fromYaml | default dict }}
+      annotations:
+        {{- if .Values.nifi.metrics.enabled }}
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /nifi-api/flow/metrics/prometheus
+        prometheus.io/port: "8080"
+        {{- end }}
+        checksum/config: {{ $cm.data | toYaml | sha256sum }}
+        {{- if $seccompCm.data }}
+        checksum/seccomp-profile: {{ $seccompCm.data | toYaml | sha256sum }}
+        {{- end }}
+      labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifi) | nindent 8 }}
+        app: "{{ $nifiFullname }}"
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      dnsPolicy: ClusterFirstWithHostNet
+      restartPolicy: Always
+{{- with include "idol-connector-management.serviceAccountName" (dict "root" . "component" .Values.nifi.serviceAccountName) }}
+      serviceAccountName: {{ . }}
+{{- end }}
+      {{- /* True when the pod uses a Localhost seccomp profile and should install it on
+             this node (via a one-shot init container) before the main container starts. */}}
+      {{- $seccompInstall := and .Values.podSecurityContext.enabled .Values.nifi.seccompProfile (eq (.Values.nifi.seccompProfile.type | default "") "Localhost") .Values.nifi.seccompInstaller.enabled }}
+{{- if .Values.podSecurityContext.enabled }}
+      {{- /* The Web connector drives headless Chrome, whose sandbox must create an
+             unprivileged user namespace. RuntimeDefault seccomp blocks that syscall
+             without CAP_SYS_ADMIN, so Chrome aborts. Override just the NiFi pod's
+             seccompProfile (via nifi.seccompProfile) to permit user namespaces so the
+             sandbox stays ON; non-root, dropped caps and no_new_privs are unchanged. */}}
+      {{- $sc := omit .Values.podSecurityContext "enabled" }}
+      {{- with .Values.nifi.seccompProfile }}
+      {{- $sc = merge (dict "seccompProfile" .) (omit $sc "seccompProfile") }}
+      {{- end }}
+      securityContext: {{- toYaml $sc | nindent 8 }}
+{{- end }}
+{{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+{{- range . }}
+      - name: {{ . }}
+{{- end }}
+{{- end }}
+      {{- $pgConfigured := include "idol-connector-management.postgresql.configured" . }}
+      {{- $pg := include "idol-connector-management.postgresql" . | fromYaml }}
+{{- if or $seccompInstall $pgConfigured }}
+      initContainers:
+      {{- if $seccompInstall }}
+      # Install the Localhost seccomp profile onto this node before the main container
+      # starts. localhostProfile files are read from the node (not the image), so a custom
+      # profile must exist under the kubelet seccomp dir first, else the main container
+      # fails with CreateContainerError ("cannot load seccomp profile"). Like
+      # wait-for-postgres this is a one-shot init - no long-running/idle container. It runs
+      # as root to write the node dir, and overrides its own seccompProfile to RuntimeDefault
+      # so it can start before the profile exists; the copy then makes it exist for the
+      # subsequent (Localhost-profiled) containers in this pod.
+      - name: install-seccomp-profile
+        image: {{ .Values.global.busyboxImage }}
+        imagePullPolicy: {{ include "idol-connector-management.imagePullPolicy" (dict "root" .) }}
+        command:
+        - sh
+        - -c
+        - |
+          set -eu
+          DEST="/host-seccomp/{{ .Values.nifi.seccompProfile.localhostProfile }}"
+          mkdir -p "$(dirname "$DEST")"
+          cp "/profile/{{ base .Values.nifi.seccompProfile.localhostProfile }}" "$DEST"
+          chmod 0644 "$DEST"
+          echo "Installed seccomp profile to node:{{ trimSuffix "/" .Values.nifi.seccompInstaller.kubeletSeccompDir }}/{{ .Values.nifi.seccompProfile.localhostProfile }}"
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            cpu: 10m
+            memory: 16Mi
+        {{- if .Values.containerSecurityContext.enabled }}
+        {{- $isc := omit .Values.containerSecurityContext "enabled" }}
+        {{- $isc = merge (dict "seccompProfile" (dict "type" "RuntimeDefault") "runAsNonRoot" false "runAsUser" 0 "readOnlyRootFilesystem" true) (omit $isc "seccompProfile") }}
+        securityContext: {{- toYaml $isc | nindent 10 }}
+        {{- else }}
+        securityContext:
+          runAsNonRoot: false
+          runAsUser: 0
+          seccompProfile:
+            type: RuntimeDefault
+        {{- end }}
+        volumeMounts:
+        - name: seccomp-profile
+          mountPath: /profile
+          readOnly: true
+        - name: seccomp-root
+          mountPath: /host-seccomp
+      {{- end }}
+      {{- if $pgConfigured }}
+      - name: wait-for-postgres
+        image: {{ .Values.global.busyboxImage }}
+        imagePullPolicy: {{ include "idol-connector-management.imagePullPolicy" (dict "root" .) }}
+        command:
+        - sh
+        - -c
+        - |
+          echo "Connecting to PostgreSQL at {{ $pg.host }}:{{ $pg.port }}"
+          until nc -vzw 1 {{ $pg.host }} {{ $pg.port }}; do
+            echo "Waiting for PostgreSQL to start"
+            sleep 3
+          done
+        resources:
+          requests:
+            cpu: 20m
+            memory: 50Mi
+          limits:
+            cpu: 20m
+            memory: 50Mi
+        {{- if .Values.containerSecurityContext.enabled }}
+        securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+          readOnlyRootFilesystem: true
+        {{- end }}
+      {{- end }}
+{{- end }}
+      containers:
+      - name: nifi
+        image: {{ .Values.nifi.image }}
+        imagePullPolicy: {{ include "idol-connector-management.imagePullPolicy" (dict "root" . "component" .Values.nifi.imagePullPolicy) }}
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: NIFI_WEB_HTTP_PORT
+          value: "8080"
+        - name: NIFI_WEB_HTTPS_PORT
+          value: ""
+        - name: NIFI_SENSITIVE_PROPS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "idol-connector-management.nifi.sensitivePropsSecretName" . }}
+              key: sensitive-props-key
+        {{- /* The JVM refuses to start with an initial heap above its maximum, which would
+               leave the pod crash-looping on a values mistake - so refuse to render instead. */}}
+        {{- $heapInit := float64 .Values.nifi.jvmHeapInitPercentage }}
+        {{- $heapMax := float64 .Values.nifi.jvmHeapMaxPercentage }}
+        {{- /* The schema bounds a number, but --set passes a decimal as a string, which it cannot. */}}
+        {{- if or (le $heapInit 0.0) (gt $heapInit 100.0) (le $heapMax 0.0) (gt $heapMax 100.0) }}
+        {{- fail (printf "nifi.jvmHeapInitPercentage and jvmHeapMaxPercentage must be above 0 and at most 100 (got %v and %v)" .Values.nifi.jvmHeapInitPercentage .Values.nifi.jvmHeapMaxPercentage) }}
+        {{- end }}
+        {{- if gt $heapInit $heapMax }}
+        {{- fail (printf "nifi.jvmHeapInitPercentage (%v) must not exceed nifi.jvmHeapMaxPercentage (%v)" .Values.nifi.jvmHeapInitPercentage .Values.nifi.jvmHeapMaxPercentage) }}
+        {{- end }}
+        - name: NIFI_JVM_HEAP_INIT_PERCENTAGE
+          value: {{ .Values.nifi.jvmHeapInitPercentage | quote }}
+        - name: NIFI_JVM_HEAP_MAX_PERCENTAGE
+          value: {{ .Values.nifi.jvmHeapMaxPercentage | quote }}
+        - name: NIFI_DB_HOST
+          value: {{ $pg.host | quote }}
+        - name: NIFI_DB_PORT
+          value: {{ $pg.port | quote }}
+        - name: NIFI_DB_NAME
+          value: {{ $pg.database | quote }}
+{{- with include "idol-connector-management.postgresql.usernameKey" . }}
+        - name: NIFI_DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "idol-connector-management.postgresql.secretName" $ }}
+              key: {{ . }}
+{{- else }}
+        - name: NIFI_DB_USERNAME
+          value: {{ $pg.username | quote }}
+{{- end }}
+        - name: NIFI_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "idol-connector-management.postgresql.secretName" . }}
+              key: {{ include "idol-connector-management.postgresql.passwordKey" . }}
+{{- if .Values.licenseServerHostname }}
+        - name: NIFI_LICENSE_SERVER_HOST
+          value: {{ .Values.licenseServerHostname | quote }}
+        - name: NIFI_LICENSE_SERVER_PORT
+          value: {{ .Values.licenseServerPort | default "20000" | quote }}
+{{- else if .Values.idolOemLicenseSecret }}
+        - name: NIFI_OEM_LICENSE_KEY_FILE
+          value: "/opt/nifi/nifi-current/licensekey.dat"
+{{- end }}
+{{- if .Values.proxyServerHostname }}
+        - name: NIFI_PROXY_SERVER_SCHEME
+          value: {{ .Values.proxyServerScheme | default "HTTP" | quote }}
+        - name: NIFI_PROXY_SERVER_HOST
+          value: {{ .Values.proxyServerHostname | quote }}
+        - name: NIFI_PROXY_SERVER_PORT
+          value: {{ .Values.proxyServerPort | default "20000" | quote }}
+{{- if .Values.proxyServerNoProxyHosts }}
+        - name: NIFI_PROXY_NO_PROXY_HOSTS
+          value: {{ .Values.proxyServerNoProxyHosts | quote }}
+{{- end }}
+{{- end }}
+{{- if .Values.nifi.ingress.enabled }}
+{{- if .Values.nifi.ingress.host }}
+        # Allowlist the external host(s) NiFi may be reached on via the ingress,
+        # else NiFi rejects proxied requests with HTTP 400 (invalid host header).
+        - name: NIFI_WEB_PROXY_HOST
+          value: {{ if .Values.nifi.ingress.port -}}
+                    {{ printf "%s,%s:%v" .Values.nifi.ingress.host .Values.nifi.ingress.host .Values.nifi.ingress.port | quote }}
+                  {{- else -}}
+                    {{ .Values.nifi.ingress.host | quote }}
+                  {{- end }}
+{{- end }}
+{{- if .Values.nifi.ingress.contextPath }}
+        # Allowlist the proxy context path (sent as X-Forwarded-Prefix, no trailing
+        # slash), else NiFi rejects it as an invalid context path.
+        - name: NIFI_WEB_PROXY_CONTEXT_PATH
+          value: {{ .Values.nifi.ingress.contextPath | quote }}
+{{- end }}
+{{- end }}
+        envFrom:
+          - configMapRef:
+              name: {{ $nifiFullname }}-cm
+              optional: false
+        {{- /* All three probes use /nifi/ - the UI index - and that choice is deliberate:
+
+               - It is served without authentication. NiFi's REST endpoints (/nifi-api/...)
+                 are not: they require read on /flow and answer 401 when unauthenticated, so
+                 a probe on one of those would start failing the moment NiFi is secured and
+                 turn the startup probe below into a permanent CrashLoopBackOff. Please do
+                 not "improve" these to a /nifi-api path.
+               - It is no weaker a signal. NiFi binds the web port only after the flow
+                 controller has synchronised ("Successfully synchronized controller with
+                 proposed flow" precedes "Started Server on http://0.0.0.0:8080/nifi"), so
+                 nothing answers at all until the flow is loaded. Verified on NiFi 2.9.0 -
+                 worth re-checking on a major NiFi upgrade.
+               - /nifi/ rather than /nifi: the latter is a 301 to /nifi/, and an httpGet probe
+                 counts 3xx as success, so it only ever asserted that Jetty issues a redirect.
+                 The trailing slash returns a real 200. */}}
+        {{- /* Startup gate. While it is running liveness and readiness are suspended, so a
+               slow first start - seeding the flow and autoloading NARs - is safe; the budget
+               is periodSeconds x failureThreshold before the container is killed. Sized for a
+               cold start with a fully populated nar_extensions, not the ~30s a warm restart
+               takes. */}}
+        startupProbe:
+          httpGet:
+            path: /nifi/
+            port: 8080
+            scheme: HTTP
+          periodSeconds: 5
+          timeoutSeconds: 5
+          failureThreshold: 72
+          successThreshold: 1
+        livenessProbe:
+          httpGet:
+            path: /nifi/
+            port: 8080
+            scheme: HTTP
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 5
+          successThreshold: 1
+        readinessProbe:
+          httpGet:
+            path: /nifi/
+            port: 8080
+            scheme: HTTP
+          periodSeconds: 15
+          timeoutSeconds: 10
+          failureThreshold: 5
+          successThreshold: 1
+        {{- if .Values.nifi.resources }}
+        resources: {{ toYaml .Values.nifi.resources | nindent 10 }}
+        {{- end }}
+        {{- if .Values.containerSecurityContext.enabled }}
+        securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+        {{- end }}
+        volumeMounts:
+        - name: nifi-data
+          mountPath: /opt/nifi/nifi-current/data
+        # The Web connector's headless Chrome puts its renderer transport buffers in
+        # shared memory. The container runtime default for /dev/shm is 64MB, and Chrome
+        # CHECK-aborts (SIGTRAP) rather than degrading when a shared memory allocation
+        # fails, killing the browser mid-crawl. See nifi.devShmSize.
+        - name: dshm
+          mountPath: /dev/shm
+        {{- if .Values.idolOemLicenseSecret }}
+        - name: oem-license
+          mountPath: /opt/nifi/nifi-current/licensekey.dat
+          subPath: licensekey.dat
+          readOnly: true
+        - name: oem-license
+          mountPath: /opt/nifi/nifi-current/versionkey.dat
+          subPath: versionkey.dat
+          readOnly: true
+        {{- end }}
+      volumes:
+        # Backs the /dev/shm mount above. Memory-medium emptyDir pages count against the
+        # container memory limit as they are used, so sizeLimit is a cap and not a
+        # reservation - keep nifi.resources.limits.memory comfortably above the sum of the
+        # JVM heap and this.
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: {{ .Values.nifi.devShmSize }}
+        {{- if $seccompInstall }}
+        # Profile content (from the chart) and a writable view of the node kubelet seccomp
+        # dir, used by the install-seccomp-profile init container to place the profile.
+        - name: seccomp-profile
+          configMap:
+            name: {{ $nifiFullname }}-seccomp
+        - name: seccomp-root
+          hostPath:
+            path: {{ .Values.nifi.seccompInstaller.kubeletSeccompDir }}
+            type: DirectoryOrCreate
+        {{- end }}
+        {{- if .Values.idolOemLicenseSecret }}
+        - name: oem-license
+          secret:
+            secretName: {{ .Values.idolOemLicenseSecret }}
+        {{- end }}
+  volumeClaimTemplates:
+  - metadata:
+      name: nifi-data
+      {{- /* volumeClaimTemplates are immutable, so these labels must NOT carry
+             helm.sh/chart - a chart version bump would otherwise make every
+             `helm upgrade` fail with "updates to statefulset spec ... are
+             forbidden". This helper is idol-library.labels minus that label. */}}
+      labels: {{- include "idol-library.labels.volumeClaimTemplates" (dict "root" . "component" .Values.nifi) | nindent 8 }}
+        app: "{{ $nifiFullname }}"
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      {{- include "idol-connector-management.storageClass" (dict "root" . "component" .Values.nifi.dataVolume.storageClass) | nindent 6 }}
+      resources:
+        requests:
+          storage: {{ .Values.nifi.dataVolume.size }}
+{{- end -}}
