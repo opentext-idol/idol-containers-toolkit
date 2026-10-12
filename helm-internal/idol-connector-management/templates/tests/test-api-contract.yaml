@@ -1,0 +1,61 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023-2025 Open Text.
+#
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+{{- /*
+  Exercises the type-listing endpoints, which readiness does not cover: it only calls
+  listResources("connectors/") internally, whereas these go through tenant handling, the full
+  resource-provider listing and JSON serialisation. An empty list is a pass - the assertion is
+  that the endpoint answers with the documented shape, not that any connector is installed.
+
+  Skipped when auth is enabled, because these paths then require a bearer token; that case is
+  covered by the auth test instead.
+*/}}
+{{- if and .Values.tests.enabled .Values.connectorManagement.enabled (not .Values.connectorManagement.auth.enabled) }}
+{{- $svc := include "idol-connector-management.fullname" . }}
+{{- $script := printf `%s
+# These three endpoints are the slowest in the chart on a cold cache: each category's listing is
+# fetched from the resource provider and every type's manifest read, which against a remote
+# provider was measured at 13-55s per category, against 0.2s once cached. The default 10s budget
+# turned that into "HTTP 000", reporting a working endpoint as unreachable - so a test run
+# immediately after an install failed while the same run passed minutes later.
+#
+# One retry rather than three: with a budget this size a second attempt is enough to cover an
+# endpoint-programming race, and three would put the suite's worst case beyond the 5-minute
+# default timeout of helm test itself.
+REQ_TIMEOUT=90
+REQ_ATTEMPTS=2
+
+BASE="http://%s:8080/v1/types"
+Q="tenantId=helm-test&subscriptionId=helm-test"
+check() {
+  local path="$1" key="$2"
+  req "$BASE/$path?$Q"
+  if [ "$code" != "200" ]; then
+    echo "  FAIL  /v1/types/$path returned HTTP $code (expected 200)"
+    printf '        %%s\n' "$body" | head -5
+    FAILED=1
+    return
+  fi
+  if ! printf '%%s' "$body" | jq -e "has(\"$key\")" >/dev/null 2>&1; then
+    echo "  FAIL  /v1/types/$path: response has no \"$key\" field"
+    printf '        %%s\n' "$body" | head -5
+    FAILED=1
+    return
+  fi
+  echo "  PASS  /v1/types/$path (HTTP 200, $(printf '%%s' "$body" | jq -r ".$key | length") entries)"
+}
+check connectors connectorTypes
+check targets    targetTypes
+check processing processingTypes
+[ "$FAILED" = "0" ] || exit 1
+echo "Type endpoints answer with the documented shape."
+` (include "idol-connector-management.test.prelude" .) $svc }}
+{{ include "idol-connector-management.test.pod" (dict "root" . "name" "api-contract" "weight" 1 "image" .Values.connectorManagement.image "script" $script) }}
+{{- end }}

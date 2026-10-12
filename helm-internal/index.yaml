@@ -1,0 +1,31 @@
+apiVersion: v1
+entries:
+  idol-connector-management:
+  - apiVersion: v2
+    appVersion: "27.1"
+    created: "2026-10-09T16:14:53.1249759+01:00"
+    dependencies:
+    - name: idol-library
+      repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+      version: ~0.16.0
+    - alias: postgresql
+      condition: postgresql.enabled
+      name: postgresql-ha
+      repository: '@bitnami-charts'
+      version: 14.3.4
+    - alias: documentsecurity
+      condition: documentsecurity.enabled
+      name: idol-documentsecurity
+      repository: '@cs-kd-helm-dev'
+      version: 27.1.0-SNAPSHOT
+    - condition: prometheus.enabled
+      name: prometheus
+      repository: '@prometheus'
+      version: 25.0.0
+    description: A configurable IDOL Connector Management API setup
+    digest: c1c0a33c9feb283051e5ce5a8dcfcbc7de4f420a6df8bfbf259fe7f0b2b503d8
+    name: idol-connector-management
+    urls:
+    - release/idol-connector-management-27.1.0-SNAPSHOT.tgz
+    version: 27.1.0-SNAPSHOT
+generated: "2026-10-09T16:14:53.1087246+01:00"

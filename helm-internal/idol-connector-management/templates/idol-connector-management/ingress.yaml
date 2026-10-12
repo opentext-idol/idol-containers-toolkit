@@ -1,0 +1,125 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+{{- if and .Values.connectorManagement.enabled .Values.connectorManagement.ingress.enabled }}
+{{- $fullname := include "idol-connector-management.fullname" . }}
+{{- $pathSuffix := "" }}
+{{- $pathType := "Prefix" }}
+{{- if eq .Values.ingressType "nginx" }}
+{{- $pathSuffix = "(.*)"}}
+{{- $pathType = "ImplementationSpecific" }}
+{{- end }}
+{{ $root := . }}
+{{- if eq $root.Values.ingressType "gateway" }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $fullname }}-public
+  labels: {{- include "idol-library.labels" (dict "root" $root "component" $root.Values.connectorManagement) | nindent 4 }}
+    app: "{{ $fullname }}"
+spec:
+  parentRefs:
+  - name: {{ $root.Values.connectorManagement.ingress.gateway.name | required "Must specify connectorManagement.ingress.gateway.name, having set ingressType=gateway" }}
+  {{- if $root.Values.connectorManagement.ingress.gateway.namespace }}
+    namespace: {{ $root.Values.connectorManagement.ingress.gateway.namespace }}
+  {{- end }}
+  hostnames: [{{ $root.Values.connectorManagement.ingress.host }}]
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: {{ print ($root.Values.connectorManagement.ingress.contextPath | default "") "/" | quote }}
+    backendRefs:
+    - name: {{ $fullname }}
+      port: 8080
+    filters:
+    - type: RequestHeaderModifier
+      requestHeaderModifier:
+        add:
+        - name: X-Forwarded-Prefix
+          value: {{ print ($root.Values.connectorManagement.ingress.contextPath | default "") "/" }}
+        - name: X-Forwarded-Proto
+          value: {{ ternary "https" "http" (eq $root.Values.connectorManagement.ingress.gateway.protocol "https") }}
+        - name: X-Forwarded-Host
+          value: {{ $root.Values.connectorManagement.ingress.host }}
+        - name: X-Forwarded-Port
+          value: {{ $root.Values.connectorManagement.ingress.port | quote }}
+    {{- if (or $root.Values.connectorManagement.ingress.gateway.requestTimeout $root.Values.connectorManagement.ingress.gateway.backendTimeout) }}
+    timeouts:
+      {{- if $root.Values.connectorManagement.ingress.gateway.requestTimeout }}
+      request: {{ $root.Values.connectorManagement.ingress.gateway.requestTimeout }}
+      {{- end -}}
+      {{- if $root.Values.connectorManagement.ingress.gateway.backendTimeout }}
+      backendRequest: {{ $root.Values.connectorManagement.ingress.gateway.backendTimeout }}
+      {{- end -}}
+    {{- end -}}
+{{- else }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullname }}-public
+  labels: {{- include "idol-library.labels" (dict "root" $root "component" $root.Values.connectorManagement) | nindent 4 }}
+    app: "{{ $fullname }}"
+  annotations:
+    app.kubernetes.io/name: {{ $fullname }}
+    app.kubernetes.io/part-of: {{ $fullname }}
+{{- if eq $root.Values.ingressType "nginx" }}
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/affinity-mode: persistent
+{{- if $root.Values.connectorManagement.ingress.contextPath }}
+    nginx.ingress.kubernetes.io/x-forwarded-prefix: {{ print ($root.Values.connectorManagement.ingress.contextPath) "/" | quote }}
+{{- end }}
+{{- else if eq $root.Values.ingressType "haproxy" }}
+    haproxy.router.openshift.io/rewrite-target: /
+    haproxy.router.openshift.io/proxy-body-size: {{ $root.Values.ingressProxyBodySize }}
+{{- end }}
+{{/* ingress setup is very dependent on cluster ingress controller so allow user value annotations */ -}}
+{{ with $root.Values.connectorManagement.ingress.annotations }}
+{{- toYaml . | trim | indent 4 }}
+{{- end }}
+spec:
+{{- if $root.Values.ingressClassName }}
+  ingressClassName: {{ $root.Values.ingressClassName | quote }}
+{{- end }}
+  {{- if $root.Values.connectorManagement.ingress.tls.secretName }}
+  tls:
+  - hosts:
+      - {{ $root.Values.connectorManagement.ingress.host }}
+    secretName: {{ $root.Values.connectorManagement.ingress.tls.secretName }}
+  {{- end }}
+  rules:
+  - http:
+      paths:
+      - path: {{ print ($root.Values.connectorManagement.ingress.contextPath | default "") "/" $pathSuffix | quote }}
+        pathType: {{ $pathType }}
+        backend:
+          service:
+            name: {{ $fullname }}
+            port:
+              name: http-public
+{{- if $root.Values.connectorManagement.ingress.host }}
+    host: {{ $root.Values.connectorManagement.ingress.host | quote }}
+{{- end }}
+{{- end }}
+---
+{{- /* Only create the Secret when certificate data was actually supplied. With just
+       secretName the Secret is expected to exist already - the usual case, e.g. issued by
+       cert-manager or managed outside the chart - and calling the helper then fails with
+       "missing tls.crt", so a perfectly valid configuration could not render. */}}
+{{- $tls := .Values.connectorManagement.ingress.tls }}
+{{- if and (or $tls.crt $tls.key) (not (and $tls.crt $tls.key)) }}
+{{- fail "ingress.tls: supply both crt and key, or neither. Set only secretName to reference a TLS Secret that already exists; set crt and key together to have the chart create it." }}
+{{- end }}
+{{ if and $tls.secretName $tls.crt -}}
+---
+{{ include "idol-library.ingress.secret" (dict "tls" $tls) -}}
+{{- end -}}
+{{- end -}}

@@ -1,0 +1,18 @@
+{{- /*
+  Carries the NiFi headless-Chrome seccomp profile so the install-seccomp-profile init
+  container in the NiFi StatefulSet can copy it onto the node's kubelet seccomp directory
+  before the main container starts. Kubernetes reads a Localhost seccompProfile from the
+  node filesystem (not from the container image), so the profile must physically exist on
+  the node first. Only rendered when the NiFi pod uses a Localhost seccomp profile.
+*/}}
+{{- if and .Values.nifi.enabled .Values.nifi.seccompInstaller.enabled .Values.nifi.seccompProfile (eq (.Values.nifi.seccompProfile.type | default "") "Localhost") }}
+{{- $nifiFullname := include "idol-connector-management.nifi.fullname" . }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $nifiFullname }}-seccomp
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifi) | nindent 4 }}
+data:
+  {{ base .Values.nifi.seccompProfile.localhostProfile }}: |-
+{{ .Files.Get "profiles/nifi-chrome-sandbox.json" | indent 4 }}
+{{- end }}

@@ -1,0 +1,39 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+{{- if .Values.nifi.enabled }}
+{{- $nifiFullname := include "idol-connector-management.nifi.fullname" . }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $nifiFullname }}-cm
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifi) | nindent 4 }}
+    app: "{{ $nifiFullname }}"
+data:
+  # Static environment variables from values. DOCSECURITY_API_URL is handled
+  # below so it can be overridden when the docsec sub-chart is bundled.
+{{- range $k,$v := .Values.nifi.env }}
+{{- if ne $k "DOCSECURITY_API_URL" }}
+  {{ $k }}: {{ $v | quote }}
+{{- end }}
+{{- end }}
+
+  # PutUserSecurity in the UserSecurity target flow reads DOCSECURITY_API_URL
+  # from NiFi's environment via ${DOCSECURITY_API_URL}. When documentsecurity
+  # is bundled point at the in-cluster service; otherwise fall back to whatever
+  # the user supplied via nifi.env.DOCSECURITY_API_URL.
+{{- if .Values.documentsecurity.enabled }}
+  DOCSECURITY_API_URL: {{ printf "http://%s:%v/" (include "idol-connector-management.documentsecurity.fullname" .) .Values.documentsecurity.documentsecurity.port | quote }}
+{{- else if hasKey .Values.nifi.env "DOCSECURITY_API_URL" }}
+  DOCSECURITY_API_URL: {{ index .Values.nifi.env "DOCSECURITY_API_URL" | quote }}
+{{- end }}
+
+{{- end -}}
+

@@ -1,0 +1,30 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023-2025 Open Text.
+#
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+{{- /*
+  Checks the bundled NiFi is serving, through the same path its probes use. /nifi/ rather than
+  /nifi because the latter is a 301 to it, and rather than a /nifi-api path because those
+  require authentication once NiFi is secured - see the comment on the NiFi probes.
+
+  Both Services are checked because they serve different callers and fail independently: the
+  routable one carries the UI and the ingress, while the api reaches NiFi by stable pod DNS
+  through the headless one. A break in either would otherwise go unnoticed - the probes only
+  exercise the pod-DNS path.
+*/}}
+{{- if and .Values.tests.enabled .Values.nifi.enabled }}
+{{- $nifi := include "idol-connector-management.nifi.fullname" . }}
+{{- $script := printf `%s
+expect 200 "http://%s:8080/nifi/" "NiFi UI served via the routable Service"
+expect 200 "http://%s-0.%s-headless:8080/nifi/" "NiFi served via pod DNS (the path the api uses)"
+[ "$FAILED" = "0" ] || exit 1
+echo "NiFi is serving."
+` (include "idol-connector-management.test.prelude" .) $nifi $nifi $nifi }}
+{{ include "idol-connector-management.test.pod" (dict "root" . "name" "nifi" "weight" 1 "image" .Values.connectorManagement.image "script" $script) }}
+{{- end }}

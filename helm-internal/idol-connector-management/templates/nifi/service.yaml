@@ -1,0 +1,56 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023-2025 Open Text.
+#
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+{{- if .Values.nifi.enabled }}
+{{- $nifiFullname := include "idol-connector-management.nifi.fullname" . }}
+{{- /* The headless Service, carrying the `-headless` suffix that names one by convention.
+       It backs the StatefulSet's stable pod DNS (<pod>-0.<service>), which is how the api
+       reaches NiFi, and publishes not-ready addresses so that name resolves while NiFi is
+       still starting.
+
+       The plain <fullname> below is the routable one. The two were the other way round -
+       the unsuffixed name was headless and the routable one wore a `-ui` suffix - which put
+       the surprising Service on the name anyone would try first. */}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $nifiFullname }}-headless
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifi) | nindent 4 }}
+    name: "{{ $nifiFullname }}-headless"
+    app: "{{ $nifiFullname }}"
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  selector:
+    app: "{{ $nifiFullname }}"
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+---
+{{- /* The routable Service: cluster-internal callers, `kubectl port-forward`, and the
+       ingress when nifi.ingress.enabled. */}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $nifiFullname }}
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.nifi) | nindent 4 }}
+    name: "{{ $nifiFullname }}"
+    app: "{{ $nifiFullname }}"
+spec:
+  selector:
+    app: "{{ $nifiFullname }}"
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+{{- end -}}

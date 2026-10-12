@@ -1,0 +1,509 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+{{- if .Values.connectorManagement.enabled }}
+{{- include "idol-connector-management.validateResourcesSource" . }}
+{{- $fullname := include "idol-connector-management.fullname" . }}
+{{- $nifiFullname := include "idol-connector-management.nifi.fullname" . }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ $fullname }}
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.connectorManagement) | nindent 4 }}
+    name: "{{ $fullname }}"
+    app: "{{ $fullname }}"
+  annotations:
+    app.kubernetes.io/name: {{ $fullname }}
+    app.kubernetes.io/part-of: {{ $fullname }}
+spec:
+  serviceName: {{ $fullname }}
+  replicas: 1
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      app: "{{ $fullname }}"
+  template:
+    metadata:
+      {{- /* Roll the pod when its configuration actually changes. Nearly all of this
+             service's config arrives through the ConfigMap, and without this a
+             `helm upgrade` that only edits connectorManagement.env updates the
+             ConfigMap while the running pod keeps its original values - silently, with
+             no indication anything was missed.
+
+             Only the ConfigMap's `data` is hashed, not the whole rendered object, so a
+             chart version bump (which changes helm.sh/chart in its labels) does not
+             force a pointless restart.
+
+             Values injected via connectorManagement.envFrom live outside the chart and
+             cannot be hashed - after changing a referenced Secret or ConfigMap, run
+             `kubectl rollout restart statefulset/<name>` yourself. */}}
+      {{- $cm := include (print $.Template.BasePath "/idol-connector-management/configmap.yaml") . | fromYaml | default dict }}
+      {{- /* secretEnv is configuration and should roll the pod when it changes. The
+             credential Secrets deliberately are NOT hashed: rotating a database password
+             or NiFi's sensitive-props key needs coordinated manual work, and an automatic
+             restart would only turn that into an outage. */}}
+      {{- $secretEnv := include "idol-connector-management.secretEnv.data" . | fromYaml }}
+      annotations:
+        {{- /* Gated on the endpoint existing, not on the bundled Prometheus being deployed.
+               Keyed on prometheus.enabled alone, a chart with metrics disabled still
+               advertised a scrape target: the controller bean is removed by
+               @ConditionalOnProperty, so the path is unmapped and every scrape 404s. An
+               external Prometheus also scrapes on these annotations without the subchart
+               being enabled at all. */}}
+        {{- if .Values.connectorManagement.metrics.enabled }}
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /internal/metrics
+        prometheus.io/port: "8081"
+        {{- end }}
+        checksum/config: {{ $cm.data | toYaml | sha256sum }}
+        {{- if $secretEnv }}
+        checksum/secret-env: {{ $secretEnv | toYaml | sha256sum }}
+        {{- end }}
+        {{- /* Only the reference is hashed, not the Secret's contents - the chart never
+               reads a user-managed Secret. So pointing at a different Secret or key rolls
+               the pod, but rotating the value inside it does not: that needs an explicit
+               `kubectl rollout restart`. */}}
+        {{- with .Values.connectorManagement.nifi.existingSecret }}
+        checksum/nifi-credentials-ref: {{ printf "%s/%s/%s" . $.Values.connectorManagement.nifi.existingSecretUsernameKey ($.Values.connectorManagement.nifi.existingSecretPasswordKey | default "password") | sha256sum }}
+        {{- end }}
+      labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.connectorManagement) | nindent 8 }}
+        app: "{{ $fullname }}"
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      dnsPolicy: ClusterFirstWithHostNet
+      restartPolicy: Always
+      {{- /* Long enough for the whole shutdown: the preStop pause, Tomcat waiting out requests
+             in flight (shutdownDrainSeconds), then the application closing down. */}}
+      terminationGracePeriodSeconds: {{ add (int .Values.connectorManagement.shutdownDrainSeconds) 15 }}
+{{- with include "idol-connector-management.serviceAccountName" (dict "root" . "component" .Values.connectorManagement.serviceAccountName) }}
+      serviceAccountName: {{ . }}
+{{- end }}
+{{- $pgConfigured := include "idol-connector-management.postgresql.configured" . }}
+{{- /* A chart-provisioned resources volume arrives empty and needs its directory
+       layout creating. An existingClaim is the operator's to populate, so it is left
+       untouched. */}}
+{{- $initResourceDirs := and .Values.connectorManagement.resourcesVolume.enabled (not .Values.connectorManagement.resourcesVolume.existingClaim) }}
+{{- if or $initResourceDirs $pgConfigured .Values.nifi.enabled .Values.documentsecurity.enabled }}
+      initContainers:
+{{- if $initResourceDirs }}
+      {{- /* Runs before the wait-for-* containers so a volume problem surfaces
+             immediately rather than after blocking on the database.
+
+             The filesystem storage provider throws FileNotFoundException for a missing
+             resource directory, and readiness lists connectors/ - so on a fresh volume
+             the pod would never become Ready, and the types endpoints would 500. This
+             creates the bare layout so the api starts cleanly with no resources
+             present, ready to be filled (e.g. by the `seeded` storage provider).
+
+             mkdir -p is idempotent, so this is safe on every restart. Writing requires
+             the volume to be group-writable by the pod - see podSecurityContext.fsGroup. */}}
+      - name: init-resource-dirs
+        image: {{ .Values.global.busyboxImage }}
+        imagePullPolicy: {{ include "idol-connector-management.imagePullPolicy" (dict "root" .) }}
+        command:
+        - sh
+        - -c
+        - |
+          set -eu
+          mkdir -p /resources/connectors /resources/targets /resources/processing /resources/NARs
+          echo "Resource directory layout ready:"
+          ls -la /resources
+        volumeMounts:
+        {{- /* Mounted read-write even when the api mounts it read-only: volumeMounts
+               are per-container, and this one has to create the directories. */}}
+        - name: resources
+          mountPath: /resources
+        resources:
+          requests:
+            cpu: 20m
+            memory: 50Mi
+          limits:
+            cpu: 20m
+            memory: 50Mi
+        {{- if .Values.containerSecurityContext.enabled }}
+        securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+          readOnlyRootFilesystem: true
+        {{- end }}
+{{- end }}
+{{- if $pgConfigured }}
+{{- $pg := include "idol-connector-management.postgresql" . | fromYaml }}
+      - name: wait-for-postgres
+        image: {{ .Values.global.busyboxImage }}
+        imagePullPolicy: {{ include "idol-connector-management.imagePullPolicy" (dict "root" .) }}
+        command:
+        - sh
+        - -c
+        - |
+          echo "Connecting to PostgreSQL at {{ $pg.host }}:{{ $pg.port }}"
+          until nc -vzw 1 {{ $pg.host }} {{ $pg.port }}; do
+            echo "Waiting for PostgreSQL to start"
+            sleep 3
+          done
+        resources:
+          requests:
+            cpu: 20m
+            memory: 50Mi
+          limits:
+            cpu: 20m
+            memory: 50Mi
+        {{- if .Values.containerSecurityContext.enabled }}
+        securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+          readOnlyRootFilesystem: true
+        {{- end }}
+{{- end }}
+{{- if .Values.nifi.enabled }}
+      - name: wait-for-nifi
+        image: {{ .Values.global.busyboxImage }}
+        imagePullPolicy: {{ include "idol-connector-management.imagePullPolicy" (dict "root" .) }}
+        command:
+        - sh
+        - -c
+        - |
+          # An HTTP request rather than a TCP connect: a bare connect succeeds the moment
+          # Jetty binds the port, whereas this waits for NiFi to actually serve. /nifi/ is
+          # used for the same reasons as the NiFi pod's own probes - it needs no
+          # authentication, and NiFi does not listen until the flow controller has
+          # synchronised, so a 200 here means NiFi is genuinely usable.
+          echo "Connecting to NiFi at {{ $nifiFullname }}-0.{{ $nifiFullname }}-headless:8080"
+          until wget -q -T 3 -O /dev/null "http://{{ $nifiFullname }}-0.{{ $nifiFullname }}-headless:8080/nifi/"; do
+            echo "Waiting for NiFi to start serving"
+            sleep 3
+          done
+          echo "NiFi is serving"
+        resources:
+          requests:
+            cpu: 20m
+            memory: 50Mi
+          limits:
+            cpu: 20m
+            memory: 50Mi
+        {{- if .Values.containerSecurityContext.enabled }}
+        securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+          readOnlyRootFilesystem: true
+        {{- end }}
+{{- end }}
+{{- if .Values.documentsecurity.enabled }}
+      - name: wait-for-documentsecurity
+        image: {{ .Values.global.busyboxImage }}
+        imagePullPolicy: {{ include "idol-connector-management.imagePullPolicy" (dict "root" .) }}
+        command:
+        - sh
+        - -c
+        - |
+          echo "Connecting to DocumentSecurity API {{ include "idol-connector-management.documentsecurity.fullname" . }}:{{ .Values.documentsecurity.documentsecurity.port }}"
+          until nc -vzw 1 {{ include "idol-connector-management.documentsecurity.fullname" . }} {{ .Values.documentsecurity.documentsecurity.port }}; do
+            echo "Waiting for DocumentSecurity API to start"
+            sleep 3
+          done
+        resources:
+          requests:
+            cpu: 20m
+            memory: 50Mi
+          limits:
+            cpu: 20m
+            memory: 50Mi
+        {{- if .Values.containerSecurityContext.enabled }}
+        securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+          readOnlyRootFilesystem: true
+        {{- end }}
+{{- end }}
+{{- end }}
+{{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
+{{- end }}
+{{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+{{- range . }}
+      - name: {{ . }}
+{{- end }}
+{{- end }}
+      containers:
+      - name: idol-connector-management
+        image: {{ .Values.connectorManagement.image }}
+        imagePullPolicy: {{ include "idol-connector-management.imagePullPolicy" (dict "root" . "component" .Values.connectorManagement.imagePullPolicy) }}
+        ports:
+        - containerPort: 8080
+          name: public-api
+        - containerPort: 8081
+          name: internal-api
+        env:
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          {{- /* As for NiFi: an initial heap above the maximum stops the JVM starting. */}}
+          {{- $heapInit := float64 .Values.connectorManagement.jvmHeapInitPercentage }}
+          {{- $heapMax := float64 .Values.connectorManagement.jvmHeapMaxPercentage }}
+          {{- /* The schema bounds a number, but --set passes a decimal as a string, which it cannot. */}}
+          {{- if or (le $heapInit 0.0) (gt $heapInit 100.0) (le $heapMax 0.0) (gt $heapMax 100.0) }}
+          {{- fail (printf "connectorManagement.jvmHeapInitPercentage and jvmHeapMaxPercentage must be above 0 and at most 100 (got %v and %v)" .Values.connectorManagement.jvmHeapInitPercentage .Values.connectorManagement.jvmHeapMaxPercentage) }}
+          {{- end }}
+          {{- if gt $heapInit $heapMax }}
+          {{- fail (printf "connectorManagement.jvmHeapInitPercentage (%v) must not exceed connectorManagement.jvmHeapMaxPercentage (%v)" .Values.connectorManagement.jvmHeapInitPercentage .Values.connectorManagement.jvmHeapMaxPercentage) }}
+          {{- end }}
+          - name: JVM_HEAP_INIT_PERCENTAGE
+            value: {{ .Values.connectorManagement.jvmHeapInitPercentage | quote }}
+          - name: JVM_HEAP_MAX_PERCENTAGE
+            value: {{ .Values.connectorManagement.jvmHeapMaxPercentage | quote }}
+          - name: SHUTDOWN_DRAIN_SECONDS
+            value: {{ .Values.connectorManagement.shutdownDrainSeconds | quote }}
+          - name: CONNECTORS_RECONCILE_ONSTARTUP
+            value: {{ .Values.connectorManagement.reconcileOnStartup | quote }}
+{{- if eq .Values.ingressType "gateway" }}
+          - name: SERVER_FORWARD_HEADERS_STRATEGY
+            value: framework
+{{- end }}
+{{- /* The database password comes from a Secret rather than the ConfigMap. Emitted only
+       when the chart owns the connection: if the user supplied their own connection
+       string through connectorManagement.env they supply the credentials with it, and an
+       explicit env entry here would silently override theirs. */}}
+{{- if not (hasKey (.Values.connectorManagement.env | default dict) "CONNECTORS_STATE_PROVIDER_DATABASE_CONNECTIONSTRING") }}
+          - name: CONNECTORS_STATE_PROVIDER_DATABASE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "idol-connector-management.postgresql.secretName" . }}
+                key: {{ include "idol-connector-management.postgresql.passwordKey" . }}
+{{- with include "idol-connector-management.postgresql.usernameKey" . }}
+          - name: CONNECTORS_STATE_PROVIDER_DATABASE_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "idol-connector-management.postgresql.secretName" $ }}
+                key: {{ . }}
+{{- end }}
+{{- end }}
+{{- /* A `database` key store given the state store's database takes its password - and its
+       username, where the Secret holds one - from the same Secret. */}}
+{{- if include "idol-connector-management.keyStore.usesStateDatabase" . }}
+          - name: CONNECTORS_KEYS_PROVIDER_DATABASE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "idol-connector-management.postgresql.secretName" . }}
+                key: {{ include "idol-connector-management.postgresql.passwordKey" . }}
+{{- with include "idol-connector-management.postgresql.usernameKey" . }}
+          - name: CONNECTORS_KEYS_PROVIDER_DATABASE_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "idol-connector-management.postgresql.secretName" $ }}
+                key: {{ . }}
+{{- end }}
+{{- end }}
+{{- /* NiFi API credentials from a user-managed Secret. The chart cannot read its contents,
+       so rotating a value inside it does not roll this pod - see the note on
+       connectorManagement.nifi.existingSecret. */}}
+{{- with .Values.connectorManagement.nifi.existingSecret }}
+{{- with $.Values.connectorManagement.nifi.existingSecretUsernameKey }}
+          - name: NIFI_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: {{ $.Values.connectorManagement.nifi.existingSecret }}
+                key: {{ . }}
+{{- end }}
+          - name: NIFI_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ . }}
+                key: {{ $.Values.connectorManagement.nifi.existingSecretPasswordKey | default "password" }}
+{{- end }}
+{{- $nifiTls := .Values.connectorManagement.nifi.tls | default dict }}
+{{- if $nifiTls.verify }}
+{{- with $nifiTls.existingTrustStorePasswordSecret }}
+          - name: NIFI_TLS_TRUSTSTORE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ . }}
+                key: {{ $nifiTls.existingTrustStorePasswordKey | default "password" }}
+{{- end }}
+{{- end }}
+        envFrom:
+          - configMapRef:
+              name: {{ $fullname }}-cm
+              optional: false
+{{- if include "idol-connector-management.secretEnv.data" . | fromYaml }}
+          - secretRef:
+              name: {{ include "idol-connector-management.secretEnvName" . }}
+              optional: false
+{{- end }}
+{{- include "idol-library.util.range_array_or_map_values" (dict "root" . "vals" .Values.connectorManagement.envFrom) | nindent 10 }}
+        # Startup gate. /v1/health/live returns 200 as soon as the web application is
+        # serving and probes no dependencies, so it distinguishes the two failures a
+        # TCP connect cannot tell apart: Tomcat listening with a *failed* webapp (every
+        # path 404s - e.g. a refused database schema version or bad configuration) from
+        # a healthy webapp whose dependencies are simply down.
+        #
+        # When this probe gives up the kubelet kills the container, so an unrecoverable
+        # startup failure becomes a visible CrashLoopBackOff instead of a pod sitting at
+        # 0/1 Running indefinitely with the reason buried in the log. Liveness and
+        # readiness are suspended until it first succeeds, so slow starts are safe:
+        # failureThreshold x periodSeconds is the budget before the container is killed.
+        {{- /* scheme is HTTP because the container only ever serves HTTP: docker/api/server.xml
+               declares both connectors (8080, 8081) as plain HTTP/1.1 with no SSLEnabled or
+               keystore, and the entrypoint has no TLS handling. A `usingTLS` value used to
+               drive this, which could only ever break the probes - it is gone. TLS belongs at
+               the ingress (see connectorManagement.ingress.tls); if the container is ever
+               taught to serve HTTPS, this needs a keystore, a server.xml connector, and the
+               ingress backend-protocol annotation, not just a scheme flip here. */}}
+        {{- /* The budget is a value because one deployment mode blows straight through the
+               default: the `seeded` storage provider copies its whole resource set from the
+               source before the web application finishes starting, so a first boot onto an
+               empty volume answers nothing for as long as that download takes - minutes, and
+               NARs run to hundreds of MB each. The container is then killed mid-seed and the
+               pod CrashLoopBackOffs. It does make progress each cycle (seedmode skip resumes
+               onto the populated volume) but that is not a first-boot experience worth
+               shipping, and a resource slower than one budget would never converge. */}}
+        {{- $startup := .Values.connectorManagement.startupProbe | default dict }}
+        startupProbe:
+          httpGet:
+            path: /v1/health/live
+            port: 8080
+            scheme: HTTP
+          periodSeconds: {{ $startup.periodSeconds | default 5 }}
+          timeoutSeconds: {{ $startup.timeoutSeconds | default 5 }}
+          failureThreshold: {{ $startup.failureThreshold | default 36 }}
+          successThreshold: 1
+        # Liveness is intentionally shallow: it proves the web application is deployed and
+        # responding, and nothing more. It must NOT exercise NiFi, the database or the
+        # resource provider - those are external dependencies whose outage should drain
+        # traffic (readiness), not restart this pod.
+        #
+        # /v1/health/live rather than a TCP connect: an open socket only shows Tomcat is
+        # alive, which stays true when the webapp has failed and every request 404s.
+        livenessProbe:
+          httpGet:
+            path: /v1/health/live
+            port: 8080
+            scheme: HTTP
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+          successThreshold: 1
+        # Readiness is the deep dependency check: /v1/health/ready returns 503
+        # when NiFi, the database or the resource provider is unavailable, so the
+        # pod is removed from the Service until its dependencies recover.
+        readinessProbe:
+          httpGet:
+            path: /v1/health/ready
+            port: 8080
+            scheme: HTTP
+          {{- /* No initialDelaySeconds: the startupProbe above already holds readiness off
+                 until the application is serving, so a delay here would only postpone the
+                 pod becoming Ready after it is genuinely ready. */}}
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+          successThreshold: 1
+        {{- /* A terminating pod is taken out of the Service at once, but kube-proxy and the
+               ingress controller take a moment to stop routing to it. Pausing before Tomcat is
+               told to stop keeps requests arriving in that moment from being refused; Tomcat
+               then drains what is in flight (shutdownDrainSeconds). */}}
+        lifecycle:
+          preStop:
+            exec:
+              command: ["sleep", "5"]
+        {{- if .Values.connectorManagement.resources }}
+        resources: {{ toYaml .Values.connectorManagement.resources | nindent 10 }}
+        {{- end }}
+        {{- if .Values.containerSecurityContext.enabled }}
+        securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+        {{- end }}
+        {{- /* Path of the storage-provider cache, read from the env var that defines
+               it so there is a single source of truth for the location. An emptyDir is
+               mounted there below, giving the cache a real volume instead of the
+               container's writable layer. No volume when the env var is unset. */}}
+        {{- $cacheDir := "" }}
+        {{- if .Values.connectorManagement.cacheVolume.enabled }}
+        {{- $cacheDir = index (.Values.connectorManagement.env | default dict) "CONNECTORS_STORAGE_PROVIDER_CACHE_DIR" | default "" }}
+        {{- end }}
+        volumeMounts:
+{{- if .Values.connectorManagement.resourcesVolume.enabled }}
+          - name: resources
+            mountPath: /opt/nifi-connector-management/resources
+            readOnly: {{ .Values.connectorManagement.resourcesVolume.readOnly }}
+{{- end }}
+{{- if $cacheDir }}
+          - name: cache
+            mountPath: {{ $cacheDir }}
+{{- end }}
+{{- if include "idol-connector-management.nifi.tls.caFile" . }}
+          - name: nifi-tls
+            mountPath: {{ include "idol-connector-management.nifi.tls.mountPath" . }}
+            readOnly: true
+{{- end }}
+{{- range .Values.additionalVolumeMounts }}
+          - {{ toYaml . | indent 12 | trim }}
+{{- end }}
+      volumes:
+{{- range .Values.additionalVolumes }}
+        - {{ toYaml . | indent 10 | trim }}
+{{- end }}
+{{- if include "idol-connector-management.nifi.tls.caFile" . }}
+{{- $tls := .Values.connectorManagement.nifi.tls | default dict }}
+        {{- /* Projected with an explicit items entry so only the named key lands in the
+               mount: a Secret holding a full TLS bundle would otherwise also expose its
+               private key inside the container. */}}
+        - name: nifi-tls
+{{- if $tls.existingCaSecret }}
+          secret:
+            secretName: {{ $tls.existingCaSecret }}
+            items:
+              - key: {{ $tls.caKey }}
+                path: {{ $tls.caKey }}
+{{- else }}
+          configMap:
+            name: {{ $tls.existingCaConfigMap }}
+            items:
+              - key: {{ $tls.caKey }}
+                path: {{ $tls.caKey }}
+{{- end }}
+{{- end }}
+{{- if and .Values.connectorManagement.resourcesVolume.enabled .Values.connectorManagement.resourcesVolume.existingClaim }}
+        {{- /* A pre-populated claim the operator manages. Referenced as a pod volume
+               rather than a volumeClaimTemplate: a VCT provisions a fresh empty PVC per
+               replica, which is the opposite of sharing one populated volume. */}}
+        - name: resources
+          persistentVolumeClaim:
+            claimName: {{ .Values.connectorManagement.resourcesVolume.existingClaim }}
+            readOnly: {{ .Values.connectorManagement.resourcesVolume.readOnly }}
+{{- end }}
+{{- if $cacheDir }}
+        - name: cache
+          {{- /* Emit an explicit {} rather than a bare `emptyDir:`. The API server
+                 normalises null to {}, so both work, but a null source makes GitOps
+                 diffs compare null against {} and report permanent drift. */}}
+          {{- with .Values.connectorManagement.cacheVolume.sizeLimit }}
+          emptyDir:
+            sizeLimit: {{ . }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+{{- end }}
+{{- /* Only provision a PVC when no existing claim was supplied - with existingClaim the
+       volume is referenced in the pod spec above instead. */}}
+{{- if and .Values.connectorManagement.resourcesVolume.enabled (not .Values.connectorManagement.resourcesVolume.existingClaim) }}
+  volumeClaimTemplates:
+  - metadata:
+      name: resources
+      {{- /* volumeClaimTemplates are immutable, so these labels must NOT carry
+             helm.sh/chart - a chart version bump would otherwise make every
+             `helm upgrade` fail with "updates to statefulset spec ... are
+             forbidden". This helper is idol-library.labels minus that label. */}}
+      labels: {{- include "idol-library.labels.volumeClaimTemplates" (dict "root" . "component" .Values.connectorManagement) | nindent 8 }}
+        app: "{{ $fullname }}"
+    spec:
+      accessModes:
+    {{- range .Values.connectorManagement.resourcesVolume.accessModes }}
+        - {{ . }}
+    {{- end }}
+    {{- include "idol-connector-management.storageClass" (dict "root" . "component" .Values.connectorManagement.resourcesVolume.storageClass) | nindent 6 }}
+      resources:
+        requests:
+          storage: {{ .Values.connectorManagement.resourcesVolume.size }}
+{{- end }}
+{{- end -}}

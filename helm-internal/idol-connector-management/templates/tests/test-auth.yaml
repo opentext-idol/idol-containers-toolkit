@@ -1,0 +1,47 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023-2025 Open Text.
+#
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+{{- /*
+  With authentication enabled, asserts that a protected endpoint rejects an unauthenticated
+  request while the health endpoints stay open. Both halves matter:
+
+  - A protected path answering 200 without a token means the public API is exposed.
+  - A health path answering 401 means the probes fail and the pod never becomes Ready. That is
+    not hypothetical: OperationPermissions is fail-closed, so an endpoint missing from its
+    PUBLIC set is denied - which is exactly the mistake that would have been made when
+    /v1/health/live was added.
+
+  No token is minted here, so this proves rejection and exemption, not that a valid token is
+  accepted; that needs an issuer and belongs in an integration test.
+*/}}
+{{- if and .Values.tests.enabled .Values.connectorManagement.enabled .Values.connectorManagement.auth.enabled }}
+{{- $svc := include "idol-connector-management.fullname" . }}
+{{- $script := printf `%s
+BASE="http://%s:8080"
+
+# Health must remain reachable without credentials, or the probes cannot pass.
+expect 200 "$BASE/v1/health/ready" "readiness exempt from authentication"
+expect 200 "$BASE/v1/health/live"  "liveness exempt from authentication"
+
+# A protected endpoint must refuse an unauthenticated caller. Spring Security answers 401 for a
+# missing token; 403 is accepted too, since either proves the endpoint is not open.
+req "$BASE/v1/types/connectors?tenantId=helm-test&subscriptionId=helm-test"
+case "$code" in
+  401|403) echo "  PASS  protected endpoint refused without a token (HTTP $code)" ;;
+  200)     echo "  FAIL  protected endpoint served without a token - the public API is exposed"; FAILED=1 ;;
+  *)       echo "  FAIL  protected endpoint returned HTTP $code, expected 401 or 403"
+           printf '        %%s\n' "$body" | head -5; FAILED=1 ;;
+esac
+
+[ "$FAILED" = "0" ] || exit 1
+echo "Authentication is enforced, health endpoints remain exempt."
+` (include "idol-connector-management.test.prelude" .) $svc }}
+{{ include "idol-connector-management.test.pod" (dict "root" . "name" "auth" "weight" 2 "image" .Values.connectorManagement.image "script" $script) }}
+{{- end }}

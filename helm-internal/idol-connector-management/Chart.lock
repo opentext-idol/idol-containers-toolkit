@@ -1,0 +1,15 @@
+dependencies:
+- name: idol-library
+  repository: https://raw.githubusercontent.com/opentext-idol/idol-containers-toolkit/main/helm
+  version: 0.16.0
+- name: postgresql-ha
+  repository: https://artifactory.otxlab.net/artifactory/charts.bitnami.com
+  version: 14.3.4
+- name: idol-documentsecurity
+  repository: https://artifactory.otxlab.net/artifactory/cs-knowledgediscovery-helm-dev
+  version: 27.1.0-SNAPSHOT
+- name: prometheus
+  repository: https://prometheus-community.github.io/helm-charts
+  version: 25.0.0
+digest: sha256:3426e1de0285209e491f5d8c1370d6eaf4101c11b3ec86f2ffd533c3ea4f351e
+generated: "2026-10-09T13:48:55.218823185Z"

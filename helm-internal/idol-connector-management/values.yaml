@@ -1,0 +1,1090 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023-2025 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+
+global:
+  # -- Global secrets used to pull container images. Set to [] when the registry
+  # needs no credentials, or when they are supplied by the node or by the pods'
+  # ServiceAccount - the imagePullSecrets field is then omitted entirely.
+  # @section -- Globals
+  imagePullSecrets:
+  - "dockerhub-secret"
+  # -- Image pull policy for every container this chart creates: the connector
+  # management api, NiFi, the busybox init containers, and the documentsecurity
+  # API. A per-component imagePullPolicy (e.g. connectorManagement.imagePullPolicy)
+  # overrides this for that component. Empty means IfNotPresent.
+  #
+  # Exception: the bitnami postgresql-ha sub-charts (this chart's own, and the one
+  # nested under documentsecurity) have no global pull-policy concept - set
+  # postgresql.postgresql.image.pullPolicy and postgresql.pgpool.image.pullPolicy
+  # directly if you need to change theirs.
+  # @section -- Globals
+  imagePullPolicy: ""
+  # -- busybox image used by every wait-for-{postgres,nifi,documentsecurity}
+  # init container in this chart. Defaults to the artifactory dockerhub mirror.
+  # @section -- Globals
+  busyboxImage: "artifactory.otxlab.net/dockerhub/library/busybox:1.36"
+
+  # -- StorageClass for every PersistentVolumeClaim this chart and its sub-charts
+  # create: the NiFi data volume, the connector resources volume, and the
+  # postgresql-ha instances (this chart's own and the one nested under
+  # documentsecurity). A per-volume storageClass (e.g. nifi.dataVolume.storageClass)
+  # overrides this for that volume.
+  #
+  # Empty means no storageClassName is set, so the cluster's own default
+  # StorageClass applies - the right choice for most clusters. Set this only when
+  # you need a specific class (e.g. a faster SSD tier, or a cluster with no
+  # default). Following the bitnami convention, "-" means storageClassName: ""
+  # and disables dynamic provisioning.
+  # @section -- Globals
+  defaultStorageClass: ""
+
+# name -- component name for this release's objects. Objects are named
+# <release>-<name> so several releases can coexist in one namespace.
+name: idol-connector-management
+
+# -- Replaces the generated <release>-<name> entirely, for when objects must have a
+# specific name. Leave empty to keep release scoping - overriding this reintroduces
+# the collision between two releases in the same namespace.
+fullnameOverride: ""
+
+# -- `helm test` hooks. Run with `helm test <release> --logs` after an install or upgrade;
+# they are never run by install itself. Each Job also depends on what it checks, so the NiFi
+# test only appears with nifi.enabled and the auth test only with
+# connectorManagement.auth.enabled.
+#
+# The Jobs run the connector management image, which already carries curl and jq, and inherit
+# this release's security contexts and pull secrets. Set enabled: false where the image cannot
+# be pulled for a short-lived Job, or to keep test hooks out of the rendered manifest entirely.
+tests:
+  enabled: true
+
+# -- Additional PodSpec Volume(s) (see <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes>)
+# Can be dict of (name, Volume), or list of (Volume). dict form allows for merging definitions from multiple values files.
+#
+# This pair is also how you serve the connector resource set from a directory on the node,
+# for development: mount it with a hostPath here and point the provider at it with
+# connectorManagement.env.CONNECTORS_STORAGE_PROVIDER_FILESYSTEM_DIRECTORY. Give it a path of
+# its own rather than /opt/nifi-connector-management/resources - two volumes on one path is
+# invalid, and Kubernetes only rejects it when it creates the pod, so the release would
+# install and then run nothing. The chart checks for that and fails the render instead.
+#
+# A path of its own also lets the directory sit alongside a remote repository through the
+# `composite` provider, rather than replacing it. See "Connector resources" in the README for
+# both recipes.
+additionalVolumes: null
+
+# -- Additional PodSpec VolumeMount(s) (see <https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#volumes-1>)
+# Can be dict of (name, VolumeMount), or list of (VolumeMount). dict form allows for merging definitions from multiple values files.
+additionalVolumeMounts: null
+
+# ingressClassName -- Optional, https://kubernetes.io/docs/concepts/services-networking/ingress/#the-ingress-resource, applied to all ingress objects
+ingressClassName: ""
+
+# ingressProxyBodySize -- the maximum allowed size of the client request body, defining
+# the maximum size of requests that can be made to IDOL components within the installation, e.g.
+# the amount of data sent in DREADDDATA index commands.
+# The value should be an nginx "size" value.
+# See http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size for the documentation of the
+# corresponding nginx configuration parameter.
+ingressProxyBodySize: 2048m
+
+# ingressType -- setup ingress for that controller type.
+# Valid values are nginx, haproxy (used by OpenShift) or custom
+ingressType: nginx
+
+# podSecurityContext -- pod security context definition
+# See https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+podSecurityContext:
+  enabled: true
+  runAsGroup: 1000
+  runAsUser: 1000
+  runAsNonRoot: true
+  # -- Group ownership applied to mounted volumes, so the non-root container can
+  # write to them. Required on real CSI storage: a freshly provisioned volume is
+  # formatted root:root 0755, which UID 1000 cannot write - the NiFi data volume and
+  # the init-resource-dirs container both need this. Note that fsGroup is ignored for
+  # hostPath volumes (including minikube's default provisioner, which instead creates
+  # them world-writable, so the difference is invisible there).
+  fsGroup: 1000
+  # -- Only re-apply ownership when the volume root does not already match fsGroup.
+  # The default (Always) recursively chowns every file on each mount, which gets slow
+  # on a large NiFi data or connector resources volume.
+  fsGroupChangePolicy: OnRootMismatch
+  seccompProfile:
+    type: RuntimeDefault
+
+# containerSecurityContext -- container security context definition 
+# See https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+containerSecurityContext:
+  enabled: true
+  allowPrivilegeEscalation: false
+  privileged: false
+  capabilities:
+    drop:
+      - ALL
+
+# -- Default serviceAccountName for this chart's pods
+# (https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account).
+# Overridden per pod by connectorManagement.serviceAccountName and
+# nifi.serviceAccountName. Empty everywhere means the namespace's `default`
+# account. The ServiceAccount must already exist - this chart does not create one.
+#
+# Prefer the per-component values when binding a cloud identity (GKE Workload
+# Identity, EKS IRSA, Azure Workload Identity): a shared account gives every pod
+# the union of the permissions any of them needs. The api may need Cloud Run and
+# the resources bucket, while NiFi - which runs connector code, headless Chrome
+# and ExecuteDocumentLua/Python - should be scoped to its own flowfile bucket.
+#
+# The pods set automountServiceAccountToken: false, so no API token is mounted.
+# The workload-identity mechanisms above are unaffected - they annotate the
+# ServiceAccount and inject their own projected token volume.
+#
+# Not a global, so it does not reach the documentsecurity sub-chart; set
+# documentsecurity.serviceAccountName for that pod. (The bundled postgresql-ha
+# instances create and use their own.)
+serviceAccountName: ""
+
+# -- Optional Secret containing OEM licensekey.dat and versionkey.dat files for licensing
+# Specify idolOemLicenseSecret or licenseServerHostname and licenseServerPort
+idolOemLicenseSecret: ""
+
+# -- Optional host and port for license server
+# Specify idolOemLicenseSecret or licenseServerHostname and licenseServerPort
+licenseServerHostname: ""
+licenseServerPort: ""
+
+# -- Optional scheme, host, port, and no-proxy hosts for a proxy server
+proxyServerScheme: ""
+proxyServerHostname: ""
+proxyServerPort: ""
+proxyServerNoProxyHosts: ""
+
+connectorManagement:
+  # -- whether to deploy the connector management api
+  enabled: true
+  # -- connector management api image. The published artifact: the CI pipeline
+  # pushes to cs-knowledgediscovery-docker-dev - the same repository the
+  # documentsecurity image comes from - tagged with the project version
+  # (`${POM_VERSION}` on the default branch, `${POM_VERSION}.${CI_COMMIT_SHORT_SHA}`
+  # on a feature branch). Note there is no `latest` tag in that repository; for a
+  # local docker build use `-f values-dev.yaml`, which points at the bare
+  # `idol-connector-management-api:latest` the build script produces.
+  #
+  # The value below is the dev-channel reference. A release-branch build
+  # (IDOLnn.n.x) repoints every `image:` line in the packaged chart at
+  # cs-knowledgediscovery-docker-rel and the released tag - see the rewrite step
+  # in build-helm.sh - so this file always holds the dev reference.
+  #
+  # build-helm.sh sets the tag on every `image:` line - in the *packaged* chart to
+  # the version that pipeline built, and here in the source to the current release
+  # line's version - so there is no need to bump it by hand when the project
+  # version moves.
+  image: artifactory.otxlab.net/cs-knowledgediscovery-docker-dev/idol-connector-management-api:27.1.0-SNAPSHOT
+  # -- pull policy for the connector management api image
+  # (see https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy).
+  # Leave empty to inherit global.imagePullPolicy, which itself defaults to IfNotPresent.
+  imagePullPolicy: ""
+
+  # -- serviceAccountName for the connector management api pod. Empty inherits
+  # the chart-wide serviceAccountName. Set this (rather than the chart-wide one)
+  # to give the api its own cloud identity - e.g. Cloud Run job dispatch and the
+  # connector resources bucket - without granting it to NiFi as well.
+  serviceAccountName: ""
+
+  # -- Volume holding the connector resources read by the `filesystem` storage
+  # provider. If not enabled, resources must come from the container image or be
+  # mounted via additionalVolumes/additionalVolumeMounts.
+  #
+  # The provider expects four categories under the mount
+  # (/opt/nifi-connector-management/resources):
+  #
+  #   connectors/<Type>/<version>/...        e.g. connectors/Web/27.1.0-nifi2/...
+  #   targets/<Type>/<version>/...
+  #   processing/<Type>/<version>/...
+  #   NARs/<artifactId>/<version>/<artifactId>-<version>.nar
+  #
+  # `connectors/` must exist or the readiness probe fails with
+  # "Resource directory not found: connectors/" and the pod never becomes Ready.
+  # `NARs/` has no such check, so omitting it produces a deployment that passes every
+  # health check and then fails whenever a flow needs a shared NAR - populate all four.
+  # Note the chart does not populate this volume - either point existingClaim at a
+  # pre-populated one, or use the `seeded` storage provider
+  # (CONNECTORS_STORAGE_PROVIDER_SEEDED_SOURCE=artifactory, TARGET=filesystem) to
+  # fill it on startup, which needs readOnly: false.
+  # -- Startup gate on /v1/health/live. failureThreshold x periodSeconds is how long the
+  # container has to start before the kubelet kills it; liveness and readiness are
+  # suspended until it first succeeds.
+  #
+  # Seeding is not part of this budget - a `seeded` storage provider copies its resource
+  # set on a background thread and reports not-ready until it finishes, so the api starts
+  # answering /v1/health/live within seconds either way. Raise this only for a slow image
+  # pull or a cold JVM on constrained hardware.
+  startupProbe:
+    periodSeconds: 5
+    timeoutSeconds: 5
+    failureThreshold: 36
+
+  # -- On shutdown (a rolling update, a drain), how long the api waits for requests already in
+  # flight to finish before stopping. Most complete in well under a second; the ones that take
+  # longer are connector and target deploys, which download NARs from the resource provider -
+  # fast in production, but slow from a remote Artifactory, where a cold deploy can outlast any
+  # reasonable drain and is cut off. It is then cleaned up, and can be retried. The pod's
+  # terminationGracePeriodSeconds is set from this.
+  shutdownDrainSeconds: 30
+
+  # -- On startup, redeploy any connector or target this release has deployed but NiFi no longer
+  # has - as after NiFi's volume was lost or replaced behind a database that was kept. Waits for
+  # the api to be ready first, then checks in the background. Anything deployed but not running is
+  # only reported. The same check can be run at any time with POST /v1/admin/reconcile.
+  reconcileOnStartup: true
+
+  resourcesVolume:
+    # -- whether to give the api a connector resources volume.
+    #
+    # On by default so that a default install stands up. The `filesystem` storage provider
+    # reads CONNECTORS_STORAGE_PROVIDER_FILESYSTEM_DIRECTORY, which is a path inside the
+    # image, and the image ships it empty - so without a volume there is no `connectors/`
+    # directory, the readiness check fails with "Resource directory not found: connectors/"
+    # and the pod never becomes Ready. With the volume, an init container creates the
+    # directory layout and the api comes up healthy.
+    #
+    # **It comes up healthy but EMPTY.** The volume is provisioned blank, so the type
+    # catalogues are empty and no connector can be created until you either populate it
+    # (see "Connector resources" in the chart README) or point the api at a resource
+    # repository instead with CONNECTORS_STORAGE_PROVIDER_TYPE - artifactory, googlecloud,
+    # or seeded to copy one of those onto this volume on first start.
+    #
+    # Turning this off later is not an upgrade: the PVC comes from a volumeClaimTemplate,
+    # which is immutable, so `helm upgrade` fails with "updates to statefulset spec ... are
+    # forbidden" and the release needs reinstalling.
+    enabled: true
+
+    # -- Use an existing, already-populated PersistentVolumeClaim instead of having
+    # the chart provision one. This is the way to mount a resource set the chart did
+    # not create - a pre-loaded NFS/CephFS share, for example. The claim must already
+    # exist in the release namespace.
+    #
+    # When set, the claim is referenced directly as a pod volume and NO PVC is
+    # provisioned, so storageClass, size and accessModes below are all ignored (they
+    # are properties of the claim you supply). Prefer this over the provisioned PVC
+    # for anything shared or pre-populated: a volumeClaimTemplate creates a separate
+    # empty PVC per replica, which cannot share one populated volume.
+    existingClaim: ""
+
+    # -- Whether to mount the volume read-only. Leave false if the volume is written
+    # to - notably when it is the target of the `seeded` storage provider. Set true
+    # for a pre-populated volume to protect its contents, which also permits a
+    # ReadOnlyMany claim to be shared across pods.
+    readOnly: false
+
+    # -- storage class for the provisioned PVC. Empty inherits
+    # global.defaultStorageClass. Ignored when existingClaim is set.
+    storageClass: ""
+    # -- size of the provisioned PVC. Ignored when existingClaim is set.
+    # A full connector set is considerably larger than this - NARs alone run to
+    # hundreds of MB each - so size this to the resources you actually deploy.
+    size: 2Gi
+    # -- access modes for the provisioned PVC. Ignored when existingClaim is set.
+    # ReadWriteOnce because most CSI drivers cannot dynamically provision
+    # ReadOnlyMany, which leaves the PVC Pending forever. To share one volume across
+    # pods, pre-provision it and use existingClaim instead.
+    accessModes:
+      - ReadWriteOnce
+
+  # -- emptyDir backing the storage-provider cache. Mounted at whatever path
+  # `env.CONNECTORS_STORAGE_PROVIDER_CACHE_DIR` names, so the location has a single
+  # source of truth; no volume is created when that env var is unset. Without this
+  # the cache lands in the container's writable layer.
+  #
+  # The cache is rebuilt after every pod replacement, which costs a slower first
+  # start against the artifactory/googlecloud providers but needs no storage.
+  # Set enabled: false to back the cache with your own volume via
+  # additionalVolumes/additionalVolumeMounts instead - leaving it true would mount
+  # an emptyDir over the same path.
+  cacheVolume:
+    enabled: true
+    # -- optional cap on the emptyDir. Empty means uncapped, bounded only by the
+    # node's ephemeral storage. If set and exceeded, the kubelet evicts the pod.
+    sizeLimit: ""
+
+  ingress:
+    # connectorManagement.ingress.enabled -- whether to deploy ingress for public API
+    enabled: true
+    # connectorManagement.ingress.internalEnabled -- whether to expose the internal callback
+    # API (/internal/*) through the ingress as well. Keep this false unless something outside
+    # the cluster genuinely has to reach it: those endpoints are exempt from authentication
+    # even when connectorManagement.auth.enabled is true, because they are meant to be
+    # reachable only from inside the cluster, on a separate port.
+    internalEnabled: false
+    # connectorManagement.ingress.annotations -- optional ingress annotations
+    annotations: {}
+    # connectorManagement.ingress.host -- ingress host
+    # (https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules).
+    #
+    # Set this, contextPath, or both for anything other than a single-application cluster.
+    # With neither, the rule has no host and a path of "/(.*)", which claims the root of every
+    # hostname the controller serves - taking traffic from anything else already published
+    # there, and colliding with a second release of this chart in the same namespace (each
+    # gets its own Ingress object, so nothing errors; the controller just serves one of them).
+    host: ""
+    # connectorManagement.ingress.contextPath -- path prefix the API is served under, e.g.
+    # "/cm-api". See the note on host above.
+    contextPath: ""
+    # The external port the ingress is exposed on.
+    # For Kubernetes-in-Docker, this may be different to the container ingress port.
+    port: ""
+
+    # Gateway settings (only applies if type is 'gateway')
+    gateway:
+      # -- Optional, name of the gateway to use for ingress
+      name: ""
+      # -- Optional, namespace of the gateway to use for ingress
+      namespace: ""
+      # -- Optional, request timeout for ingress route
+      requestTimeout: ""
+      # -- Optional, backend timeout for ingress route
+      backendTimeout: ""
+      # -- Forwarded protocol for ingress
+      protocol: "http"
+
+    # -- Whether ingress uses TLS. You must set an ingress host to use this. 
+    # See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
+    tls:
+      # -- The name of the secret for ingress TLS. Leave empty if not using TLS. 
+      # If specified then either this secret must already exist, or crt and key values must be provided and secret will be created.
+      secretName: ""
+      # -- Certificate data value to generate tls Secret (should be base64 encoded)
+      crt: ""
+      # -- Private key data value to generate tls Secret (should be base64 encoded)
+      key: ""
+
+  # connectorManagement.resources -- https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits
+  resources:
+    requests:
+      cpu: 200m
+      memory: 1Gi
+    limits:
+      cpu: 1000m
+      memory: 3Gi
+
+  # -- API JVM initial heap, as a percentage of `connectorManagement.resources.limits.memory`
+  # (-XX:InitialRAMPercentage). Must not exceed jvmHeapMaxPercentage.
+  jvmHeapInitPercentage: 10
+  # -- API JVM maximum heap, as a percentage of `connectorManagement.resources.limits.memory`
+  # (-XX:MaxRAMPercentage). Leave headroom for non-heap JVM memory (metaspace, threads, Tomcat).
+  # An -Xmx given through JAVA_OPTS in `env` still takes precedence.
+  jvmHeapMaxPercentage: 65
+
+  labels:
+    app.framework/openjdk: "21"
+
+  # -- Sensitive environment variables for the api. Identical in effect to `env` below,
+  # but rendered into a Secret rather than the ConfigMap - use this for anything secret,
+  # e.g.
+  #   secretEnv:
+  #     CONNECTORS_STORAGE_PROVIDER_GOOGLECLOUD_PRIVATEKEY: "-----BEGIN PRIVATE KEY-----..."
+  #
+  # Values still live in the release and are readable by anyone who can read Secrets in
+  # the namespace; the gain over a ConfigMap is separate RBAC and encryption at rest. To
+  # keep secrets out of values entirely, leave this empty and use `envFrom` with your own
+  # secretRef. Changing secretEnv rolls the pod, as changing `env` does.
+  secretEnv: {}
+
+  # -- Additional environment variables for connector management api
+  # These map to NiFiConnectorManagementService.properties via the container entrypoint
+  env:
+    # Storage provider configuration
+    # Use "filesystem" for production with packaged connectors, or "dev" for development
+    CONNECTORS_STORAGE_PROVIDER_TYPE: "filesystem"
+    CONNECTORS_STORAGE_PROVIDER_FILESYSTEM_DIRECTORY: "/opt/nifi-connector-management/resources"
+
+    # Artifactory storage provider (alternative to filesystem)
+    # CONNECTORS_STORAGE_PROVIDER_TYPE: "artifactory"
+    # CONNECTORS_STORAGE_PROVIDER_ARTIFACTORY_BASEURL: "https://orgartifactory.swinfra.net/artifactory/cs-knowledgediscovery-generic-dev-local/builds/"
+    # CONNECTORS_STORAGE_PROVIDER_ARTIFACTORY_CONNECTOR_TYPES: "Web,SharePointOData,GoogleCloudStorage"
+    # dir is a full path relative to build/ (omitted => connectors/<type>)
+    # CONNECTORS_STORAGE_PROVIDER_ARTIFACTORY_CONNECTOR_SHAREPOINTODATA_DIR: "connectors/flyingPig"
+    # CONNECTORS_STORAGE_PROVIDER_ARTIFACTORY_TARGET_TYPES: "UserSecurity"
+    # CONNECTORS_STORAGE_PROVIDER_ARTIFACTORY_TARGET_USERSECURITY_BUILD: "connectors-documentsecurity"
+    # CONNECTORS_STORAGE_PROVIDER_ARTIFACTORY_TARGET_USERSECURITY_PLATFORM: "common"
+    # CONNECTORS_STORAGE_PROVIDER_ARTIFACTORY_TARGET_USERSECURITY_DIR: "connectors/documentSecurity"
+
+    # Google Cloud Storage provider (alternative to filesystem)
+    # CONNECTORS_STORAGE_PROVIDER_TYPE: "googlecloud"
+    # CONNECTORS_STORAGE_PROVIDER_GOOGLECLOUD_PROJECTID: ""
+    # CONNECTORS_STORAGE_PROVIDER_GOOGLECLOUD_BUCKET: ""
+    # CONNECTORS_STORAGE_PROVIDER_GOOGLECLOUD_PATHPREFIX: ""
+    # CONNECTORS_STORAGE_PROVIDER_GOOGLECLOUD_SERVICEACCOUNT: ""
+    # CONNECTORS_STORAGE_PROVIDER_GOOGLECLOUD_PRIVATEKEY: ""
+
+    # Seed GCS from another provider on startup (uploads missing files only)
+    # CONNECTORS_STORAGE_PROVIDER_TYPE: "seeded"
+    # CONNECTORS_STORAGE_PROVIDER_SEEDED_SOURCE: "artifactory"
+    # CONNECTORS_STORAGE_PROVIDER_SEEDED_TARGET: "googlecloud"
+    # CONNECTORS_STORAGE_PROVIDER_SEEDED_SEEDMODE: "skip"  # "skip" (default) or "overwrite"
+
+    # Composite provider - read-only federation over an ordered list of child
+    # providers. Reads resolve first-hit-wins in list order; a type/version present
+    # in more than one child is served entirely by the first child that has it.
+    # Each child is configured via its own CONNECTORS_STORAGE_PROVIDER_<TYPE>_* vars.
+    # CONNECTORS_STORAGE_PROVIDER_TYPE: "composite"
+    # CONNECTORS_STORAGE_PROVIDER_COMPOSITE_PROVIDERS: "artifactory,googlecloud"
+
+    # Cache configuration (wraps any storage provider)
+    # CONNECTORS_STORAGE_PROVIDER_CACHE_DIR: "/opt/nifi-connector-management/storage_provider_cache"
+    # CONNECTORS_STORAGE_PROVIDER_CACHE_TTL: "1 day"
+
+    # Type restrictions (comma-separated, omit to accept all)
+    # TYPES_CONNECTORS: "Web,SharePointOData"
+    # Which connectors may act as targets (put-capable connectors); omit to allow all. Does not
+    # affect non-connector target definitions.
+    # CONNECTOR_TARGET_TYPES: "GoogleCloudStorage,SharePointOData"
+
+    # State provider - uses PostgreSQL from the subchart
+    CONNECTORS_STATE_PROVIDER_TYPE: "database"
+    # Connection string is set dynamically below based on postgresql subchart settings
+
+    # Schedule provider
+    CONNECTORS_SCHEDULE_PROVIDER_TYPE: "nifi.cron"
+
+    # Keys provider
+    CONNECTORS_KEYS_PROVIDER_TYPE: "noop"
+
+    # Max concurrent jobs permitted per connector, per operation (externally-dispatched only;
+    # synchronize/purge remain limited to one, and exceed as a 409 rather than a 429). Omit any
+    # of these to use its default.
+    # CONNECTORS_JOBRUNNER_FETCH_MAXPARALLEL: "5"     # default 1
+    # CONNECTORS_JOBRUNNER_DELETE_MAXPARALLEL: "5"    # default 1
+    # CONNECTORS_JOBRUNNER_VIEW_MAXPARALLEL: "8"      # default 4
+    # CONNECTORS_JOBRUNNER_LIST_MAXPARALLEL: "8"      # default 4
+
+    # Seconds a throttled caller is told to wait, sent as Retry-After on the 429. Set these to how
+    # long the capacity is really held against your repositories: a view or list slot lasts one
+    # request (about a second on a fast repository, never more than
+    # connectors.view.timeout.seconds), while a fetch or delete slot lasts a whole ingest job and
+    # can run for minutes. A caller blocked on fetch or delete is usually better off watching the
+    # job it already holds a token for than retrying.
+    # CONNECTORS_JOBRUNNER_FETCH_RETRYAFTER_SECONDS: "60"    # default 30
+    # CONNECTORS_JOBRUNNER_DELETE_RETRYAFTER_SECONDS: "60"   # default 30
+    # CONNECTORS_JOBRUNNER_VIEW_RETRYAFTER_SECONDS: "10"     # default 5
+    # CONNECTORS_JOBRUNNER_LIST_RETRYAFTER_SECONDS: "10"     # default 5
+
+    # Reports configuration
+    CONNECTORS_REPORTS_STORAGE_ENABLED: "true"
+    CONNECTORS_REPORTS_MAX_DAYS: "366"
+    CONNECTORS_REPORTS_MAX_COUNT: "100000"
+
+  # -- Base URL that NiFi processors use to call back into the internal API.
+  # Defaults to http://<release-name>:8081 (the Kubernetes Service).
+  # Override if using a different service name, namespace, or port.
+  callbacksEndpoint: ""
+
+  # -- Optional URL to POST reports to as a callback.
+  # Leave empty to disable report callbacks.
+  reportsCallbackUrl: ""
+
+  # -- NiFi endpoint configuration (required for production)
+  nifi:
+    # -- NiFi server URL
+    endpoint: ""
+    # -- NiFi username for authentication. Not a secret, so it is kept in the ConfigMap
+    # unless existingSecret below supplies it.
+    username: ""
+    # -- NiFi password for authentication. Rendered into the sensitive-env Secret rather
+    # than the ConfigMap; use existingSecret to keep it out of values entirely.
+    password: ""
+    # -- Use a Secret you manage for the NiFi API credentials. When set, NIFI_USERNAME and
+    # NIFI_PASSWORD are read from it by reference and the `username`/`password` values
+    # above are ignored.
+    #
+    # Note the chart cannot see the Secret's contents, so rotating a value *inside* it
+    # does not restart the api - run `kubectl rollout restart statefulset/<name>` after
+    # rotating. Changing which Secret or key is referenced does roll the pod.
+    existingSecret: ""
+    # -- Key in existingSecret holding the username. Leave empty to keep using the
+    # `username` value above (the common case - a username is not secret).
+    existingSecretUsernameKey: ""
+    # -- Key in existingSecret holding the password.
+    existingSecretPasswordKey: password
+    # -- Optional proxy host
+    proxyHost: ""
+    # -- Optional proxy port
+    proxyPort: ""
+    # -- TLS settings for an `https://` endpoint. Only relevant for an external NiFi; the
+    # bundled one speaks plain HTTP.
+    tls:
+      # -- Verify NiFi's certificate. Off by default, which accepts any certificate from any
+      # issuer - the connection is encrypted but the server is not authenticated. Turn this on
+      # for a NiFi reached over a network you do not control.
+      verify: false
+      # -- Check that the certificate names the host in `endpoint`. Only consulted when
+      # `verify` is on. Turn it off for a trusted certificate issued for a different name.
+      verifyHostname: true
+      # -- Name of an existing Secret or ConfigMap holding the certificate to trust. Leave
+      # empty to use the JVM's default trust store, which is enough for a certificate issued
+      # by a public CA.
+      existingCaSecret: ""
+      # -- Set when the certificate lives in a ConfigMap rather than a Secret.
+      existingCaConfigMap: ""
+      # -- Key within the Secret/ConfigMap. A PEM file (`.crt`, one or more certificates,
+      # usually the issuing CA) or a PKCS#12/JKS trust store, identified by a `.p12`, `.pfx`
+      # or `.jks` extension.
+      caKey: ca.crt
+      # -- Password for the trust store, when `caKey` names one. Ignored for PEM. Prefer
+      # `existingTrustStorePasswordSecret` to keep it out of values.
+      trustStorePassword: ""
+      # -- Name of an existing Secret holding the trust store password.
+      existingTrustStorePasswordSecret: ""
+      # -- Key within `existingTrustStorePasswordSecret`.
+      existingTrustStorePasswordKey: password
+
+  # -- Target pipeline configuration
+  # Define pre-configured targets that appear as built-in pipelines
+  # Each key is a pipeline UUID, value contains pipeline properties
+  # Example:
+  #   targetPipelines:
+  #     175daea0-1d46-473f-a514-124ece40fdb5:
+  #       name: "Production Ingest"
+  #       url: "https://nifi.example.com:8443/nifi"
+  #       processGroupId: "830abd97-3273-4725-8e63-67e9c2caa5e5"
+  #       portId: "f378e6c3-f6b7-4c0f-8155-e6ed5a5b5126"
+  #       portName: "IngestPort"
+  targetPipelines: {}
+
+  # -- Site-to-site identities (comma-separated)
+  siteToSiteIdentities: ""
+
+  # -- Authentication configuration
+  auth:
+    # -- Enable JWT authentication (requires OTDS)
+    enabled: false
+    # -- OTDS JWKS URI for JWT validation (required when auth.enabled is true)
+    # jwksUri: "https://otds.example.com/otdsws/v1/jwks"
+    # -- Issuer a token must name (required when auth.enabled is true). A key set is often shared
+    # between applications, so a valid signature alone does not say the token was minted by the
+    # issuer this service trusts.
+    # issuer: "https://otds.example.com/otdsws/v1"
+    # -- Audience a token must be addressed to (required when auth.enabled is true, unless
+    # requireValidSubscription is). Without it - or the subscription check in its place - a token
+    # minted for another application against the same issuer would be accepted here. Leave it
+    # unset only for an issuer whose tokens carry no audience, such as OCP's OTDS.
+    # audience: "idol-connector-management"
+    # -- Entitlement Service URL (optional; required by requireValidSubscription). When set, a caller's
+    # roles are those ETS lists for them on the subscription they act as, and the token's scopes are
+    # ignored; when unset, roles are read from the token's scope claim.
+    # etsUrl: "https://ets.example.com"
+    # -- How long a user's ETS entitlement is reused before asking again ("0" for every request).
+    # A revoked subscription is still accepted for up to this long.
+    # etsCacheTtl: "60s"
+    # -- Refuse a caller unless the subscription it acts as is to one of validSubscriptionApplications
+    # (checked against ETS on each request; cloud admins are exempt)
+    # requireValidSubscription: true
+    # -- Application names a subscription must be to (required when requireValidSubscription is true)
+    # validSubscriptionApplications:
+    #   - kdcn-test-1
+
+  # -- Additional sources for environment variables to export in connector management api
+  # See EnvFromSource https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#environment-variables-1
+  # but allows merge on key names
+  envFrom: {}
+    # # Example values
+    # merge-key-name:
+    #   configMapRef:
+    #     name: config-map-name
+    # another-key:
+    #   secretRef:
+    #     name: secret-name
+    #     optional: false
+
+  # -- Prometheus metrics on the internal port. The endpoint is /internal/metrics on 8081 and
+  # carries cross-tenant aggregates, so it must not be routed through the public ingress.
+  metrics:
+    enabled: true
+    serviceMonitor:
+      # -- create a ServiceMonitor. Requires the Prometheus Operator CRDs; without them the
+      # render succeeds but the object is rejected at install.
+      enabled: false
+      # -- extra labels for the ServiceMonitor. A Prometheus Operator only scrapes
+      # ServiceMonitors its `serviceMonitorSelector` matches, and kube-prometheus-stack
+      # defaults that to `release: <the prometheus release>`. Without a matching label the
+      # object installs and is then ignored silently, so set this to whatever the operator
+      # in the cluster selects on, e.g. `{release: kube-prometheus-stack}`.
+      labels: {}
+      interval: 30s
+      scrapeTimeout: 10s
+
+# -- `postgresql` configuration.
+# Required for shared state data storage across the nifi cluster: the API stores
+# every connector, target, job and report here, and the bundled NiFi uses the
+# same instance.
+#
+# Either deploy the bundled postgresql-ha sub-chart (enabled: true, the default)
+# or point at an existing PostgreSQL instance (enabled: false plus `host`). One
+# of the two is mandatory - the chart refuses to render otherwise, because the
+# container silently falls back to an ephemeral embedded HSQLDB when it has no
+# connection string, which passes health checks and then loses all state on the
+# next pod restart.
+#
+# See https://github.com/bitnami/charts/tree/main/bitnami/postgresql-ha
+# @default -- Default configuration to support shared state data. See values.yaml for details.
+# --- Existing (external) PostgreSQL instance ---
+#
+# Describes an instance this chart does not deploy. Used only when postgresql.enabled is
+# false, and ignored entirely when the bundled sub-chart is deployed. Kept out of the
+# `postgresql` block below because everything under there is the bundled sub-chart's own
+# configuration - the two were one block, which made `postgresql.enabled: false` sit next to
+# `postgresql.host` and turned the bundled username into `postgresql.postgresql.username`.
+# The idol-documentsecurity sub-chart splits them the same way.
+externalPostgresql:
+  # -- Hostname of the instance (or a Service pointing at one).
+  # REQUIRED when postgresql.enabled is false.
+  host: ""
+  # -- Port of the instance.
+  port: 5432
+  # -- Database, user and password on the instance. Each falls back to the corresponding
+  # `postgresql.postgresql.*` value, so an instance provisioned with those defaults needs
+  # only `host` to be set.
+  #
+  # `password` is placed in a Secret, not the ConfigMap, and reaches both the api and the
+  # bundled NiFi by reference. To keep it out of values entirely, use `existingSecret` below.
+  database: ""
+  username: ""
+  password: ""
+  # -- Use a Secret you manage for this instance's credentials instead of putting the
+  # password above into values. The chart otherwise creates one to hold it, so the password
+  # never reaches a ConfigMap either way.
+  #
+  # Separate from postgresql.existingSecret because the two are not interchangeable: that
+  # one has to carry bitnami's key names and be wired into the sub-chart as well, while this
+  # one needs only a password and may name its keys as it likes, below. Only one is ever in
+  # force - the chart reads this when postgresql.enabled is false, and that one when it is
+  # true.
+  existingSecret: ""
+  # -- Which key of the Secret above holds the password.
+  existingSecretPasswordKey: password
+  # -- Which key holds the username, for secret stores that keep the whole credential
+  # together (an AWS Secrets Manager RDS bundle, for example). Leave empty to take the
+  # username from `username` above, which is the usual choice - a username is not secret,
+  # and keeping it in the ConfigMap keeps it visible when debugging auth failures.
+  #
+  # The bundled sub-chart reads its username from values rather than from a Secret, so
+  # setting this with postgresql.enabled=true would be a second source of truth that bitnami
+  # ignores. The chart rejects that combination.
+  existingSecretUsernameKey: ""
+
+postgresql:
+  # -- whether to deploy the bundled postgresql-ha sub-chart.
+  # Set to false to use an existing instance, and set externalPostgresql.host above.
+  enabled: true
+
+  # -- Optional JDBC query parameters appended to the connection URL, for options an
+  # instance may require, e.g. "sslmode=require". The leading "?" is added automatically if
+  # omitted. Applies to both the bundled and the external database, which is why it sits
+  # here rather than under externalPostgresql.
+  jdbcParameters: ""
+
+  # -- Use a Secret you manage for the bundled database's credentials instead of the one
+  # this chart generates. Required for GitOps: chart-side generation relies on `lookup`,
+  # which Argo CD and Flux render without, so the generated values would rotate on every
+  # sync.
+  #
+  # Must supply keys `password`, `repmgr-password` and `admin-password` (plus
+  # `postgres-password` if the username is not "postgres") - those names are what the
+  # postgresql-ha sub-chart's own secretKeyRefs expect, and it has to be handed the same
+  # Secret through postgresql.postgresql.existingSecret and postgresql.pgpool.existingSecret.
+  # The chart fails the render if the three disagree.
+  #
+  # For an external instance use externalPostgresql.existingSecret instead: that one needs
+  # only a password and can name its keys freely, so the two are not interchangeable.
+  existingSecret: ""
+
+  # --- Bundled postgresql-ha sub-chart. Used only when enabled is true. ---
+
+  # -- Point the sub-chart at the Secret above rather than letting it manage its own.
+  # Both entries name the same Secret - the keys bitnami reads do not collide.
+  #
+  # These strings are templated by the SUB-CHART, in its own context: only `.Release` is
+  # meaningful there, so the name must not reference .Values.name or fullnameOverride -
+  # they would expand to nothing and point at a Secret that does not exist. If you change
+  # these, change postgresql.existingSecret to match; the chart fails the render if they
+  # disagree.
+  pgpool:
+    existingSecret: '{{ .Release.Name }}-postgresql-credentials'
+    image:
+      repository: bitnamilegacy/pgpool
+    adminUsername: pgpool_admin
+    # -- Passwords are left empty so they are generated into the Secret above on first
+    # install and preserved on upgrade. Set them to pin a specific value. Do NOT rely on
+    # the sub-chart's own generation: it uses a bare randAlphaNum with no lookup, so each
+    # upgrade would mint a new password while the existing PGDATA kept the old one.
+    adminPassword: ""
+  postgresql:
+    existingSecret: '{{ .Release.Name }}-postgresql-credentials'
+    image:
+      repository: bitnamilegacy/postgresql-repmgr
+    database: idol-connector-management
+    username: postgres
+    password: ""
+    repmgrUsername: postgres_repmgr
+    repmgrPassword: ""
+    replicaCount: 1
+    resources:
+      requests:
+        cpu: 500m
+        memory: 500Mi
+      limits: 
+        cpu: 1000m
+        memory: 1Gi
+    extraVolumes:
+    - name: dshm
+      emptyDir:
+        medium: Memory
+        sizeLimit: 256Mi
+    extraVolumeMounts:
+    - name: dshm
+      mountPath: /dev/shm
+  persistence:
+    # Empty so global.defaultStorageClass applies (bitnami's precedence is
+    # persistence.storageClass then global.defaultStorageClass). Set here only to
+    # give the database a different class from everything else.
+    storageClass: ""
+    size: 8Gi
+  metrics:
+    enabled: false
+    image:
+      repository: bitnamilegacy/postgres-exporter
+  volumePermissions:
+    image:
+      repository: bitnamilegacy/os-shell
+
+# -- `nifi` standalone NiFi deployment
+# Deploys a simple single-node Apache NiFi instance for connector management.
+# Uses the official apache/nifi image with HTTP-only (no security).
+# @default -- Enabled by default. See values.yaml for details.
+nifi:
+  # -- whether to deploy the NiFi instance.
+  #
+  # On by default because the api cannot work without a NiFi to deploy flows to: NiFi is a
+  # required readiness check, so a release with neither this nor
+  # connectorManagement.nifi.endpoint never becomes Ready. The chart fails the render rather
+  # than let that happen.
+  #
+  # Turn this off when pointing at an existing NiFi, and set
+  # connectorManagement.nifi.endpoint (with credentials, if it needs them). Note the bundled
+  # instance is HTTP-only with no authentication - see the production checklist in the chart
+  # README before exposing it.
+  enabled: true
+  # -- component name for the NiFi StatefulSet, Services and DNS. Objects are named
+  # <release>-<name>; the api reaches NiFi by stable pod DNS through the headless Service, so
+  # the in-cluster name becomes <release>-idol-nifi-0.<release>-idol-nifi-headless
+  name: idol-nifi
+  # -- Replaces the generated <release>-<name> for the NiFi objects entirely.
+  # Leave empty to keep release scoping.
+  fullnameOverride: ""
+  # -- NiFi container image, published alongside the api by the same pipeline and
+  # tagged with the same project version. See connectorManagement.image for the
+  # tag scheme; `-f values-dev.yaml` selects the local docker build instead.
+  image: artifactory.otxlab.net/cs-knowledgediscovery-docker-dev/idol-connector-management-nifi:27.1.0-SNAPSHOT
+  # -- pull policy for the NiFi image. Leave empty to inherit
+  # global.imagePullPolicy, which itself defaults to IfNotPresent.
+  imagePullPolicy: ""
+
+  # -- serviceAccountName for the NiFi pod. Empty inherits the chart-wide
+  # serviceAccountName. Set this (rather than the chart-wide one) to scope NiFi
+  # to only what the connectors need - e.g. its flowfile storage bucket - since
+  # this pod runs connector code, headless Chrome and ExecuteDocumentLua/Python.
+  serviceAccountName: ""
+  # -- Key NiFi uses to encrypt sensitive properties in its flow. Leave empty to have a
+  # 32-character key generated on first install and preserved on upgrade; set a value
+  # (minimum 12 characters) to pin your own.
+  #
+  # This key protects every enc{...} value in the flow, including the database credentials
+  # the bundled flow holds - so anyone with the NiFi data volume and this key can read
+  # them. It was previously a constant published in this chart and shared by every
+  # deployment, which is why it is now generated per release.
+  #
+  # Changing it after first install makes the existing flow's encrypted values
+  # undecryptable. See templates/nifi/secret-sensitive-props.yaml.
+  sensitivePropsKey: ""
+  # -- Use a Secret you manage for the sensitive properties key instead, with key
+  # `sensitive-props-key`. As with the database credentials, this is the option to use
+  # under GitOps.
+  existingSensitivePropsSecret: ""
+  # -- JVM initial heap, as a percentage of `nifi.resources.limits.memory`
+  # (-XX:InitialRAMPercentage). Must not exceed jvmHeapMaxPercentage.
+  jvmHeapInitPercentage: 25
+  # -- JVM maximum heap, as a percentage of `nifi.resources.limits.memory`
+  # (-XX:MaxRAMPercentage). The rest of the limit is needed for non-heap JVM memory, the
+  # connectors' native code, headless Chrome and /dev/shm (devShmSize), so leave headroom.
+  jvmHeapMaxPercentage: 50
+  # -- size of the /dev/shm mount (a Memory-medium emptyDir).
+  # The Web connector's headless Chrome allocates its renderer transport buffers in
+  # shared memory and CHECK-aborts (SIGTRAP) rather than degrading if an allocation
+  # fails, which kills the browser and leaves the connector's DevTools session dead.
+  # The container runtime default of 64MB is not enough once several renderers are
+  # live, so it is sized up here. Pages count against the container memory limit only
+  # as they are used, so this is a cap rather than a reservation - but keep
+  # resources.limits.memory comfortably above the maximum heap (jvmHeapMaxPercentage of the
+  # limit) plus this value.
+  # Below 256MB the connector falls back to --disable-dev-shm-usage (file-backed and
+  # slower, but crash-free) and logs a warning.
+  devShmSize: 512Mi
+  # -- container resource requests and limits
+  resources:
+    requests:
+      cpu: 1000m
+      memory: 2Gi
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+  # -- labels for idol-library.labels compatibility
+  labels: {}
+  # -- seccomp profile for the NiFi pod ONLY (overrides podSecurityContext.seccompProfile).
+  # The Web connector's headless Chrome sandbox must create an unprivileged user
+  # namespace; the default RuntimeDefault profile blocks clone/unshare(CLONE_NEWUSER)
+  # without CAP_SYS_ADMIN, so Chrome aborts ("DevToolsActivePort file not found").
+  # This custom profile permits exactly the namespace/mount syscalls Chrome needs while
+  # still blocking dangerous host-affecting syscalls, so Chrome's sandbox stays ON and
+  # non-root / dropped-caps / no_new_privs are all unchanged. See profiles/README.md.
+  #
+  # The file is placed on the node automatically by the install-seccomp-profile init
+  # container (see nifi.seccompInstaller). Alternatively set `type: Unconfined` (sandbox
+  # still works; drops seccomp filtering for this pod only) if you can't run that init.
+  seccompProfile:
+    type: Localhost
+    localhostProfile: profiles/nifi-chrome-sandbox.json
+    # type: Unconfined            # fallback if the Localhost profile is not yet on nodes
+  # -- Installs the Localhost seccomp profile onto the node via a one-shot NiFi
+  # initContainer (install-seccomp-profile) before the main container starts, so the
+  # profiles/nifi-chrome-sandbox.json file exists at the kubelet seccomp root when the
+  # container is created (localhostProfile files are read from the node, not the image).
+  # The init overrides its own seccomp to RuntimeDefault so it can start first, and runs
+  # as root with a hostPath write to the kubelet seccomp dir - so the namespace must
+  # permit hostPath volumes and a root pod (PodSecurity baseline/privileged, not
+  # restricted). Because it is synchronous with the pod, there is no first-deploy
+  # CreateContainerError race. Only used when seccompProfile.type == Localhost. Set false
+  # if you install the profile on nodes by other means (node image, provisioning, SPO).
+  seccompInstaller:
+    enabled: true
+    # -- kubelet seccomp root on the node; localhostProfile is resolved relative to this
+    kubeletSeccompDir: /var/lib/kubelet/seccomp
+  # -- persistent volume for NiFi data
+  dataVolume:
+    # -- storage class for the NiFi data PVC. Empty inherits
+    # global.defaultStorageClass, which itself defaults to the cluster's default.
+    storageClass: ""
+    # -- size of the NiFi data PVC
+    size: 8Gi
+
+  # -- NiFi's own Prometheus metrics (flow, queue and JVM figures), served by NiFi at
+  # /nifi-api/flow/metrics/prometheus on its HTTP port.
+  metrics:
+    # -- advertise the endpoint with prometheus.io/* pod annotations, so the bundled
+    # Prometheus - or any Prometheus scraping on those annotations - collects it. The
+    # figures name every flow component, and component names carry tenant and entity ids, so
+    # treat them like the api's /internal/metrics: for a monitoring network you control.
+    enabled: true
+
+  env:
+    DOCSECURITY_API_URL: "http://localhost:8080/"
+
+  ingress:
+    # nifi.ingress.enabled -- whether to deploy ingress for public API
+    enabled: false
+    # nifi.ingress.annotations -- optional ingress annotations
+    annotations: {}
+    # nifi.ingress.host -- optional ingress host https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-rules
+    host: ""
+    # nifi.ingress.contextPath -- optional ingress context path
+    contextPath: ""
+    # The external port the ingress is exposed on.
+    # For Kubernetes-in-Docker, this may be different to the container ingress port.
+    port: ""
+
+    # Gateway settings (only applies if type is 'gateway')
+    gateway:
+      # -- Optional, name of the gateway to use for ingress
+      name: ""
+      # -- Optional, namespace of the gateway to use for ingress
+      namespace: ""
+      # -- Optional, request timeout for ingress route
+      requestTimeout: ""
+      # -- Optional, backend timeout for ingress route
+      backendTimeout: ""
+      # -- Forwarded protocol for ingress
+      protocol: "http"
+
+    # -- Whether ingress uses TLS. You must set an ingress host to use this. 
+    # See https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
+    tls:
+      # -- The name of the secret for ingress TLS. Leave empty if not using TLS. 
+      # If specified then either this secret must already exist, or crt and key values must be provided and secret will be created.
+      secretName: ""
+      # -- Certificate data value to generate tls Secret (should be base64 encoded)
+      crt: ""
+      # -- Private key data value to generate tls Secret (should be base64 encoded)
+      key: ""
+
+
+# -- `documentsecurity` sub-chart configuration
+# Optionally bundle the IDOL DocumentSecurity API alongside connector-management.
+# Required if the Groups operation is used (PutUserSecurity processor pushes to
+# the DocumentSecurity REST API). Disabled by default.
+#
+# When enabled, docsec deploys its own postgres-ha StatefulSet alongside the
+# parent's. Each chart owns its own postgres - simpler to reason about than
+# sharing an instance, at the cost of a second StatefulSet (~1 CPU + 1.5GB
+# RAM). The docsec chart pins its postgres resources to a stable name via
+# fullnameOverride so the two postgres-ha deployments don't collide.
+documentsecurity:
+  # -- whether to deploy the documentsecurity sub-chart
+  enabled: false
+  # Nothing here renames the sub-chart's objects any more. It names them from the
+  # release itself (`<release>-documentsecurity`, and `<release>-docsec-postgresql`
+  # for its bundled database), which keeps them clear of this chart's own postgres
+  # and lets two releases coexist in one namespace. This chart resolves those names
+  # through idol-connector-management.documentsecurity.fullname - see the comment on
+  # that helper before overriding documentsecurity.nameOverride or
+  # documentsecurity.fullnameOverride here.
+  documentsecurity:
+    # -- DocumentSecurity API image. Pinned to the artifactory publish target
+    # because docsec is an external dependency of NCM (built and published by
+    # the documentSecurity project, not by anyone working in this repo). NCM
+    # developers don't have a local-build flow for docsec, so referencing the
+    # published artifact directly is the right default.
+    #
+    # Tagged with the documentsecurity project version, the same scheme this
+    # chart's own images use - there is no `latest` or `master-SNAPSHOT` tag in
+    # the repository. Override to pin an integration to a known-good build.
+    #
+    # This literal is only the local/dev-facing default. Both repositories take
+    # their version from the same source (buildutils' get_idol_version.py off
+    # idol.h), differing only by our "-nifiN" postfix, so build-helm.sh derives
+    # this tag for the packaged chart by stripping that postfix - no manual bump
+    # needed. Set NCM_SIBLING_VERSION to build against a different docsec
+    # version.
+    image: artifactory.otxlab.net/cs-knowledgediscovery-docker-dev/idol-documentsecurity-api:27.1.0-SNAPSHOT
+    # -- API port. Default 8082 to avoid 8080 (public api) and 8081 (callbacks).
+    port: 8082
+    ingress:
+      # -- No ingress for DocumentSecurity. Two reasons, either sufficient:
+      #
+      # 1. It collides with this chart's public ingress. Both default to an empty
+      #    host, which ingress-nginx treats as the catch-all "_", so both claim
+      #    host "_" path "/(.*)" in one namespace and its admission webhook
+      #    rejects the second - failing `helm upgrade` with "already defined in
+      #    ingress <ns>/idol-documentsecurity". On install the two are submitted
+      #    together and it can slip through, so the failure is not even reliable.
+      # 2. Nothing outside the cluster needs it. Connector management reaches
+      #    DocumentSecurity through its Service, and the DocumentSecurity API has
+      #    no authentication of its own, so publishing it would expose an
+      #    unauthenticated API for no gain.
+      #
+      # To expose it anyway, give it and this chart's ingress distinct hosts.
+      enabled: false
+
+# -- Sharing one PostgreSQL between connector-management and documentsecurity.
+#
+# By default each deploys its own postgresql-ha, which is simpler to reason about at the
+# cost of a second StatefulSet. To run both against this chart's instance instead, disable
+# the docsec sub-chart's database and point it at this one - including at this chart's
+# credentials Secret, so the password is not duplicated into values:
+#
+#   documentsecurity:
+#     enabled: true
+#     postgresql:
+#       enabled: false                                                  # no second database
+#       existingSecret: '{{ .Release.Name }}-postgresql-credentials'     # this chart's Secret
+#     documentsecurity:
+#       externalPostgresql:
+#         host: '{{ .Release.Name }}-postgresql-pgpool'
+#         database: idol-connector-management
+#         username: postgres                                            # match postgresql.postgresql.username
+#
+# Both values are resolved with `tpl` by the docsec chart, so the release name is filled in
+# at render time and this works from a static values file.
+#
+# Sharing a single database is safe: the two schemas do not overlap - documentsecurity owns
+# users/groups/repositories/update_state, connector-management owns connectors/targets/jobs
+# and friends - and documentsecurity creates its tables with CREATE TABLE IF NOT EXISTS
+# rather than the drop-and-recreate scheme this chart's schemaversion table drives. Keep the
+# database name aligned with postgresql.postgresql.database above.
+
+# -- `prometheus` - a bundled Prometheus (the prometheus-community chart) for a deployment
+# with no monitoring of its own. Off by default: a cluster that already runs Prometheus should
+# scrape this release itself (see Metrics in the README).
+#
+# Configured to watch this release and nothing else, so any number of releases can each run
+# one side by side:
+#   - one scrape job, over pods in the release's own namespace that carry this release's
+#     labels and a prometheus.io/scrape annotation - the api (/internal/metrics on 8081) and
+#     NiFi (/nifi-api/flow/metrics/prometheus on 8080, see nifi.metrics)
+#   - no cluster-wide exporters: node-exporter (a DaemonSet on host port 9100, which a second
+#     release could not start), kube-state-metrics and the pushgateway are off, as is
+#     alertmanager
+#   - namespaced permissions: the sub-chart's ClusterRole is not created; this chart grants
+#     the server read access to pods in the release namespace only (prometheus-rbac.yaml)
+# Node and cluster metrics are therefore not collected - they belong to the cluster's own
+# monitoring.
+prometheus:
+  enabled: false
+  rbac:
+    create: false
+  alertmanager:
+    enabled: false
+  kube-state-metrics:
+    enabled: false
+  prometheus-node-exporter:
+    enabled: false
+  prometheus-pushgateway:
+    enabled: false
+  serverFiles:
+    prometheus.yml:
+      # Replaces the sub-chart's cluster-wide jobs (API server, nodes, cadvisor, every
+      # annotated service and pod in every namespace) with Prometheus's own, plus the
+      # release job below.
+      scrape_configs:
+        - job_name: prometheus
+          static_configs:
+            - targets:
+                - localhost:9090
+  # Rendered with `tpl` by the sub-chart, so the release name is filled in at install.
+  extraScrapeConfigs: |
+    - job_name: {{ .Release.Name }}
+      kubernetes_sd_configs:
+        - role: pod
+          namespaces:
+            own_namespace: true
+      relabel_configs:
+        - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_instance]
+          action: keep
+          regex: {{ .Release.Name | quote }}
+        - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+          action: keep
+          regex: idol-connector-management
+        - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+          action: keep
+          regex: "true"
+        - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+          action: replace
+          target_label: __metrics_path__
+          regex: (.+)
+        - source_labels: [__meta_kubernetes_pod_ip, __meta_kubernetes_pod_annotation_prometheus_io_port]
+          action: replace
+          target_label: __address__
+          regex: (.+);(\d+)
+          replacement: $1:$2
+        - source_labels: [__meta_kubernetes_namespace]
+          target_label: namespace
+        - source_labels: [__meta_kubernetes_pod_name]
+          target_label: pod
+        - source_labels: [__meta_kubernetes_pod_label_app]
+          target_label: component

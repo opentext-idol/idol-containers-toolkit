@@ -1,0 +1,157 @@
+# BEGIN COPYRIGHT NOTICE
+# Copyright 2023 Open Text.
+# 
+# The only warranties for products and services of Open Text and its affiliates and licensors
+# ("Open Text") are as may be set forth in the express warranty statements accompanying such
+# products and services. Nothing herein should be construed as constituting an additional warranty.
+# Open Text shall not be liable for technical or editorial errors or omissions contained herein.
+# The information contained herein is subject to change without notice.
+#
+# END COPYRIGHT NOTICE
+{{- if .Values.connectorManagement.enabled }}
+{{- $fullname := include "idol-connector-management.fullname" . }}
+{{- $nifiFullname := include "idol-connector-management.nifi.fullname" . }}
+{{- $env := .Values.connectorManagement.env | default dict }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $fullname }}-cm
+  labels: {{- include "idol-library.labels" (dict "root" . "component" .Values.connectorManagement) | nindent 4 }}
+    app: "{{ $fullname }}"
+data:
+  # Static environment variables from values
+{{- range $k,$v := .Values.connectorManagement.env }}
+  {{ $k }}: {{ $v | quote }}
+{{- end }}
+
+  # Callbacks endpoint - base URL that NiFi uses to call back into the internal API
+  CALLBACKS_ENDPOINT: {{ .Values.connectorManagement.callbacksEndpoint | default (printf "http://%s:8081" $fullname) | quote }}
+
+  # Reports callback URL
+{{- if .Values.connectorManagement.reportsCallbackUrl }}
+  CONNECTORS_REPORTS_CALLBACK_URL: {{ .Values.connectorManagement.reportsCallbackUrl | quote }}
+{{- end }}
+
+  # Database connection - the bundled PostgreSQL subchart via pgpool, or the
+  # external instance described by externalPostgresql.host. Supplying
+  # CONNECTORS_STATE_PROVIDER_DATABASE_CONNECTIONSTRING under
+  # connectorManagement.env takes over the whole block, in which case the
+  # matching USERNAME/PASSWORD must be supplied there too.
+{{- /* The password is deliberately absent: it is injected from a Secret as an explicit
+       env entry on the container (see idol-connector-management.yaml). */}}
+{{- if not (hasKey $env "CONNECTORS_STATE_PROVIDER_DATABASE_CONNECTIONSTRING") }}
+{{- $pg := include "idol-connector-management.postgresql" . | fromYaml }}
+  CONNECTORS_STATE_PROVIDER_DATABASE_CONNECTIONSTRING: {{ include "idol-connector-management.postgresql.jdbcUrl" . | quote }}
+{{- /* The username stays here - it is configuration, not a secret - unless the credential
+       Secret supplies it, in which case it is referenced on the container instead. */}}
+{{- if not (include "idol-connector-management.postgresql.usernameKey" .) }}
+  CONNECTORS_STATE_PROVIDER_DATABASE_USERNAME: {{ $pg.username | quote }}
+{{- end }}
+{{- end }}
+
+  # A `database` key store with no connection of its own is given the state store's database;
+  # its password is injected from the same Secret on the container.
+{{- if include "idol-connector-management.keyStore.usesStateDatabase" . }}
+{{- $pg := include "idol-connector-management.postgresql" . | fromYaml }}
+  CONNECTORS_KEYS_PROVIDER_DATABASE_CONNECTIONSTRING: {{ include "idol-connector-management.postgresql.jdbcUrl" . | quote }}
+{{- if and (not (include "idol-connector-management.postgresql.usernameKey" .)) (not (hasKey $env "CONNECTORS_KEYS_PROVIDER_DATABASE_USERNAME")) }}
+  CONNECTORS_KEYS_PROVIDER_DATABASE_USERNAME: {{ $pg.username | quote }}
+{{- end }}
+{{- end }}
+
+  # NiFi configuration. The helper resolves the bundled NiFi or the configured external
+  # endpoint, and fails the render when there is neither - see its comment for why.
+  NIFI_ENDPOINT: {{ include "idol-connector-management.nifi.endpoint" . | quote }}
+{{- with .Values.connectorManagement.nifi }}
+{{- /* Omitted when existingSecret supplies the credentials by reference. */}}
+{{- if and .username (not .existingSecret) }}
+  NIFI_USERNAME: {{ .username | quote }}
+{{- end }}
+{{- /* NIFI_PASSWORD is omitted here on purpose - it is supplied from the sensitive-env
+       Secret (see secret-env.yaml). */}}
+{{- if .proxyHost }}
+  NIFI_PROXY_HOST: {{ .proxyHost | quote }}
+{{- end }}
+{{- if .proxyPort }}
+  NIFI_PROXY_PORT: {{ .proxyPort | quote }}
+{{- end }}
+{{- end }}
+{{- $tls := .Values.connectorManagement.nifi.tls | default dict }}
+{{- if $tls.verify }}
+{{- /* Only emitted when verification is on: with it off the api's default applies, and
+       spelling out NIFI_TLS_VERIFY=false would make the insecure setting look deliberate
+       in a rendered manifest where it is merely the default. */}}
+  NIFI_TLS_VERIFY: "true"
+{{- /* `default` cannot be used here: it treats false as empty, so an explicit
+       verifyHostname=false would come back out as true. An absent value must also mean the
+       check is on, so the unset case cannot fall through to false either. */}}
+  NIFI_TLS_VERIFY_HOSTNAME: {{ if kindIs "bool" $tls.verifyHostname }}{{ $tls.verifyHostname | quote }}{{ else }}"true"{{ end }}
+{{- with include "idol-connector-management.nifi.tls.caFile" . }}
+{{- if include "idol-connector-management.nifi.tls.isTrustStore" $ }}
+  NIFI_TLS_TRUSTSTORE: {{ . | quote }}
+{{- else }}
+  NIFI_TLS_CA_FILE: {{ . | quote }}
+{{- end }}
+{{- end }}
+{{- /* The trust store password, when it is a plain value, arrives from the sensitive-env
+       Secret; from a user-managed Secret it is referenced on the container instead. */}}
+{{- end }}
+
+  # Target pipeline configuration
+{{- if .Values.connectorManagement.targetPipelines }}
+  TARGET_PIPELINE_IDS: {{ keys .Values.connectorManagement.targetPipelines | join "," | quote }}
+{{- range $pipelineId, $pipeline := .Values.connectorManagement.targetPipelines }}
+{{- $envId := $pipelineId | replace "-" "_" }}
+{{- if $pipeline.name }}
+  TARGET_PIPELINE_{{ $envId }}_NAME: {{ $pipeline.name | quote }}
+{{- end }}
+{{- if $pipeline.url }}
+  TARGET_PIPELINE_{{ $envId }}_URL: {{ $pipeline.url | quote }}
+{{- end }}
+{{- if $pipeline.processGroupId }}
+  TARGET_PIPELINE_{{ $envId }}_PROCESSGROUP_ID: {{ $pipeline.processGroupId | quote }}
+{{- end }}
+{{- if $pipeline.portId }}
+  TARGET_PIPELINE_{{ $envId }}_PORT_ID: {{ $pipeline.portId | quote }}
+{{- end }}
+{{- if $pipeline.portName }}
+  TARGET_PIPELINE_{{ $envId }}_PORT_NAME: {{ $pipeline.portName | quote }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+  # Site-to-site identities
+{{- if .Values.connectorManagement.siteToSiteIdentities }}
+  TARGETS_SITE_TO_SITE_IDENTITIES: {{ .Values.connectorManagement.siteToSiteIdentities | quote }}
+{{- end }}
+
+  # Authentication
+{{- if .Values.connectorManagement.auth.enabled }}
+  CONNECTORS_AUTH_ENABLED: {{ .Values.connectorManagement.auth.enabled | quote }}
+{{- end }}
+{{- if .Values.connectorManagement.auth.jwksUri }}
+  CONNECTORS_AUTH_JWKS_URI: {{ .Values.connectorManagement.auth.jwksUri | quote }}
+{{- end }}
+{{- if .Values.connectorManagement.auth.issuer }}
+  CONNECTORS_AUTH_ISSUER: {{ .Values.connectorManagement.auth.issuer | quote }}
+{{- end }}
+{{- if .Values.connectorManagement.auth.audience }}
+  CONNECTORS_AUTH_AUDIENCE: {{ .Values.connectorManagement.auth.audience | quote }}
+{{- end }}
+{{- if .Values.connectorManagement.auth.etsUrl }}
+  CONNECTORS_AUTH_ETS_URL: {{ .Values.connectorManagement.auth.etsUrl | quote }}
+{{- end }}
+{{- if .Values.connectorManagement.auth.etsCacheTtl }}
+  CONNECTORS_AUTH_ETS_CACHE_TTL: {{ .Values.connectorManagement.auth.etsCacheTtl | quote }}
+{{- end }}
+{{- if .Values.connectorManagement.auth.requireValidSubscription }}
+  CONNECTORS_AUTH_REQUIRE_VALID_SUBSCRIPTION: {{ .Values.connectorManagement.auth.requireValidSubscription | quote }}
+{{- end }}
+{{- with .Values.connectorManagement.auth.validSubscriptionApplications }}
+  CONNECTORS_AUTH_VALID_SUBSCRIPTION_APPLICATIONS: {{ join "," . | quote }}
+{{- end }}
+  # Metrics
+{{- if not .Values.connectorManagement.metrics.enabled }}
+  CONNECTORS_METRICS_ENABLED: "false"
+{{- end }}
+{{- end -}}

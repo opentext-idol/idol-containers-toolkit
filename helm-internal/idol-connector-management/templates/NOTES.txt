@@ -1,0 +1,178 @@
+IDOL Connector Management API has been deployed.
+
+{{- if .Values.connectorManagement.enabled }}
+{{- $fullname := include "idol-connector-management.fullname" . }}
+{{- $nifiFullname := include "idol-connector-management.nifi.fullname" . }}
+
+1. Get the application URLs:
+
+{{- if .Values.connectorManagement.ingress.enabled }}
+{{- if .Values.connectorManagement.ingress.host }}
+   Public API:  http{{ if .Values.connectorManagement.ingress.tls.secretName }}s{{ end }}://{{ .Values.connectorManagement.ingress.host }}{{ .Values.connectorManagement.ingress.contextPath }}/
+   Swagger UI:  http{{ if .Values.connectorManagement.ingress.tls.secretName }}s{{ end }}://{{ .Values.connectorManagement.ingress.host }}{{ .Values.connectorManagement.ingress.contextPath }}/swagger-ui.html
+{{- else }}
+   NOTE: No ingress host configured. Configure connectorManagement.ingress.host for external access.
+{{- end }}
+{{- else }}
+   Ingress is disabled. Access via port-forward:
+   kubectl port-forward svc/{{ $fullname }} 8080:8080
+   Then access: http://localhost:8080/
+{{- end }}
+
+2. Health check endpoint:
+   GET /v1/health/ready
+
+3. Configuration:
+
+{{- if .Values.nifi.enabled }}
+   NiFi: Deployed as {{ $nifiFullname }} (http://{{ $nifiFullname }}-0.{{ $nifiFullname }}:8080/nifi)
+{{- else if not .Values.connectorManagement.nifi.endpoint }}
+   WARNING: NiFi is not deployed and no external endpoint is configured!
+   Either enable nifi.enabled to deploy a NiFi instance,
+   or set connectorManagement.nifi.endpoint to connect to an external NiFi.
+{{- else }}
+   NiFi Endpoint: {{ .Values.connectorManagement.nifi.endpoint }}
+{{- end }}
+
+{{- if hasKey (.Values.connectorManagement.env | default dict) "CONNECTORS_STATE_PROVIDER_DATABASE_CONNECTIONSTRING" }}
+   Database: configured directly via connectorManagement.env
+   Connection: {{ index .Values.connectorManagement.env "CONNECTORS_STATE_PROVIDER_DATABASE_CONNECTIONSTRING" }}
+{{- else if .Values.postgresql.enabled }}
+   Database: PostgreSQL (deployed as subchart)
+   Connection: {{ include "idol-connector-management.postgresql.jdbcUrl" . }}
+{{- else }}
+   Database: existing PostgreSQL instance
+   Connection: {{ include "idol-connector-management.postgresql.jdbcUrl" . }}
+{{- end }}
+
+{{- if .Values.documentsecurity.enabled }}
+   DocumentSecurity API: Deployed as {{ include "idol-connector-management.documentsecurity.fullname" . }}:{{ .Values.documentsecurity.documentsecurity.port }}{{ if .Values.documentsecurity.postgresql.enabled }} with its own postgres-ha ({{ include "idol-connector-management.documentsecurity.postgresql.fullname" . }}){{ else }}, using the database at {{ tpl ((.Values.documentsecurity.externalPostgresql | default dict).host | default "") . | default "(none configured - embedded HSQLDB)" }}{{ end }}.
+   NiFi PutUserSecurity processor will resolve DOCSECURITY_API_URL to: http://{{ include "idol-connector-management.documentsecurity.fullname" . }}:{{ .Values.documentsecurity.documentsecurity.port }}/
+{{- end }}
+
+{{- $storageType := index (.Values.connectorManagement.env | default dict) "CONNECTORS_STORAGE_PROVIDER_TYPE" | default "filesystem" }}
+{{- if not .Values.connectorManagement.resourcesVolume.enabled }}
+{{- if eq $storageType "filesystem" }}
+   Connector Resources: NONE. The filesystem provider reads a directory inside the image,
+   which ships empty, so readiness will fail with "Resource directory not found: connectors/"
+   and this pod will never become Ready. Either enable connectorManagement.resourcesVolume,
+   mount a volume via additionalVolumes, or configure a different provider.
+{{- else }}
+   Connector Resources: read directly from {{ $storageType }}, with no volume - nothing to
+   populate.
+{{- end }}
+{{- else if .Values.connectorManagement.resourcesVolume.existingClaim }}
+   Connector Resources: existing claim {{ .Values.connectorManagement.resourcesVolume.existingClaim }} - reading {{ $storageType }}.
+   The claim's contents are yours to populate; the chart does not touch them.
+{{- else }}
+   Connector Resources: PVC resources-{{ $fullname }}-0 ({{ .Values.connectorManagement.resourcesVolume.size }}),
+   provisioned empty with only the bare connectors/targets/processing/NARs layout.
+{{- if eq $storageType "filesystem" }}
+
+   >> THIS DEPLOYMENT HAS NO CONNECTORS YET. The volume is empty, so /v1/types/* will list
+   >> nothing and no connector can be created. Choose one:
+   >>
+   >>   - populate the volume yourself - copy a resource set into all four categories
+   >>     (connectors/, targets/, processing/ and NARs/) on resources-{{ $fullname }}-0,
+   >>     then POST /v1/admin/resources/resync (or restart the pod);
+   >>   - have the chart fill it on first start - set
+   >>     CONNECTORS_STORAGE_PROVIDER_TYPE=seeded with SEEDED_SOURCE/SEEDED_TARGET, which
+   >>     copies from artifactory or googlecloud onto this volume;
+   >>   - skip the volume and read a repository directly - set
+   >>     CONNECTORS_STORAGE_PROVIDER_TYPE to artifactory or googlecloud.
+   >>
+   >> All three, with the settings each needs, are in "Connector resources" in the chart
+   >> README.
+{{- end }}
+{{- end }}
+
+4. For production deployments, ensure you have configured:
+{{- if not .Values.nifi.enabled }}
+   - connectorManagement.nifi.endpoint - required, as this release deploys no NiFi of its own
+{{- end }}
+   - connectorManagement.nifi.username and password (for NiFi authentication), ideally through
+     connectorManagement.nifi.existingSecret so they stay out of values
+   - connectorManagement.ingress.host (for external access)
+{{- if .Values.postgresql.enabled }}
+   - Nothing for the database passwords. They are generated on first install and preserved
+     across upgrades, in {{ include "idol-connector-management.postgresql.secretName" . }}.
+     To manage them yourself instead, set postgresql.existingSecret together with
+     postgresql.postgresql.existingSecret and postgresql.pgpool.existingSecret.
+{{- else }}
+   - The external database credentials: externalPostgresql.username and externalPostgresql.password,
+     or externalPostgresql.existingSecret with its existingSecretUsernameKey /
+     existingSecretPasswordKey to keep them out of values
+{{- end }}
+   - The security defaults that need a decision - authentication is off and the keys provider is
+     noop - see the production checklist in the chart README
+{{ $ownsPvcs := or .Values.postgresql.enabled .Values.nifi.enabled .Values.documentsecurity.enabled (and .Values.connectorManagement.resourcesVolume.enabled (not .Values.connectorManagement.resourcesVolume.existingClaim)) }}
+5. Before upgrading:
+
+   Take a database backup. The service migrates its schema in place and refuses to start
+   rather than modify a schema it cannot migrate, so an upgrade should not lose data - but
+   a backup is what makes that recoverable if one goes wrong.
+
+{{- if .Values.postgresql.enabled }}
+     kubectl exec -n {{ .Release.Namespace }} {{ .Release.Name }}-postgresql-postgresql-0 -- \
+       env PGPASSWORD=$(kubectl get secret -n {{ .Release.Namespace }} {{ include "idol-connector-management.postgresql.secretName" . }} -o jsonpath='{.data.password}' | base64 -d) \
+       pg_dump -U {{ (include "idol-connector-management.postgresql" . | fromYaml).username }} -d {{ (include "idol-connector-management.postgresql" . | fromYaml).database }} > backup.sql
+{{- else }}
+     pg_dump -h {{ (include "idol-connector-management.postgresql" . | fromYaml).host }} \
+       -U {{ (include "idol-connector-management.postgresql" . | fromYaml).username }} \
+       -d {{ (include "idol-connector-management.postgresql" . | fromYaml).database }} > backup.sql
+{{- end }}
+
+6. Cleaning up after `helm uninstall`:
+{{- if not $ownsPvcs }}
+
+   This release provisions no PersistentVolumeClaims of its own - the database is
+   external and no volume-backed component is enabled - so `helm uninstall` removes
+   everything it created.
+{{- if .Values.connectorManagement.resourcesVolume.existingClaim }}
+   Your claim {{ .Values.connectorManagement.resourcesVolume.existingClaim }} was never owned by the release and is untouched.
+{{- end }}
+   Its data lives in the external database, which the chart never touches.
+{{- else }}
+
+   `helm uninstall` does NOT remove this release's PersistentVolumeClaims. They are
+   created by the StatefulSet controller rather than by Helm, and StatefulSets default
+   to persistentVolumeClaimRetentionPolicy Retain, so they and their data survive:
+
+{{- if .Values.postgresql.enabled }}
+     - connector/target/job state:  data-{{ .Release.Name }}-postgresql-postgresql-N
+{{- end }}
+{{- if .Values.nifi.enabled }}
+     - NiFi flow + repositories:    nifi-data-{{ $nifiFullname }}-0
+{{- end }}
+{{- if and .Values.connectorManagement.resourcesVolume.enabled (not .Values.connectorManagement.resourcesVolume.existingClaim) }}
+     - connector resources:         resources-{{ $fullname }}-0
+{{- end }}
+{{- if and .Values.documentsecurity.enabled .Values.documentsecurity.postgresql.enabled }}
+     - documentsecurity database:   data-{{ include "idol-connector-management.documentsecurity.postgresql.fullname" . }}-postgresql-N
+{{- end }}
+{{- if .Values.connectorManagement.resourcesVolume.existingClaim }}
+
+   Your claim {{ .Values.connectorManagement.resourcesVolume.existingClaim }} is untouched by any of this - it was never
+   owned by the release.
+{{- end }}
+
+   That is deliberate: it lets you reinstall onto the existing data. It also means a
+   reinstall inherits the old state, and that anything retained for the same reason
+   (credentials tied to that data) stays too.
+
+   To discard the release completely - THIS PERMANENTLY DESTROYS ALL CONNECTOR STATE:
+
+     kubectl delete pvc,secret -l app.kubernetes.io/instance={{ .Release.Name }} -n {{ .Release.Namespace }}
+
+   That selector covers the sub-charts' databases too - every PVC in the release
+   carries app.kubernetes.io/instance, whether from its volumeClaimTemplate labels or
+   copied from the StatefulSet selector by the controller.
+
+   Then check for PersistentVolumes left behind. With a StorageClass whose
+   reclaimPolicy is Delete they go automatically; with Retain they stay in status
+   Released and must be removed by hand:
+
+     kubectl get pv | grep {{ .Release.Namespace }}
+{{- end }}
+
+{{- end }}
